@@ -1352,6 +1352,7 @@
             )
         }
 
+
         // Popup di conferma per il SALVA-VITA (Uscita accidentale)
         if (showExitWarning) {
             AlertDialog(
