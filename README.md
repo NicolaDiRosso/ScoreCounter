@@ -20,8 +20,9 @@ ScoreCounter è un'applicazione Android moderna costruita con **Kotlin** e **Jet
 ## 📸 Screenshot
 <p align="center">
   <img width="250" alt="Home e Storico" src="https://github.com/user-attachments/assets/f82d8f3b-da7d-47a0-91cc-dfff905d33d5" />
-  <img width="250" alt="Creazione Sfida" src="https://github.com/user-attachments/assets/e50adea9-702f-40b0-8bb8-3eb0bbc353be" />
-  <img width="250" alt="Contatore e Corona" src="https://github.com/user-attachments/assets/fa5f13bb-70a4-4059-ad0d-38b4e485ad6c" />
+ 
+  <img width="250" alt="Screenshot_20260415-002935" src="https://github.com/user-attachments/assets/5fe589db-c3d6-41e5-b02f-398b4078d1dd" />
+
 </p>
 
 <p align="center">
