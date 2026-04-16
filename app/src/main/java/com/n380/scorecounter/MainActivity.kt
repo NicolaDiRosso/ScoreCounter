@@ -20,6 +20,9 @@
     import androidx.compose.animation.core.Animatable
     import androidx.compose.animation.core.FastOutSlowInEasing
     import androidx.compose.animation.core.tween
+    // Import per i Bordi dei bottoni dinamici
+    import androidx.compose.foundation.border
+    import androidx.compose.foundation.BorderStroke
     import androidx.compose.foundation.Canvas // La "Tela" su cui disegniamo coriandoli e il grafico delle stats
     import androidx.compose.foundation.clickable
     // Per riconoscere la "Pressione Prolungata" (Long Click per i +10 e -5)
@@ -30,6 +33,8 @@
     import androidx.compose.foundation.layout.Arrangement
     import androidx.compose.foundation.layout.Box // La "Scatola" per sovrapporre l'animazione allo schermo
     import androidx.compose.foundation.layout.Column
+    // Import per i margini e gli spazi vuoti
+    import androidx.compose.foundation.layout.PaddingValues
     import androidx.compose.foundation.layout.Row
     import androidx.compose.foundation.layout.Spacer
     import androidx.compose.foundation.layout.fillMaxSize
@@ -46,7 +51,7 @@
     // Forme e stili per arrotondare i bottoni
     import androidx.compose.foundation.shape.CircleShape
     import androidx.compose.foundation.shape.RoundedCornerShape
-    // ---> NUOVI IMPORT PER LA TASTIERA NUMERICA <---
+    // ---> IMPORT PER LA TASTIERA NUMERICA <---
     import androidx.compose.foundation.text.KeyboardOptions
     import androidx.compose.ui.text.input.KeyboardType
     // Tutte le icone usate nell'app
@@ -54,30 +59,37 @@
     import androidx.compose.material.icons.filled.Edit
     import androidx.compose.material.icons.Icons
     import androidx.compose.material.icons.filled.Add
-    import androidx.compose.material.icons.filled.EmojiEvents
+    import androidx.compose.material.icons.filled.Close // NUOVA ICONA: La 'X' per chiudere il BottomSheet
+    import androidx.compose.material.icons.filled.EmojiEvents // Trofeo
     import androidx.compose.material.icons.filled.ExpandLess // Freccia in su per lo storico
     import androidx.compose.material.icons.filled.ExpandMore // Freccia in giù per lo storico
+    import androidx.compose.material.icons.filled.Group // Icona del Gruppo per lo Stato Vuoto
     import androidx.compose.material.icons.filled.KeyboardArrowDown // Freccia giù per riordino
     import androidx.compose.material.icons.filled.KeyboardArrowUp   // Freccia su per riordino
+    import androidx.compose.material.icons.filled.Person // Icona Utente/Contatto
     import androidx.compose.material.icons.filled.Remove
     import androidx.compose.material.icons.filled.Share // L'icona della condivisione
+    import androidx.compose.material.icons.filled.Style // Icona delle Carte
+    import androidx.compose.material.icons.filled.Tv // Icona TV per gli Anime
+    import androidx.compose.material.icons.filled.VideogameAsset // Icona Controller
     import androidx.compose.material.icons.filled.WorkspacePremium // La medaglia/corona del Leader
     import androidx.compose.material.icons.filled.Timer // L'icona del cronometro
-    import androidx.compose.material.icons.filled.VideogameAsset
-    import androidx.compose.material.icons.filled.Person
     // Componenti grafici Material 3
     import androidx.compose.material3.AlertDialog
     import androidx.compose.material3.Button
-    import androidx.compose.material3.ButtonDefaults // Per cambiare colore ai bottoni di avviso (es. rosso)
+    import androidx.compose.material3.ButtonDefaults // Per cambiare colore ai bottoni in modo dinamico
     import androidx.compose.material3.Card
     import androidx.compose.material3.CardDefaults
+    import androidx.compose.material3.ExperimentalMaterial3Api // NUOVO: Serve per attivare il BottomSheet sperimentale
     import androidx.compose.material3.ExtendedFloatingActionButton
     import androidx.compose.material3.HorizontalDivider
     import androidx.compose.material3.Icon
     import androidx.compose.material3.IconButton
     import androidx.compose.material3.MaterialTheme
+    import androidx.compose.material3.ModalBottomSheet // NUOVO: Il pannello a scorrimento dal basso
     import androidx.compose.material3.OutlinedButton
     import androidx.compose.material3.OutlinedTextField
+    import androidx.compose.material3.rememberModalBottomSheetState // NUOVO: Ricorda in che stato è il pannello
     import androidx.compose.material3.Scaffold
     // Componenti per la Snackbar (Il messaggio temporaneo nero in basso)
     import androidx.compose.material3.SnackbarDuration
@@ -101,11 +113,13 @@
     import androidx.compose.ui.graphics.drawscope.Stroke
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.style.TextAlign // Per centrare il testo (es. del dado)
+    import androidx.compose.ui.text.style.TextOverflow // serve per mettere i puntini di "..." alla fine del testo nella sezione di Sfida in caso il numero sia enorme
     import androidx.compose.ui.unit.dp
     // Feedback tattile (Vibrazione)
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
     import androidx.compose.ui.platform.LocalHapticFeedback
-    import androidx.compose.ui.platform.LocalContext // Serve per ottenere il "Contesto" della pagina (es. per la condivisione)
+    import androidx.compose.ui.platform.LocalContext // Serve per ottenere il "Contesto" della pagina
+    import androidx.compose.foundation.layout.fillMaxHeight
     // Database e salvataggio
     import androidx.datastore.preferences.core.edit
     import androidx.datastore.preferences.core.stringPreferencesKey
@@ -130,30 +144,26 @@
     import java.text.SimpleDateFormat
     import java.util.Date
     import java.util.Locale
-    import kotlin.math.cos // Calcoli trigonometrici per l'esplosione dei coriandoli
+    import kotlin.math.cos
     import kotlin.math.sin
-    import kotlin.random.Random // Generatore di numeri casuali per i coriandoli e il dado
+    import kotlin.random.Random
 
     // ====================================================================
     // 2. INIZIALIZZAZIONE DEL DATABASE (DataStore) E FUNZIONI DI SUPPORTO
     // ====================================================================
     // LEZIONE: Questa riga crea un "collegamento" globale alla memoria fisica del telefono.
-    // Usiamo 'by preferencesDataStore' che gestisce la creazione del file "score_counter_prefs"
-    // in modo automatico e sicuro.
     val Context.dataStore by preferencesDataStore(name = "score_counter_prefs")
 
     // FUNZIONE DI SUPPORTO: Formatta i secondi in "Minuti:Secondi" (Es. 05:12)
     fun formatTime(totalSeconds: Long): String {
         val m = totalSeconds / 60
         val s = totalSeconds % 60
-        // padStart aggiunge uno '0' davanti se il numero è a una sola cifra (es. 5 diventa 05)
         return "${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}"
     }
 
-    // FUNZIONE DI SUPPORTO: Formatta i millisecondi in una Data (Es. 8 Nov 2025)
+    // FUNZIONE DI SUPPORTO: Formatta i millisecondi in una Data (Es. 8 Nov 2026)
     fun formatDate(timestamp: Long): String {
-        if (timestamp == 0L) return "" // Salva-vita per le vecchie partite che non avevano la data salvata
-        // Creiamo il formattatore usando il formato "Giorno Mese Anno" con il dizionario Italiano
+        if (timestamp == 0L) return ""
         val sdf = SimpleDateFormat("d MMM yyyy", Locale.ITALIAN)
         return sdf.format(Date(timestamp))
     }
@@ -161,83 +171,46 @@
     // ====================================================================
     // 3. MAIN ACTIVITY (Il punto d'ingresso)
     // ====================================================================
-    /**
-     * MAIN ACTIVITY
-     * Pensa a questa classe come al tuo "int main()" in C++.
-     * È il punto di ingresso dell'applicazione quando l'utente clicca l'icona sul telefono.
-     */
     class MainActivity : ComponentActivity() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
-
-            // Questa funzione permette all'app di disegnare anche sotto la barra della batteria
-            // e sotto la barra di navigazione in basso, per un look molto moderno.
             enableEdgeToEdge()
-
-            // setContent è il "ponte" magico. Qui finisce il mondo Android classico
-            // ed entriamo nel mondo "dichiarativo" di Jetpack Compose.
             setContent {
-                // Questo è il "Tema". Applica in automatico i colori Material 3 (Expressive)
-                // basandosi sullo sfondo del telefono dell'utente (Dynamic Colors).
                 ScoreCounterTheme {
-
-                    // LEZIONE: Il NavController è il nostro "Vigile Urbano" che gestisce lo stack delle schermate.
                     val navController = rememberNavController()
-
-                    // LEZIONE: Creiamo il ViewModel!
-                    // Questa funzione magica crea il ViewModel la prima volta, e poi
-                    // continua a restituirci sempre lo stesso se cambiamo schermata.
-                    // Essendo un AndroidViewModel, capisce automaticamente che deve passargli l'Application Context.
                     val matchViewModel: MatchViewModel = viewModel()
 
-                    // Definiamo la mappa stradale delle nostre schermate
                     NavHost(navController = navController, startDestination = "home") {
-
                         composable("home") {
                             HomeScreen(
                                 viewModel = matchViewModel,
                                 onNavigateToCreate = {
-                                    // Quando creiamo una nuova sfida, puliamo i vecchi dati (Puliamo la RAM)
                                     matchViewModel.clearMatch()
                                     navController.navigate("create")
                                 },
-                                onNavigateToCounter = {
-                                    // Per riprendere la partita dal salva-vita
-                                    navController.navigate("counter")
-                                }
+                                onNavigateToCounter = { navController.navigate("counter") }
                             )
                         }
-
                         composable("create") {
                             CreateMatchScreen(
                                 viewModel = matchViewModel,
                                 onNavigateToCounter = { navController.navigate("counter") }
                             )
                         }
-
-                        // --- ROTTA: IL CONTATORE ---
                         composable("counter") {
                             CounterScreen(
                                 viewModel = matchViewModel,
                                 onNavigateToResults = { navController.navigate("results") },
-                                // Passiamo la funzione per tornare indietro in caso di uscita d'emergenza (Salva-Vita)
                                 onNavigateHome = {
-                                    matchViewModel.clearMatch() // Puliamo la RAM
+                                    matchViewModel.clearMatch()
                                     navController.popBackStack("home", inclusive = false)
                                 }
                             )
                         }
-
-                        // --- ROTTA: LA CLASSIFICA FINALE ---
                         composable("results") {
                             ResultsScreen(
                                 viewModel = matchViewModel,
-                                onNavigateHome = {
-                                    // LEZIONE: popBackStack("home", false) è fondamentale!
-                                    // Chiude la classifica, il contatore e la schermata di creazione,
-                                    // togliendole dalla memoria e riportandoci direttamente alla Home pulita!
-                                    navController.popBackStack("home", inclusive = false)
-                                }
+                                onNavigateHome = { navController.popBackStack("home", inclusive = false) }
                             )
                         }
                     }
@@ -248,12 +221,10 @@
 
     // ====================================================================
     // 4. LE SCHERMATE DELL'APP (Composables)
-    // Nota: In Kotlin, le funzioni grafiche Compose si scrivono sempre con l'Iniziale Maiuscola!
     // ====================================================================
 
     /**
      * SCHERMATA HOME: Mostra lo storico delle sfide salvate.
-     * ---> MODIFICA: Aggiunto popup Salva-Vita <---
      */
     @Composable
     fun HomeScreen(
@@ -261,13 +232,8 @@
         onNavigateToCreate: () -> Unit,
         onNavigateToCounter: () -> Unit // Serve per riprendere la partita dal backup
     ) {
-        // MOTORE APTICO: Prepariamo il sistema di vibrazione per questa schermata
         val haptic = LocalHapticFeedback.current
-
-        // Recuperiamo il Contesto per poter lanciare l'Intento di Condivisione dalla Home
         val context = LocalContext.current
-
-        // Stati per la Snackbar nella Home (per il cestino dello storico)
         val snackbarHostState = remember { SnackbarHostState() }
         val coroutineScope = rememberCoroutineScope()
 
@@ -292,325 +258,137 @@
             )
         }
 
-        // Scaffold è l'impalcatura pre-costruita del Material Design.
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            // Montiamo la Snackbar fisicamente all'interno della pagina Home
             snackbarHost = { SnackbarHost(snackbarHostState) },
-            // Lo Scaffold ha uno "slot" speciale già pronto per il pulsante fluttuante.
             floatingActionButton = {
                 ExtendedFloatingActionButton(
                     onClick = {
-                        // EFFETTO APTICO: Vibrazione al tocco
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Esegue la funzione passata come parametro per navigare
                         onNavigateToCreate()
                     },
-                    // Modella la posizione del pulsante aggiungendo un margine inferiore e laterale per sollevarlo dal bordo
                     modifier = Modifier.padding(bottom = 32.dp, end = 8.dp),
-                    icon = {
-                        Icon(
-                            Icons.Filled.Add,
-                            contentDescription = "Nuova Sfida",
-                            // Modella la dimensione dell'icona forzandola a 28dp (rispetto allo standard di 24dp)
-                            modifier = Modifier.size(28.dp)
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = "Nuova Sfida",
-                            // Modella l'aspetto del testo applicando lo stile titleLarge e forzando il grassetto
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    icon = { Icon(Icons.Filled.Add, contentDescription = "Nuova Sfida", modifier = Modifier.size(28.dp)) },
+                    text = { Text(text = "Nuova Sfida", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
                 )
             }
-        ) { innerPadding -> // innerPadding è lo spazio occupato dalle barre di sistema (batteria, ecc.)
-
-            // Column ordina i suoi figli uno sotto l'altro (in verticale).
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(16.dp)
-            ) {
+        ) { innerPadding ->
+            Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
                 Text(
                     text = "Storico Sfide",
-                    // Modella il titolo principale assegnandogli una dimensione prominente, il grassetto e il colore del tema
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // ---> GESTIONE DELLO STORICO <---
                 if (viewModel.history.isEmpty()) {
                     Text(
                         text = "Nessuna sfida salvata al momento.",
-                        // Modella il testo di stato vuoto con una dimensione media
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    // LEZIONE: LazyColumn disegna solo gli elementi visibili sullo schermo.
-                    // Ottimo per le performance se lo storico diventa lunghissimo.
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        // Modella la spaziatura verticale tra gli elementi della lista (12dp di distanza l'uno dall'altro)
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                    LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(viewModel.history) { record ->
-
-                            // STATO: QUESTA SPECIFICA CARD È ESPANSA? (Ricordato in modo indipendente per ogni carta)
                             var expanded by remember { mutableStateOf(false) }
 
                             Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    // Rende la Card cliccabile, fa vibrare il telefono e inverte lo stato dell'animazione
-                                    .clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        expanded = !expanded // Se era true diventa false, e viceversa
-                                    },
+                                modifier = Modifier.fillMaxWidth().clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    expanded = !expanded
+                                },
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
-                                // Modella i margini interni della Card per dare più respiro al testo (20dp)
                                 Column(modifier = Modifier.padding(20.dp)) {
+                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = record.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 
-                                    // ---> IL TITOLO E IL CRONOMETRO NELLO STORICO <---
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // Intestazione sempre visibile
-                                        Text(
-                                            text = record.title,
-                                            // Modella il titolo della singola sfida in grassetto
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Bold
-                                        )
-
-                                        // Se la partita ha una durata registrata (> 0), mostra l'orologio
                                         if (record.durationSeconds > 0) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Timer,
-                                                    contentDescription = "Durata",
-                                                    modifier = Modifier.size(16.dp).padding(end = 4.dp),
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                Text(
-                                                    text = formatTime(record.durationSeconds),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
+                                                Icon(Icons.Filled.Timer, null, modifier = Modifier.size(16.dp).padding(end = 4.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Text(text = formatTime(record.durationSeconds), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
                                     }
 
-                                    // Modella la riga che contiene il nome del vincitore e l'icona a forma di freccia
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "🏆 Vincitore: ${record.winnerName}",
-                                            // Modella il testo del vincitore nel sommario con un peso medio
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        // Modella l'indicatore di espansione: se expanded è true mostra la freccia in su, altrimenti in giù
-                                        Icon(
-                                            imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                            contentDescription = "Espandi dettagli",
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
+                                    Row(modifier = Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = "🏆 Vincitore: ${record.winnerName}", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                                        Icon(imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                     }
 
-                                    // ---> IL CONTENUTO A SCOMPARSA ANIMATO <---
-                                    // AnimatedVisibility gestisce da sola l'animazione fluida di entrata/uscita!
                                     AnimatedVisibility(visible = expanded) {
                                         Column(modifier = Modifier.padding(top = 16.dp)) {
-                                            // Una linea divisoria sottile
                                             HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
 
-                                            // Scorriamo tutti i giocatori salvati in questa partita (forEachIndexed ci dà l'indice)
                                             record.allPlayers.forEachIndexed { index, playerRecord ->
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    // Se è il primo (indice 0), mettiamo la coppa!
+                                                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                                     if (index == 0) {
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            Icon(
-                                                                imageVector = Icons.Filled.EmojiEvents,
-                                                                contentDescription = "Vincitore",
-                                                                tint = MaterialTheme.colorScheme.primary,
-                                                                modifier = Modifier.padding(end = 8.dp)
-                                                            )
-                                                            Text(
-                                                                text = "1° ${playerRecord.name}",
-                                                                // Modella il nome del vincitore assegnando il grassetto
-                                                                style = MaterialTheme.typography.titleLarge,
-                                                                fontWeight = FontWeight.ExtraBold,
-                                                                color = MaterialTheme.colorScheme.primary
-                                                            )
+                                                            Icon(Icons.Filled.EmojiEvents, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(end = 8.dp))
+                                                            Text(text = "1° ${playerRecord.name}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
                                                         }
                                                     } else {
-                                                        Text(
-                                                            text = "${index + 1}° ${playerRecord.name}",
-                                                            // Nomi degli altri giocatori senza grassetto
-                                                            style = MaterialTheme.typography.bodyLarge
-                                                        )
+                                                        Text(text = "${index + 1}° ${playerRecord.name}", style = MaterialTheme.typography.bodyLarge)
                                                     }
-
-                                                    // Punteggio
-                                                    Text(
-                                                        text = "${playerRecord.score} pt",
-                                                        // Punteggio in grassetto solo se è il vincitore
-                                                        style = MaterialTheme.typography.bodyLarge,
-                                                        fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
-                                                    )
+                                                    Text(text = "${playerRecord.score} pt", style = MaterialTheme.typography.bodyLarge, fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal)
                                                 }
                                             }
 
-                                            // ---> MINI-GRAFICO NELLO STORICO (Game Stats) <---
-                                            // Protezione: Disegna il grafico solo se c'è una storia e se è lunga almeno 2 step (per fare una riga)
-                                            // Il "?: emptyList()" serve a NON far crashare l'app se apri una partita vecchia che non aveva la history salvata!
                                             val validHistory = record.allPlayers.any { (it.scoreHistory ?: emptyList()).size > 1 }
                                             if (validHistory) {
                                                 Spacer(modifier = Modifier.height(16.dp))
-                                                Text(
-                                                    text = "Andamento Punteggi",
-                                                    style = MaterialTheme.typography.labelMedium,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                                // Richiamiamo il motore del grafico riducendone l'altezza a 120dp per farlo stare carino nella Card
+                                                Text("Andamento Punteggi", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                                                 ScoreChart(players = record.allPlayers, modifier = Modifier.height(120.dp).fillMaxWidth().padding(top = 8.dp))
                                                 HorizontalDivider(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
                                             }
 
-                                            // ---> RIGA PER LA DATA (A SINISTRA) E LE AZIONI (A DESTRA) <---
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                                // SpaceBetween allontana la data dai bottoni il più possibile
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                // 1. LA DATA DELLA PARTITA
-                                                Text(
-                                                    text = if (record.timestamp > 0L) formatDate(record.timestamp) else "",
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-
-                                                // 2. I BOTTONI RAGGRUPPATI A DESTRA
+                                            Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                                Text(text = if (record.timestamp > 0L) formatDate(record.timestamp) else "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                 Row {
-                                                    // ---> PULSANTE CONDIVIDI STORICO <---
-                                                    IconButton(
-                                                        onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                                            // Costruiamo il testo per WhatsApp leggendo direttamente da "record" (la partita salvata)
-                                                            var shareText = "🏆 Risultati Storici: ${record.title}\n"
-                                                            if (record.timestamp > 0L) shareText += "📅 Data: ${formatDate(record.timestamp)}\n"
-                                                            if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${formatTime(record.durationSeconds)}\n"
-                                                            shareText += "\n"
-
-                                                            record.allPlayers.forEachIndexed { index, player ->
-                                                                val medal = when(index) {
-                                                                    0 -> "🥇 1°"
-                                                                    1 -> "🥈 2°"
-                                                                    2 -> "🥉 3°"
-                                                                    else -> "${index + 1}°"
-                                                                }
-                                                                shareText += "$medal ${player.name} - ${player.score} pt\n"
-                                                            }
-                                                            shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
-
-                                                            // Lanciamo l'intento di condivisione di Android
-                                                            val sendIntent = Intent().apply {
-                                                                action = Intent.ACTION_SEND
-                                                                putExtra(Intent.EXTRA_TEXT, shareText)
-                                                                type = "text/plain"
-                                                            }
-                                                            val shareIntent = Intent.createChooser(sendIntent, "Condividi partita passata")
-                                                            context.startActivity(shareIntent)
-                                                        },
-                                                        // Modella il colore per distinguerlo dal cestino
-                                                        modifier = Modifier.padding(end = 8.dp)
-                                                    ) {
-                                                        Icon(Icons.Filled.Share, contentDescription = "Condividi partita", tint = MaterialTheme.colorScheme.primary)
-                                                    }
-
-                                                    // ---> PULSANTE ELIMINA (Cestino) CON SNACKBAR E TIMER CUSTOM <---
-                                                    IconButton(
-                                                        onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                                            // 1. Salviamo i dati per poterli ripristinare se l'utente si pente
-                                                            val removedIndex = viewModel.history.indexOf(record)
-                                                            val removedRecord = record
-
-                                                            // 2. Eliminiamo subito
-                                                            viewModel.deleteMatch(record)
-
-                                                            // 3. Lanciamo la Snackbar in background
-                                                            coroutineScope.launch {
-                                                                // IL NOSTRO TIMER PERSONALIZZATO (Uccide la Snackbar dopo 2.5 secondi)
-                                                                launch {
-                                                                    delay(2500L)
-                                                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                                                }
-
-                                                                // Mostriamo la Snackbar bloccandola su Infinita (la ucciderà il nostro timer qui sopra)
-                                                                val result = snackbarHostState.showSnackbar(
-                                                                    message = "Partita eliminata",
-                                                                    actionLabel = "ANNULLA",
-                                                                    duration = SnackbarDuration.Indefinite
-                                                                )
-
-                                                                // 4. Se l'utente clicca Annulla in tempo, resuscita la partita!
-                                                                if (result == SnackbarResult.ActionPerformed) {
-                                                                    viewModel.restoreMatch(removedIndex, removedRecord)
-                                                                }
-                                                            }
+                                                    IconButton(onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        var shareText = "🏆 Risultati Storici: ${record.title}\n"
+                                                        if (record.timestamp > 0L) shareText += "📅 Data: ${formatDate(record.timestamp)}\n"
+                                                        if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${formatTime(record.durationSeconds)}\n"
+                                                        shareText += "\n"
+                                                        record.allPlayers.forEachIndexed { index, player ->
+                                                            val medal = when(index) { 0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°" }
+                                                            shareText += "$medal ${player.name} - ${player.score} pt\n"
                                                         }
-                                                    ) {
-                                                        Icon(Icons.Filled.Delete, contentDescription = "Elimina partita", tint = MaterialTheme.colorScheme.error)
-                                                    }
+                                                        shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
+                                                        val sendIntent = Intent().apply { action = Intent.ACTION_SEND; putExtra(Intent.EXTRA_TEXT, shareText); type = "text/plain" }
+                                                        context.startActivity(Intent.createChooser(sendIntent, "Condividi partita"))
+                                                    }) { Icon(Icons.Filled.Share, null, tint = MaterialTheme.colorScheme.primary) }
+
+                                                    IconButton(onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        val removedIndex = viewModel.history.indexOf(record)
+                                                        viewModel.deleteMatch(record)
+                                                        coroutineScope.launch {
+                                                            launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
+                                                            val result = snackbarHostState.showSnackbar("Partita eliminata", "ANNULLA", duration = SnackbarDuration.Indefinite)
+                                                            if (result == SnackbarResult.ActionPerformed) viewModel.restoreMatch(removedIndex, record)
+                                                        }
+                                                    }) { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colorScheme.error) }
                                                 }
                                             }
                                         }
                                     }
-                                    // ---> FINE CONTENUTO A SCOMPARSA <---
                                 }
                             }
                         }
 
-                        // ---> FIRMA DIGITALE <---
                         item {
-                            Spacer(modifier = Modifier.height(32.dp)) // Diamo un po' di respiro dopo l'ultima partita
-
+                            Spacer(modifier = Modifier.height(32.dp))
                             Text(
                                 text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.",
-                                // Usiamo uno stile piccolo e "discreto" (labelSmall)
                                 style = MaterialTheme.typography.labelSmall,
-                                // Lo facciamo leggermente trasparente (alpha = 0.6f) per non renderlo invadente
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 80.dp), // Aggiungiamo spazio vitale in basso per non farla coprire dal pulsante "+" fluttuante
-                                textAlign = TextAlign.Center // Centriamo il testo perfettamente
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp),
+                                textAlign = TextAlign.Center
                             )
                         }
-
                     }
                 }
             }
@@ -619,47 +397,40 @@
 
     /**
      * SCHERMATA CREAZIONE SFIDA: Impostazioni iniziali e aggiunta giocatori.
+     * ---> MODIFICHE: Implementato BottomSheet per gestione Preferiti <---
      */
-    /**
-     * SCHERMATA CREAZIONE SFIDA: Impostazioni iniziali e aggiunta giocatori.
-     * ---> MODIFICA UI: Raggruppamento in Card (Material 3) e Icone nei campi di testo <---
-     */
+    @OptIn(ExperimentalMaterial3Api::class) // Serve per indicare ad Android che stiamo usando il ModalBottomSheet (funzione avanzata)
     @Composable
     fun CreateMatchScreen(
         viewModel: MatchViewModel,
         onNavigateToCounter: () -> Unit
     ) {
-        // Stato per il nome del giocatore in fase di digitazione (rimane locale alla schermata)
+        // Stato per il nome del giocatore in fase di digitazione
         var newPlayerName by remember { mutableStateOf("") }
-
-        // Stato che ricorda QUALE giocatore stiamo modificando. Se è "null", il popup di modifica è chiuso.
+        // Stato che ricorda QUALE giocatore stiamo modificando (per il popup).
         var playerToEdit by remember { mutableStateOf<Player?>(null) }
 
         // STATI PER I NOMI RAPIDI (Preferiti)
-        // Mostra o nasconde il popup principale di gestione dei preferiti
         var showFavoritesDialog by remember { mutableStateOf(false) }
-        // Ricorda QUALE nome rapido stiamo modificando (apre un popup secondario sopra al primo)
         var favToEdit by remember { mutableStateOf<String?>(null) }
 
-        // MOTORE APTICO: Prepariamo il sistema di vibrazione
-        val haptic = LocalHapticFeedback.current
+        // ---> NUOVO: STATO DEL BOTTOM SHEET <---
+        // Il "foglio che scorre dal basso" ha bisogno di una sua memoria per gestire le animazioni fluide di apertura/chiusura.
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
-        // SISTEMA SNACKBAR (Il messaggio nero in basso con il tasto "Annulla" per i cestini)
+        val haptic = LocalHapticFeedback.current
         val snackbarHostState = remember { SnackbarHostState() }
         val coroutineScope = rememberCoroutineScope()
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            // Montiamo la Snackbar fisicamente all'interno della pagina
             snackbarHost = { SnackbarHost(snackbarHostState) },
-            // Il grande pulsante fluttuante (FAB) per avviare la partita
             floatingActionButton = {
                 ExtendedFloatingActionButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateToCounter() // Quando clicco, vado al contatore!
+                        onNavigateToCounter()
                     },
-                    // Solleva il bottone dal fondo e lo stacca leggermente da destra
                     modifier = Modifier.padding(bottom = 32.dp, end = 8.dp),
                     icon = { Icon(Icons.Filled.Add, contentDescription = "Inizia", modifier = Modifier.size(28.dp)) },
                     text = { Text("Inizia Sfida", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
@@ -667,14 +438,17 @@
             }
         ) { innerPadding ->
 
-            // Usiamo LazyColumn invece di Column affinché la pagina sia interamente scorrevole.
-            // Questo previene fastidiosi bug visivi (elementi tagliati) su telefoni con schermi piccoli.
+            // Usiamo LazyColumn affinché la pagina sia scorrevole.
+            // LEZIONE SOVRAPPOSIZIONE: Aggiungiamo 'innerPadding' per rispettare le barre di sistema.
+            // Per evitare che il FAB (Pulsante Fluttuante) copra i contenuti, aggiungeremo uno Spacer
+            // gigante alla fine della lista (riga 595).
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp)
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(bottom = 100.dp)
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    // TITOLO PRINCIPALE DELLA SCHERMATA
+                    // TITOLO PRINCIPALE
                     Text(
                         text = "Nuova Partita",
                         style = MaterialTheme.typography.displaySmall,
@@ -684,15 +458,12 @@
                     )
 
                     // ====================================================================
-                    // ---> PRIMA CARD: LE REGOLE DEL GIOCO (Raggruppamento Logico) <---
+                    // ---> PRIMA CARD: LE REGOLE DEL GIOCO <---
                     // ====================================================================
-                    // LEZIONE: Usiamo una Card per raggruppare elementi simili. Questo riduce
-                    // il carico cognitivo dell'utente (Legge della Vicinanza della Gestalt).
+                    // Raggruppa le impostazioni della partita in un riquadro per migliorare l'ordine visivo
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                        // Diamo alla Card uno sfondo che risalta leggermente rispetto alla pagina (Surface Variant)
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        // Bordi molto arrotondati, tipici del nuovo Material Design 3
                         shape = RoundedCornerShape(24.dp)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
@@ -712,62 +483,83 @@
                                 label = { Text("Nome della Sfida") },
                                 placeholder = { Text("Es. Sfida Epica") },
                                 shape = RoundedCornerShape(20.dp),
-                                // ---> LEZIONE ICONE: 'leadingIcon' inserisce un'icona DENTRO il campo di testo, a sinistra.
-                                // Questo si chiama "Affordance visiva": l'utente capisce cosa deve inserire ancor prima di leggere.
+                                // L'icona del joypad per dare un feedback visivo immediato ("Affordance")
                                 leadingIcon = {
-                                    Icon(Icons.Filled.VideogameAsset, contentDescription = "Icona controller", tint = MaterialTheme.colorScheme.primary)
+                                    Icon(Icons.Filled.VideogameAsset, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                 }
                             )
 
-                            // Pulsanti rapidi per riempire il titolo velocemente
+                            // ---> LEZIONE: BOTTONI INTELLIGENTI <---
+                            // Salviamo in due variabili se il testo attuale è ESATTAMENTE quello dei temi predefiniti.
+                            val isAnimeTheme = viewModel.matchTitle == "Sfida Anime"
+                            val isCarteTheme = viewModel.matchTitle == "Sfida Carte"
+
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 16.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                OutlinedButton(
+                                // BOTTONE TEMA ANIME
+                                Button(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         viewModel.matchTitle = "Sfida Anime"
                                     },
+                                    modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(20.dp),
-                                    modifier = Modifier.weight(1f) // Entrambi i bottoni si dividono lo spazio a metà
-                                ) { Text("Tema Anime") }
+                                    // Cambio Colore Dinamico: Se isAnimeTheme è vero, coloralo di blu (Primario).
+                                    // Altrimenti fallo diventare trasparente (Outlined).
+                                    colors = if (isAnimeTheme) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                    else ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                                    // Cambio Bordo Dinamico: Se è vero togliamo i bordi, se è falso disegniamo un contorno sottile.
+                                    border = if (isAnimeTheme) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                                ) {
+                                    Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                                    Text("Anime")
+                                }
 
-                                OutlinedButton(
+                                // BOTTONE TEMA CARTE
+                                Button(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         viewModel.matchTitle = "Sfida Carte"
                                     },
+                                    modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(20.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) { Text("Tema Carte") }
+                                    colors = if (isCarteTheme) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                    else ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+                                    border = if (isCarteTheme) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                                ) {
+                                    Icon(Icons.Filled.Style, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+                                    Text("Carte")
+                                }
                             }
 
                             // --- PUNTEGGIO OBIETTIVO ---
                             OutlinedTextField(
                                 value = viewModel.targetScore,
                                 onValueChange = { newValue ->
-                                    // Accettiamo il nuovo testo SOLO se è vuoto oppure se è composto esclusivamente da numeri!
+                                    // Accettiamo solo testo vuoto o composto da numeri
                                     if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
                                         viewModel.targetScore = newValue
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                label = { Text("Punteggio Obiettivo (Opzionale)") },
+                                // LEZIONE TESTO: Ho accorciato la scritta da "Punteggio Obiettivo" a "Traguardo"
+                                // per evitare che, insieme all'icona, le parole vadano a capo rovinando l'estetica.
+                                label = { Text("Traguardo (Opzionale)") },
                                 placeholder = { Text("Es. 50") },
                                 shape = RoundedCornerShape(20.dp),
-                                // ---> LEZIONE TASTIERA: Forza Android ad aprire il Tastierino Numerico invece della tastiera QWERTY completa! <---
+                                // Forza l'apertura del tastierino numerico sul telefono
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                // Icona della Coppa inserita a sinistra
                                 leadingIcon = {
-                                    Icon(Icons.Filled.EmojiEvents, contentDescription = "Icona trofeo", tint = MaterialTheme.colorScheme.primary)
+                                    Icon(Icons.Filled.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                 }
                             )
                         }
                     }
 
                     // ====================================================================
-                    // ---> SECONDA CARD: LA GESTIONE DEI GIOCATORI <---
+                    // ---> SECONDA CARD: AGGIUNTA E GESTIONE GIOCATORI <---
                     // ====================================================================
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
@@ -776,14 +568,14 @@
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
-                                text = "Aggiungi Partecipanti",
+                                text = "Gestione Partecipanti",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
 
-                            // --- CAMPO INSERIMENTO NUOVO GIOCATORE E BOTTONE AGGIUNGI ---
+                            // --- INSERIMENTO NUOVO GIOCATORE ---
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -793,47 +585,43 @@
                                     value = newPlayerName,
                                     onValueChange = { newPlayerName = it },
                                     modifier = Modifier.weight(1f),
-                                    label = { Text("Nome giocatore") },
+                                    // LEZIONE TESTO: Accorciato da "Nome giocatore" a "Nome" per fare spazio all'icona
+                                    label = { Text("Nome") },
                                     shape = RoundedCornerShape(20.dp),
-                                    // Icona del "Profilo Utente" inserita a sinistra
                                     leadingIcon = {
-                                        Icon(Icons.Filled.Person, contentDescription = "Icona utente", tint = MaterialTheme.colorScheme.primary)
+                                        Icon(Icons.Filled.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                     }
                                 )
 
                                 Button(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        // Controllo di sicurezza: non aggiungiamo nomi vuoti composti solo da spazi
                                         if (newPlayerName.isNotBlank()) {
                                             viewModel.addPlayer(newPlayerName)
-                                            newPlayerName = "" // Svuotiamo la casella dopo l'aggiunta per essere pronti al prossimo
+                                            newPlayerName = "" // Svuota la casella testuale
                                         }
                                     },
-                                    modifier = Modifier.padding(top = 6.dp).height(56.dp) // Altezza forzata per pareggiare la casella di testo
+                                    modifier = Modifier.padding(top = 6.dp).height(56.dp)
                                 ) { Text("Aggiungi") }
                             }
 
                             Spacer(modifier = Modifier.height(24.dp))
-                            // Divisore grafico trasparente
                             HorizontalDivider(modifier = Modifier.padding(bottom = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
 
-                            // --- SEZIONE GIOCATORI RAPIDI (PREFERITI) ---
+                            // --- GIOCATORI RAPIDI (PREFERITI) ---
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text("Giocatori Rapidi:", style = MaterialTheme.typography.titleSmall)
-
-                                // Bottone testuale che fa aprire il popup (Dialog) di gestione dei nomi
                                 TextButton(onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showFavoritesDialog = true
+                                    showFavoritesDialog = true // Apre il nuovo BottomSheet!
                                 }) { Text("Gestisci") }
                             }
 
-                            // Se ci sono nomi salvati nel database, mostriamo lo scroll orizzontale
+                            // Se ci sono preferiti salvati, crea una lista orizzontale scorrevole
                             if (viewModel.favoriteNames.isNotEmpty()) {
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -843,8 +631,7 @@
                                         OutlinedButton(
                                             onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                // Aggiunge istantaneamente il preferito alla partita in corso!
-                                                viewModel.addPlayer(fav)
+                                                viewModel.addPlayer(fav) // Inserisce il rapido nella partita
                                             },
                                             shape = RoundedCornerShape(20.dp)
                                         ) { Text(fav) }
@@ -859,112 +646,145 @@
                             }
                         }
                     }
-
-                    // Titolo dinamico che cambia se l'elenco è vuoto o meno
-                    Text(
-                        text = if (viewModel.players.isEmpty()) "Nessun giocatore al tavolo." else "Giocatori pronti:",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
                 }
 
                 // ====================================================================
-                // === LA LISTA INFERIORE DEI GIOCATORI AGGIUNTI (MODIFICA E RIORDINA) ===
+                // ---> TERZA CARD FISSA: IL "TAVOLO" (Empty State / Lista Giocatori) <---
                 // ====================================================================
-                // itemsIndexed ci passa sia il numero di riga (index) che l'oggetto stesso (player)
-                itemsIndexed(viewModel.players) { index, player ->
+                // LEZIONE: Questa singola Card fa da contenitore generale. Se è vuota mostra
+                // l'icona gigante, se ci sono giocatori disegna le righe al suo interno.
+                item {
                     Card(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        shape = RoundedCornerShape(16.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        // Colore leggermente diverso dalle altre due Card per distinguerla
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(24.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // --- Frecce SU e GIÙ per ordinare i giocatori ---
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                IconButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        // Sposta l'oggetto all'indice precedente (più in alto)
-                                        viewModel.movePlayer(index, index - 1)
-                                    },
-                                    // Spento se siamo già al primo posto
-                                    enabled = index > 0,
-                                    modifier = Modifier.size(32.dp)
-                                ) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Sposta su", tint = MaterialTheme.colorScheme.primary) }
+                        Column(modifier = Modifier.padding(20.dp)) {
 
-                                IconButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        // Sposta l'oggetto all'indice successivo (più in basso)
-                                        viewModel.movePlayer(index, index + 1)
-                                    },
-                                    // Spento se siamo all'ultimo posto
-                                    enabled = index < viewModel.players.size - 1,
-                                    modifier = Modifier.size(32.dp)
-                                ) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Sposta giù", tint = MaterialTheme.colorScheme.primary) }
-                            }
-
-                            // --- Nome Inserito ---
                             Text(
-                                text = player.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f).padding(start = 8.dp)
+                                text = "Giocatori al Tavolo",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
 
-                            // --- Bottone Matita (Modifica al volo) ---
-                            IconButton(onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                // Salvando l'oggetto 'player' qui, il Compose rileva che non è più null
-                                // e disegna istantaneamente il Popup di modifica!
-                                playerToEdit = player
-                            }) { Icon(Icons.Filled.Edit, contentDescription = "Modifica nome", tint = MaterialTheme.colorScheme.primary) }
-
-                            // --- Bottone Cestino (Elimina con Snackbar) ---
-                            IconButton(onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                // 1. Salvataggio di emergenza prima dell'eliminazione
-                                val removedIndex = index
-                                val removedPlayer = player
-
-                                // 2. Eliminazione immediata per feeling visivo
-                                viewModel.removePlayer(player)
-
-                                // 3. Esecuzione asincrona della scritta nera in basso (Snackbar)
-                                coroutineScope.launch {
-                                    // TIMER CUSTOM: Dopo 2.5 secondi, la scritta scompare forzatamente
-                                    launch {
-                                        delay(2500L)
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                    }
-
-                                    // Attendiamo la risposta dell'utente ("Ha cliccato Annulla?")
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "${player.name} rimosso",
-                                        actionLabel = "ANNULLA",
-                                        duration = SnackbarDuration.Indefinite
+                            // SEZIONE CONDIZIONALE (IF / ELSE)
+                            if (viewModel.players.isEmpty()) {
+                                // SE VUOTO: Disegniamo lo stato "Vuoto" con un'illustrazione centrale
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Group,
+                                        contentDescription = "Vuoto",
+                                        modifier = Modifier.size(64.dp).padding(bottom = 16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                     )
+                                    Text(
+                                        text = "Il tavolo è vuoto!",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Aggiungi qualcuno per iniziare la sfida.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(top = 8.dp)
+                                    )
+                                }
+                            } else {
+                                // SE PIENO: Disegniamo la lista dei giocatori usando forEachIndexed
+                                // Nota: in una Card non possiamo usare 'items()', quindi usiamo un ciclo for.
+                                viewModel.players.forEachIndexed { index, player ->
 
-                                    // 4. Se ha cliccato Annulla prima del timeout, ripristiniamo tutto!
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        viewModel.restorePlayer(removedIndex, removedPlayer)
+                                    // Creiamo una piccola "Sotto-Card" bianca (Surface) per ogni riga giocatore
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // --- Frecce di Riordino ---
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                IconButton(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        viewModel.movePlayer(index, index - 1)
+                                                    },
+                                                    enabled = index > 0,
+                                                    modifier = Modifier.size(32.dp)
+                                                ) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Sposta su", tint = MaterialTheme.colorScheme.primary) }
+
+                                                IconButton(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        viewModel.movePlayer(index, index + 1)
+                                                    },
+                                                    enabled = index < viewModel.players.size - 1,
+                                                    modifier = Modifier.size(32.dp)
+                                                ) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Sposta giù", tint = MaterialTheme.colorScheme.primary) }
+                                            }
+
+                                            // --- Nome Giocatore ---
+                                            Text(
+                                                text = player.name,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                modifier = Modifier.weight(1f).padding(start = 8.dp)
+                                            )
+
+                                            // --- Bottone Modifica ---
+                                            IconButton(onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                playerToEdit = player
+                                            }) { Icon(Icons.Filled.Edit, contentDescription = "Modifica", tint = MaterialTheme.colorScheme.primary) }
+
+                                            // --- Bottone Elimina (Con Snackbar Annulla) ---
+                                            IconButton(onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                val removedIndex = index
+                                                val removedPlayer = player
+                                                viewModel.removePlayer(player)
+
+                                                coroutineScope.launch {
+                                                    launch {
+                                                        delay(2500L)
+                                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                                    }
+                                                    val result = snackbarHostState.showSnackbar(
+                                                        message = "${player.name} rimosso",
+                                                        actionLabel = "ANNULLA",
+                                                        duration = SnackbarDuration.Indefinite
+                                                    )
+                                                    if (result == SnackbarResult.ActionPerformed) {
+                                                        viewModel.restorePlayer(removedIndex, removedPlayer)
+                                                    }
+                                                }
+                                            }) { Icon(Icons.Filled.Delete, contentDescription = "Elimina", tint = MaterialTheme.colorScheme.error) }
+                                        }
                                     }
                                 }
-                            }) { Icon(Icons.Filled.Delete, contentDescription = "Elimina giocatore", tint = MaterialTheme.colorScheme.error) }
+                            }
                         }
                     }
                 }
 
-                // Aggiungiamo uno spazio vuoto enorme in fondo. Questo evita che l'ultimo
-                // giocatore della lista finisca "nascosto" sotto il pulsante Inizia Sfida!
-                item { Spacer(modifier = Modifier.height(100.dp)) }
+                // ---> LEZIONE FAB FIX: IL GRANDE CUSCINETTO FINALE <---
+                // Questo blocco trasparente alto 120 pixel viene disegnato sempre in fondo alla pagina.
+                // Quando scrollerai la lista fino in fondo, questo spazio si infilerà SOTTO il bottone "Inizia Sfida",
+                // spingendo le Card verso l'alto ed evitando per sempre che vengano coperte!
+                item { Spacer(modifier = Modifier.height(120.dp)) }
             }
         }
 
-        // === POPUP (DIALOG) MODIFICA GIOCATORE ===
+        // === POPUP MODIFICA GIOCATORE IN PARTITA ===
         if (playerToEdit != null) {
             var editedName by remember { mutableStateOf(playerToEdit!!.name) }
             AlertDialog(
@@ -983,7 +803,7 @@
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         if (editedName.isNotBlank()) {
                             playerToEdit!!.name = editedName
-                            playerToEdit = null // Chiude il popup
+                            playerToEdit = null
                         }
                     }) { Text("Salva") }
                 },
@@ -991,49 +811,109 @@
             )
         }
 
-        // === POPUP GESTIONE PREFERITI ===
-        // Questo popup serve a scrivere permanentemente i nomi nel database del telefono
+        // ====================================================================
+        // ---> NUOVO: BOTTOM SHEET GESTIONE PREFERITI <---
+        // ====================================================================
+        // Questo sostituisce il vecchio AlertDialog. Scorre dolcemente dal basso
+        // e si può chiudere con uno swipe verso il basso o cliccando la "X".
         if (showFavoritesDialog) {
             var newFavName by remember { mutableStateOf("") }
-            AlertDialog(
-                onDismissRequest = { showFavoritesDialog = false },
-                title = { Text("Gestisci Giocatori Rapidi") },
-                text = {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedTextField(
-                                value = newFavName,
-                                onValueChange = { newFavName = it },
-                                modifier = Modifier.weight(1f),
-                                placeholder = { Text("Nuovo nome rapido") },
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            IconButton(onClick = {
+
+            ModalBottomSheet(//il "Pannello Inferiore Modale"
+                onDismissRequest = { showFavoritesDialog = false }, // Si attiva se tocchi lo sfondo scuro fuori dal pannello
+                sheetState = sheetState
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.93f) // <--- forza l'altezza del menù a tendina dei Giocatori rapidi al massimo al 93% di schermon
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
+                ) {
+
+
+
+                    // INTESTAZIONE PANNELLO (Titolo + Bottone X)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Giocatori Rapidi", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+
+                        // Bottone X per chiudere esplicitamente il pannello
+                        IconButton(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showFavoritesDialog = false
+                        }) {
+                            Icon(Icons.Filled.Close, contentDescription = "Chiudi")
+                        }
+                    }
+
+                    // RIGA DI AGGIUNTA (Testo + Bottone "Aggiungi" affiancato)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newFavName,
+                            onValueChange = { newFavName = it },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("Nuovo nome") },
+                            shape = RoundedCornerShape(16.dp)
+                        )
+                        Button(
+                            onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 if (newFavName.isNotBlank()) {
                                     viewModel.addFavorite(newFavName.trim())
-                                    newFavName = ""
+                                    newFavName = "" // Svuota il campo per permettere un'altra aggiunta veloce
                                 }
-                            }) { Icon(Icons.Filled.Add, null, tint = MaterialTheme.colorScheme.primary) }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider()
-                        LazyColumn(modifier = Modifier.heightIn(max = 200.dp).padding(top = 8.dp)) {
-                            items(viewModel.favoriteNames) { fav ->
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                                    Text(fav, modifier = Modifier.weight(1f))
-                                    IconButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); favToEdit = fav }) { Icon(Icons.Filled.Edit, null, tint = MaterialTheme.colorScheme.primary) }
-                                    IconButton(onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); viewModel.removeFavorite(fav) }) { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colorScheme.error) }
+                            },
+                            // Altezza forzata per allinearlo visivamente al campo di testo accanto
+                            modifier = Modifier.height(56.dp).padding(top = 6.dp)
+                        ) { Text("Aggiungi") }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider()
+
+                    // LISTA DEI NOMI SALVATI (Formato Card Compattato)
+                    LazyColumn(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                        items(viewModel.favoriteNames) { fav ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                // Bordi leggermente meno arrotondati (12dp) rispetto al tavolo principale per risparmiare spazio
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Row(
+                                    // Padding interno ridotto in altezza per far entrare più nomi nello schermo
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(fav, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+
+                                    IconButton(onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        favToEdit = fav
+                                    }) { Icon(Icons.Filled.Edit, contentDescription = "Modifica", tint = MaterialTheme.colorScheme.primary) }
+
+                                    IconButton(onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        viewModel.removeFavorite(fav)
+                                    }) { Icon(Icons.Filled.Delete, contentDescription = "Elimina", tint = MaterialTheme.colorScheme.error) }
                                 }
                             }
                         }
                     }
-                },
-                confirmButton = { Button(onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); showFavoritesDialog = false }) { Text("Chiudi") } }
-            )
+                }
+            }
         }
 
         // === POPUP MODIFICA SINGOLO PREFERITO ===
+        // Questo popup (AlertDialog) compare "sopra" al pannello BottomSheet in modo perfettamente legale e pulito.
         if (favToEdit != null) {
             var editedFavName by remember { mutableStateOf(favToEdit!!) }
             AlertDialog(
@@ -1178,7 +1058,10 @@
                         // Titolo della sfida (Con salvagente se l'utente l'ha lasciato vuoto)
                         Text(
                             text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
-                            style = MaterialTheme.typography.headlineLarge
+                            // Usiamo l'esatto stile gigante della schermata Home e Nuova Partita
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold, // Grassetto massiccio
+                            color = MaterialTheme.colorScheme.primary // Lo coloriamo di a tema
                         )
                         // ---> CRONOMETRO DI PARTITA IN TEMPO REALE <---
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1352,7 +1235,6 @@
             )
         }
 
-
         // Popup di conferma per il SALVA-VITA (Uscita accidentale)
         if (showExitWarning) {
             AlertDialog(
@@ -1412,98 +1294,169 @@
 
     /**
      * COMPONENTE: Card personalizzata per la singola riga del giocatore nella fase di punteggio.
-     * ---> NUOVO PARAMETRO: 'onScoreClick' è la funzione che esegue quando tocchiamo il numerone
+     * ---> MODIFICA UI: Stile "Gamepad", Numeri Giganti, Pulsanti Tattili, Bordi Marcati e FIX anti-schiacciamento (Ellipsis) <---
+     * * @OptIn(ExperimentalFoundationApi::class) serve perché stiamo usando 'combinedClickable',
+     * una funzione avanzata di Compose che gestisce sia il tocco normale che la pressione lunga.
      */
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun PlayerScoreCard(player: Player, isLeader: Boolean = false, onScoreClick: () -> Unit) {
+        // MOTORE APTICO: Prepariamo il sistema di vibrazione del telefono per il feedback tattile
         val haptic = LocalHapticFeedback.current
 
+        // ---> IL CONTENITORE PRINCIPALE (La riga del giocatore) <---
         // Card è un contenitore bellissimo del Material Design (sfondo leggero, bordi arrotondati e una leggera ombra invisibile)
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            // fillMaxWidth() gli fa occupare tutta la larghezza dello schermo.
+            // padding(vertical = 4.dp) aggiunge una piccola spaziatura tra un giocatore e l'altro per non appiccicarli.
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            // ---> LEZIONE BORDI MARCATI <---
+            // Usiamo BorderStroke per disegnare un contorno spesso 1 pixel.
+            // Usiamo il colore 'primary' (quello principale del tuo tema), ma con '.copy(alpha = 0.3f)'
+            // lo rendiamo trasparente al 30%. Questo crea un effetto "evidenziato" ma molto elegante e non invadente.
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+            // Arrotondiamo pesantemente gli angoli (24.dp) per un look moderno in stile Material 3
+            shape = RoundedCornerShape(24.dp)
         ) {
-            // Row allinea gli elementi (Nome e Corona a sinistra, punteggi a destra) in orizzontale
+            // Row allinea gli elementi in orizzontale.
+            // Arrangement.SpaceBetween spinge il Nome tutto a sinistra e i Pulsanti tutti a destra.
             Row(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Raggruppo Nome e Corona in una riga interna per farli stare assieme a sinistra
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    // Nome del giocatore
-                    Text(text = player.name, style = MaterialTheme.typography.titleLarge)
+                // ==========================================================
+                // BLOCCO SINISTRO: NOME DEL GIOCATORE E CORONA DEL LEADER
+                // ==========================================================
+                // Raggruppo Nome e Corona in una riga interna per farli stare assieme a sinistra.
+                // weight(1f) è fondamentale qui: dice a questo blocco "prenditi tutto lo spazio vuoto che avanza".
+                // Così facendo, spinge prepotentemente il blocco dei pulsanti (a destra) contro il bordo del telefono.
+                // Aggiungiamo un padding 'end' per non far mai incollare il nome al bottone Meno nel caso di numeri giganti.
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+
+                    // ---> IL NOME DEL GIOCATORE <---
+                    Text(
+                        text = player.name,
+                        // LEZIONE TIPOGRAFIA: 'headlineSmall' è uno stile di testo più grande e imponente del normale.
+                        style = MaterialTheme.typography.headlineSmall,
+                        // FontWeight.Bold forza la scritta in Grassetto per massimizzare la leggibilità durante il gioco.
+                        fontWeight = FontWeight.Bold,
+                        // ---> FIX ANTI-SCHIACCIAMENTO <---
+                        // maxLines = 1: Forza il testo a rimanere sempre e solo su una singola riga, impedendo che la grafica si rompa in verticale.
+                        maxLines = 1,
+                        // overflow = TextOverflow.Ellipsis: Se il nome è troppo lungo e viene schiacciato dai numeri grandi, taglia le lettere finali e mette "..." (Es. "Dani...").
+                        overflow = TextOverflow.Ellipsis,
+                        // Diamo un 'weight' interno al testo per farlo restringere dolcemente se manca spazio, senza spingere fuori o schiacciare la corona del leader!
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
 
                     // ---> DISEGNO DELLA CORONA DEL LEADER <---
+                    // (Solo per chi è in vantaggio)
                     if (isLeader) {
                         Icon(
-                            imageVector = Icons.Filled.WorkspacePremium, // Un'icona a medaglia/stella molto in stile Material 3
+                            imageVector = Icons.Filled.WorkspacePremium, // L'icona a medaglia/stella molto in stile Material 3
                             contentDescription = "In Vantaggio",
-                            // La stilizziamo usando il colore Primario di accento del tuo tema utente!
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 8.dp).size(24.dp)
+                            tint = MaterialTheme.colorScheme.primary, // La stilizziamo col colore principale del tema
+                            // Padding 'start' la stacca leggermente dal nome, 'size' la rende bella grande
+                            modifier = Modifier.padding(start = 8.dp).size(28.dp)
                         )
                     }
                 }
 
+                // ==========================================================
+                // BLOCCO DESTRO: CONTROLLI STILE "GAMEPAD" E PUNTEGGIO
+                // ==========================================================
                 // Raggruppiamo i controlli matematici (Meno, Numero, Più) in un'altra mini-Row a destra
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
                     // ---> PULSANTE MENO CON PUNTEGGIO RAPIDO (Long Press) <---
+                    // Usiamo un 'Box' vuoto che poi "mascheriamo" da pulsante hardware.
                     Box(
                         modifier = Modifier
-                            .size(48.dp) // Grandezza standard dei bottoni touch per un dito umano
-                            .clip(CircleShape) // Ritaglia l'effetto dell'onda grigia del tocco a forma di cerchio perfetto
+                            // Grandezza fissa di 56x56 pixel (Bersaglio touch molto grande per non mancarlo, Legge di Fitts)
+                            .size(56.dp)
+                            // LEZIONE FORME: Invece di un cerchio, usiamo un quadrato con angoli smussati a 16.dp.
+                            // In UI Design questa forma si chiama "Squircle" e ricorda i tasti fisici dei joypad!
+                            .clip(RoundedCornerShape(16.dp))
+                            // Colore di sfondo tenue: usiamo 'errorContainer' (di solito un rosso slavato) con trasparenza al 70%
+                            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f))
+                            // Disegniamo un bordino microscopico attorno al tasto per dargli un finto effetto 3D (Rilievo)
+                            .border(1.dp, MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                            // LEZIONE RIPPLE EFFECT: combinedClickable non solo gestisce i click, ma genera
+                            // in automatico l'ombra grigia che si espande dal dito (L'onda tattile o Ripple Effect)!
                             .combinedClickable(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress) // Vibra
                                     // MODIFICA GRAFICO: Usiamo la nuova funzione changeScore() invece di un banale score--.
                                     // In questo modo, l'app sa che deve salvare questo -1 anche nella memoria storica del grafico!
                                     player.changeScore(-1)
                                 },
                                 onLongClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    // Pressione Lunga: -5 Punti in un colpo solo (Modifica Utente Mantenuta!)
+                                    // Pressione Lunga: Toglie 5 punti in un colpo solo (Modifica Utente Mantenuta!)
                                     player.changeScore(-5)
                                 }
                             ),
-                        contentAlignment = Alignment.Center // Mette l'icona "-" perfettamente al centro del Box
+                        contentAlignment = Alignment.Center // Centra l'icona "-" perfettamente in mezzo al Box
                     ) {
-                        Icon(Icons.Filled.Remove, contentDescription = "Diminuisci")
+                        Icon(
+                            Icons.Filled.Remove,
+                            contentDescription = "Diminuisci",
+                            tint = MaterialTheme.colorScheme.onErrorContainer, // Colore scuro per fare contrasto col rosso tenue
+                            modifier = Modifier.size(32.dp) // Icona ingrandita per riempire bene il tasto hardware
+                        )
                     }
 
                     // ---> PUNTEGGIO GIGANTE CLICCABILE <---
                     Text(
                         text = player.score.toString(),
-                        style = MaterialTheme.typography.displaySmall,
-                        // Usiamo 'modifier' per dirgli che ora non è più solo un testo da leggere, ma un bottone da cliccare!
+                        // LEZIONE TIPOGRAFIA: 'displayMedium' è uno degli stili più enormi di Android. Ideale per i numeri.
+                        style = MaterialTheme.typography.displayMedium,
+                        // FontWeight.Black è il livello massimo di grassetto esistente! Rende il font "cicciotto" e massiccio.
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary, // Coloriamo il numero col colore principale dell'app
+                        // Mettiamo maxLines = 1 anche qui. Se il numero diventa assurdamente lungo (es. 10 milioni), non andrà a capo rompendo la card.
+                        maxLines = 1,
                         modifier = Modifier
+                            // MODIFICA ANTI-SCHIACCIAMENTO: Imposto un padding a 16.dp. per evitare che il numero risulti schiacciato tra i pulsanti
+                            // In questo modo i numeri hanno molto più spazio fisico per crescere prima di dare fastidio al nome del giocatore a sinistra!
                             .padding(horizontal = 16.dp)
+                            // Usiamo 'modifier' per dirgli che ora non è più solo un testo da leggere, ma un bottone da cliccare!
                             .clickable {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onScoreClick() // Esegue il comando di apertura del popup passato dalla CounterScreen
+                                onScoreClick() // Esegue il comando di apertura del popup tastiera passato dalla CounterScreen
                             }
                     )
 
                     // ---> PULSANTE PIÙ CON PUNTEGGIO RAPIDO (Long Press) <---
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            // Sfondo tenue: usiamo 'primaryContainer' (un azzurro chiaro) per indicare positività
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .border(1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
                             .combinedClickable(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    player.changeScore(1) // +1 e salva nella memoria del grafico!
+                                    // Aggiunge 1 punto e lo salva nella memoria del grafico!
+                                    player.changeScore(1)
                                 },
                                 onLongClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    player.changeScore(10) // +10 in un colpo solo per velocizzare i giochi a punti alti!
+                                    // Pressione lunga: Aggiunge 10 punti in un colpo solo per velocizzare i giochi a punti alti!
+                                    player.changeScore(10)
                                 }
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Aumenta")
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = "Aumenta",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
                 }
             }
@@ -2157,9 +2110,11 @@
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Classifica Finale",
+                            text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
+                            // Usiamo l'esatto stile gigante della schermata Home e Nuova Partita e Sfida
                             style = MaterialTheme.typography.displaySmall,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            fontWeight = FontWeight.Bold, // Grassetto massiccio
+                            color = MaterialTheme.colorScheme.primary // Lo coloriamo di a tema
                         )
 
                         // Mostriamo il cronometro di gioco sotto il titolo dei risultati
@@ -2208,8 +2163,8 @@
                                         style = MaterialTheme.typography.displayMedium,
                                         // Il "fontWeight" modella il peso del font rendendolo Extra Grassetto
                                         fontWeight = FontWeight.ExtraBold,
-                                        // Diamo al nome lo stesso colore del tema per farlo risaltare al massimo
-                                        color = MaterialTheme.colorScheme.primary
+                                        // Usiamo il colore di contrasto per il contenitore
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
                                     )
                                     Text(text = "${winner.score} Punti", style = MaterialTheme.typography.titleMedium)
                                 }
