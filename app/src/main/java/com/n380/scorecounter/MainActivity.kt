@@ -60,6 +60,8 @@
     import androidx.compose.foundation.text.KeyboardOptions
     import androidx.compose.ui.text.input.KeyboardType
     // Tutte le icone usate nell'app
+    import androidx.compose.foundation.verticalScroll // Per far scorrere il testo del tutorial se lo schermo è piccolo
+    import androidx.compose.material.icons.filled.Info // L'icona della "i" cerchiata per le informazioni
     import androidx.compose.material.icons.filled.Delete
     import androidx.compose.material.icons.filled.Edit
     import androidx.compose.material.icons.Icons
@@ -991,9 +993,12 @@
         var showDiceDialog by remember { mutableStateOf(false) }
         var diceResult by remember { mutableIntStateOf(1) }
 
-        // ---> NUOVO STATO: Ricorda QUALE giocatore stiamo modificando manualmente con la tastiera <---
+        // --->Ricorda QUALE giocatore stiamo modificando manualmente con la tastiera <---
         // Se è "null", il popup per l'inserimento manuale è nascosto.
         var playerForManualEdit by remember { mutableStateOf<Player?>(null) }
+
+        // STATO TUTORIAL: Controlla l'apertura del popup centrale con le regole nascoste (Manuale)
+        var showInfoDialog by remember { mutableStateOf(false) }
 
         // SISTEMA SNACKBAR (Tasto Annulla Azzeramento)
         val snackbarHostState = remember { SnackbarHostState() }
@@ -1082,7 +1087,7 @@
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Raggruppo Titolo e Cronometro in una Colonna per tenerli vicini
+                    // Raggruppo Titolo, Cronometro e Info in una Colonna per tenerli vicini
                     Column(modifier = Modifier.weight(1f)) {
                         // Titolo della sfida (Con salvagente se l'utente l'ha lasciato vuoto)
                         Text(
@@ -1090,9 +1095,9 @@
                             // Usiamo l'esatto stile gigante della schermata Home e Nuova Partita
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold, // Grassetto massiccio
-                            color = MaterialTheme.colorScheme.primary // Lo coloriamo di a tema
+                            color = MaterialTheme.colorScheme.primary // Lo coloriamo a tema
                         )
-                        // ---> CRONOMETRO DI PARTITA IN TEMPO REALE <---
+                        // ---> CRONOMETRO DI PARTITA E INFO <---
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Filled.Timer,
@@ -1107,10 +1112,27 @@
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Medium
                             )
+
+                            // ---> SPOSTATO QUI: L'icona delle Informazioni <---
+                            IconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showInfoDialog = true // Cambia lo stato a VERO e fa apparire il popup!
+                                },
+                                // Riduciamo la grandezza del bottone invisibile per non sformare la riga del cronometro
+                                modifier = Modifier.padding(start = 4.dp).size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Info,
+                                    contentDescription = "Informazioni App",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp) // Icona leggermente più piccola per allinearsi al testo
+                                )
+                            }
                         }
                     }
 
-                    // ---> PULSANTE LANCIA DADO <---
+                    // ---> PULSANTE LANCIA DADO (Tornato da solo a destra) <---
                     OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -1125,6 +1147,7 @@
                         Text("Lancia 🎲")
                     }
                 }
+
 
                 // ---> CALCOLO DELLA CORONA DEL LEADER IN TEMPO REALE <---
                 // Per assegnare la corona, dobbiamo sapere chi ha il punteggio più alto in questo esatto millisecondo.
@@ -1174,6 +1197,7 @@
                 }
             }
         }
+
 
         // ---> NUOVO: POPUP PER L'INSERIMENTO MANUALE DEL PUNTEGGIO DA TASTIERA <---
         if (playerForManualEdit != null) {
@@ -1261,7 +1285,8 @@
                                     viewModel.restoreScores(oldScores)
                                 }
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) { Text("Sì, azzera") }
                 },
                 dismissButton = {
@@ -1328,7 +1353,39 @@
                 }
             )
         }
+
+        // POPUP TUTORIAL: SPIEGAZIONE DELLE MECCANICHE NASCOSTE DELL'APP
+        if (showInfoDialog) {
+            AlertDialog(
+                onDismissRequest = { showInfoDialog = false }, // Se l'utente clicca fuori dal popup, si chiude
+                title = { Text("Info funzionalità", fontWeight = FontWeight.Bold) },
+                text = {
+                    // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                        Text("🚀 Punteggio Rapido", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 2.dp, top = 8.dp))
+                        Text("Tieni premuto il tasto '+' per aggiungere 10 punti o il tasto '-' per toglierne 5 istantaneamente.", style = MaterialTheme.typography.bodyMedium)
+
+                        Text("🔥 Stato On Fire", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 2.dp, top = 16.dp))
+                        Text("Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione. \nNon si applica nelle sfide a carte", style = MaterialTheme.typography.bodyMedium)
+
+                        Text("⌨️ Modifica Manuale", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 2.dp, top = 16.dp))
+                        Text("Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.", style = MaterialTheme.typography.bodyMedium)
+
+                        Text("🎲 Dado Fortunato", fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 2.dp, top = 16.dp))
+                        Text("Usa il tasto 'Lancia Dado' per decidere chi inizia tra le dispute con amici", style = MaterialTheme.typography.bodyMedium)
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showInfoDialog = false // Chiude il popup quando si preme il bottone
+                    }) { Text("Ho capito") }
+                }
+            )
+        }
     }
+
 
     /**
      * COMPONENTE: Card personalizzata per la singola riga del giocatore nella fase di punteggio.
