@@ -248,7 +248,8 @@
         // ---> LOGICA SALVA-VITA: Mostriamo il popup se c'è un backup <---
         if (viewModel.showResumeMatchDialog) {
             AlertDialog(
-                onDismissRequest = { viewModel.showResumeMatchDialog = false },
+                onDismissRequest = { },//Lasciando le graffe vuote { }, diciamo ad Android di NON fare nulla
+                // Il popup rimane lì "bloccato" finché non si preme uno dei due bottoni.
                 title = { Text("Partita in sospeso") },
                 text = { Text("Hai lasciato una sfida a metà.\nVuoi riprenderla da dove l'avevi lasciata?") },
                 confirmButton = {
@@ -388,9 +389,9 @@
                         }
 
                         item {
-                            Spacer(modifier = Modifier.height(32.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             Text(
-                                text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.",
+                                text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp),
@@ -422,6 +423,15 @@
         var showFavoritesDialog by remember { mutableStateOf(false) }
         var favToEdit by remember { mutableStateOf<String?>(null) }
 
+        // ---> LOGICA DI VALIDAZIONE (Prevenzione Errori) <---
+        // 1. Controlla se il nome NON è vuoto e i giocatori NON sono zero
+        val canStart = viewModel.matchTitle.isNotBlank() && viewModel.players.isNotEmpty()
+        // 2. Ricorda se l'utente ha provato a cliccare "Inizia" facendo il furbo (senza aver messo i dati)
+        var showError by remember { mutableStateOf(false) }
+
+        // STATO PER IL POPUP DEL DADO PERSONALIZZATO
+        var showDiceSettingsDialog by remember { mutableStateOf(false) }
+
         // ---> NUOVO: STATO DEL BOTTOM SHEET <---
         // Il "foglio che scorre dal basso" ha bisogno di una sua memoria per gestire le animazioni fluide di apertura/chiusura.
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -437,9 +447,19 @@
                 ExtendedFloatingActionButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateToCounter()
+                        // IL BLOCCO: Se i requisiti ci sono, andiamo alla partita...
+                        if (canStart) {
+                            onNavigateToCounter()
+                        } else {
+                            // ...altrimenti, accendiamo la spia dell'errore visivo!
+                            showError = true
+                        }
                     },
                     modifier = Modifier.padding(bottom = 32.dp, end = 8.dp),
+                    // IL COLORE: Se può partire è acceso (Primary), altrimenti è grigio scuro trasparente al 50%
+                    containerColor = if (canStart) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    // Anche il colore del testo e dell'icona sbiadisce se non si può partire
+                    contentColor = if (canStart) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     icon = { Icon(Icons.Filled.Add, contentDescription = "Inizia", modifier = Modifier.size(28.dp)) },
                     text = { Text("Inizia Sfida", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold) }
                 )
@@ -475,25 +495,61 @@
                         shape = RoundedCornerShape(24.dp)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {//
-                            Text(
-                                text = "Regole del Gioco",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 1.dp)
-                            )
+                            // INTESTAZIONE REGOLE CON INGRANAGGIO DADO
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Regole del Gioco",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
 
-                            // --- NOME DELLA PARTITA ---
+                                // Il bottone dell'ingranaggio per il Dado
+                                IconButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        showDiceSettingsDialog = true // Apre il popup!
+                                    },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Settings,
+                                        contentDescription = "Impostazioni Dado",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            // --- NOME DELLA PARTITA (Con validazione) ---
                             OutlinedTextField(
                                 value = viewModel.matchTitle,
-                                onValueChange = { viewModel.matchTitle = it },
+                                onValueChange = {
+                                    viewModel.matchTitle = it
+                                    // Se l'utente inizia a scrivere, spegniamo subito l'allarme rosso per premiarlo
+                                    if (it.isNotBlank()) showError = false
+                                },
                                 modifier = Modifier.fillMaxWidth(),
                                 label = { Text("Nome della Sfida") },
                                 placeholder = { Text("Es. Sfida Epica") },
                                 shape = RoundedCornerShape(20.dp),
+                                // ---> LA MAGIA DEL BORDO ROSSO <---
+                                // Diventa rosso SOLO SE l'utente ha provato a cliccare start (showError) E il campo è ancora vuoto
+                                isError = showError && viewModel.matchTitle.isBlank(),
+                                // Se c'è un errore, facciamo apparire anche una micro-scritta rossa sotto al campo!
+                                supportingText = {
+                                    if (showError && viewModel.matchTitle.isBlank()) {
+                                        Text("Il nome della sfida è obbligatorio", color = MaterialTheme.colorScheme.error)
+                                    }
+                                },
                                 // L'icona del joypad per dare un feedback visivo immediato ("Affordance")
                                 leadingIcon = {
-                                    Icon(Icons.Filled.VideogameAsset, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                    // Se c'è un errore, anche l'icona diventa rossa, altrimenti resta del colore a tema
+                                    val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                    Icon(Icons.Filled.VideogameAsset, contentDescription = null, tint = iconColor)
                                 }
                             )
 
@@ -593,7 +649,6 @@
                                     value = newPlayerName,
                                     onValueChange = { newPlayerName = it },
                                     modifier = Modifier.weight(1f),
-                                    // LEZIONE TESTO: Accorciato da "Nome giocatore" a "Nome" per fare spazio all'icona
                                     label = { Text("Nome") },
                                     shape = RoundedCornerShape(20.dp),
                                     leadingIcon = {
@@ -601,15 +656,30 @@
                                     }
                                 )
 
+                                // ---> LOGICA DEL BOTTONE "SPENTO" <---
+                                // Il bottone si "accende" SOLO SE: Il testo non è vuoto E il nome non esiste già al tavolo
+                                val isAddPlayerEnabled = newPlayerName.trim().isNotEmpty() && viewModel.players.none { it.name.equals(newPlayerName.trim(), ignoreCase = true) }
+
                                 Button(
                                     onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        if (newPlayerName.isNotBlank()) {
+                                        if (isAddPlayerEnabled) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             viewModel.addPlayer(newPlayerName)
-                                            newPlayerName = "" // Svuota la casella testuale
+                                            newPlayerName = ""
                                         }
                                     },
-                                    modifier = Modifier.padding(top = 6.dp).height(56.dp)
+                                    modifier = Modifier.padding(top = 6.dp).height(56.dp),
+                                    // ---> LOGICA DEL BORDO <---
+                                    // Se il pulsante è spento, disegnamo un bordo sottile da 1.dp
+                                    // con il colore 'outline' (grigio neutro) leggermente trasparente.
+                                    border = if (isAddPlayerEnabled) null else BorderStroke(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                    ),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        contentColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                    )
                                 ) { Text("Aggiungi") }
                             }
 
@@ -658,12 +728,24 @@
                                     contentPadding = PaddingValues(end = 32.dp)
                                 ) {
                                     items(viewModel.favoriteNames) { fav ->
+                                        // ---> CONTROLLO PRESENZA AL TAVOLO <---
+                                        // Verifichiamo se questo preferito è già in partita
+                                        val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
+
                                         OutlinedButton(
                                             onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                viewModel.addPlayer(fav) // Inserisce il rapido nella partita
+                                                // Permette l'aggiunta e la vibrazione SOLO se non è già al tavolo
+                                                if (!isAlreadyAtTable) {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    viewModel.addPlayer(fav)
+                                                }
                                             },
-                                            shape = RoundedCornerShape(20.dp)
+                                            shape = RoundedCornerShape(20.dp),
+                                            // Se è già al tavolo, sbiadisce il testo e il bordo per farlo sembrare "esaurito"
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                contentColor = if (!isAlreadyAtTable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                            ),
+                                            border = BorderStroke(1.dp, if (!isAlreadyAtTable) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                                         ) { Text(fav) }
                                     }
                                 }
@@ -893,16 +975,29 @@
                             label = { Text("Nuovo nome") },
                             shape = RoundedCornerShape(16.dp)
                         )
+
+                        // ---> LOGICA DEL BOTTONE "SPENTO" PER I PREFERITI <---
+                        // Si accende solo se il testo non è vuoto e il nome non è già salvato tra i preferiti!
+                        val isAddFavEnabled = newFavName.trim().isNotEmpty() && viewModel.favoriteNames.none { it.equals(newFavName.trim(), ignoreCase = true) }
+
                         Button(
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                if (newFavName.isNotBlank()) {
+                                if (isAddFavEnabled) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     viewModel.addFavorite(newFavName.trim())
-                                    newFavName = "" // Svuota il campo per permettere un'altra aggiunta veloce
+                                    newFavName = ""
                                 }
                             },
-                            // Altezza forzata per allinearlo visivamente al campo di testo accanto
-                            modifier = Modifier.height(56.dp).padding(top = 6.dp)
+                            modifier = Modifier.height(56.dp).padding(top = 6.dp),
+                            // ---> LOGICA DEL BORDO ANCHE QUI <---
+                            border = if (isAddFavEnabled) null else BorderStroke(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            ),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
                         ) { Text("Aggiungi") }
                     }
 
@@ -969,6 +1064,56 @@
                 dismissButton = { TextButton(onClick = { favToEdit = null }) { Text("Annulla") } }
             )
         }
+
+        // ====================================================================
+        // ---> POPUP SCELTA DADO PERSONALIZZATO <---
+        // ====================================================================
+        if (showDiceSettingsDialog) {
+            AlertDialog(
+                onDismissRequest = { showDiceSettingsDialog = false },
+                title = { Text("Seleziona il Dado 🎲", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Che tipo di dado vuoi usare per questa partita?", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 8.dp))
+
+                        // Creiamo una lista con i dadi più famosi (D6, D12, D20, D100)
+                        val diceOptions = listOf(6, 12, 20, 100)
+
+                        // Generiamo un bottone per ogni dado della lista!
+                        diceOptions.forEach { sides ->
+                            // Creiamo una piccola variabile "spia" per capire se questo specifico bottone è quello scelto
+                            val isSelected = viewModel.diceSides == sides
+
+                            OutlinedButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.diceSides = sides // Salviamo la scelta nel cervello!
+                                    showDiceSettingsDialog = false // Chiudiamo il popup
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                // ---> FIX DEI COLORI (Contrasto perfetto) <---
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                    // Se è selezionato, forziamo il testo a "onPrimaryContainer" (scuro). Altrimenti usiamo il colore primario normale.
+                                    contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary
+                                ),
+                                // CHICCA VISIVA: Se il bottone è selezionato, gli togliamo il bordo per farlo sembrare un bottone "pieno" e non una semplice linea!
+                                border = if (isSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            ) {
+                                Text(
+                                    text = "Dado a $sides facce (D$sides)",
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDiceSettingsDialog = false }) { Text("Annulla") }
+                }
+            )
+        }
+
     }
 
     // ====================================================================
@@ -1132,19 +1277,20 @@
                         }
                     }
 
-                    // ---> PULSANTE LANCIA DADO (Tornato da solo a destra) <---
+                    // ---> PULSANTE LANCIA DADO (Dinamico) <---
                     OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // Matematica pura: (1..6) crea un intervallo numerico da 1 a 6.
-                            // Il comando '.random()' ne pesca uno a caso sfruttando l'entropia del processore!
-                            diceResult = (1..6).random()
-                            // Mostriamo il popup
+                            // ---> LA MAGIA <---
+                            // Invece di (1..6), usiamo (1..viewModel.diceSides).
+                            // Se hai scelto il D20, calcolerà un numero casuale da 1 a 20!
+                            diceResult = (1..viewModel.diceSides).random()
                             showDiceDialog = true
                         },
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text("Lancia 🎲")
+                        // Cambiamo il testo del bottone per mostrare SEMPRE quale dado stiamo usando (Es. "Lancia D20")
+                        Text("Lancia D${viewModel.diceSides} 🎲")
                     }
                 }
 
@@ -1327,10 +1473,9 @@
         // ---> POPUP DEL DADO VIRTUALE <---
         if (showDiceDialog) {
             AlertDialog(
-                onDismissRequest = { showDiceDialog = false }, // Chiudi il popup se si tocca lo schermo grigio fuori
+                onDismissRequest = { showDiceDialog = false },
                 title = { Text("Lancio del Dado") },
                 text = {
-                    // Mostriamo il risultato del dado in modo gigante e ben centrato
                     Text(
                         text = "🎲 $diceResult",
                         style = MaterialTheme.typography.displayLarge,
@@ -1339,10 +1484,11 @@
                     )
                 },
                 confirmButton = {
-                    // Tasto per rullare di nuovo senza chiudere la finestra e riaprirla
+                    // Tasto per rullare di nuovo
                     Button(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        diceResult = (1..6).random() // Rulla di nuovo generando un nuovo numero!
+                        // ---> FIX: Usiamo la variabile del ViewModel invece del numero fisso 6! <---
+                        diceResult = (1..viewModel.diceSides).random()
                     }) { Text("Tira di nuovo") }
                 },
                 dismissButton = {
@@ -1635,9 +1781,12 @@
     // il che significa che gli viene passato in automatico il contesto fisico del telefono (per leggere la sua memoria locale).
     class MatchViewModel(application: Application) : AndroidViewModel(application) {
         var matchTitle by mutableStateOf("")
-
         // Stato per memorizzare l'obiettivo di vittoria (Stringa per il campo di testo della Creation Screen)
         var targetScore by mutableStateOf("")
+
+        // ---> La memoria del Dado <---
+        // Di default è un classico dado a 6 facce (D6).
+        var diceSides by mutableIntStateOf(6)
 
         val players = mutableStateListOf<Player>()
         val history = mutableStateListOf<MatchRecord>()
@@ -1778,10 +1927,20 @@
             matchDurationSeconds = 0L // Riporta l'orologio a zero
         }
 
-        // Aggiunge un nuovo oggetto Player (che partirà da 0 punti e 0 storico) alla lista attiva della partita
+        // Aggiunge un nuovo oggetto Player alla lista attiva della partita (Evitando i Cloni)
         fun addPlayer(name: String) {
-            players.add(Player(name))
-            saveBackup() // Salviamo subito il nuovo giocatore nel salva-vita
+            // 1. Pulizia: Togliamo eventuali spazi vuoti iniziali o finali inseriti per sbaglio (es. " Marco " diventa "Marco")
+            val cleanName = name.trim()
+
+            // 2. Controllo: Cerchiamo se nella lista c'è GIÀ qualcuno con questo esatto nome.
+            // ignoreCase = true fa sì che "Marco" e "marco" vengano considerati la stessa identica persona!
+            val alreadyExists = players.any { it.name.equals(cleanName, ignoreCase = true) }
+
+            // 3. Esecuzione: Aggiungiamo il giocatore SOLO SE non è vuoto E non esiste già al tavolo.
+            if (cleanName.isNotEmpty() && !alreadyExists) {
+                players.add(Player(cleanName))
+                saveBackup() // Salviamo subito il nuovo giocatore nel salva-vita
+            }
         }
 
         // Diamo al cervello dell'app il potere di eliminare un giocatore attivo
@@ -1819,8 +1978,13 @@
 
         // ---> FUNZIONI GESTIONE GIOCATORI RAPIDI (PREFERITI) <---
         fun addFavorite(name: String) {
-            if (!favoriteNames.contains(name)) { // Controllo IF logico per evitare che l'utente inserisca un duplicato identico
-                favoriteNames.add(name)
+            val cleanName = name.trim()
+
+            // Controllo intelligente: verifichiamo se il nome esiste già ignorando le maiuscole
+            val alreadyExists = favoriteNames.any { it.equals(cleanName, ignoreCase = true) }
+
+            if (cleanName.isNotEmpty() && !alreadyExists) {
+                favoriteNames.add(cleanName) // Salviamo il nome "pulito"
                 saveFavorites() // Dopo ogni modifica alla lista, salva fisicamente sul disco
             }
         }
@@ -1937,6 +2101,7 @@
         }
 
         fun clearMatch() {
+            diceSides = 6 //impostiamo come dado di default quello a 6 facce
             matchTitle = ""
             targetScore = "" // Puliamo anche l'obiettivo di vittoria precedente per non portarcelo nelle sfide future
             players.clear()
