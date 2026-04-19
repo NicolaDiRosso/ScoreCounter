@@ -208,17 +208,16 @@
                             // IL TRUCCO: Sfalsiamo leggermente le righe dispari per fare l'effetto "muro di mattoni" sfalsato
                             modifier = if (row % 2 == 0) Modifier else Modifier.padding(start = 36.dp)
                         ) {
-                            for (col in 0..10) {
-                                // Andiamo a leggere l'icona salvata nella nostra mappa casuale
-                                val icon = randomGrid[row][col]
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        //Usiamo il colore del testo, ma con opacità al 5% (0.05f). Sarà un'ombra elegantissima!
-                                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
-                                        modifier = Modifier.size(36.dp)
-                                    )
-                                }
+                            for (col in 0..10) {val icon = randomGrid[row][col] // Andiamo a leggere l'icona salvata nella nostra mappa casuale
+
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    //Usiamo il colore del testo, ma con opacità al 5% (0.05f). Sarà un'ombra elegantissima!
+                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
                             }
                         }
                     }
@@ -803,7 +802,7 @@
                                         color = MaterialTheme.colorScheme.primary
                                     )
 
-                                    // Il bottone dell'ingranaggio per il Dado
+                                    // Il bottone delle impostazioni per il Dado
                                     IconButton(
                                         onClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -812,7 +811,7 @@
                                         modifier = Modifier.size(28.dp)
                                     ) {
                                         Icon(
-                                            Icons.Filled.Settings,
+                                            Icons.Filled.Casino,
                                             contentDescription = "Impostazioni Dado",
                                             tint = MaterialTheme.colorScheme.primary
                                         )
@@ -3690,7 +3689,7 @@
                                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                         Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                                             Text(text = topArsonist.key, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                                            Text(text = "È il giocatore più 'caldo' della storia!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(text = "È il giocatore più combo fatte in una partita", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
 
                                         Column(horizontalAlignment = Alignment.End) {
