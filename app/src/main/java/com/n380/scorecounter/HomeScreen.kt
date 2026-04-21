@@ -99,24 +99,104 @@ fun HomeScreen(
         expandedMatchIndex = -1
     }
 
+    // --------------------------------------------------------------------
+    // DIALOGO MODALE: RIPRISTINO PARTITA IN SOSPESO
+    // --------------------------------------------------------------------
     if (viewModel.showResumeMatchDialog) {
         AlertDialog(
-            // Assegnando un blocco vuoto { }, rendiamo il dialogo "modale", ovvero non chiudibile
-            // cliccando sullo sfondo oscurato, forzando l'utente a premere uno dei bottoni.
+            // Assegnando una lambda vuota { } a onDismissRequest, stiamo intenzionalmente
+            // bloccando la chiusura del popup tramite tocco esterno o tasto indietro.
+            // Questo forza l'utente a prendere una decisione esplicita (Riprendi o Cancella).
             onDismissRequest = { },
-            title = { Text("Partita in sospeso") },
-            text = { Text("Hai lasciato una sfida a metà.\nVuoi riprenderla da dove l'avevi lasciata?") },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.resumeBackupMatch()
-                    onNavigateToCounter()
-                }) { Text("Riprendi") }
+
+            // L'inserimento dell'icona sposta automaticamente il layout del dialogo
+            // secondo le specifiche Material 3, centrando icona e titolo per dare enfasi.
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Restore, // Oppure .PauseCircle o .SportsEsports
+                    contentDescription = "Ripristina salvataggio",
+                    // Essendo un'opportunità per l'utente (non un'azione distruttiva),
+                    // usiamo il colore primario dell'app e non quello di errore.
+                    tint = MaterialTheme.colorScheme.primary,
+                    // L'uso di Modifier.size permette di alterare il bounding box (la scatola invisibile) dell'icona.
+                    // Passando a 36.dp (o 48.dp se la vuoi gigantesca), aumentiamo l'ingombro visivo del 50%.
+                    // Essendo un'immagine vettoriale (imageVector), si ingrandirà senza sgranare o perdere qualità.
+                    modifier = Modifier.size(36.dp)
+
+                )
             },
-            dismissButton = {
-                TextButton(onClick = {
-                    viewModel.clearBackup()
-                    viewModel.showResumeMatchDialog = false
-                }) { Text("Cancella", color = MaterialTheme.colorScheme.error) }
+
+            title = {
+                Text(
+                    text = "Partita in sospeso",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("Hai lasciato una sfida a metà.\nVuoi riprenderla da dove l'avevi lasciata?")
+            },
+
+            // Per uniformare il Design System dell'app, bypassiamo l'allineamento
+            // a destra predefinito di Material 3 raggruppando le azioni nel confirmButton.
+            confirmButton = {
+                Row(
+                    // fillMaxWidth() forza il contenitore a occupare tutta la larghezza disponibile.
+                    modifier = Modifier.fillMaxWidth(),
+                    // spacedBy(12.dp) garantisce una separazione esatta e immutabile di 12 pixel
+                    // tra i due pulsanti, creando un "respiro" visivo coerente.
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    // AZIONE SECONDARIA / DISTRUTTIVA
+                    // Utilizziamo un OutlinedButton per indicare che questa è l'opzione
+                    // secondaria. Dal momento che l'azione comporta la perdita dei dati (cancellazione
+                    // del backup), applichiamo la semantica 'Error' al contenuto e al bordo.
+                    OutlinedButton(
+                        onClick = {
+                            // Invocazione della logica di business: purga il database dal salvataggio temporaneo
+                            viewModel.clearBackup()
+                            // Modifica dello stato osservato per smontare (nascondere) l'AlertDialog
+                            viewModel.showResumeMatchDialog = false
+                        },
+                        modifier = Modifier
+                            // Il weight(1f) su entrambi i pulsanti istruisce l'engine di rendering
+                            // a dividere equamente lo spazio orizzontale rimanente (50/50).
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // Sovrascrittura mirata dei colori del bottone delineato per indicare pericolo
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        ),
+                        // Applichiamo un bordo spesso 1 pixel usando lo stesso colore di errore
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text(text = "Cancella")
+                    }
+
+                    // AZIONE PRIMARIA / COSTRUTTIVA
+                    // Il pulsante Filled rappresenta l'azione suggerita o principale (Happy Path).
+                    Button(
+                        onClick = {
+                            // Invocazione della logica di business: carica i dati dal DB al ViewModel
+                            viewModel.resumeBackupMatch()
+                            // Callback di navigazione passata dal livello superiore per cambiare schermata
+                            onNavigateToCounter()
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(
+                            text = "Riprendi",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         )
     }

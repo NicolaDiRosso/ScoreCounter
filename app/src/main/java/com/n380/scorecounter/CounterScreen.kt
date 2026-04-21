@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -335,78 +336,191 @@ fun CounterScreen(
         )
     }
 
-    // Popup di conferma AZZERAMENTO con SNACKBAR ANNULLA E TIMER CUSTOM
+    // --------------------------------------------------------------------
+    // DIALOGO DI CONFERMA: AZZERAMENTO PUNTEGGI
+    // --------------------------------------------------------------------
+    // L'espressione 'if (showResetDialog)' agisce come un interruttore di rendering.
+    // In Compose, se questa condizione è falsa, il codice al suo interno non viene
+    // ignorato, ma non viene proprio disegnato sullo schermo.
     if (showResetDialog) {
+
+        // AlertDialog è il componente standard Material 3 per creare popup modali.
+        // Un popup modale blocca tutte le interazioni con la schermata sottostante.
         AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            title = { Text("Sei proprio sicuro?") },
-            text = { Text("Sei sicurissimo di voler azzerare tutto?\nQuesta azione non può essere annullata.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                        // 1. Azzeriamo ma CI SALVIAMO una fotografia dei vecchi punteggi grazie a questa nuova funzione!
-                        val oldScores = viewModel.resetScoresWithUndo()
-                        showResetDialog = false // Chiude il popup
-
-                        // 2. Mostriamo la Snackbar di "Ops, ho sbagliato" in background
-                        coroutineScope.launch {
-
-                            // ---> IL NOSTRO TIMER PERSONALIZZATO DELLA SNACKBAR <---
-                            launch {
-                                delay(2500L) // Regola qui i millisecondi! (2500 = 2.5 secondi di permanenza)
-                                snackbarHostState.currentSnackbarData?.dismiss() // Passato il tempo, uccide la Snackbar
-                            }
-
-                            // Mostriamo il messaggio bloccandolo temporaneamente su "Indefinite" per far agire il nostro timer qui sopra
-                            val result = snackbarHostState.showSnackbar(
-                                message = "Punteggi azzerati",
-                                actionLabel = "ANNULLA",
-                                duration = SnackbarDuration.Indefinite
-                            )
-
-                            // 3. Se l'utente clicca Annulla in tempo utile, la logica interviene e ripristina la "fotografia" dei punti!
-                            if (result == SnackbarResult.ActionPerformed) {
-                                viewModel.restoreScores(oldScores)
-                            }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text("Sì, azzera") }
+            // onDismissRequest è un evento che viene scatenato da Android quando l'utente
+            // clicca lo sfondo scuro fuori dal popup, oppure preme il tasto indietro fisico.
+            onDismissRequest = {
+                showResetDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showResetDialog = false
-                }) { Text("Annulla") }
+
+            // icon posiziona un'immagine in alto al centro del popup.
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Warning, // L'icona vettoriale predefinita di sistema
+                    contentDescription = "Attenzione", // Testo invisibile letto dagli screen reader per ciechi
+                    // tint colora l'icona. Usiamo MaterialTheme.colorScheme.error per
+                    // estrarre il colore rosso dinamico previsto dal tema del telefono.
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(36.dp),
+                )
+            },
+
+            // title è l'intestazione in grassetto.
+            title = {
+                Text(
+                    text = "Sei proprio sicuro?",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+
+            // text è il corpo del messaggio.
+            text = {
+                Text(
+                    text = "Sei sicurissimo di voler azzerare tutto?\nQuesta azione non può essere annullata."
+                )
+            },
+
+            // confirmButton è l'area in basso a destra destinata ai pulsanti.
+            // Per aggirare il suo allineamento nativo a destra, passiamo come parametro
+            // una Row (Riga) che prenderà il controllo totale dello spazio.
+            confirmButton = {
+                Row(
+                    // Modifier.fillMaxWidth() impone alla riga di allargarsi orizzontalmente al 100%.
+                    modifier = Modifier.fillMaxWidth(),
+                    // horizontalArrangement definisce la gestione dello spazio vuoto.
+                    // spacedBy(12.dp) inietta esattamente 12 pixel di spazio rigido e non
+                    // comprimibile tra i pulsanti che inseriremo all'interno della riga.
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    // OutlinedButton è un pulsante trasparente delineato solo da un bordo.
+                    // Visivamente indica un'azione secondaria (di fuga o annullamento).
+                    OutlinedButton(
+                        // onClick è una lambda (una funzione): definisce il codice che
+                        // verrà eseguito nel millisecondo esatto in cui il pulsante viene premuto.
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showResetDialog = false
+                        },
+                        // I Modifiers in Compose sono a cascata e definiscono forma e spazio.
+                        modifier = Modifier
+                            // weight(1f) è una proporzione. Essendoci due bottoni con weight(1f),
+                            // Compose calcola lo spazio totale, toglie i 12dp centrali,
+                            // e divide il resto esattamente in due metà uguali (50% e 50%).
+                            .weight(1f)
+                            // height(48.dp) forza l'altezza verticale a 48 pixel (standard accessibilità touch).
+                            .height(48.dp),
+                        // shape definisce i contorni. RoundedCornerShape smussa gli angoli.
+                        // 20.dp è un raggio molto alto, creando il tipico effetto a "pillola".
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text(text = "Annulla")
+                    }
+
+                    // Button è il pulsante pieno (Filled) standard. Indica l'azione primaria.
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // viewModel è l'oggetto che contiene le logiche di calcolo.
+                            // Invochiamo la sua funzione per manipolare la lista punti in background.
+                            viewModel.resetScoresWithUndo()
+                            showResetDialog = false
+                        },
+                        // Riapplichiamo l'esatto stesso Modifier del pulsante precedente
+                        // per garantire la perfetta simmetria geometrica.
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // colors permette di sovrascrivere lo schema colori predefinito del pulsante.
+                        colors = ButtonDefaults.buttonColors(
+                            // containerColor stabilisce il colore di riempimento.
+                            // Applichiamo la semantica 'error' (rosso) per indicare azioni irreversibili.
+                            containerColor = MaterialTheme.colorScheme.error,
+                            // contentColor stabilisce il colore di ciò che sta dentro il bottone (es: il testo).
+                            // 'onError' è un colore generato da sistema per essere sempre leggibile sul rosso.
+                            contentColor = MaterialTheme.colorScheme.onError
+                        )
+                    ) {
+                        Text(
+                            text = "Sì, azzera",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         )
     }
 
-    // Popup di conferma per il SALVA-VITA (Uscita accidentale)
+    // --------------------------------------------------------------------
+    // DIALOGO SALVA-VITA: USCITA ACCIDENTALE
+    // --------------------------------------------------------------------
     if (showExitWarning) {
         AlertDialog(
             onDismissRequest = { showExitWarning = false },
-            title = { Text("Abbandonare la partita?") },
-            text = { Text("Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro sicuro di voler uscire?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showExitWarning = false
-                        onNavigateHome() // Esegue la funzione di chiusura drastica che abbiamo passato dal NavHost
-                    },
-                    // Usiamo il colore d'errore (Rosso) del tema per far intuire istintivamente che è un'azione distruttiva
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text("Sì, esci") }
+
+            // L'icona in alto al centro cattura l'attenzione e contestualizza l'azione.
+            icon = {
+                Icon(
+                    // ExitToApp è l'icona standard Material per l'abbandono di una schermata o app.
+                    // Usiamo AutoMirrored per garantire il corretto orientamento in lingue RTL (Right-to-Left).
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = "Attenzione Uscita",
+                    // Essendo un'azione potenzialmente distruttiva, applichiamo il colore di errore.
+                    tint = MaterialTheme.colorScheme.error,
+                    // Ingrandiamo l'icona per darle maggiore peso visivo, come fatto nei dialoghi precedenti.
+                    modifier = Modifier.size(36.dp)
+                )
             },
-            dismissButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showExitWarning =
-                        false // Falso allarme, l'utente chiude il popup e continua a giocare serenamente!
-                }) { Text("Annulla") }
+            title = {
+                Text(
+                    text = "Abbandonare la partita?",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text("Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?")
+            },
+            // Replicando l'architettura del popup precedente, creiamo coerenza per l'utente.
+            // Imparerà che due bottoni larghi colorati in un certo modo significano sempre la stessa cosa.
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showExitWarning = false
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text("Annulla")
+                    }
+
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showExitWarning = false
+                            // onNavigateHome è una lambda passata dal livello superiore dell'app.
+                            // Serve per istruire il "NavHost" a distruggere questa schermata e mostrare la Home.
+                            onNavigateHome()
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        )
+                    ) {
+                        Text(
+                            text = "Sì, esci",
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         )
     }
