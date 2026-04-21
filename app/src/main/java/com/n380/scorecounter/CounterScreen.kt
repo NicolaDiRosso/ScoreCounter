@@ -33,8 +33,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 // ====================================================================
 // ====================================================================
@@ -105,50 +103,82 @@ fun CounterScreen(
         // Montiamo la Snackbar in questa schermata per gli avvisi
         snackbarHost = { SnackbarHost(snackbarHostState) },
         // Usiamo la "bottomBar" (barra inferiore) dello Scaffold per i tasti principali d'azione
+        // --------------------------------------------------------------------
+        // BOTTOM BAR: IL "DOCK" DEI COMANDI
+        // --------------------------------------------------------------------
         bottomBar = {
-            Row(
-                // Modella la posizione: solleviamo la riga dal bordo inferiore (bottom=32.dp) e le diamo margini laterali.
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
-                // Modella lo spazio vuoto in mezzo ai due bottoni (16dp)
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // ---> LEZIONE: LA PIATTAFORMA VISIVA (Surface) <---
+            // Invece di lasciare i bottoni sospesi nel vuoto, li avvolgiamo in una Surface.
+            // Questa agirà come un "muro" semi-trasparente che nasconde le carte che scorrono sotto,
+            // eliminando il rumore visivo e dando risalto ai bottoni.
+            Surface(
+                // Sfondo scuro (colore di background del tema) quasi solido al 95%
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                // ANGOLI SUPERIORI ARROTONDATI
+                // Usiamo RoundedCornerShape specificando SOLO gli angoli in alto (topStart e topEnd).
+                // Mettendo 24.dp creiamo una curva morbida che "abbraccia" visivamente i bottoni da 20.dp,
+                // mentre gli angoli in basso restano a 0.dp (piatti) per aderire al vetro del telefono.
+                shape = RoundedCornerShape(24.dp),
+                // Bordo superiore sottilissimo per staccare nettamente la barra dalla lista
+                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
-                // ---> Pulsante AZZERA <---
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showResetDialog = true
-                    },
-                    // weight(1f) divide lo schermo esattamente a metà tra i due bottoni (simmetria perfetta).
-                    // height(56.dp) forza l'altezza ad essere identica a quella dei bottoni FAB fluttuanti.
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    shape = RoundedCornerShape(20.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // navigationBarsPadding() assicura che i bottoni non finiscano MAI sotto
+                        // la barra di navigazione nativa di Android (quella con la linea bianca in basso).
+                        .navigationBarsPadding()
+                        // Padding interno della barra
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Azzera",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    // ========================================================
+                    // TASTO SECONDARIO: AZZERA (GHOST BUTTON)
+                    // ========================================================
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showResetDialog = true
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(60.dp), // Altezza Expressive massiccia
+                        shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                    ) {
+                        Text(
+                            text = "Azzera",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                // ---> Pulsante FINE MATCH <---
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Blocchiamo il cronometro un attimo prima di cambiare pagina!
-                        viewModel.pauseTimer()
-                        // L'animazione esplosiva scatta istantaneamente non appena si apre la nuova pagina dei risultati.
-                        onNavigateToResults()
-                    },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Text(
-                        text = "Fine Match",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    // ========================================================
+                    // TASTO PRIMARIO: FINE MATCH (CALL TO ACTION)
+                    // ========================================================
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.pauseTimer()
+                            onNavigateToResults()
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(60.dp), // Altezza Expressive massiccia
+                        shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Text(
+                            text = "Fine Match",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

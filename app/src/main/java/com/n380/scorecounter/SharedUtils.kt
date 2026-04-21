@@ -29,7 +29,6 @@
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
     import androidx.compose.ui.unit.dp
-    import androidx.compose.ui.graphics.nativeCanvas
     import java.text.SimpleDateFormat
     import java.util.*
     import kotlin.math.cos

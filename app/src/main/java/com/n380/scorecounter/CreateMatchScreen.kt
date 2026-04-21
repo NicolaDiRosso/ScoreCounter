@@ -78,43 +78,69 @@ fun CreateMatchScreen(
         // ====================================================================
         // LA BARRA INFERIORE (BottomBar) - Il grande pulsante d'avvio
         // ====================================================================
-        // DIDATTICA: Usiamo la BottomBar invece del FloatingActionButton per evitare
-        // che il pulsante si sovrapponga alle carte dei giocatori in fondo alla lista.
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 32.dp, top = 8.dp)
+            // ---> IL DOCK "EXPRESSIVE" <---
+            // Avvolgiamo il pulsante nella Surface semi-trasparente che abbiamo usato
+            // nelle altre schermate. Questo crea il "cassetto" ancorato al fondo.
+            Surface(
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                // Arrotondiamo solo i bordi superiori per un look da "Bottom Sheet"
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Se i requisiti sono rispettati, andiamo a giocare! Altrimenti accendiamo le scritte rosse di errore.
-                        if (canStart) {
-                            onNavigateToCounter()
-                        } else {
-                            showError = true
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    // DIDATTICA UX: Se canStart è VERO, usiamo il colore pieno.
-                    // Se FALSO, usiamo la "Regola del 12%/38%" del Material 3 per creare un bottone spento PERFETTAMENTE visibile.
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (canStart) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                        contentColor = if (canStart) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding() // Protezione dalla barra di sistema
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Inizia",
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    )
-                    Text(
-                        text = "Inizia Sfida",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // La tua logica di sicurezza originale rimane intatta
+                            if (canStart) {
+                                onNavigateToCounter()
+                            } else {
+                                showError = true
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // Portiamo l'altezza a 72.dp per coerenza con gli altri tasti principali
+                            .height(72.dp),
+                        shape = RoundedCornerShape(20.dp),
+
+                        // ELEVAZIONE: Si azzera se il pulsante è disabilitato per dare senso di piattezza
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = if (canStart) 8.dp else 0.dp
+                        ),
+
+                        // LOGICA COLORI (Regola 12%/38%):
+                        // Manteniamo la tua ottima gestione della visibilità condizionale
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (canStart)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                            contentColor = if (canStart)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        // Cambiamo l'icona da 'Add' a 'PlayArrow' per indicare l'avvio
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = "Inizia",
+                            modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                        )
+                        Text(
+                            text = "Inizia Sfida",
+                            // Usiamo lo stile HeadlineSmall come nel pulsante Home
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

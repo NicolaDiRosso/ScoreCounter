@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -118,92 +119,109 @@ fun ResultsScreen(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             bottomBar = {
-                // LA CONDIVISIONE TESTUALE E IL SALVATAGGIO
-                // Usiamo una Column per impilare i bottoni.
-                // Applichiamo l'animazione a cascata anche a questi bottoni, dando loro un indice alto
-                // in modo che appaiano per ultimi, dopo che la classifica e il grafico sono stati disegnati.
-                Column(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 32.dp
-                    ).then(staggeredModifier(rankedPlayers.size + 3))
+                // ---> LEZIONE: IL "DOCK" ANCORATO AI BORDI <---
+                // Rimuoviamo il padding esterno (start, end, bottom) per far aderire
+                // la Surface ai bordi fisici dello schermo, esattamente come nella CounterScreen.
+                Surface(
+                    modifier = staggeredModifier(rankedPlayers.size + 3), // Manteniamo solo l'animazione!
+                    color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+
+                    // Modifichiamo la forma: arrotondiamo SOLO gli angoli superiori (24.dp).
+                    // Gli angoli inferiori resteranno a 0.dp (piatti) per combaciare con il vetro del telefono.
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding() // Protezione dalla barra bianca di sistema Android
+                            // Il padding INTERNO a 16.dp garantisce che i bottoni non tocchino
+                            // i bordi dello schermo, rimanendo larghi esattamente quanto le card sopra!
+                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                    ) {
 
-                    // IL PULSANTE DI CONDIVISIONE
-                    OutlinedButton(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // 1. Costruiamo il testo magico che l'utente invierà su WhatsApp!
-                            val finalTitle =
-                                if (viewModel.matchTitle.isEmpty()) "Sfida Senza Nome" else viewModel.matchTitle
-                            var shareText = "🏆 Risultati: $finalTitle\n"
-                            // Mostriamo il cronometro nella condivisione
-                            if (viewModel.matchDurationSeconds > 0) shareText += "⏱️ Durata: ${
-                                formatTime(
-                                    viewModel.matchDurationSeconds
-                                )
-                            }\n"
-                            // Aggiungiamo anche la data di oggi
-                            shareText += "📅 Data: ${formatDate(System.currentTimeMillis())}\n\n"
+                        // ========================================================
+                        // TASTO SECONDARIO: CONDIVIDI RISULTATI (GHOST BUTTON)
+                        // ========================================================
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                // --- LA LOGICA DI CONDIVISIONE RIMANE INVARIATA ---
+                                val finalTitle = if (viewModel.matchTitle.isEmpty()) "Sfida Senza Nome" else viewModel.matchTitle
+                                var shareText = "🏆 Risultati: $finalTitle\n"
+                                if (viewModel.matchDurationSeconds > 0) shareText += "⏱️ Durata: ${formatTime(viewModel.matchDurationSeconds)}\n"
+                                shareText += "📅 Data: ${formatDate(System.currentTimeMillis())}\n\n"
 
-                            // Cicliamo tutti i giocatori e aggiungiamo le medagliette testuali
-                            rankedPlayers.forEachIndexed { index, player ->
-                                val medal = when (index) {
-                                    0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
+                                rankedPlayers.forEachIndexed { index, player ->
+                                    val medal = when (index) {
+                                        0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
+                                    }
+                                    shareText += "$medal ${player.name} - ${player.score} pt\n"
                                 }
-                                shareText += "$medal ${player.name} - ${player.score} pt\n"
-                            }
-                            shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola" // Firma
+                                shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
 
-                            // 2. Prepariamo l'"Intent" (Il Messaggero Interno di Android)
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND; putExtra(
-                                Intent.EXTRA_TEXT,
-                                shareText
-                            ); type = "text/plain"
-                            }
-                            // 3. Facciamo apparire il menu nativo del telefono
-                            context.startActivity(
-                                Intent.createChooser(
-                                    sendIntent,
-                                    "Condividi classifica"
-                                )
+                                val sendIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND; putExtra(Intent.EXTRA_TEXT, shareText); type = "text/plain"
+                                }
+                                context.startActivity(Intent.createChooser(sendIntent, "Condividi classifica"))
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp), // Altezza Expressive massiccia (72.dp)
+                            shape = RoundedCornerShape(20.dp), // Angoli coerenti per i bottoni (20.dp)
+                            // Bordo rinforzato a 2.dp come fatto per il tasto "Azzera"
+                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                        ) {
+                            Icon(
+                                Icons.Filled.Share,
+                                contentDescription = "Condividi",
+                                modifier = Modifier.padding(end = 8.dp).size(28.dp) // Icona leggermente ingrandita
                             )
-                        },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(20.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Share,
-                            contentDescription = "Condividi",
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                        Text(
-                            text = "Condividi Risultati",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                            Text(
+                                text = "Condividi Risultati",
+                                style = MaterialTheme.typography.titleLarge, // Aumentato a titleLarge
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        // Distanziatore tra i due bottoni impilati
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    // IL PULSANTE SALVA E TORNA ALLA HOME
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // FUNZIONE SALVATAGGIO: Scriviamo la partita nel DataStore prima di sparire!
-                            viewModel.saveCurrentMatch()
-                            onNavigateHome()
-                        },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(20.dp)
-                    ) {
-                        Text(
-                            text = "Salva e Torna alla Home",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        // ========================================================
+                        // TASTO PRIMARIO: SALVA E TORNA ALLA HOME (CALL TO ACTION)
+                        // ========================================================
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.saveCurrentMatch()
+                                onNavigateHome()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp), // Altezza Expressive massiccia (72.dp)
+                            shape = RoundedCornerShape(20.dp),
+                            // Diamo un'ombra forte per farlo "emergere" come tasto principale
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                            // Colori 'Container' per massima leggibilità
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        ) {
+                            // ---> COME RICHIESTO: Aggiunta un'icona coerente per il rientro alla Home <---
+                            Icon(
+                                imageVector = Icons.Filled.Home, // L'icona della casetta
+                                contentDescription = "Home",
+                                modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                            )
+                            Text(
+                                // Ho abbreviato leggermente il testo per non farlo sbordare
+                                // ora che c'è l'icona, mantenendo però il significato intatto
+                                text = "Salva e chiudi",
+                                style = MaterialTheme.typography.titleLarge, // Aumentato a titleLarge
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }

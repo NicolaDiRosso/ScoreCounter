@@ -18,9 +18,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.core.* // Strumenti per l'animazione infinita
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
 import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -106,59 +106,83 @@ fun GlobalStatsScreen(
 
 
 
-    // ====================================================================
-    // ---> IMPALCATURA DELLA SCHERMATA (Scaffold) <---
-    // ====================================================================
+    // --------------------------------------------------------------------
+    // SCAFFOLD E PULSANTE CHIUDI (Modello Expressive)
+    // --------------------------------------------------------------------
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        // Manteniamo lo sfondo trasparente per vedere il pattern del livello inferiore
-        containerColor = Color.Transparent,
-
-        // ==============================================================
-        // ---> IL TASTO CHIUDI ERGONOMICO (Fisso in basso) <---
-        // ==============================================================
-        // Usando la bottomBar, garantiamo che il bottone sia sempre ancorato in fondo allo schermo,
-        // permettendo all'utente di uscire in qualsiasi momento senza dover scorrere tutta la pagina!
+        // ====================================================================
+        // DOCK INFERIORE: CHIUDI STATISTICHE
+        // ====================================================================
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    // Stessi identici margini usati in Home e Nuova Partita per coerenza millimetrica
-                    .padding(start = 16.dp, end = 16.dp, bottom = 32.dp, top = 8.dp)
+            // La Surface crea la piattaforma scura "effetto vetro" che si incolla al fondo
+            Surface(
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                // Arrotondiamo solo gli angoli in alto a 24.dp per l'effetto cassetto
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Questo comando (passato dalla MainActivity) fa chiudere la pagina e tornare alla Home
-                        onNavigateBack()
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp), // Altezza standard 56dp
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        // Usiamo i colori primari per mantenere lo stesso stile del tasto "Nuova Sfida"
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding() // Indispensabile per non finire sotto la barra di Android
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
-                    Text(
-                        text = "Chiudi",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    // Usiamo il Button con altezza 72dp e stondatura 20dp
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // Qui metti la funzione che chiude la schermata (es. onNavigateBack o simile)
+                            onNavigateBack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(72.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        // Icona della X per la chiusura
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Chiudi",
+                            modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                        )
+                        Text(
+                            text = "Chiudi Statistiche",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
     ) { innerPadding ->
-        // innerPadding ORA contiene l'altezza esatta del nostro nuovo bottone "Chiudi"!
 
-        // Usiamo una LazyColumn per permettere lo scorrimento
         LazyColumn(
-            // Applicando innerPadding qui, la lista saprà esattamente dove fermarsi per non
-            // far finire l'ultima carta nascosta dietro al bottone gigante!
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
-            // Spaziatura tra una carta e l'altra
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            // --- LEZIONE 2: EDGE-TO-EDGE E CONTENT PADDING ---
+            // Rimuoviamo il '.padding(innerPadding)' dal Modifier. Così diciamo alla lista
+            // di invadere tutto lo schermo, passando sotto il bottone fluttuante.
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+
+            // Usiamo il 'contentPadding' per aggiungere un margine interno scorrevole.
+            // L'ultima card della lista saprà che deve fermarsi più in alto, calcolando
+            // matematicamente l'ingombro del FAB (calculateBottomPadding) più 24dp di spazio extra.
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + 96.dp
+            )
         ) {
+
+            // ==============================================================
+            // ---> INTESTAZIONE DELLA PAGINA E CARD SEGUENTI <---
+            // ==============================================================
+            // [TUTTO IL RESTO DEL TUO CODICE DA QUI IN POI RIMANE IDENTICO: item { ... } ]
 
 
             // ==============================================================

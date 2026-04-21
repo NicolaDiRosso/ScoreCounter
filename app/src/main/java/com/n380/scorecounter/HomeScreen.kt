@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,7 +57,8 @@ fun HomeScreen(
     // CompositionLocal è un meccanismo di Compose per passare dati impliciti attraverso l'albero della UI
     // senza doverli passare manualmente in ogni singola funzione come parametro.
     val haptic = LocalHapticFeedback.current // Fornisce l'accesso al motore di vibrazione hardware.
-    val context = LocalContext.current // Il contesto Android base, necessario per lanciare Intent (es. condivisione).
+    val context =
+        LocalContext.current // Il contesto Android base, necessario per lanciare Intent (es. condivisione).
 
     // SnackbarHostState gestisce la coda dei messaggi a comparsa (Snackbar).
     // remember fa sì che l'oggetto non venga ricreato a ogni ricomposizione della UI.
@@ -76,7 +78,8 @@ fun HomeScreen(
     var expandedMatchIndex by rememberSaveable { mutableIntStateOf(-1) }
 
     // Valutazione reattiva: Se l'indice è valido (>= 0), recuperiamo i dati della partita dal ViewModel.
-    val expandedMatch = if (expandedMatchIndex >= 0) viewModel.history.getOrNull(expandedMatchIndex) else null
+    val expandedMatch =
+        if (expandedMatchIndex >= 0) viewModel.history.getOrNull(expandedMatchIndex) else null
 
     // Variabile di cache (Memoria Fantasma). Usa solo 'remember' perché deve sopravvivere solo
     // per pochi millisecondi durante l'animazione di uscita, non serve salvarla nel disco.
@@ -202,54 +205,100 @@ fun HomeScreen(
     }
 
     // --------------------------------------------------------------------
-    // SCAFFOLD: L'OSSATURA DELLA SCHERMATA MATERIAL
+    // SCAFFOLD: L'ARCHITETTURA BASE E GLI "SLOT" MATERIAL
     // --------------------------------------------------------------------
-    // Scaffold implementa la struttura base del Material Design (TopBar, BottomBar, FloatingActionButton, ecc.).
-    // Gestisce automaticamente la sovrapposizione degli elementi e calcola i margini di sicurezza.
+    // Lo Scaffold non è un semplice contenitore, ma uno schema pre-fabbricato da Google.
+    // Possiede degli "Slot" (buchi) specifici per posizionare gli elementi (TopBar, BottomBar, FAB).
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(snackbarHostState) },
+
+
+    // ====================================================================
+        // NUOVO DOCK INFERIORE (Ancorato ai bordi dello schermo)
+        // ====================================================================
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 32.dp, top = 8.dp)
+            // ---> LEZIONE: SURFACE ANCORATA (Senza margini esterni) <---
+            // Abbiamo rimosso il 'modifier = Modifier.padding(...)' dalla Surface.
+            // Senza margini esterni, la Surface si espande automaticamente fino a toccare
+            // i bordi fisici laterali e il bordo inferiore dello schermo del telefono.
+            Surface(
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                // ---> FIX GEOMETRICO: ARROTONDAMENTO PARZIALE <---
+                // Usiamo topStart e topEnd a 24.dp per creare la curva morbida solo in alto.
+                // Non specificando bottomStart e bottomEnd, essi rimangono a 0.dp (angoli retti),
+                // permettendo al dock di "incollarsi" perfettamente alla base dello schermo.
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateToCreate()
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // ---> LEZIONE: PROTEZIONE DI SISTEMA <---
+                        // navigationBarsPadding() "spinge" in alto il contenuto interno solo di quel
+                        // tanto che basta per non finire sotto la riga orizzontale bianca di Android.
+                        .navigationBarsPadding()
+                        // ---> FIX ALTEZZA: PADDING INTERNO <---
+                        // Qui decidiamo quanto il bottone è distante dai bordi del dock (la Surface).
+                        // Usando 'horizontal = 16.dp' teniamo il bottone allineato con le card sopra.
+                        // Usando 'vertical = 16.dp' riduciamo lo spazio vuoto sotto e sopra il bottone,
+                        // evitando che risulti "troppo rialzato" rispetto alla base dello schermo.
+                        .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Nuova Sfida",
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    )
-                    Text(
-                        text = "Nuova Sfida",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToCreate()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(72.dp), // Altezza Expressive massiccia (72dp)
+                        shape = RoundedCornerShape(20.dp), // Stondatura interna del bottone (20dp)
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Nuova Sfida",
+                            modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                        )
+                        Text(
+                            text = "Nuova Sfida",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
-    ) { innerPadding ->
-        // innerPadding calcolato dallo Scaffold contiene lo spazio occupato dalle barre di sistema
-        // e dalla nostra bottomBar. Applicandolo al Column, garantiamo che la lista non finisca sotto il pulsante.
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+    ) { innerPadding -> // <-- L'innerPadding contiene le misure degli ingombri di sistema (orologio, barra di navigazione in basso e il nostro FAB)
 
+        // --------------------------------------------------------------------
+        // IL CONTENITORE PRINCIPALE E IL CONCETTO DI "EDGE-TO-EDGE"
+        // --------------------------------------------------------------------
+        // LEZIONE CRITICA: Abbiamo rimosso '.padding(innerPadding)' da questo Column.
+        // Se lo avessimo lasciato, il Column si sarebbe fermato PRIMA del FAB, creando un vuoto.
+        // Togliendolo, diciamo al Column di ignorare gli ingombri e di espandersi al 100%
+        // dello schermo, "infilandosi" fisicamente anche sotto il FAB e la status bar.
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            // INTESTAZIONE (Titolo e Bottone Statistiche)
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                // Arrangement.SpaceBetween posiziona il primo elemento a sinistra e l'ultimo a destra,
-                // distribuendo lo spazio vuoto in mezzo.
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Poiché il genitore (Column) ora ignora gli ingombri, dobbiamo dire manualmente
+                    // all'intestazione di non finire "sotto" l'orologio e la batteria del telefono.
+                    // calculateTopPadding() recupera i pixel esatti della barra di sistema superiore.
+                    .padding(
+                        top = innerPadding.calculateTopPadding() + 16.dp,
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 24.dp
+                    ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -281,31 +330,39 @@ fun HomeScreen(
             }
 
             if (viewModel.history.isEmpty()) {
+                // STATO VUOTO (Empty State)
                 Text(
                     text = "Nessuna sfida salvata al momento.",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             } else {
                 // --------------------------------------------------------------------
-                // LAZY COLUMN: RENDERING OTTIMIZZATO
+                // LAZYCOLUMN E IL SEGRETO DEL "CONTENT PADDING"
                 // --------------------------------------------------------------------
-                // A differenza di una Column normale che calcola e disegna tutti i suoi figli subito,
-                // LazyColumn istanzia (crea) solo gli elementi attualmente visibili a schermo.
-                // Quando l'utente scorre, gli elementi che escono dallo schermo vengono distrutti e riciclati
-                // per disegnare quelli nuovi, garantendo alte prestazioni anche con migliaia di dati.
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+
+                    // LEZIONE CRITICA: Cos'è il contentPadding?
+                    // A differenza del 'modifier.padding' (che stringe la finestra dall'esterno),
+                    // il 'contentPadding' aggiunge spazio *dentro* la fine della lista scorrrevole.
+                    // Risultato visivo: le Card scorreranno liberamente "dietro" al FAB trasparente.
+                    // Ma quando arrivi all'ultimo elemento della lista, questo non rimarrà nascosto
+                    // sotto il bottone, perché la lista sa di dover aggiungere un margine finale
+                    // pari all'ingombro del FAB in basso (calculateBottomPadding) più 16dp extra.
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = innerPadding.calculateBottomPadding() + 96.dp//aggiungiamo un padding di 96 per superare il bottone
+                    )
                 ) {
-                    // La funzione "items" itera la nostra lista di dati e crea un blocco UI per ciascuno.
                     items(viewModel.history) { record ->
-                        // Questo stato è "locale" alla singola iterazione: ogni Card ha la sua variabile
-                        // indipendente che controlla se la sua tendina interna è aperta o chiusa.
+                        // Variabile di stato locale per gestire l'apertura/chiusura della singola card
                         var expanded by remember { mutableStateOf(false) }
 
                         Card(
-                            // Modificatore di interazione base. Il click inverte lo stato booleano locale.
                             modifier = Modifier.fillMaxWidth().clickable {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 expanded = !expanded
@@ -314,6 +371,7 @@ fun HomeScreen(
                         ) {
                             Column(modifier = Modifier.padding(20.dp)) {
 
+                                // --- PARTE SEMPRE VISIBILE DELLA CARD ---
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -359,15 +417,16 @@ fun HomeScreen(
                                     )
                                 }
 
-                                // AnimatedVisibility interno. Se 'expanded' diventa true, il contenuto
-                                // all'interno delle sue parentesi graffe entra in scena espandendosi in altezza.
+                                // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
                                 AnimatedVisibility(visible = expanded) {
                                     Column(modifier = Modifier.padding(top = 20.dp)) {
                                         HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
 
+                                        // Ciclo che genera la classifica dei giocatori
                                         record.allPlayers.forEachIndexed { index, playerRecord ->
                                             Row(
-                                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(vertical = 4.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
@@ -400,7 +459,9 @@ fun HomeScreen(
                                             }
                                         }
 
-                                        val validHistory = record.allPlayers.any { (it.scoreHistory ?: emptyList()).size > 1 }
+                                        val validHistory = record.allPlayers.any {
+                                            (it.scoreHistory ?: emptyList()).size > 1
+                                        }
                                         if (validHistory) {
                                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -422,30 +483,40 @@ fun HomeScreen(
                                                 )
                                             }
 
+                                            // Mini-grafico vettoriale
                                             ScoreChart(
                                                 players = record.allPlayers,
                                                 modifier = Modifier
                                                     .height(120.dp)
                                                     .fillMaxWidth()
                                                     .padding(top = 8.dp)
-                                                    // Modifier.combinedClickable abilita l'ascolto di interazioni multiple
-                                                    // (doppio tocco, tocco prolungato) fornendo callback separati.
+                                                    // Gestione dei tap lunghi e corti per aprire l'overlay a schermo intero
                                                     .combinedClickable(
                                                         onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            // Recuperiamo dinamicamente l'indice corrente dell'elemento nel database
-                                                            // e lo assegniamo alla variabile di stato root, innescando l'overlay.
-                                                            expandedMatchIndex = viewModel.history.indexOf(record)
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress
+                                                            )
+                                                            expandedMatchIndex =
+                                                                viewModel.history.indexOf(record)
                                                         },
                                                         onLongClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            expandedMatchIndex = viewModel.history.indexOf(record)
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress
+                                                            )
+                                                            expandedMatchIndex =
+                                                                viewModel.history.indexOf(record)
                                                         }
                                                     )
                                             )
-                                            HorizontalDivider(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp))
+                                            HorizontalDivider(
+                                                modifier = Modifier.padding(
+                                                    top = 16.dp,
+                                                    bottom = 8.dp
+                                                )
+                                            )
                                         }
 
+                                        // Data della partita e pulsanti di Azione (Condividi / Elimina)
                                         Row(
                                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -457,12 +528,22 @@ fun HomeScreen(
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                             Row {
+                                                // Logica di Condivisione (Intent)
                                                 IconButton(onClick = {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                                    var shareText = "🏆 Risultati Storici: ${record.title}\n"
-                                                    if (record.timestamp > 0L) shareText += "📅 Data: ${formatDate(record.timestamp)}\n"
-                                                    if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${formatTime(record.durationSeconds)}\n\n"
+                                                    var shareText =
+                                                        "🏆 Risultati Storici: ${record.title}\n"
+                                                    if (record.timestamp > 0L) shareText += "📅 Data: ${
+                                                        formatDate(
+                                                            record.timestamp
+                                                        )
+                                                    }\n"
+                                                    if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${
+                                                        formatTime(
+                                                            record.durationSeconds
+                                                        )
+                                                    }\n\n"
                                                     record.allPlayers.forEachIndexed { index, player ->
                                                         val medal = when (index) {
                                                             0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
@@ -471,40 +552,52 @@ fun HomeScreen(
                                                     }
                                                     shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
 
-                                                    // Intent.ACTION_SEND demanda al sistema operativo la gestione
-                                                    // del testo, aprendo il foglio di condivisione nativo (ShareSheet).
                                                     val sendIntent = Intent().apply {
                                                         action = Intent.ACTION_SEND
                                                         putExtra(Intent.EXTRA_TEXT, shareText)
                                                         type = "text/plain"
                                                     }
-                                                    context.startActivity(Intent.createChooser(sendIntent, "Condividi partita"))
+                                                    context.startActivity(
+                                                        Intent.createChooser(
+                                                            sendIntent,
+                                                            "Condividi partita"
+                                                        )
+                                                    )
                                                 }) {
-                                                    Icon(Icons.Filled.Share, null, tint = MaterialTheme.colorScheme.primary)
+                                                    Icon(
+                                                        Icons.Filled.Share,
+                                                        null,
+                                                        tint = MaterialTheme.colorScheme.primary
+                                                    )
                                                 }
 
+                                                // Logica di Eliminazione con possibilità di annullamento (Undo)
                                                 IconButton(onClick = {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    val removedIndex = viewModel.history.indexOf(record)
+                                                    val removedIndex =
+                                                        viewModel.history.indexOf(record)
                                                     viewModel.deleteMatch(record)
 
-                                                    // Esecuzione asincrona (Coroutine)
-                                                    // Permette di eseguire operazioni ritardate (delay) senza bloccare il Main Thread.
                                                     coroutineScope.launch {
                                                         launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
-
-                                                        // La funzione showSnackbar sospende l'esecuzione di questo blocco finché
-                                                        // la snackbar non viene scartata o non viene premuta l'azione associata.
-                                                        val result = snackbarHostState.showSnackbar("Partita eliminata", "ANNULLA", duration = SnackbarDuration.Indefinite)
-
-                                                        // Se il risultato è ActionPerformed (l'utente ha premuto "ANNULLA"),
-                                                        // si procede al ripristino dell'oggetto rimosso.
+                                                        val result = snackbarHostState.showSnackbar(
+                                                            "Partita eliminata",
+                                                            "ANNULLA",
+                                                            duration = SnackbarDuration.Indefinite
+                                                        )
                                                         if (result == SnackbarResult.ActionPerformed) {
-                                                            viewModel.restoreMatch(removedIndex, record)
+                                                            viewModel.restoreMatch(
+                                                                removedIndex,
+                                                                record
+                                                            )
                                                         }
                                                     }
                                                 }) {
-                                                    Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colorScheme.error)
+                                                    Icon(
+                                                        Icons.Filled.Delete,
+                                                        null,
+                                                        tint = MaterialTheme.colorScheme.error
+                                                    )
                                                 }
                                             }
                                         }
@@ -514,13 +607,19 @@ fun HomeScreen(
                         }
                     }
 
+                    // --- LEZIONE: COPYRIGHT NEL FLUSSO SCORREVOLE ---
+                    // Inserendo il copyright come 'item' finale della LazyColumn,
+                    // beneficerà automaticamente del 'contentPadding' che abbiamo impostato sopra.
+                    // Non serve più forzare un padding enorme dal basso, si posizionerà da solo
+                    // in modo perfetto sotto all'ultima card e sopra all'ingombro del FAB.
                     item {
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp),
+                            // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -528,35 +627,39 @@ fun HomeScreen(
             }
         }
     }
-
     // --------------------------------------------------------------------
-    // LAYER MODALE (OVERLAY GRAFICO DETTAGLIATO)
+    // LAYER MODALE: OVERLAY DEL GRAFICO DETTAGLIATO
     // --------------------------------------------------------------------
-    // Essendo dichiarato alla fine della gerarchia della funzione HomeScreen (dopo lo Scaffold),
-    // questo blocco viene disegnato sull'asse Z al di sopra di tutti gli altri elementi (Z-Index implicito).
+    // LEZIONE Z-INDEX: In Jetpack Compose, l'ordine in cui scrivi il codice determina
+    // l'ordine in cui gli elementi vengono impilati l'uno sull'altro (Asse Z).
+    // Inserendo questa AnimatedVisibility alla FINE della funzione HomeScreen (fuori dallo Scaffold),
+    // ci assicuriamo che quando appare venga disegnata *SOPRA* a tutto il resto (lista, bottoni, topbar).
     AnimatedVisibility(
+        // Il "Grilletto": l'animazione parte solo quando expandedMatch ha un valore (non è null)
         visible = expandedMatch != null,
-        // Configurazione delle specifiche di animazione (AnimationSpec).
-        // Il parametro 'tween' definisce un'interpolazione lineare basata sul tempo (es. 300ms).
-        // 'easing' descrive la curva di accelerazione dell'animazione.
+        // Animazione di entrata: Svanimento (fadeIn) + scivolamento dal basso verso l'alto (slideInVertically)
         enter = fadeIn(tween(300)) + slideInVertically(
             initialOffsetY = { it / 10 },
             animationSpec = tween(300, easing = FastOutSlowInEasing)
         ),
+        // Animazione di uscita: Svanimento veloce + scivolamento verso il basso
         exit = fadeOut(tween(200)) + slideOutVertically(
             targetOffsetY = { it / 10 },
             animationSpec = tween(200, easing = FastOutLinearInEasing)
         )
     ) {
-        // Accesso sicuro (let) alla cache dei dati per prevenire la corruzione visiva durante l'exit transition
+        // Usiamo lastMatch (la memoria fantasma) per assicurarci che i dati non spariscano
+        // improvvisamente mentre l'animazione di uscita sta ancora finendo di scivolare via.
         lastMatch?.let { match ->
             Surface(
                 modifier = Modifier.fillMaxSize(),
+                // Usiamo il colore di background del telefono ma lo rendiamo leggermente trasparente (alpha 0.97f)
+                // per far intravedere la schermata sfocata sotto, dando senso di profondità.
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.97f)
             ) {
-                // systemBarsPadding() impedisce al contenuto interno di collidere
-                // con la StatusBar (in alto) e la NavigationBar (in basso).
                 Column(
+                    // systemBarsPadding() è vitale in un overlay a schermo intero: impedisce
+                    // che i nostri testi finiscano sotto l'orologio di Android in alto.
                     modifier = Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)
                 ) {
 
@@ -572,12 +675,12 @@ fun HomeScreen(
                         text = "Sfida: ${match.title}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                     Text(
                         text = "Vinta da ${match.winnerName} con ${match.winningScore} pt",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.LightGray,
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
 
@@ -586,9 +689,11 @@ fun HomeScreen(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                         shape = RoundedCornerShape(24.dp)
                     ) {
-                        // Invocazione della logica vettoriale nativa tramite il parametro 'isDetailed'
+                        // Il nostro componente Canvas personalizzato
                         ScoreChart(
                             players = match.allPlayers,
+                            // Passando isDetailed = true attiviamo la modalità espansa:
+                            // il Canvas disegnerà anche la griglia, i numeri e permetterà lo scroll orizzontale.
                             isDetailed = true,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -604,34 +709,59 @@ fun HomeScreen(
                         Text(
                             text = " Durata totale: ${formatTime(match.durationSeconds)}",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color.LightGray
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     }
 
-                    // Il modificatore weight(1f) impone allo Spacer di espandersi fino ad assorbire
-                    // interamente lo spazio rimanente non assegnato nel Column genitore.
-                    // Risultato visivo: gli elementi successivi vengono ancorati al limite inferiore del layout.
+                    // LEZIONE FLEXBOX: Un weight(1f) vuoto agisce come una "molla".
+                    // Si prende tutto lo spazio vuoto tra il testo sopra e il bottone sotto,
+                    // spingendo di fatto il bottone di chiusura incollato al bordo inferiore.
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Button(
+                    // --------------------------------------------------------------------
+                    // PULSANTE CHIUDI ANALISI (Modello Expressive con Icona)
+                    // --------------------------------------------------------------------
+                    // ---> LEZIONE: RIUTILIZZO DEI PATTERN VISIVI <---
+                    // Invece di usare un 'Button' base, usiamo un 'ExtendedFloatingActionButton'.
+                    // Questo ci garantisce automaticamente la stessa elevazione (ombra),
+                    // gli stessi colori primari e un allineamento perfetto tra icona e testo,
+                    // esattamente come nella pagina delle Statistiche.
+                    // --------------------------------------------------------------------
+                    // PULSANTE CHIUDI ANALISI (Modello Expressive con Icona)
+                    // --------------------------------------------------------------------
+                    ExtendedFloatingActionButton(
                         onClick = {
+                            // Aggiunta la vibrazione per coerenza tattile
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // La modifica dello stato osservato innesca l'Exit Transition definita nell'AnimatedVisibility.
                             expandedMatchIndex = -1
                         },
-                        modifier = Modifier.fillMaxWidth().height(56.dp).padding(bottom = 8.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    ) {
-                        Text(
-                            text = "Chiudi",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f) // Largo il 90%
+                            .height(72.dp)      // Alto 72dp
+                            // ---> FIX MILLIMETRICO: CENTRATURA <---
+                            // Forza il pulsante a stare esattamente in mezzo alla colonna
+                            // distribuendo il 10% di spazio vuoto in due margini uguali da 5%.
+                            .align(Alignment.CenterHorizontally),
+                        shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
+                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp), // Ombra attiva
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Close, // Stessa icona (X) delle Statistiche
+                                contentDescription = "Chiudi",
+                                modifier = Modifier.size(28.dp) // Icona maggiorata per bilanciare il testo
+                            )
+                        },
+                        text = {
+                            Text(
+                                text = "Chiudi Analisi",
+                                // Tipografia imponente (Headline) per richiamare la Home
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    )
                 }
             }
         }
