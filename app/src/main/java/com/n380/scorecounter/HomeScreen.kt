@@ -236,9 +236,9 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         // ---> LEZIONE: PROTEZIONE DI SISTEMA <---
-                        // navigationBarsPadding() "spinge" in alto il contenuto interno solo di quel
+                        .navigationBarsPadding() //"spinge" in alto il contenuto interno solo di quel
                         // tanto che basta per non finire sotto la riga orizzontale bianca di Android.
-                        .navigationBarsPadding()
+                        //.navigationBarsPadding()
                         // ---> FIX ALTEZZA: PADDING INTERNO <---
                         // Qui decidiamo quanto il bottone è distante dai bordi del dock (la Surface).
                         // Usando 'horizontal = 16.dp' teniamo il bottone allineato con le card sopra.
@@ -355,7 +355,7 @@ fun HomeScreen(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        bottom = innerPadding.calculateBottomPadding() + 96.dp//aggiungiamo un padding di 96 per superare il bottone
+                        bottom = innerPadding.calculateBottomPadding() + 20.dp//aggiungiamo un padding di 96 per superare il bottone
                     )
                 ) {
                     items(viewModel.history) { record ->
@@ -417,7 +417,7 @@ fun HomeScreen(
                                     )
                                 }
 
-                                // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
+                              // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
                                 AnimatedVisibility(visible = expanded) {
                                     Column(modifier = Modifier.padding(top = 20.dp)) {
                                         HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
@@ -615,7 +615,7 @@ fun HomeScreen(
                     item {
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati",
+                            text = "© 2026 Creato da NicolA380✈️\nCopia esclusivissima per Fede\nTutti i diritti sono riservati",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
@@ -709,7 +709,7 @@ fun HomeScreen(
                         Text(
                             text = " Durata totale: ${formatTime(match.durationSeconds)}",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = MaterialTheme.colorScheme.tertiary,
                         )
                     }
 

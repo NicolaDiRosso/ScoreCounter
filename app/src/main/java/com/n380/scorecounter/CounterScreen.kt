@@ -735,8 +735,8 @@ fun PlayerScoreCard(
                     Icon(
                         imageVector = Icons.Filled.WorkspacePremium, // L'icona a medaglia/stella molto in stile Material 3
                         contentDescription = "In Vantaggio",
-                        // La corona è il nostro "Accento Grafico": la facciamo brillare del colore puro del giocatore!
-                        tint = playerColor,
+                        // Usa lo stesso colore del testo principale (massimo contrasto garantito)
+                        tint = MaterialTheme.colorScheme.onSurface,
                         // Padding 'start' la stacca leggermente dal nome, 'size' la rende bella grande
                         modifier = Modifier.padding(start = 8.dp).size(28.dp)
                     )

@@ -9,21 +9,19 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.animation.core.* // Strumenti per l'animazione infinita
-import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.animation.core.* // Strumenti per l'animazione infinita
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
 import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 /**
  * ====================================================================
@@ -106,84 +104,19 @@ fun GlobalStatsScreen(
 
 
 
-    // --------------------------------------------------------------------
-    // SCAFFOLD E PULSANTE CHIUDI (Modello Expressive)
-    // --------------------------------------------------------------------
     Scaffold(
-        // ====================================================================
-        // DOCK INFERIORE: CHIUDI STATISTICHE
-        // ====================================================================
-        bottomBar = {
-            // La Surface crea la piattaforma scura "effetto vetro" che si incolla al fondo
-            Surface(
-                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                // Arrotondiamo solo gli angoli in alto a 24.dp per l'effetto cassetto
-                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding() // Indispensabile per non finire sotto la barra di Android
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    // Usiamo il Button con altezza 72dp e stondatura 20dp
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // Qui metti la funzione che chiude la schermata (es. onNavigateBack o simile)
-                            onNavigateBack()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(72.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    ) {
-                        // Icona della X per la chiusura
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Chiudi",
-                            modifier = Modifier.padding(end = 8.dp).size(28.dp)
-                        )
-                        Text(
-                            text = "Chiudi Statistiche",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-    ) { innerPadding ->
+        modifier = Modifier.fillMaxSize(),
+        // Usiamo il nostro solito trucco per far vedere il pattern di icone sullo sfondo!
+        containerColor = Color.Transparent,
 
+        ) { innerPadding ->
+
+        // Usiamo una LazyColumn per permettere lo scorrimento se gli schermi sono piccoli.
+        // Arrangement.spacedBy(16.dp) separa elegantemente le Card tra di loro.
         LazyColumn(
-            // --- LEZIONE 2: EDGE-TO-EDGE E CONTENT PADDING ---
-            // Rimuoviamo il '.padding(innerPadding)' dal Modifier. Così diciamo alla lista
-            // di invadere tutto lo schermo, passando sotto il bottone fluttuante.
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-
-            // Usiamo il 'contentPadding' per aggiungere un margine interno scorrevole.
-            // L'ultima card della lista saprà che deve fermarsi più in alto, calcolando
-            // matematicamente l'ingombro del FAB (calculateBottomPadding) più 24dp di spazio extra.
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-                top = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding() + 96.dp
-            )
+            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)//12 corrisponde allo spazio tra le carte
         ) {
-
-            // ==============================================================
-            // ---> INTESTAZIONE DELLA PAGINA E CARD SEGUENTI <---
-            // ==============================================================
-            // [TUTTO IL RESTO DEL TUO CODICE DA QUI IN POI RIMANE IDENTICO: item { ... } ]
-
 
             // ==============================================================
             // ---> INTESTAZIONE DELLA PAGINA (Ora è al sicuro sotto l'orologio!) <---

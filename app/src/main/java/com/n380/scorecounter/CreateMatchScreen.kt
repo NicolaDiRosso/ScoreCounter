@@ -703,7 +703,7 @@ fun CreateMatchScreen(
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text("Es. 45") },
                         label = { Text("N° Facce") },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(20.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
@@ -711,8 +711,8 @@ fun CreateMatchScreen(
             },
             confirmButton = {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(modifier = Modifier.weight(1f), onClick = { customDiceInput = ""; showDiceSettingsDialog = false }) { Text("Annulla", maxLines = 1) }
-                    Button(modifier = Modifier.weight(1f), onClick = {
+                    OutlinedButton(modifier = Modifier.weight(1f).height(48.dp),shape = RoundedCornerShape(20.dp), onClick = { customDiceInput = ""; showDiceSettingsDialog = false }) { Text("Annulla", maxLines = 1) }
+                    Button(modifier = Modifier.weight(1f).height(48.dp),shape = RoundedCornerShape(20.dp), onClick = {
                         val manualSides = customDiceInput.toIntOrNull()
                         viewModel.diceSides = if (manualSides != null && manualSides > 0) manualSides else pendingDiceSides
                         customDiceInput = ""; showDiceSettingsDialog = false
