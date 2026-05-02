@@ -201,6 +201,26 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Aggiorna il colore di un giocatore già seduto al tavolo.
+     * Questa funzione viene chiamata dal popup della tavolozza colori in CreateMatchScreen.
+     */
+    fun updatePlayerColor(player: Player, newColor: Int) {
+        // 1. Cerchiamo in che posizione si trova questo giocatore nella lista del tavolo
+        val index = players.indexOf(player)
+
+        // Se lo troviamo (index è diverso da -1)
+        if (index != -1) {
+            // 2. Gli assegniamo il nuovo colore
+            players[index].color = newColor
+
+            // 3. TRUCCO COMPOSE: Per forzare la grafica ad aggiornarsi istantaneamente,
+            // "sostituiamo" il giocatore con se stesso nella lista. Questo fa capire a
+            // Jetpack Compose che c'è stata una modifica e deve ricaricare i colori.
+            players[index] = players[index]
+        }
+    }
+
     // Diamo al cervello dell'app il potere di eliminare un giocatore attivo
     fun removePlayer(player: Player) {
         players.remove(player)

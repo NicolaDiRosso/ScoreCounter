@@ -4,11 +4,6 @@ import android.app.Activity
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,7 +18,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -31,7 +25,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 // ====================================================================
@@ -284,30 +277,50 @@ fun CounterScreen(
             val isFireEnabled = !viewModel.matchTitle.lowercase()
                 .contains("carte")//Questa variabile è VERA se il titolo NON contiene la parola "carte".
 
-            // LazyColumn: La "lista intelligente" che renderizza graficamente solo i giocatori attualmente visibili sullo schermo
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // ---> IL NUOVO CONTENITORE DEL TAVOLO (Box di Sfondo) <---
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // weight(1f) dice alla Card: "Allungati occupando tutto lo spazio vuoto che c'è tra
+                    // l'intestazione in alto e i bottoni in basso"
+                    .weight(1f)
+                    // Aggiungiamo un margine inferiore per non farla incollare ai tasti "Azzera/Fine Match"
+                    .padding(bottom = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                // ---> MODIFICA 1: Stondatura completa <---
+                // Scrivendo solo 24.dp (senza specificare top o bottom), Android stonda tutti e 4 gli angoli!
+                shape = RoundedCornerShape(24.dp)
             ) {
-                // items() scorre la lista dei giocatori e per ognuno richiama la nostra funzione grafica "PlayerScoreCard"
-                items(viewModel.players) { p ->
+                Column(
+                    // Abbiamo ridotto il padding 'top' perché non essendoci più il titolo,
+                    // non serve più tutto quello spazio vuoto in alto.
+                    modifier = Modifier.fillMaxSize().padding(top = 16.dp, start = 12.dp, end = 12.dp)
+                ) {
 
-                    // Capiamo se questo specifico giocatore merita la corona (Deve avere il maxScore e almeno 1 punto in attivo)
-                    val isLeader = p.score == maxScore && maxScore > 0
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        // ---> MODIFICA 3: Cuscinetto ridotto <---
+                        // Siccome la scatola grigia ora finisce PRIMA dei bottoni e non ci scivola più dietro,
+                        // non ci serve più quel trucco del padding a 100.dp. Bastano 16.dp per far
+                        // scorrere bene l'ultima carta senza farla incollare al bordo inferiore.
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        items(viewModel.players) { p ->
 
-                    // ---> MODIFICA COMBO: Passiamo la logica aggiornata alla Carta <---
-                    PlayerScoreCard(
-                        player = p,
-                        isLeader = isLeader,
-                        isFireEnabled = isFireEnabled, // Passiamo il verdetto del filtro anti-carte
-                        onScoreChange = { amount ->
-                            viewModel.updatePlayerScore(
-                                p,
-                                amount
+                            val isLeader = p.score == maxScore && maxScore > 0
+
+                            PlayerScoreCard(
+                                player = p,
+                                isLeader = isLeader,
+                                isFireEnabled = isFireEnabled,
+                                onScoreChange = { amount ->
+                                    viewModel.updatePlayerScore(p, amount)
+                                },
+                                onScoreClick = { playerForManualEdit = p }
                             )
-                        }, // Usiamo la logica centralizzata del ViewModel per le combo!
-                        onScoreClick = { playerForManualEdit = p }
-                    )
+                        }
+                    }
                 }
             }
         }
@@ -652,202 +665,4 @@ fun CounterScreen(
 }
 
 
-/**
- * COMPONENTE: Card personalizzata per la singola riga del giocatore nella fase di punteggio.
- * ---> MODIFICA UI: Stile "Gamepad", Numeri Giganti, Pulsanti Tattili, Bordi Marcati e FIX anti-schiacciamento (Ellipsis) <---
- * ---> NUOVA MODIFICA IDENTITY VISUAL: Sfondo Sfumato (Tonal Surface) per un'estetica Material 3 più pulita e leggibile <---
- * * @OptIn(ExperimentalFoundationApi::class) serve perché stiamo usando 'combinedClickable',
- * una funzione avanzata di Compose che gestisce sia il tocco normale che la pressione lunga.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PlayerScoreCard(
-    player: Player,
-    isLeader: Boolean = false,
-    // ---> NUOVI PARAMETRI PER LA COMBO ON FIRE <---
-    isFireEnabled: Boolean = true, // Se falso (Sfida Carte), blocca il colore arancione
-    onScoreChange: (Int) -> Unit,  // Il "Tubo" che invia l'azione (+1, -1, ecc.) al ViewModel per fargli contare la combo
-    onScoreClick: () -> Unit
-) {
-    // MOTORE APTICO: Prepariamo il sistema di vibrazione del telefono per il feedback tattile
-    val haptic = LocalHapticFeedback.current
 
-    // ---> ESTRAZIONE DEL COLORE <---
-    // Trasformiamo il numero intero salvato nel database in un oggetto Colore utilizzabile dalla grafica
-    val playerColor = Color(player.color)
-
-    // ---> IL CONTENITORE PRINCIPALE (La riga del giocatore) <---
-    // Card è un contenitore bellissimo del Material Design (sfondo leggero, bordi arrotondati e una leggera ombra invisibile)
-    Card(
-        // fillMaxWidth() gli fa occupare tutta la larghezza dello schermo.
-        // padding(vertical = 4.dp) aggiunge una piccola spaziatura tra un giocatore e l'altro per non appiccicarli.
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        // ---> LA TUA IDEA UX (TONAL SURFACE) <---
-        // Usiamo il colore del giocatore ma con opacità al 15% (0.15f).
-        // Questo crea un elegantissimo "bagliore" di fondo senza accecare l'utente.
-        colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.7f)),
-        // Sostituiamo il vecchio bordo marcato con uno leggerissimo (10% di opacità) per dare solo un lieve senso di profondità
-        border = BorderStroke(1.dp, playerColor.copy(alpha = 0.1f)),
-        // Arrotondiamo pesantemente gli angoli (24.dp) per un look moderno in stile Material 3
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        // Row allinea gli elementi in orizzontale.
-        // Arrangement.SpaceBetween spinge il Nome tutto a sinistra e i Pulsanti tutti a destra.
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // ==========================================================
-            // BLOCCO SINISTRO: NOME DEL GIOCATORE E CORONA DEL LEADER
-            // ==========================================================
-            // Raggruppo Nome e Corona in una riga interna per farli stare assieme a sinistra.
-            // weight(1f) è fondamentale qui: dice a questo blocco "prenditi tutto lo spazio vuoto che avanza".
-            // Così facendo, spinge prepotentemente il blocco dei pulsanti (a destra) contro il bordo del telefono.
-            // Aggiungiamo un padding 'end' per non far mai incollare il nome al bottone Meno nel caso di numeri giganti.
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f).padding(end = 8.dp)
-            ) {
-
-                // ---> IL NOME DEL GIOCATORE <---
-                Text(
-                    text = player.name,
-                    // LEZIONE TIPOGRAFIA: 'headlineSmall' è uno stile di testo più grande e imponente del normale.
-                    style = MaterialTheme.typography.headlineSmall,
-                    // FontWeight.Bold forza la scritta in Grassetto per massimizzare la leggibilità durante il gioco.
-                    fontWeight = FontWeight.Bold,
-                    // ---> FIX LEGGIBILITÀ <---
-                    // Avendo colorato lo sfondo (Tonal Surface), il testo torna ad essere 'onSurface' (Bianco o Nero puro a seconda del tema del telefono)
-                    color = MaterialTheme.colorScheme.onSurface,
-                    // ---> FIX ANTI-SCHIACCIAMENTO <---
-                    // maxLines = 1: Forza il testo a rimanere sempre e solo su una singola riga, impedendo che la grafica si rompa in verticale.
-                    maxLines = 1,
-                    // overflow = TextOverflow.Ellipsis: Se il nome è troppo lungo e viene schiacciato dai numeri grandi, taglia le lettere finali e mette "..." (Es. "Dani...").
-                    overflow = TextOverflow.Ellipsis,
-                    // Diamo un 'weight' interno al testo per farlo restringere dolcemente se manca spazio, senza spingere fuori o schiacciare la corona del leader!
-                    modifier = Modifier.weight(1f, fill = false)
-                )
-
-                // ---> DISEGNO DELLA CORONA DEL LEADER <---
-                // (Solo per chi è in vantaggio)
-                if (isLeader) {
-                    Icon(
-                        imageVector = Icons.Filled.WorkspacePremium, // L'icona a medaglia/stella molto in stile Material 3
-                        contentDescription = "In Vantaggio",
-                        // Usa lo stesso colore del testo principale (massimo contrasto garantito)
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        // Padding 'start' la stacca leggermente dal nome, 'size' la rende bella grande
-                        modifier = Modifier.padding(start = 8.dp).size(28.dp)
-                    )
-                }
-            }
-
-            // ==========================================================
-            // BLOCCO DESTRO: CONTROLLI STILE "GAMEPAD" E PUNTEGGIO
-            // ==========================================================
-            // Raggruppiamo i controlli matematici (Meno, Numero, Più) in un'altra mini-Row a destra
-            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                // ---> PULSANTE MENO CON PUNTEGGIO RAPIDO (Long Press) <---
-                // Usiamo un 'Box' vuoto che poi "mascheriamo" da pulsante hardware.
-                Box(
-                    modifier = Modifier
-                        // Grandezza fissa di 56x56 pixel (Bersaglio touch molto grande per non mancarlo, Legge di Fitts)
-                        .size(56.dp)
-                        // LEZIONE FORME: Invece di un cerchio, usiamo un quadrato con angoli smussati a 16.dp.
-                        // In UI Design questa forma si chiama "Squircle" e ricorda i tasti fisici dei joypad!
-                        .clip(RoundedCornerShape(16.dp))
-                        // Colore di sfondo tenue: usiamo 'errorContainer' (di solito un rosso slavato) con trasparenza al 70%
-                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f))
-                        // Disegniamo un bordino microscopico attorno al tasto per dargli un finto effetto 3D (Rilievo)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
-                            RoundedCornerShape(16.dp)
-                        )
-                        // LEZIONE RIPPLE EFFECT: combinedClickable non solo gestisce i click, ma genera
-                        // in automatico l'ombra grigia che si espande dal dito (L'onda tattile o Ripple Effect)!
-                        .combinedClickable(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress) // Vibra
-                                // MODIFICA COMBO: Usiamo onScoreChange(-1) invece del diretto player.changeScore(-1).
-                                // In questo modo avvisiamo il cervello dell'app (ViewModel) che deve spegnere il fuoco!
-                                onScoreChange(-1)
-                            },
-                            onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                // Pressione Lunga: Toglie 5 punti in un colpo solo e resetta le combo!
-                                onScoreChange(-5)
-                            }
-                        ),
-                    contentAlignment = Alignment.Center // Centra l'icona "-" perfettamente in mezzo al Box
-                ) {
-                    Icon(
-                        Icons.Filled.Remove,
-                        contentDescription = "Diminuisci",
-                        tint = MaterialTheme.colorScheme.onErrorContainer, // Colore scuro per fare contrasto col rosso tenue
-                        modifier = Modifier.size(32.dp) // Icona ingrandita per riempire bene il tasto hardware
-                    )
-                }
-
-                // ---> PUNTEGGIO GIGANTE CLICCABILE <---
-                Text(
-                    text = player.score.toString(),
-                    // LEZIONE TIPOGRAFIA: 'displayMedium' è uno degli stili più enormi di Android. Ideale per i numeri.
-                    style = MaterialTheme.typography.displayMedium,
-                    // FontWeight.Black è il livello massimo di grassetto esistente! Rende il font "cicciotto" e massiccio.
-                    fontWeight = FontWeight.Black,
-                    // ---> LOGICA COLORE PUNTEGGIO <---
-                    // Se On Fire: Arancione scoppiettante. Altrimenti: colore neutro 'onSurface' per integrarsi con il nome.
-                    color = if (player.isOnFire && isFireEnabled) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
-                    // Mettiamo maxLines = 1 anche qui. Se il numero diventa assurdamente lungo (es. 10 milioni), non andrà a capo rompendo la card.
-                    maxLines = 1,
-                    modifier = Modifier
-                        // MODIFICA ANTI-SCHIACCIAMENTO: Imposto un padding a 16.dp. per evitare che il numero risulti schiacciato tra i pulsanti
-                        // In questo modo i numeri hanno molto più spazio fisico per crescere prima di dare fastidio al nome del giocatore a sinistra!
-                        .padding(horizontal = 16.dp)
-                        // Usiamo 'modifier' per dirgli che ora non è più solo un testo da leggere, ma un bottone da cliccare!
-                        .clickable {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onScoreClick() // Esegue il comando di apertura del popup tastiera passato dalla CounterScreen
-                        }
-                )
-
-                // ---> PULSANTE PIÙ CON PUNTEGGIO RAPIDO (Long Press) <---
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        // Sfondo tenue: usiamo 'primaryContainer' (un azzurro chiaro) per indicare positività
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
-                            RoundedCornerShape(16.dp)
-                        )
-                        .combinedClickable(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                // MODIFICA COMBO: Inviamo +1 al ViewModel. Se succede 3 volte di fila, scatta la Combo!
-                                onScoreChange(1)
-                            },
-                            onLongClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                // Pressione lunga: Aggiunge 10 punti istantanei e conta per la Combo!
-                                onScoreChange(10)
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Aumenta",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-        }
-    }
-}

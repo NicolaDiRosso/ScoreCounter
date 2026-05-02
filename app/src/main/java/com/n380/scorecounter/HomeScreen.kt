@@ -160,6 +160,7 @@ fun HomeScreen(
                             viewModel.clearBackup()
                             // Modifica dello stato osservato per smontare (nascondere) l'AlertDialog
                             viewModel.showResumeMatchDialog = false
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         },
                         modifier = Modifier
                             // Il weight(1f) su entrambi i pulsanti istruisce l'engine di rendering
@@ -184,6 +185,7 @@ fun HomeScreen(
                     // Il pulsante Filled rappresenta l'azione suggerita o principale (Happy Path).
                     Button(
                         onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             // Invocazione della logica di business: carica i dati dal DB al ViewModel
                             viewModel.resumeBackupMatch()
                             // Callback di navigazione passata dal livello superiore per cambiare schermata
@@ -615,7 +617,7 @@ fun HomeScreen(
                     item {
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "© 2026 Creato da NicolA380✈️\nCopia esclusivissima per Fede\nTutti i diritti sono riservati",
+                            text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card

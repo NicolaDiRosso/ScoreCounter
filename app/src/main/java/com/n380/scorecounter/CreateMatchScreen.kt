@@ -345,7 +345,7 @@ fun CreateMatchScreen(
                                     OutlinedButton(
                                         onClick = {
                                             if (!isAlreadyAtTable) {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                //haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
                                                 // ---> NUOVA LOGICA MULTICOLOR INTELLIGENTE (Colori Univoci) <---
                                                 val finalColor = if (selectedColor == Color.Unspecified) {
@@ -501,61 +501,39 @@ fun CreateMatchScreen(
                         } else {
                             // STATO PIENO: Generiamo una riga (Mini-Card) per ogni giocatore
                             viewModel.players.forEachIndexed { index, player ->
+                                // =============================================================================
+                                // Richiamiamo la funzione che abbiamo costruito nel file PlayerCardComponents
+                                // =============================================================================
+                                PlayerAtTableCard(
+                                    player = player,
+                                    isFirst = index == 0, // Vero se è il primo della lista
+                                    isLast = index == viewModel.players.size - 1, // Vero se è l'ultimo
+                                    onMoveUp = { viewModel.movePlayer(index, index - 1) },
+                                    onMoveDown = { viewModel.movePlayer(index, index + 1) },
+                                    onEdit = { playerToEdit = player },
+                                    onRemove = {
+                                        val removedIndex = index
+                                        val removedPlayer = player
+                                        viewModel.removePlayer(player)
 
-                                val playerColor = Color(player.color)
-
-                                // ---> IDENTITY VISUAL <---
-                                // Tonal Surface (Sfondo sfumato al 50%) usando il colore salvato dal giocatore
-                                Card(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                                    colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.5f)),
-                                    border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f)),
-                                    shape = RoundedCornerShape(16.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // Frecce per ordinare i giocatori
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            IconButton(onClick = { viewModel.movePlayer(index, index - 1) }, enabled = index > 0, modifier = Modifier.size(32.dp)) {
-                                                Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
-                                            }
-                                            IconButton(onClick = { viewModel.movePlayer(index, index + 1) }, enabled = index < viewModel.players.size - 1, modifier = Modifier.size(32.dp)) {
-                                                Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                        // Logica della Snackbar per l'annullamento (Undo)
+                                        coroutineScope.launch {
+                                            launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
+                                            val result = snackbarHostState.showSnackbar(
+                                                "${player.name} rimosso",
+                                                "ANNULLA",
+                                                duration = SnackbarDuration.Indefinite
+                                            )
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                viewModel.restorePlayer(removedIndex, removedPlayer)
                                             }
                                         }
-
-                                        // Nome testuale (Colore neutro per non cozzare con lo sfondo)
-                                        Text(player.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f).padding(start = 8.dp))
-
-                                        // Tasto Modifica
-                                        IconButton(onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            playerToEdit = player
-                                        }) {
-                                            Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.onSurface)
-                                        }
-
-                                        // Tasto Elimina (Con animazione Snackbar)
-                                        IconButton(onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            val removedIndex = index
-                                            val removedPlayer = player
-                                            viewModel.removePlayer(player)
-
-                                            coroutineScope.launch {
-                                                launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
-                                                val result = snackbarHostState.showSnackbar("${player.name} rimosso", "ANNULLA", duration = SnackbarDuration.Indefinite)
-                                                if (result == SnackbarResult.ActionPerformed) {
-                                                    viewModel.restorePlayer(removedIndex, removedPlayer)
-                                                }
-                                            }
-                                        }) {
-                                            Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
-                                        }
+                                    },
+                                    onColorChange = { newColorArgb ->
+                                        // Questa funzione fa aggiornare il colore salvato nel ViewModel
+                                        viewModel.updatePlayerColor(player, newColorArgb)
                                     }
-                                }
+                                )
                             }
                         }
                     }
@@ -569,11 +547,13 @@ fun CreateMatchScreen(
     // ====================================================================
 
     // 1. POPUP MODIFICA NOME GIOCATORE AL TAVOLO
+    // 1. POPUP MODIFICA NOME GIOCATORE AL TAVOLO
     if (playerToEdit != null) {
         var editedName by remember { mutableStateOf(playerToEdit!!.name) }
         AlertDialog(
             onDismissRequest = { playerToEdit = null },
-            title = { Text("Modifica Nome") },
+            // Aggiungiamo il grassetto al titolo per renderlo più elegante
+            title = { Text("Modifica Nome", fontWeight = FontWeight.Bold) },
             text = {
                 OutlinedTextField(
                     value = editedName,
@@ -582,18 +562,55 @@ fun CreateMatchScreen(
                     shape = RoundedCornerShape(16.dp)
                 )
             },
+            // ---> GRAFICA PULSANTI AFFIANCATI <---
+            // Mettiamo tutto dentro confirmButton per forzare la riga al 100% della larghezza
             confirmButton = {
-                Button(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    if (editedName.isNotBlank()) {
-                        playerToEdit!!.name = editedName
-                        playerToEdit = null
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp) // Spazio esatto tra i due bottoni
+                ) {
+
+                    // TASTO ANNULLA (Sinistra)
+                    OutlinedButton(
+                        onClick = {
+                            playerToEdit = null
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm) },
+                        modifier = Modifier
+                            .weight(1f) // Prende metà spazio
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // Usiamo colori neutri (outline e onSurface) come hai richiesto, niente rosso!
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
                     }
-                }) { Text("Salva") }
+
+                    // TASTO SALVA (Destra)
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            if (editedName.isNotBlank()) {
+                                playerToEdit!!.name = editedName
+                                playerToEdit = null
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f) // Prende l'altra metà dello spazio
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // Usiamo il PrimaryContainer (lo stesso azzurro/blu chiaro del tuo screenshot)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Text("Salva", fontWeight = FontWeight.Bold)
+                    }
+                }
             },
-            dismissButton = {
-                TextButton(onClick = { playerToEdit = null }) { Text("Annulla") }
-            }
+            // Avendo messo entrambi i pulsanti dentro confirmButton, diciamo ad Android
+            // di spegnere il pulsante "Annulla" invisibile di default.
+            dismissButton = null
         )
     }
 
@@ -622,7 +639,7 @@ fun CreateMatchScreen(
                     Button(
                         onClick = {
                             if (isAddFavEnabled) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 viewModel.addFavorite(newFavName.trim())
                                 newFavName = ""
                             }
@@ -644,8 +661,26 @@ fun CreateMatchScreen(
                         Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), shape = RoundedCornerShape(12.dp)) {
                             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(fav, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                                IconButton(onClick = { favToEdit = fav }) { Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.primary) }
-                                IconButton(onClick = { viewModel.removeFavorite(fav) }) { Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error) }
+                                IconButton(
+                                    onClick = {
+                                        favToEdit = fav
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    })
+                                {
+                                    Icon(
+                                        Icons.Filled.Edit,
+                                        "Modifica",
+                                        tint = MaterialTheme.colorScheme.primary)
+                                }
+                                IconButton(
+                                    onClick = {
+                                        viewModel.removeFavorite(fav)
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    })
+                                { Icon(
+                                    Icons.Filled.Delete,
+                                    "Elimina",
+                                    tint = MaterialTheme.colorScheme.error) }
                             }
                         }
                     }
@@ -692,7 +727,7 @@ fun CreateMatchScreen(
                                     val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
                                     Card(
                                         modifier = Modifier.weight(1f).height(60.dp).clickable {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                             pendingDiceSides = sides
                                             customDiceInput = ""
                                         },
@@ -725,11 +760,26 @@ fun CreateMatchScreen(
                 }
             },
             confirmButton = {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(modifier = Modifier.weight(1f).height(48.dp),shape = RoundedCornerShape(20.dp), onClick = { customDiceInput = ""; showDiceSettingsDialog = false }) { Text("Annulla", maxLines = 1) }
-                    Button(modifier = Modifier.weight(1f).height(48.dp),shape = RoundedCornerShape(20.dp), onClick = {
-                        val manualSides = customDiceInput.toIntOrNull()
-                        viewModel.diceSides = if (manualSides != null && manualSides > 0) manualSides else pendingDiceSides
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp,)
+                ) {
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            customDiceInput = "";showDiceSettingsDialog = false
+                        })
+                    { Text("Annulla", maxLines = 1, ) }
+                    Button(
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            val manualSides = customDiceInput.toIntOrNull()
+                            viewModel.diceSides = if (manualSides != null && manualSides > 0) manualSides
+                            else pendingDiceSides
                         customDiceInput = ""; showDiceSettingsDialog = false
                     }) { Text("Applica") }
                 }
