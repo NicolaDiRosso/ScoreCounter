@@ -158,7 +158,7 @@ fun CreateMatchScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 // ---> IL TITOLO DELLA PAGINA <---
                 Text(
-                    text = "Nuova Partita",
+                    text = "Nuova Sfida",
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
@@ -347,12 +347,27 @@ fun CreateMatchScreen(
                                             if (!isAlreadyAtTable) {
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                                // ---> LOGICA MULTICOLOR (Per i Nomi Rapidi) <---
-                                                // Se la tavolozza giù è ferma sull'Arcobaleno, estraiamo un colore a caso!
-                                                // Altrimenti assegniamo a questo preferito esattamente il colore selezionato.
+                                                // ---> NUOVA LOGICA MULTICOLOR INTELLIGENTE (Colori Univoci) <---
                                                 val finalColor = if (selectedColor == Color.Unspecified) {
-                                                    playerPalette.random()
+
+                                                    // 1. Estraiamo tutti i colori già assegnati ai giocatori attualmente al tavolo
+                                                    // (Estraiamo il valore numerico 'color' dal database)
+                                                    val usedColors = viewModel.players.map { it.color }
+
+                                                    // 2. Filtriamo la tavolozza: teniamo SOLO i colori che NON sono presenti nella lista 'usedColors'
+                                                    val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+
+                                                    // 3. Estraiamo un colore a caso da quelli rimasti.
+                                                    // CONTROLLO DI SICUREZZA: Se abbiamo finito i colori liberi (es. 8 giocatori e 8 colori),
+                                                    // l'app crasherebbe. Quindi, se la lista è vuota, peschiamo a caso da tutta la tavolozza.
+                                                    if (availableColors.isNotEmpty()) {
+                                                        availableColors.random()
+                                                    } else {
+                                                        playerPalette.random()
+                                                    }
+
                                                 } else {
+                                                    // Se l'utente ha toccato un pallino colorato specifico, usiamo quello ignorando i duplicati
                                                     selectedColor
                                                 }
 
