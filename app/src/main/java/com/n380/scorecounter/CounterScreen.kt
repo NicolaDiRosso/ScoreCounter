@@ -26,6 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+//Importiamo la classe Lifecycle per gestire il ciclo di vita della schermata.
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 
 // ====================================================================
 // ====================================================================
@@ -63,11 +67,78 @@ fun CounterScreen(
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
 
+
     // ---> AVVIO CRONOMETRO AUTOMATICO <---
     // LaunchedEffect fa partire un blocco di codice non appena questa pagina viene "disegnata" sullo schermo.
     LaunchedEffect(Unit) {
         viewModel.startTimer()
     }
+
+    // ====================================================================
+    // LOGICA TIMER INTELLIGENTE (Pausa automatica in background)
+    // ====================================================================
+
+    // 1. LocalLifecycleOwner: Recupera il "proprietario" del ciclo di vita.
+    // In Android, ogni schermata ha un ciclo di vita (nasce, diventa visibile, va in pausa, muore).
+    // Con questo comando otteniamo l'oggetto che "governa" queste fasi per la pagina attuale.
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // 2. LA VARIABILE: isTimerRunning
+    // Creiamo una variabile locale per ricordare se il timer sta attualmente girando.
+    // Siccome poco sopra abbiamo eseguito viewModel.startTimer(), la facciamo partire a 'true'.
+    var isTimerRunning by remember { mutableStateOf(true) }
+
+    // 3. LA MEMORIA STORICA: wasTimerRunningBeforeBackground
+    // Serve per ricordare se il timer stava girando nell'istante PRIMA che l'utente bloccasse lo schermo.
+    // (Se il timer era GIA' in pausa prima di bloccare lo schermo, non vogliamo che riparta da solo sbloccandolo!).
+    var wasTimerRunningBeforeBackground by remember { mutableStateOf(false) }
+
+    // 4. DisposableEffect: Un effetto speciale di Compose.
+    // "Disposable" significa "usa e getta". Serve per attivare una funzione quando la schermata
+    // appare, e DEVE avere una funzione 'onDispose' alla fine per "pulire" tutto quando la schermata si chiude.
+    DisposableEffect(lifecycleOwner) {
+
+        // Creiamo la nostra "spia" (Observer) che ascolta i cambiamenti del telefono.
+        val observer = LifecycleEventObserver { _, event ->
+            // Controlliamo quale evento è appena successo
+            when (event) {
+
+                // EVENTO A: L'app va in background o lo schermo si spegne
+                Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP -> {
+                    // Se il timer in questo momento stava scorrendo...
+                    if (isTimerRunning) {
+                        wasTimerRunningBeforeBackground = true // ...ce lo appuntiamo nella memoria
+                        isTimerRunning = false                 // ...aggiorniamo la variabile locale a falso
+                        viewModel.pauseTimer()                 // ...e Diciamo al ViewModel di STOPPARE il cronometro
+                    }
+                }
+
+                // EVENTO B: L'utente riapre l'app o sblocca lo schermo
+                Lifecycle.Event.ON_RESUME -> {
+                    // Controlliamo la nostra memoria: il timer stava girando prima dell'interruzione?
+                    if (wasTimerRunningBeforeBackground) {
+                        isTimerRunning = true                  // ...aggiorniamo la variabile locale a vero
+                        viewModel.startTimer()                 // ...e Diciamo al ViewModel di FAR RIPARTIRE il cronometro
+                        wasTimerRunningBeforeBackground = false // Svuotiamo la memoria
+                    }
+                }
+
+                // Tutti gli altri eventi di Android non ci interessano, li ignoriamo.
+                else -> {}
+            }
+        }
+
+        // Dopo aver configurato la spia, la attacchiamo ufficialmente al telefono.
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // COMANDO DI PULIZIA (obbligatorio nel DisposableEffect)
+        onDispose {
+            // Quando l'utente preme "Fine Match" ed esce definitivamente dalla schermata,
+            // stacchiamo la spia. Se non lo facessimo, rimarrebbe accesa in memoria rallentando il telefono!
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    // ====================================================================
 
     // ---> SCHERMO SEMPRE ACCESO (Senza modalità immersiva problematica) <---
     // DisposableEffect è magico: esegue un codice quando la pagina si APRE (init) e un altro quando si CHIUDE (onDispose).
