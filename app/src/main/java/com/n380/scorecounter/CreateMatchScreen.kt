@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -656,31 +657,61 @@ fun CreateMatchScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider()
 
+                // La lista scorrevole dei preferiti nel popup
                 LazyColumn(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    items(viewModel.favoriteNames) { fav ->
-                        Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), shape = RoundedCornerShape(12.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text(fav, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                                IconButton(
-                                    onClick = {
-                                        favToEdit = fav
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    })
-                                {
-                                    Icon(
-                                        Icons.Filled.Edit,
-                                        "Modifica",
-                                        tint = MaterialTheme.colorScheme.primary)
+
+                    // Usiamo itemsIndexed per avere sia la posizione (index) che il nome (fav)
+                    itemsIndexed(viewModel.favoriteNames) { index, fav ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // ---> SISTEMA DI RIORDINO (IDENTICO AL TAVOLO) <---
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    // Freccia SU
+                                    IconButton(
+                                        onClick = { viewModel.moveFavorite(index, index - 1) },
+                                        // Disabilitato se è il primo elemento (non può andare più su di 0)
+                                        enabled = index > 0,
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                                    }
+
+                                    // Freccia GIÙ
+                                    IconButton(
+                                        onClick = { viewModel.moveFavorite(index, index + 1) },
+                                        // Disabilitato se è l'ultimo elemento della lista
+                                        enabled = index < viewModel.favoriteNames.size - 1,
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                    }
                                 }
-                                IconButton(
-                                    onClick = {
-                                        viewModel.removeFavorite(fav)
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    })
-                                { Icon(
-                                    Icons.Filled.Delete,
-                                    "Elimina",
-                                    tint = MaterialTheme.colorScheme.error) }
+
+                                // Nome del giocatore preferito
+                                Text(
+                                    text = fav,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier
+                                        .weight(1f) // Occupa tutto lo spazio centrale
+                                        .padding(start = 12.dp) // Lo stacca dalle frecce
+                                )
+
+                                // Tasto Modifica (Matita)
+                                IconButton(onClick = { favToEdit = fav }) {
+                                    Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.primary)
+                                }
+
+                                // Tasto Elimina (Cestino)
+                                IconButton(onClick = { viewModel.removeFavorite(fav) }) {
+                                    Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
                     }

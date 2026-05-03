@@ -318,6 +318,24 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Sposta un nome nella lista dei preferiti su o giù
+    fun moveFavorite(fromIndex: Int, toIndex: Int) {
+        // Controllo di sicurezza: verifichiamo che entrambi gli indici siano validi
+        // (Compresi tra 0 e la fine della lista dei preferiti)
+        if (fromIndex in favoriteNames.indices && toIndex in favoriteNames.indices) {
+
+            // 1. Estraiamo il nome dalla posizione attuale
+            val fav = favoriteNames.removeAt(fromIndex)
+
+            // 2. Lo inseriamo nella nuova posizione desiderata
+            favoriteNames.add(toIndex, fav)
+
+            // 3. Salviamo il cambiamento (se hai una funzione specifica per i preferiti,
+            // altrimenti qui è dove l'app memorizza l'ordine per il futuro)
+            saveFavorites()
+        }
+    }
+
     /**
      * LOGICA COMBO ROVENTE:
      * Gestisce l'assegnazione punti controllando se sono consecutivi.
