@@ -11,6 +11,7 @@
     import androidx.compose.foundation.lazy.items // <-- IMPORTANTE: Serve per ciclare la lista dei colori
     import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.shape.CircleShape
+    import androidx.compose.foundation.shape.RoundedCornerShape
     import androidx.compose.material.icons.Icons
     import androidx.compose.material.icons.filled.*
     import androidx.compose.material3.Icon
@@ -409,7 +410,7 @@
 
     /**
      * ColorPickerRow: Crea una riga scorrevole di pulsanti circolari colorati.
-     * * @param selectedColor: Il colore che l'utente ha attualmente cliccato (per disegnare il bordo di selezione).
+     * @param selectedColor: Il colore che l'utente ha attualmente cliccato (per disegnare il bordo di selezione).
      * @param onColorSelected: Una funzione (lambda) che avvisa l'app quando l'utente cambia scelta cromatica.
      */
     @Composable
@@ -418,47 +419,58 @@
         onColorSelected: (Color) -> Unit,
         modifier: Modifier = Modifier
     ) {
-        // ---> LA LOGICA ARCOBALENO <---
-        // Aggiungiamo Color.Unspecified all'inizio della lista come nostro "Jolly" per i colori casuali
+        // ---> 1. LA LISTA UNITA (Il Jolly + I Colori Normali) <---
+        // Creiamo una nuova lista mettendo Color.Unspecified al primo posto,
+        // seguito da tutti gli altri colori della nostra palette.
         val paletteWithRandom = listOf(Color.Unspecified) + playerPalette
 
-        // LazyRow: Disegna graficamente solo i cerchi visibili al momento, risparmiando RAM del telefono.
+        // LazyRow: Disegna graficamente solo i cerchi visibili
         LazyRow(
             modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp), // Spazio tra i cerchi
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
         ) {
-            // items: Cicla la palette sopra definita per creare un pulsante per ogni colore disponibile.
-            items(playerPalette) { color ->
-                // Variabile spia: ci dice se questo specifico cerchio è quello "attivo".
+            // ---> FIX LOGICO: Usiamo la nuova lista 'paletteWithRandom'! <---
+            items(paletteWithRandom) { color ->
+
                 val isSelected = color == selectedColor
 
-                // Box: Lo usiamo come base per disegnare fisicamente il cerchio.
                 Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            // ---> IL DISEGNO DELL'ARCOBALENO <---
-                            // Se il colore è il Jolly, disegniamo il Brush.sweepGradient (l'arcobaleno a ruota).
-                            // Altrimenti coloriamo di tinta unita.
-                            .then(
-                                if (color == Color.Unspecified) {
-                                    Modifier.background(
-                                        Brush.sweepGradient(
-                                            listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
-                                        )
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(15.dp))// RoundedCornerShape serve a dare quell'effetto "squadrato ma morbido" perfetto.
+                        // ---> 2. IL DISEGNO INTELLIGENTE (Modifier.then) <---
+                        // .then() ci permette di applicare modifiche grafiche diverse in base a una condizione
+                        .then(
+                            if (color == Color.Unspecified) {
+                                // Se è il Jolly: Disegna un gradiente arcobaleno a ruota
+                                Modifier.background(
+                                    Brush.sweepGradient(//definisce come un'area viene riempita. Invece della classica tinta unita, Jetpack Compose offre i Gradienti.
+                                        listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
                                     )
-                                } else {
-                                    Modifier.background(color)
-                                }
-                            )
-                            .border(
-                                width = if (isSelected) 3.dp else 0.dp,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                shape = CircleShape
-                            )
-                            .clickable { onColorSelected(color) }
-                    )
+                                )
+                            } else {
+                                // Se è un colore normale: Disegna la tinta unita
+                                Modifier.background(color)
+                            }
+                        )
+                        // ---> 3. IL BORDO DI SELEZIONE <---
+                        .border(
+                            width = if (isSelected) 3.dp else 0.dp,
+                            // Selezionato = Bordo Blu (Primary). Non selezionato = Bordo invisibile.
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            shape = RoundedCornerShape(15.dp)
+                        /* * 💡 CURIOSITÀ DI DESIGN: Le Forme e lo "Squircle"
+                         * Il raggio di stondatura (es. 12.dp) definisce la forma geometrica finale:
+                         * - 0.dp: Quadrato perfetto, spigoloso e netto.
+                         * - 20.dp: Cerchio perfetto (la metà esatta della grandezza totale, che qui è 40.dp).
+                         * - 8.dp ~ 16.dp: "Squircle" (Square + Circle). È la moderna forma a "mattonella"
+                         * morbidamente arrotondata, standard del Material Design 3 e delle icone smartphone!
+                         */
+
+                        )
+                        .clickable { onColorSelected(color) }
+                )
             }
         }
     }
