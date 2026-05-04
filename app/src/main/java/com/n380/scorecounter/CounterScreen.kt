@@ -51,7 +51,10 @@ fun CounterScreen(
 
     // ---> STATI PER IL DADO VIRTUALE <---
     var showDiceDialog by remember { mutableStateOf(false) }
+
     var diceResult by remember { mutableIntStateOf(1) }
+    // Contatore univoco per forzare l'aggiornamento dell'interfaccia ad ogni click
+    var diceRollCount by remember { mutableIntStateOf(0) }
 
     // --->Ricorda QUALE giocatore stiamo modificando manualmente con la tastiera <---
     // Se è "null", il popup per l'inserimento manuale è nascosto.
@@ -203,6 +206,7 @@ fun CounterScreen(
                     OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
                             showResetDialog = true
                         },
                         modifier = Modifier
@@ -643,9 +647,11 @@ fun CounterScreen(
     if (showDiceDialog) {
         DiceRollDialog(
             result = diceResult,
+            rollCount = diceRollCount, // <-- Passiamo il nuovo parametro
             onRollAgain = {
                 // Genera un nuovo numero casuale e lo salva
                 diceResult = (1..viewModel.diceSides).random()
+                diceRollCount++ // <-- Incrementiamo ad ogni nuovo lancio
             },
             onDismiss = { showDiceDialog = false }
         )
