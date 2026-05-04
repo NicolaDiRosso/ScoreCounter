@@ -15,16 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 // ====================================================================
@@ -226,221 +222,109 @@ fun ResultsScreen(
                 }
             }
         ) { innerPadding ->
-            // Ora la schermata base è una LazyColumn. Con l'aggiunta del grafico in fondo, lo schermo diventa molto alto.
-            // Con una Column statica, su telefoni piccoli parte della classifica finirebbe fuori dallo schermo.
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp)
             ) {
-                item {
-                    // --- INTESTAZIONE TITOLO E CRONOMETRO (Indice 0, appare per primo) ---
-                    Column(
-                        modifier = staggeredModifier(0),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Spacer(modifier = Modifier.height(16.dp))
+
+                // --- INTESTAZIONE (Titolo e Cronometro) ---
+                Column(
+                    modifier = staggeredModifier(0).fillMaxWidth().padding(vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (viewModel.matchDurationSeconds > 0) {
                         Text(
-                            text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
-                            // Usiamo l'esatto stile gigante della schermata Home e Nuova Partita
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            text = "⏱️ Tempo di gioco: ${formatTime(viewModel.matchDurationSeconds)}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 8.dp) // Ridotto padding bottom
                         )
-                        // Mostriamo il cronometro di gioco sotto il titolo
-                        if (viewModel.matchDurationSeconds > 0) {
-                            Text(
-                                text = "⏱️ Tempo di gioco: ${formatTime(viewModel.matchDurationSeconds)}",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
-                        } else {
-                            // Se non c'è il cronometro, usiamo uno Spacer per mantenere bilanciata la grafica
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
                     }
                 }
 
-                // Controlliamo preventivamente che la classifica non sia vuota per evitare crash
-                if (rankedPlayers.isNotEmpty()) {
-                    item {
-                        // --- IL VINCITORE (Indice 1, appare per secondo) ---
-                        // Il primo elemento della lista (ormai ordinata!) è indubbiamente il vincitore assoluto
-                        val winner = rankedPlayers[0]
-                        val winnerColor = Color(winner.color)
+                // ====================================================================
+                // ---> IL TAVOLO (Scatola Grigia Contenitiva) <---
+                // ====================================================================
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // weight(1f) permette alla card di occupare tutto lo spazio fino ai bottoni
+                        .weight(1f)
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    // Stondatura completa a 24.dp per coerenza con la CounterScreen
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    // LazyColumn DENTRO il tavolo, per scorrere i giocatori e il grafico
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 16.dp, start = 12.dp, end = 12.dp), // Padding interno del tavolo
+                        verticalArrangement = Arrangement.spacedBy(4.dp), // Spazio ridotto, lo gestisce il padding della card
+                        contentPadding = PaddingValues(bottom = 16.dp) // Cuscinetto in fondo prima di finire il tavolo
+                    ) {
 
-                        // ======================================================
-                        // ---> EFFETTO CARTA RARA (Shimmer Sweep) <---
-                        // ======================================================
-                        // 1. IL MOTORE DELL'ANIMAZIONE: Crea un timer che va in loop continuo (infinito).
-                        val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+                        // Controllo di sicurezza
+                        if (rankedPlayers.isNotEmpty()) {
 
-                        // 2. LA COORDINATA IN MOVIMENTO: Calcola un numero che viaggia da -500 a 2000 in 4.5 secondi.
-                        val translateAnim by infiniteTransition.animateFloat(
-                            initialValue = -500f, // Parte da fuori lo schermo a sinistra
-                            targetValue = 2000f,  // Viaggia fino a fuori lo schermo a destra
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(durationMillis = 4500, easing = LinearEasing),
-                                repeatMode = RepeatMode.Restart // Quando finisce, ricomincia da capo istantaneamente
-                            ),
-                            label = "shimmer_translation"
-                        )
-
-                        // 3. IL FASCIO DI LUCE (Pennello Gradiente):
-                        val shimmerBrush = Brush.linearGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                winnerColor.copy(alpha = 0.4f), // Luce sfumata col colore del vincitore
-                                Color.Transparent
-                            ),
-                            // Colleghiamo inizio e fine del gradiente alle coordinate in movimento per far "scivolare" la luce in diagonale
-                            start = Offset(translateAnim, translateAnim),
-                            end = Offset(translateAnim + 400f, translateAnim + 400f) // 400f è lo spessore logico del raggio
-                        )
-                        // ======================================================
-
-                        Card(
-                            modifier = staggeredModifier(1) // Applica l'animazione di entrata a cascata
-                                .fillMaxWidth()
-                                .padding(bottom = 24.dp)
-                                // ---> APPLICAZIONE DELLA LUCE SULLA CARD <---
-                                .drawWithContent {
-                                    drawContent()
-                                    drawRect(brush = shimmerBrush)
-                                },
-                            // ---> MODIFICA IDENTITY VISUAL: Tonal Surface (Sfondo sfumato al 50%) <---
-                            colors = CardDefaults.cardColors(containerColor = winnerColor.copy(alpha = 0.7f)),
-                            border = BorderStroke(2.dp, winnerColor.copy(alpha = 0.5f))
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    Icons.Filled.EmojiEvents,
-                                    "Vincitore",
-                                    Modifier.padding(bottom = 8.dp).size(48.dp),
-                                    tint = winnerColor // La coppa esplode col colore puro
-                                )
-                                Text(
-                                    text = "VINCITORE",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    // ---> FIX LEGGIBILITÀ <--- Testo Neutro
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = winner.name,
-                                    // Usiamo "displayMedium" che è un testo davvero gigantesco per fare impatto
-                                    style = MaterialTheme.typography.displayMedium,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    // ---> FIX LEGGIBILITÀ <--- Testo Neutro per contrasto ottimale
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "${winner.score} Punti",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                            // --- LA CLASSIFICA GIOCATORI ---
+                            itemsIndexed(rankedPlayers) { index, player ->
+                                // Richiamiamo il nostro nuovo componente da PlayerCardComponents!
+                                // L'animazione a cascata (staggeredModifier) viene passata tramite il modifier
+                                PlayerResultCard(
+                                    player = player,
+                                    position = index + 1, // L'indice parte da 0, la classifica da 1
+                                    modifier = staggeredModifier(index + 1)
                                 )
                             }
-                        }
-                    }
 
-                    item {
-                        // --- TITOLO POSIZIONI (Indice 2, appare per terzo) ---
-                        Text(
-                            text = "Posizioni successive:",
-                            style = MaterialTheme.typography.titleMedium,
-                            // ---> Forziamo un colore brillante a contrasto! <---
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = staggeredModifier(2).fillMaxWidth().padding(bottom = 8.dp),
-                            textAlign = TextAlign.Start
-                        )
-                    }
+                            item {
+                                // --- GRAFICO FINALE ---
+                                Spacer(modifier = Modifier.height(24.dp)) // Diamo respiro tra classifica e grafico
 
-                    // --- ALTRI GIOCATORI (Indice 3 + la loro posizione) ---
-                    // Cicliamo il resto della classifica per creare le card arrotondate per il 2°, 3° posto ecc.
-                    itemsIndexed(rankedPlayers) { index, player ->
-                        // Condizione IF geniale: "Salta la generazione se l'indice è 0" (il vincitore lo abbiamo già stampato)
-                        if (index > 0) {
-                            val playerColor = Color(player.color)
-
-                            Card(
-                                // staggeredModifier(index + 3) fa sì che il ritardo aumenti in base alla posizione in classifica
-                                modifier = staggeredModifier(index + 3)
-                                    .fillMaxWidth()
-                                    .padding(bottom = 8.dp),
-                                // ---> MODIFICA IDENTITY VISUAL: Tonal Surface al 50% <---
-                                colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.7f)),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
+                                Column(
+                                    modifier = staggeredModifier(rankedPlayers.size + 2) // Animazione finale
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 4.dp)
                                 ) {
-                                    // Mettiamo 'index + 1' perché gli array nella programmazione partono da 0,
-                                    // ma la classifica umana parte logicamente dal 1° posto!
                                     Text(
-                                        text = "${index + 1}° ${player.name}",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        // ---> FIX LEGGIBILITÀ <--- Testo Neutro
-                                        color = MaterialTheme.colorScheme.onSurface
+                                        text = "Andamento Partita",
+                                        style = MaterialTheme.typography.titleMedium, // Più discreto rispetto alla classifica
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 12.dp)
                                     )
-                                    Text(
-                                        text = "${player.score} pt",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        // ---> FIX LEGGIBILITÀ <--- Testo Neutro
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-                        }
-                    }
 
-                    item {
-                        // --- GRAFICO FINALE (Indice dimensione classifica + 4) ---
-                        // Appare per ultimo dopo tutti i giocatori
-                        Spacer(modifier = Modifier.height(16.dp)) // Diamo respiro prima del grafico
-                        Card(
-                            modifier = staggeredModifier(rankedPlayers.size + 4)
-                                .fillMaxWidth()
-                                .padding(bottom = 24.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "Andamento Partita",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(bottom = 16.dp)
-                                )
-                                // Convertiamo i "Player" in "PlayerRecord" per darli in pasto al motore grafico
-                                val recordsForChart = viewModel.players.map {
-                                    PlayerRecord(
-                                        it.name,
-                                        it.score,
-                                        it.scoreHistory.toList(),
-                                        it.fireComboCount,
-                                        it.color // Assicuriamoci che il colore venga passato al grafico!
-                                    )
+                                    val recordsForChart = viewModel.players.map {
+                                        PlayerRecord(it.name, it.score, it.scoreHistory.toList(), it.fireComboCount, it.color)
+                                    }
+
+                                    // Sfondo del grafico
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth().height(180.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        ScoreChart(
+                                            players = recordsForChart,
+                                            modifier = Modifier.fillMaxSize().padding(12.dp)
+                                        )
+                                    }
                                 }
-                                // ALTEZZA DEL GRAFICO FISSATA: lo rendiamo alto 200 pixel, bello spazioso.
-                                ScoreChart(
-                                    players = recordsForChart,
-                                    modifier = Modifier.fillMaxWidth().height(200.dp)
-                                )
                             }
                         }
                     }
-                    // Spazio vuoto gigante inserito in fondo alla lista per non coprire mai la fine del grafico coi bottoni
-                    item { Spacer(modifier = Modifier.height(180.dp)) }
                 }
             }
         }
-
         // =========================================================
         // ESECUZIONE DELL'ANIMAZIONE CORIANDOLI (Sovrapposta in alto)
         // =========================================================

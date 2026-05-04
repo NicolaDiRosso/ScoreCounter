@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -26,6 +25,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+
+// ---> IMPORT PER ANIMAZIONI E SHIMMER <---
+import androidx.compose.animation.core.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
 
 /**
  * ====================================================================
@@ -371,6 +377,177 @@ fun PlayerScoreCard(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+/**
+ * ====================================================================
+ * COMPONENTE: PlayerResultCard (Stile Prestigio & Material You Accent)
+ * ====================================================================
+ * Card usata nella schermata della Classifica Finale.
+ * Al 1° posto applica un effetto "Luce Passante" (Shimmer), elevation
+ * e design pieno. Agli altri applica lo stile accent bar.
+ * ====================================================================
+ */
+@Composable
+fun PlayerResultCard(
+    player: Player,
+    position: Int, // 1 per il vincitore, 2 per il secondo, ecc.
+    modifier: Modifier = Modifier
+) {
+    val playerColor = Color(player.color)
+    val isWinner = position == 1
+
+    // Il vincitore ha uno sfondo solido, gli altri hanno l'alpha al 30% (coerenza con la sfida)
+    val cardBackground = if (isWinner) playerColor else playerColor.copy(alpha = 0.30f)
+    // Ora tutti i giocatori (vincitore compreso) useranno lo stesso colore di testo!
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    // ====================================================================
+    // LOGICA ANIMAZIONE SHIMMER (Riflesso di Luce)
+    // ====================================================================
+    // Questa animazione viene definita e calcolata SOLO se è il vincitore.
+    val shimmerBrush = if (isWinner) {
+
+        // rememberInfiniteTransition: Gestisce animazioni cicliche che non finiscono mai.
+        val infiniteTransition = rememberInfiniteTransition(label = "WinnerLightAnimation")
+
+        // animateFloat: Definisce una variabile numerica che fluttua nel tempo.
+        val translationX by infiniteTransition.animateFloat(
+            initialValue = -500f, // Parte molto a sinistra (fuori dalla card)
+            targetValue = 1000f, // Arriva molto a destra (oltre la card)
+            animationSpec = infiniteRepeatable(
+                // tween(1500): La luce impiega 1 secondo e mezzo a passare.
+                animation = tween(1500, delayMillis = 1000, easing = LinearEasing),
+                // Restart: Quando finisce, ricomincia da sinistra.
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "XTranslation"
+        )
+
+        // ---> MODIFICA 2: LUCE UNIVERSALE <---
+        // Usiamo un bianco puro (Color.White) semi-trasparente per l'effetto luce.
+        // In questo modo il riflesso sarà sempre visibile e brillante,
+        // indipendentemente dal colore di testo che abbiamo scelto sopra.
+        Brush.linearGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.0f),
+                Color.White.copy(alpha = 0.4f), // Luce più marcata al centro
+                Color.White.copy(alpha = 0.0f),
+            ),
+            start = Offset(translationX, 0f),
+            end = Offset(translationX + 300f, 300f)
+        )
+    } else {
+        null // Se non è il vincitore, non creiamo nessun gradiente per risparmiare risorse
+    }
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = if (isWinner) 6.dp else 4.dp) // Più spazio verticale per il vincitore
+            // zIndex(1f): Alza il livello di renderizzazione del vincitore per sovrapporre l'ombra perfettamente
+            .zIndex(if (isWinner) 1f else 0f),
+
+        colors = CardDefaults.cardColors(containerColor = cardBackground),
+        // Il vincitore non ha bordo (è pieno), gli altri hanno il bordo al 50%
+        border = if (isWinner) null else BorderStroke(1.dp, playerColor.copy(alpha = 0.5f)),
+
+        // RISALTO STRUTTURALE: Forma più grande per il vincitore (24.dp vs 16.dp)
+        shape = RoundedCornerShape(if (isWinner) 24.dp else 16.dp),
+
+        // RISALTO STRUTTURALE (Elevation): Il vincitore è "alzato" (ombra). Gli altri sono "piatti".
+        elevation = if (isWinner) CardDefaults.cardElevation(defaultElevation = 8.dp)
+        else CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        // Usiamo Box per sovrapporre il gradiente della luce sopra il contenuto
+        Box(modifier = Modifier.fillMaxWidth()) {
+
+            // 1. IL CONTENUTO DELLA CARD (Identico a prima, ma con padding ritoccato per il vincitore)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                // L'ACCENT BAR LATERALE (Visibile solo per chi NON vince)
+                if (!isWinner) {
+                    Box(
+                        modifier = Modifier
+                            .width(12.dp)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+                            .background(playerColor)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // Il vincitore ha molto più "respiro" interno (padding)
+                        .padding(horizontal = 16.dp, vertical = if (isWinner) 24.dp else 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // BLOCCO SINISTRA: Posizione + Nome + Trofeo
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    ) {
+                        Text(
+                            text = "$position°",
+                            style = if (isWinner) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Black,
+                            color = textColor,
+                            modifier = Modifier.padding(end = 12.dp)
+                        )
+
+                        Text(
+                            text = player.name,
+                            style = if (isWinner) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = textColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+
+                        if (isWinner) {
+                            Icon(
+                                imageVector = Icons.Filled.EmojiEvents,
+                                contentDescription = "Vincitore",
+                                tint = Color(0xFFFFD700), // Trofeo Oro (Questo sta bene su tutti gli sfondi perché è un'icona, non un bordo!)
+                                modifier = Modifier.padding(start = 8.dp).size(28.dp)
+                            )
+                        }
+                    }
+
+                    // BLOCCO DESTRA: Punteggio Gigante
+                    Text(
+                        text = "${player.score} pt",
+                        style = if (isWinner) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black,
+                        color = textColor,
+                        maxLines = 1
+                    )
+                }
+            } // <-- Fine Row contenuto
+
+            // ====================================================================
+            // 2. LO STRATO DELLA LUCE (Shimmer Overlay)
+            // ====================================================================
+            // Sovrapponiamo un Box vuoto che disegna solo il gradiente diagonale.
+            if (isWinner && shimmerBrush != null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize() // Si adatta perfettamente alle dimensioni della card
+                        // .then(if (isWinner)...) Applica lo sfondo del gradiente, che è animato!
+                        .background(shimmerBrush)
+                        // Aggiungiamo un leggero effetto blur lenticolare sul gradiente stesso (Premium feel)
+                        .graphicsLayer { alpha = 0.7f }
+                )
             }
         }
     }
