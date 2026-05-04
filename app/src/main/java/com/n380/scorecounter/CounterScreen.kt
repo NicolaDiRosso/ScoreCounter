@@ -639,33 +639,15 @@ fun CounterScreen(
         )
     }
 
-    // ---> POPUP DEL DADO VIRTUALE <---
+    // ---> POPUP DEL DADO VIRTUALE (Esternalizzato in DiceComponents.kt) <---
     if (showDiceDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiceDialog = false },
-            title = { Text("Lancio del Dado") },
-            text = {
-                Text(
-                    text = "🎲 $diceResult",
-                    style = MaterialTheme.typography.displayLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
+        DiceRollDialog(
+            result = diceResult,
+            onRollAgain = {
+                // Genera un nuovo numero casuale e lo salva
+                diceResult = (1..viewModel.diceSides).random()
             },
-            confirmButton = {
-                // Tasto per rullare di nuovo
-                Button(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    // ---> FIX: Usiamo la variabile del ViewModel invece del numero fisso 6! <---
-                    diceResult = (1..viewModel.diceSides).random()
-                }) { Text("Tira di nuovo") }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showDiceDialog = false
-                }) { Text("Chiudi") }
-            }
+            onDismiss = { showDiceDialog = false }
         )
     }
 

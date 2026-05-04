@@ -60,7 +60,7 @@ fun CreateMatchScreen(
 
     // ---> STATI DEL DADO <---
     var showDiceSettingsDialog by remember { mutableStateOf(false) }
-    var customDiceInput by remember { mutableStateOf("") }
+
 
     // ---> IL MOTORE DEL BOTTOM SHEET <---
     // Ricorda lo stato del pannello che scivola dal basso (se è aperto, mezzo aperto o chiuso)
@@ -190,7 +190,6 @@ fun CreateMatchScreen(
                             )
 
                             // ---> IL BOTTONE DEL DADO <---
-                            // Mostra sempre il numero di facce attualmente scelto nel ViewModel (es. D6, D20)
                             OutlinedButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -199,8 +198,10 @@ fun CreateMatchScreen(
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                 modifier = Modifier.height(36.dp)
                             ) {
+                                // Aggiungiamo l'icona e inseriamo un testo per chiarire a cosa serve
+                                Icon(Icons.Filled.Casino, "Dado", modifier = Modifier.size(18.dp).padding(end = 4.dp))
                                 Text(
-                                    text = "D${viewModel.diceSides} 🎲", // String Interpolation!
+                                    text = "Dado (D${viewModel.diceSides})",
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -739,83 +740,12 @@ fun CreateMatchScreen(
         )
     }
 
-    // 3. POPUP: IMPOSTAZIONI DEL DADO
+    // 3. POPUP: IMPOSTAZIONI DEL DADO (Esternalizzato in DiceComponents.kt)
     if (showDiceSettingsDialog) {
-        var pendingDiceSides by remember { mutableIntStateOf(viewModel.diceSides) }
-        AlertDialog(
-            onDismissRequest = { showDiceSettingsDialog = false },
-            title = { Text("Seleziona il Dado 🎲", fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Scegli un formato rapido o creane uno tuo:", style = MaterialTheme.typography.bodyMedium)
-
-                    // GRIGLIA DADI STANDARD
-                    val diceOptions = listOf(6, 12, 20, 100)
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        diceOptions.chunked(2).forEach { rowItems ->
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                rowItems.forEach { sides ->
-                                    val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
-                                    Card(
-                                        modifier = Modifier.weight(1f).height(60.dp).clickable {
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            pendingDiceSides = sides
-                                            customDiceInput = ""
-                                        },
-                                        colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                            Text("D$sides", fontWeight = FontWeight.Bold, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-
-                    // INSERIMENTO MANUALE
-                    Text("Inserimento manuale:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                    OutlinedTextField(
-                        value = customDiceInput,
-                        onValueChange = { if (it.all { char -> char.isDigit() }) customDiceInput = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Es. 45") },
-                        label = { Text("N° Facce") },
-                        shape = RoundedCornerShape(20.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
-                    )
-                }
-            },
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp,)
-                ) {
-                    OutlinedButton(
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            customDiceInput = "";showDiceSettingsDialog = false
-                        })
-                    { Text("Annulla", maxLines = 1, ) }
-                    Button(
-                        modifier = Modifier.weight(1f).height(48.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            val manualSides = customDiceInput.toIntOrNull()
-                            viewModel.diceSides = if (manualSides != null && manualSides > 0) manualSides
-                            else pendingDiceSides
-                        customDiceInput = ""; showDiceSettingsDialog = false
-                    }) { Text("Applica") }
-                }
-            },
-            dismissButton = null
+        DiceSettingsDialog(
+            currentSides = viewModel.diceSides,
+            onSidesChanged = { newSides -> viewModel.diceSides = newSides },
+            onDismiss = { showDiceSettingsDialog = false }
         )
     }
 }
