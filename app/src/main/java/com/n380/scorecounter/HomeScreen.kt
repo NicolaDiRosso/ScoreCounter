@@ -18,8 +18,10 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -650,120 +652,387 @@ fun HomeScreen(
             animationSpec = tween(200, easing = FastOutLinearInEasing)
         )
     ) {
-        // Usiamo lastMatch (la memoria fantasma) per assicurarci che i dati non spariscano
-        // improvvisamente mentre l'animazione di uscita sta ancora finendo di scivolare via.
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //AGGIUNGIAMO LA SEZIONE DEI PREMI MA PRIMA DI QUESTO IMPOSTAIMO LOL SFONDO CON LE ICONE
         lastMatch?.let { match ->
+            // Usiamo lastMatch (la memoria fantasma) per assicurarci che i dati non spariscano
+            // improvvisamente mentre l'animazione di uscita sta ancora finendo di scivolare via.
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                // Usiamo il colore di background del telefono ma lo rendiamo leggermente trasparente (alpha 0.97f)
-                // per far intravedere la schermata sfocata sotto, dando senso di profondità.
-                color = MaterialTheme.colorScheme.background.copy(alpha = 0.97f)
+                // Riportiamo il colore a solido (senza alpha) perché lo sfondo a icone
+                // riempirà visivamente lo spazio.
+                color = MaterialTheme.colorScheme.background
             ) {
-                Column(
-                    // systemBarsPadding() è vitale in un overlay a schermo intero: impedisce
-                    // che i nostri testi finiscano sotto l'orologio di Android in alto.
-                    modifier = Modifier.fillMaxSize().systemBarsPadding().padding(16.dp)
-                ) {
+                // 🧠 LEZIONE Z-INDEX: Il Box ci permette di sovrapporre i livelli.
+                Box(modifier = Modifier.fillMaxSize()) {
 
-                    Text(
-                        text = "Analisi Partita",
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
+                    // LIVELLO 0 (Sfondo): Dipingiamo la griglia di icone dinamiche
+                    // per coerenza con la Home e la ResultsScreen.
+                    PatternedBackground()
 
-                    Text(
-                        text = "Sfida: ${match.title}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary,
-                    )
-                    Text(
-                        text = "Vinta da ${match.winnerName} con ${match.winningScore} pt",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        shape = RoundedCornerShape(24.dp)
+                    // LIVELLO 1 (Contenuto): La colonna con tutte le informazioni.
+                    Column(
+                        // systemBarsPadding() è vitale in un overlay a schermo intero: impedisce
+                        // che i nostri testi finiscano sotto l'orologio di Android in alto.
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .systemBarsPadding()
+                            .padding(16.dp)
                     ) {
-                        // Il nostro componente Canvas personalizzato
-                        ScoreChart(
-                            players = match.allPlayers,
-                            // Passando isDetailed = true attiviamo la modalità espansa:
-                            // il Canvas disegnerà anche la griglia, i numeri e permetterà lo scroll orizzontale.
-                            isDetailed = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(400.dp)
-                                .padding(16.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.Timer, null, tint = Color.LightGray)
+                        // --- INTESTAZIONE OVERLAY ---
                         Text(
-                            text = " Durata totale: ${formatTime(match.durationSeconds)}",
+                            text = "Analisi Partita",
+                            style = MaterialTheme.typography.displaySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = "Sfida: ${match.title}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        Text(
+                            text = "Vinta da ${match.winnerName} con ${match.winningScore} pt",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+
+                        // ====================================================================
+                        // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
+                        // ====================================================================
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f) // 🧠 COMPOSE: Il weight(1f) spinge tutto ciò che segue verso il basso.
+                                .padding(bottom = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            shape = RoundedCornerShape(24.dp)
+                        ) {
+                            // 🧠 RECOMPOSITION: Usiamo Column + verticalScroll invece di LazyColumn.
+                            // Forziamo il caricamento immediato di tutti gli elementi per avere animazioni fluide.
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()) // Rende il contenuto del Tavolo scorrevole.
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp) // Spazio automatico tra i figli.
+                            ) {
+                                // --- IL GRAFICO ESPANSO ---
+                                Text(
+                                    "Andamento Punteggi",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().height(350.dp),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    ScoreChart(
+                                        players = match.allPlayers,
+                                        isDetailed = true, // Attiva la griglia e le etichette nel Canvas.
+                                        modifier = Modifier.fillMaxSize().padding(12.dp)
+                                    )
+                                }
+
+                                // --- AREA PREMI (Retrocompatibile) ---
+                                // 🧠 KOTLIN EXTENSION: Usiamo i metodi creati nel file Models per calcolare i dati.
+                                // 'remember(match)' assicura che il calcolo avvenga solo quando cambia la partita selezionata.
+                                val storiciCecchino =
+                                    remember(match) { match.getHistoricalCecchino() }
+                                val storiciInarrestabile =
+                                    remember(match) { match.getHistoricalInarrestabile() }
+                                val storiciGambero =
+                                    remember(match) { match.getHistoricalGambero() }
+                                val storiciFenice = remember(match) { match.getHistoricalFenice() }
+
+                                // 🧠 LOGICA CONDIZIONALE: Se tutti i calcoli sono 'null' (partite vecchie), il blocco sparisce.
+                                if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Premi Partita",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+
+                                    // --- CARD PREMIO: CECCHINO 🎯 ---
+                                    storiciCecchino?.let { (player, punti) ->
+                                        val playerColor = Color(player.color)
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            // 🎨 DESIGN: Alpha 0.15f crea uno sfondo tenue basato sul colore del giocatore.
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = playerColor.copy(
+                                                    alpha = 0.15f
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(20.dp),
+                                            border = BorderStroke(
+                                                1.dp,
+                                                playerColor.copy(alpha = 0.3f)
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    "🎯",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    modifier = Modifier.padding(end = 16.dp)
+                                                )
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        "Il Cecchino",
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        color = playerColor,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        player.name,
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Black
+                                                    )
+                                                }
+                                                Card(
+                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text(
+                                                        "+$punti pt",
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 12.dp,
+                                                            vertical = 6.dp
+                                                        ),
+                                                        color = Color.White,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // --- CARD PREMIO: INARRESTABILE 🔥 ---
+                                    storiciInarrestabile?.let { (player, combo) ->
+                                        val playerColor = Color(player.color)
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = playerColor.copy(
+                                                    alpha = 0.15f
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(20.dp),
+                                            border = BorderStroke(
+                                                1.dp,
+                                                playerColor.copy(alpha = 0.3f)
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    "🔥",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    modifier = Modifier.padding(end = 16.dp)
+                                                )
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        "L'Inarrestabile",
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        color = playerColor,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        player.name,
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Black
+                                                    )
+                                                }
+                                                Card(
+                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text(
+                                                        "$combo Combo",
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 12.dp,
+                                                            vertical = 6.dp
+                                                        ),
+                                                        color = Color.White,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // --- CARD PREMIO: IL GAMBERO 🦞 ---
+                                    storiciGambero?.let { (player, punti) ->
+                                        val playerColor = Color(player.color)
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = playerColor.copy(
+                                                    alpha = 0.15f
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(20.dp),
+                                            border = BorderStroke(
+                                                1.dp,
+                                                playerColor.copy(alpha = 0.3f)
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    "🦞",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    modifier = Modifier.padding(end = 16.dp)
+                                                )
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        "Il Gambero",
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        color = playerColor,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        player.name,
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Black
+                                                    )
+                                                }
+                                                Card(
+                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text(
+                                                        "-$punti pt",
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 12.dp,
+                                                            vertical = 6.dp
+                                                        ),
+                                                        color = Color.White,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // --- CARD PREMIO: LA FENICE 🦅 ---
+                                    storiciFenice?.let { (player, punti) ->
+                                        val playerColor = Color(player.color)
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = playerColor.copy(
+                                                    alpha = 0.15f
+                                                )
+                                            ),
+                                            shape = RoundedCornerShape(20.dp),
+                                            border = BorderStroke(
+                                                1.dp,
+                                                playerColor.copy(alpha = 0.3f)
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    "🦅",
+                                                    style = MaterialTheme.typography.displaySmall,
+                                                    modifier = Modifier.padding(end = 16.dp)
+                                                )
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    Text(
+                                                        "La Fenice",
+                                                        style = MaterialTheme.typography.labelLarge,
+                                                        color = playerColor,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        player.name,
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Black
+                                                    )
+                                                }
+                                                Card(
+                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                    shape = RoundedCornerShape(12.dp)
+                                                ) {
+                                                    Text(
+                                                        "+$punti pt",
+                                                        modifier = Modifier.padding(
+                                                            horizontal = 12.dp,
+                                                            vertical = 6.dp
+                                                        ),
+                                                        color = Color.White,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Footer informativo sulla durata
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Filled.Timer,
+                                        null,
+                                        tint = Color.LightGray,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        text = " Durata totale: ${formatTime(match.durationSeconds)}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                            }
+                        }
+
+                        // PULSANTE CHIUDI (Ancorato al fondo tramite FloatingActionButton)
+                        ExtendedFloatingActionButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                expandedMatchIndex =
+                                    -1 // 🧠 STATE: Cambiando l'indice a -1, l'overlay scompare.
+                            },
+                            modifier = Modifier.fillMaxWidth(0.8f).height(72.dp)
+                                .align(Alignment.CenterHorizontally),
+                            shape = RoundedCornerShape(20.dp),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            icon = {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    null,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            },
+                            text = {
+                                Text(
+                                    "Chiudi Analisi",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         )
                     }
-
-                    // LEZIONE FLEXBOX: Un weight(1f) vuoto agisce come una "molla".
-                    // Si prende tutto lo spazio vuoto tra il testo sopra e il bottone sotto,
-                    // spingendo di fatto il bottone di chiusura incollato al bordo inferiore.
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // --------------------------------------------------------------------
-                    // PULSANTE CHIUDI ANALISI (Modello Expressive con Icona)
-                    // --------------------------------------------------------------------
-                    // ---> LEZIONE: RIUTILIZZO DEI PATTERN VISIVI <---
-                    // Invece di usare un 'Button' base, usiamo un 'ExtendedFloatingActionButton'.
-                    // Questo ci garantisce automaticamente la stessa elevazione (ombra),
-                    // gli stessi colori primari e un allineamento perfetto tra icona e testo,
-                    // esattamente come nella pagina delle Statistiche.
-                    // --------------------------------------------------------------------
-                    // PULSANTE CHIUDI ANALISI (Modello Expressive con Icona)
-                    // --------------------------------------------------------------------
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            // Aggiunta la vibrazione per coerenza tattile
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            expandedMatchIndex = -1
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f) // Largo il 90%
-                            .height(72.dp)      // Alto 72dp
-                            // ---> FIX MILLIMETRICO: CENTRATURA <---
-                            // Forza il pulsante a stare esattamente in mezzo alla colonna
-                            // distribuendo il 10% di spazio vuoto in due margini uguali da 5%.
-                            .align(Alignment.CenterHorizontally),
-                        shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
-                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp), // Ombra attiva
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Filled.Close, // Stessa icona (X) delle Statistiche
-                                contentDescription = "Chiudi",
-                                modifier = Modifier.size(28.dp) // Icona maggiorata per bilanciare il testo
-                            )
-                        },
-                        text = {
-                            Text(
-                                text = "Chiudi Analisi",
-                                // Tipografia imponente (Headline) per richiamare la Home
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    )
                 }
             }
         }
