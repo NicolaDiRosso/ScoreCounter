@@ -578,5 +578,50 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: IL RITORNO DI FIAMMA 🚀
+     * ====================================================================
+     * Premia il giocatore che ha effettuato la rimonta più grande.
+     * Calcola la differenza (delta) tra il punteggio più basso toccato nella sua
+     * cronologia e il suo punteggio finale.
+     */
+    fun getRitornoDiFiamma(): Pair<Player, Int>? {
+        if (players.isEmpty()) return null
+
+        var comebackPlayer: Player? = null
+        var maxRecovery = 0
+
+        for (player in players) {
+            // Se il giocatore non ha una cronologia, non c'è partita da analizzare
+            if (player.scoreHistory.isEmpty()) continue
+
+            // 🧠 TEORIA KOTLIN: La funzione 'minOrNull()' e l'operatore Elvis '?:'
+            // In Kotlin, 'minOrNull()' esegue queste operazioni:
+            // 1. Scansiona la lista e restituisce il numero più piccolo.
+            // 2. (Null Safety) Se la lista dovesse essere completamente vuota, invece di lanciare
+            //    una letale Exception (crash), restituisce educatamente 'null'.
+            // L'operatore Elvis '?: 0' agisce come piano B: se la parte di sinistra restituisce null,
+            // assegna automaticamente il valore 0 alla variabile lowestScore.
+            val lowestScore = player.scoreHistory.minOrNull() ?: 0
+
+            // Il "recupero" è la distanza matematica tra il finale e il punto più basso
+            val recovery = player.score - lowestScore
+
+            // Se il recupero è maggiore di 0 ed è il migliore visto finora, aggiorniamo il record
+            if (recovery > maxRecovery) {
+                maxRecovery = recovery
+                comebackPlayer = player
+            }
+        }
+
+        // Ritorna il Pair solo se c'è stato effettivamente un recupero valido
+        return if (comebackPlayer != null && maxRecovery > 0) {
+            Pair(comebackPlayer, maxRecovery)
+        } else {
+            null
+        }
+    }
+
 }
 

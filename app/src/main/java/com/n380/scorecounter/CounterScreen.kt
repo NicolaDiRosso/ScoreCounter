@@ -714,10 +714,16 @@ fun CounterScreen(
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    showInfoDialog = false // Chiude il popup quando si preme il bottone
-                }) { Text("Ho capito") }
+                // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showInfoDialog = false // Chiude il popup quando si preme il bottone
+                    },
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text("Ho capito")
+                }
             }
         )
     }

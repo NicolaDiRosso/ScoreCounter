@@ -4,8 +4,6 @@ import android.content.Intent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -23,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Info
 
 // ====================================================================
 // LA SCHERMATA DELLA CLASSIFICA (RISULTATI) - VERSIONE ANIMATA
@@ -77,6 +76,10 @@ fun ResultsScreen(
         startAnimation = true
     }
 
+    // Variabile di Stato per controllare la visibilità del popup informativo sui premi
+    // Parte su 'false' così il popup è nascosto di default.
+    var showAwardsInfoDialog by remember { mutableStateOf(false) }
+
     // ---> CALCOLO STATISTICHE <---
     //-----> CECCHINO <-----
     // Usiamo 'remember' così il calcolo viene fatto UNA SOLA VOLTA quando si apre la schermata,
@@ -87,6 +90,9 @@ fun ResultsScreen(
     val inarrestabileStat = remember { viewModel.getInarrestabile() }
     //-----> IL GAMBERO <-----
     val gamberoStat = remember { viewModel.getGambero() }
+
+    //-----> LA FENICE <-----
+    val feniceStat = remember { viewModel.getRitornoDiFiamma() }
 
 
     // FUNZIONE DI SUPPORTO INTERNA: Crea l'effetto "comparsa e scivolamento"
@@ -327,7 +333,13 @@ fun ResultsScreen(
                             )
 
                             val recordsForChart = viewModel.players.map {
-                                PlayerRecord(it.name, it.score, it.scoreHistory.toList(), it.fireComboCount, it.color)
+                                PlayerRecord(
+                                    it.name,
+                                    it.score,
+                                    it.scoreHistory.toList(),
+                                    it.fireComboCount,
+                                    it.color
+                                )
                             }
 
                             // Sfondo del grafico
@@ -344,27 +356,41 @@ fun ResultsScreen(
                         }
 
                         // 🧠 KOTLIN LOGICA REATTIVA:
-                        // Disegniamo il titolo "Premi Partita" SOLO se almeno uno dei tre premi è stato assegnato.
-                        // L'operatore '||' significa "OPPURE".
-                        if (cecchinoStat != null || inarrestabileStat != null || gamberoStat != null) {
+                        // Aggiunto anche il controllo sul quarto premio (ritornoDiFiammaStat)
+                        if (cecchinoStat != null || inarrestabileStat != null || gamberoStat != null || feniceStat != null) {
 
-                            // Diamo un respiro di 24.dp per separare bene il blocco del grafico da quello dei premi
+                            // Diamo un respiro di 12.dp per separare bene il blocco del grafico da quello dei premi
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            Text(
-                                text = "Premi Partita",
-                                // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                // Usiamo l'indice 'size + 3' in modo che appaia in sincrono con la prima card dei premi
+                            // Usiamo una Row per disporre Titolo e Pulsante sulla stessa riga, spingendoli agli estremi (SpaceBetween)
+                            Row(
                                 modifier = staggeredModifier(rankedPlayers.size + 3)
-                                    // 🧠 KOTLIN & COMPOSE: Concatenazione dei Modifier
-                                    // Non potendo mischiare parametri di costruttori diversi (horizontal e bottom),
-                                    // chiamiamo semplicemente la funzione padding due volte in sequenza.
+                                    .fillMaxWidth()
                                     .padding(horizontal = 4.dp)
-                                    .padding(bottom = 4.dp)
-                            )
+                                    .padding(bottom = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Premi Partita",
+                                    // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                                // Pulsante icona che inverte la variabile di stato per aprire il popup
+                                IconButton(
+                                    onClick = { showAwardsInfoDialog = true },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,//icona delle info piena
+                                        contentDescription = "Info Premi",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                         }
 
 
@@ -445,7 +471,10 @@ fun ResultsScreen(
                                     ) {
                                         Text(
                                             text = "+$maxJump pt",
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
+                                            ),
                                             // Usiamo onPrimary per garantire un contrasto assoluto sul colore pieno
                                             color = MaterialTheme.colorScheme.onPrimary,
                                             fontWeight = FontWeight.Bold,
@@ -521,7 +550,10 @@ fun ResultsScreen(
                                         Text(
                                             // Scriviamo "X Combo" (es. "3 Combo")
                                             text = "$comboCount Combo",
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
+                                            ),
                                             color = MaterialTheme.colorScheme.onPrimary,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.titleMedium
@@ -592,7 +624,83 @@ fun ResultsScreen(
                                         Text(
                                             // Aggiungiamo il segno meno '-' davanti per indicare la perdita
                                             text = "-$pointsLost pt",
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
+                                            ),
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // ====================================================================
+                        // STATISTICHE AVANZATE: LA FENICE 🦅 (Ex Ritorno di Fiamma)
+                        // ====================================================================
+                        // Manteniamo il nome della variabile logica intatto, cambiamo solo la UI!
+                        feniceStat?.let { stat ->
+                            // Spacchettamento (Destructuring): Estraiamo il giocatore e i punti recuperati
+                            val (comebackPlayer, recoveryPoints) = stat
+                            val playerColor = Color(comebackPlayer.color)
+
+                            // Spazio ridotto (8.dp) per raggruppare visivamente le card dei premi
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // 🎨 MATERIAL 3 EXPRESSIVE: Stessa struttura delle card precedenti
+                            Card(
+                                // Incrementiamo ancora l'indice dell'animazione a cascata (size + 6)
+                                // in modo che appaia per quarta, con un timing perfetto.
+                                modifier = staggeredModifier(rankedPlayers.size + 6)
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 4.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = playerColor.copy(alpha = 0.15f)
+                                ),
+                                shape = RoundedCornerShape(20.dp),
+                                border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Icona a tema per la rimonta
+                                    Text(
+                                        text = "🦅",
+                                        style = MaterialTheme.typography.displaySmall,
+                                        modifier = Modifier.padding(end = 16.dp)
+                                    )
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = "La Fenice",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = playerColor,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = comebackPlayer.name,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                    }
+
+                                    // Il punteggio della rimonta (Delta)
+                                    Card(
+                                        colors = CardDefaults.cardColors(containerColor = playerColor),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        Text(
+                                            text = "+$recoveryPoints pt",
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
+                                            ),
                                             color = MaterialTheme.colorScheme.onPrimary,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.titleMedium
@@ -606,6 +714,79 @@ fun ResultsScreen(
                 } // <-- FINE DEL TAVOLO (Card contenitiva)
             }
         }
+        // =========================================================
+        // POPUP INFORMATIVO SUI PREMI (AlertDialog)
+        // =========================================================
+        // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
+        if (showAwardsInfoDialog) {
+            AlertDialog(
+                // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
+                onDismissRequest = { showAwardsInfoDialog = false },
+                title = { Text("Guida ai Premi", fontWeight = FontWeight.Bold) },
+                text = {
+                    // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                        Text(
+                            "🎯 Il Cecchino",
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                        )
+                        Text(
+                            "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            "🔥 L'Inarrestabile",
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                        )
+                        Text(
+                            "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            "🦞 Il Gambero",
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                        )
+                        Text(
+                            "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            "🦅 La Fenice",
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                        )
+                        Text(
+                            "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                },
+                confirmButton = {
+                    // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showAwardsInfoDialog = false // Chiude il popup quando si preme il bottone
+                        },
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text("Ho capito")
+                    }
+                }
+            )
+        }
+
         // =========================================================
         // ESECUZIONE DELL'ANIMAZIONE CORIANDOLI (Sovrapposta in alto)
         // =========================================================
