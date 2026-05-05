@@ -1005,28 +1005,34 @@ fun HomeScreen(
                             }
                         }
 
-                        // PULSANTE CHIUDI (Ancorato al fondo tramite FloatingActionButton)
+                        // --------------------------------------------------------------------
+                        // PULSANTE CHIUDI ANALISI (Versione Full Width)
+                        // --------------------------------------------------------------------
                         ExtendedFloatingActionButton(
                             onClick = {
+                                // Aggiunta la vibrazione per coerenza tattile
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                expandedMatchIndex =
-                                    -1 // 🧠 STATE: Cambiando l'indice a -1, l'overlay scompare.
+                                expandedMatchIndex = -1 // 🧠 STATE: Cambiando l'indice a -1, l'overlay scompare.
                             },
-                            modifier = Modifier.fillMaxWidth(0.8f).height(72.dp)
+                            modifier = Modifier
+                                .fillMaxWidth() // 🧠 UI: Rimosso lo 0.8f per occupare tutto lo spazio disponibile
+                                .height(72.dp)  // Altezza Expressive massiccia (72dp)
                                 .align(Alignment.CenterHorizontally),
-                            shape = RoundedCornerShape(20.dp),
+                            shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
+                            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             icon = {
                                 Icon(
-                                    Icons.Filled.Close,
-                                    null,
-                                    modifier = Modifier.size(28.dp)
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Chiudi",
+                                    modifier = Modifier.size(28.dp) // Icona maggiorata
                                 )
                             },
                             text = {
                                 Text(
-                                    "Chiudi Analisi",
+                                    text = "Chiudi Analisi",
+                                    // Tipografia imponente (Headline) per richiamare la Home
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold
                                 )
