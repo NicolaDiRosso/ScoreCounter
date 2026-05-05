@@ -373,7 +373,15 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         saveBackup()
     }
 
-
+    /**
+     * 🧠 TEORIA KOTLIN: La classe 'Pair'
+     * Un 'Pair' (Coppia) è una struttura dati nativa di Kotlin progettata per
+     * contenere esattamente due valori (anche di tipo diverso), accessibili
+     * tramite le proprietà '.first' e '.second'.
+     * Il suo scopo principale è permettere a una funzione di restituire DUE
+     * risultati contemporaneamente, evitandoci di dover creare una classe
+     * personalizzata solo per impacchettare i dati (come avremmo fatto in Java/C++).
+     */
     // Funzione furba per la Snackbar dell'azzeramento! Invece di azzerare e basta, fa prima una "Copia di Sicurezza"
     fun resetScoresWithUndo(): List<Pair<Int, List<Int>>> {
         // Mappa e salva una lista di "Coppie" (Pair): Il punteggio finale del giocatore e TUTTA la sua lunga lista di mosse passate
@@ -458,4 +466,117 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             clearBackup()
         }
     }
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: IL CECCHINO 🎯
+     * ====================================================================
+     * Trova il giocatore che ha ottenuto più punti positivi in una singola mossa.
+     * Ritorna un 'Pair' (Coppia) contenente il Giocatore e il valore del salto.
+     * Se nessuno ha fatto punti, ritorna 'null'.
+     */
+    fun getCecchino(): Pair<Player, Int>? {
+        // Se non ci sono giocatori, non c'è nessun cecchino
+        if (players.isEmpty()) return null
+
+        var bestPlayer: Player? = null
+        var absoluteMaxJump = 0
+
+        for (player in players) {
+            // ---> MAGIA DI KOTLIN (Programmazione Funzionale) <---
+            // zipWithNext { a, b -> b - a } crea le coppie contigue e calcola la differenza.
+            // maxOrNull() trova la differenza più alta. Se la lista è vuota, ritorna null (gestito con l'operatore Elvis ?: 0).
+            val playerMaxJump = player.scoreHistory
+                .zipWithNext { previousScore, currentScore -> currentScore - previousScore }
+                .maxOrNull() ?: 0
+
+            // Se il salto di questo giocatore è il più alto registrato finora, diventa lui il "bestPlayer"
+            if (playerMaxJump > absoluteMaxJump) {
+                absoluteMaxJump = playerMaxJump
+                bestPlayer = player
+            }
+        }
+
+        // Ritorna il vincitore solo se ha effettivamente guadagnato punti (salto > 0)
+        return if (bestPlayer != null && absoluteMaxJump > 0) {
+            Pair(bestPlayer, absoluteMaxJump)
+        } else {
+            null
+        }
+    }
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: L'INARRESTABILE 🔥
+     * ====================================================================
+     * Trova il giocatore che ha innescato più volte lo stato "On Fire".
+     * Ritorna un 'Pair' contenente il Giocatore e il numero di combo effettuate.
+     * Se nessuno ha fatto combo, ritorna 'null'.
+     */
+    fun getInarrestabile(): Pair<Player, Int>? {
+        // Controllo di sicurezza: se la partita è vuota, annulla tutto
+        if (players.isEmpty()) return null
+
+        // ---> MAGIA DI KOTLIN: maxByOrNull e 'it' <---
+        // maxByOrNull scansiona tutta la lista e ci restituisce direttamente
+        // L'OGGETTO (Player) che possiede il valore più alto.
+        // 'it' rappresenta "il giocatore corrente" durante l'iterazione interna,
+        // si può usare se il lambda ha un solo parametro, altrimenti si scriverebbe { player -> player.score } ma { it.score } è la stessa cosa
+        /*Una Lambda in Kotlin è semplicemente una funzione anonima (senza nome) che puoi trattare come se fosse una variabile.
+        La si racchiude sempre tra parentesi graffe {
+         */
+        val bestPlayer = players.maxByOrNull { it.fireComboCount }//con maxByOrNull andiamo a trovare il valore massimo guardando la proprietà it.fireComboCount
+
+        // Il giocatore vince il titolo SOLO se ha fatto almeno 1 combo ( > 0 )
+        return if (bestPlayer != null && bestPlayer.fireComboCount > 0) {
+            Pair(bestPlayer, bestPlayer.fireComboCount)
+        } else {
+            null
+        }
+    }
+
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: IL GAMBERO 🦞
+     * ====================================================================
+     * Trova il giocatore che ha perso più punti in totale durante l'intera partita.
+     * Ritorna un 'Pair' contenente il Giocatore e il numero (positivo) totale di punti persi.
+     * Se nessuno ha mai perso punti, ritorna 'null'.
+     */
+    fun getGambero(): Pair<Player, Int>? {
+        // Controllo di sicurezza
+        if (players.isEmpty()) return null
+
+        var worstPlayer: Player? = null
+        var maxPointsLost = 0
+
+        for (player in players) {
+            // ---> MAGIA DI KOTLIN: filter & sum <---
+            // 1. zipWithNext: calcola la differenza tra ogni punteggio consecutivo.
+            // 2. filter { it < 0 }: agisce come un setaccio, tiene SOLO i numeri negativi (i malus).
+            // 3. sum(): somma tutti i malus rimasti (es. -5 e -10 diventa -15).
+            val totalNegativePoints = player.scoreHistory
+                .zipWithNext { previousScore, currentScore -> currentScore - previousScore }
+                .filter { it < 0 }
+                .sum()
+
+            // La variabile 'totalNegativePoints' ora è un numero negativo (es. -20).
+            // Per comodità visiva, usiamo la matematica assoluta (abs) per trasformarlo
+            // in positivo (es. 20) così sarà più facile stamparlo a schermo ("Hai perso 20 punti").
+            val pointsLost = kotlin.math.abs(totalNegativePoints)
+
+            // Se questo giocatore ha perso più punti del record precedente, diventa lui il Gambero
+            if (pointsLost > maxPointsLost) {
+                maxPointsLost = pointsLost
+                worstPlayer = player
+            }
+        }
+
+        // Ritorna il risultato solo se qualcuno ha effettivamente perso almeno un punto
+        return if (worstPlayer != null && maxPointsLost > 0) {
+            Pair(worstPlayer, maxPointsLost)
+        } else {
+            null
+        }
+    }
+
 }
+

@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -75,6 +74,18 @@ fun ResultsScreen(
     LaunchedEffect(Unit) {
         startAnimation = true
     }
+
+    // ---> CALCOLO STATISTICHE <---
+    //-----> CECCHINO <-----
+    // Usiamo 'remember' così il calcolo viene fatto UNA SOLA VOLTA quando si apre la schermata,
+    // e non viene ricalcolato ogni volta che Compose ridisegna un frame dell'animazione dei coriandoli!
+    val cecchinoStat = remember { viewModel.getCecchino() }
+
+    //-----> INARRESATBILE <-----
+    val inarrestabileStat = remember { viewModel.getInarrestabile() }
+    //-----> IL GAMBERO <-----
+    val gamberoStat = remember { viewModel.getGambero() }
+
 
     // FUNZIONE DI SUPPORTO INTERNA: Crea l'effetto "comparsa e scivolamento"
     // Spiegazione: prende un 'indice' (la posizione dell'oggetto) e calcola un ritardo basato su di esso.
@@ -320,6 +331,249 @@ fun ResultsScreen(
                                     }
                                 }
                             }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: IL CECCHINO 🎯
+                            // ====================================================================
+                            // 🧠 KOTLIN NULL SAFETY & SCOPE FUNCTIONS:
+                            // In Kotlin usiamo l'operatore '?.let'. che dice "Se cecchinoStat esiste,
+                            // esegui questo blocco di codice e chiamalo 'stat'". È un approccio molto più
+                            // sicuro ed elegante per gestire variabili che potrebbero essere vuote.
+                            cecchinoStat?.let { stat ->
+
+                                // 🧠 COMPOSE LAZY COLUMN:
+                                // Dato che siamo dentro una LazyColumn (una lista scorrevole), non possiamo
+                                // buttare elementi a caso. Dobbiamo racchiudere ogni singolo blocco dentro 'item { ... }'.
+                                item {
+                                    // 🧠 KOTLIN DESTRUCTURING (Spacchettamento):
+                                    // Invece di scrivere stat.first e stat.second come in C++, Kotlin capisce
+                                    // che 'stat' è una coppia (Pair) e la divide in due variabili al volo.
+                                    val (sniperPlayer, maxJump) = stat
+                                    val playerColor = Color(sniperPlayer.color)
+
+                                    // Spacer crea uno spazio vuoto verticale di 16.dp per distanziare il grafico da questa card
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // 🎨 MATERIAL 3 EXPRESSIVE: La Card
+                                    Card(
+                                        // staggeredModifier è la nostra animazione di entrata. Usiamo 'rankedPlayers.size + 3'
+                                        // per far apparire questa statistica in ritardo, esattamente dopo l'ultimo giocatore in classifica.
+                                        modifier = staggeredModifier(rankedPlayers.size + 3)
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            // 🎨 COLORI ADATTIVI: Usiamo il colore del giocatore ma con opacità al 15% (alpha = 0.15f).
+                                            // Questo crea uno sfondo tenue che richiama l'identità del giocatore senza rubare
+                                            // l'attenzione cromatica alle card della classifica principale.
+                                            containerColor = playerColor.copy(alpha = 0.15f)
+                                        ),
+                                        // 🎨 FORME DINAMICHE: Un raggio di 20.dp crea un bordo molto "rotondo" e moderno
+                                        shape = RoundedCornerShape(20.dp),
+                                        // Aggiungiamo un bordo leggermente più scuro dello sfondo per delineare i contorni
+                                        border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
+                                    ) {
+                                        // Row dispone gli elementi in riga (orizzontalmente)
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically // Centra tutto verticalmente
+                                        ) {
+                                            // Icona a tema (Emoji usata come testo)
+                                            Text(
+                                                text = "🎯",
+                                                style = MaterialTheme.typography.displaySmall,
+                                                modifier = Modifier.padding(end = 16.dp)
+                                            )
+
+                                            // Column dispone i testi in colonna (verticalmente)
+                                            // 🧠 COMPOSE MODIFIER WEIGHT:
+                                            // .weight(1f) dice a questa colonna: "Spingiti per occupare tutto lo spazio orizzontale
+                                            // vuoto a disposizione". Questo trucco schiaccia l'emoji tutta a sinistra e
+                                            // il punteggio da record tutto a destra!
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = "Il Cecchino",
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = playerColor,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = sniperPlayer.name,
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    fontWeight = FontWeight.Black
+                                                )
+                                            }
+
+                                            // Il punteggio da record: racchiuso in una mini-Card per sembrare un "Badge"
+                                            Card(
+                                                colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Text(
+                                                    text = "+$maxJump pt",
+                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                                    // Usiamo onPrimary per garantire un contrasto assoluto sul colore pieno
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: L'INARRESTABILE 🔥
+                            // ====================================================================
+                            // Ripetiamo la stessa logica di sicurezza: disegniamo la card SOLO se
+                            // il ViewModel ha effettivamente trovato qualcuno che ha fatto delle combo.
+                            inarrestabileStat?.let { stat ->
+                                item {
+                                    // Spacchettiamo il Pair: chi è il giocatore e quante combo ha fatto
+                                    val (firePlayer, comboCount) = stat
+                                    val playerColor = Color(firePlayer.color)
+
+                                    // Spazio verticale per separare questa card da quella precedente (Cecchino o Grafico)
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // 🎨 MATERIAL 3 EXPRESSIVE: Manteniamo la coerenza visiva!
+                                    // Usiamo lo stesso identico design della card del Cecchino per creare
+                                    // una sezione "Statistiche" uniforme e professionale.
+                                    Card(
+                                        // Aumentiamo l'indice dell'animazione a cascata (staggeredModifier)
+                                        // così questa card entra un istante DOPO quella del Cecchino.
+                                        modifier = staggeredModifier(rankedPlayers.size + 4)
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = playerColor.copy(alpha = 0.15f)
+                                        ),
+                                        shape = RoundedCornerShape(20.dp),
+                                        border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // Icona dedicata all'Inarrestabile
+                                            Text(
+                                                text = "🔥",
+                                                style = MaterialTheme.typography.displaySmall,
+                                                modifier = Modifier.padding(end = 16.dp)
+                                            )
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = "L'Inarrestabile",
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = playerColor,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = firePlayer.name,
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    fontWeight = FontWeight.Black
+                                                )
+                                            }
+
+                                            // Il conteggio delle combo
+                                            Card(
+                                                colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Text(
+                                                    // Scriviamo "X Combo" (es. "3 Combo")
+                                                    text = "$comboCount Combo",
+                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: IL GAMBERO 🦞
+                            // ====================================================================
+                            // Mostriamo la card solo se qualcuno ha effettivamente perso dei punti
+                            gamberoStat?.let { stat ->
+                                item {
+                                    // Destructuring: estraiamo il giocatore sfortunato e i punti totali persi
+                                    val (gamberoPlayer, pointsLost) = stat
+                                    val playerColor = Color(gamberoPlayer.color)
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // 🎨 MATERIAL 3 EXPRESSIVE: Stessa identica struttura delle card precedenti.
+                                    Card(
+                                        // Aumentiamo ancora di 1 l'indice dell'animazione a cascata (size + 5)
+                                        // così apparirà per terza, dopo l'Inarrestabile.
+                                        modifier = staggeredModifier(rankedPlayers.size + 5)
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = playerColor.copy(alpha = 0.15f)
+                                        ),
+                                        shape = RoundedCornerShape(20.dp),
+                                        border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // Icona dedicata al Gambero
+                                            Text(
+                                                text = "🦞",
+                                                style = MaterialTheme.typography.displaySmall,
+                                                modifier = Modifier.padding(end = 16.dp)
+                                            )
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = "Il Gambero",
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = playerColor,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = gamberoPlayer.name,
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    fontWeight = FontWeight.Black
+                                                )
+                                            }
+
+                                            // Il punteggio negativo
+                                            Card(
+                                                colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                shape = RoundedCornerShape(12.dp)
+                                            ) {
+                                                Text(
+                                                    // Aggiungiamo il segno meno '-' davanti per indicare la perdita
+                                                    text = "-$pointsLost pt",
+                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                                    color = MaterialTheme.colorScheme.onPrimary,
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }
