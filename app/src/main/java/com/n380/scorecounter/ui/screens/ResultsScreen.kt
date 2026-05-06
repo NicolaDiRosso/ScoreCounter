@@ -464,13 +464,13 @@ fun ResultsScreen(
                                         Text(
                                             text = "Il Cecchino",
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = playerColor,
+                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
                                             text = sniperPlayer.name,
                                             style = MaterialTheme.typography.titleLarge,
-                                            color = MaterialTheme.colorScheme.onSurface,
+                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
                                             fontWeight = FontWeight.Black
                                         )
                                     }
@@ -538,11 +538,12 @@ fun ResultsScreen(
                                         modifier = Modifier.padding(end = 16.dp)
                                     )
 
+                                    // 🧠 ACCESSIBILITÀ (A11y) & UX: Manteniamo la coerenza visiva dei premi
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "L'Inarrestabile",
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = playerColor,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
@@ -612,11 +613,12 @@ fun ResultsScreen(
                                         modifier = Modifier.padding(end = 16.dp)
                                     )
 
+                                    // 🧠 ACCESSIBILITÀ (A11y) & UX: Manteniamo la coerenza visiva dei premi
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "Il Gambero",
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = playerColor,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
@@ -686,11 +688,12 @@ fun ResultsScreen(
                                         modifier = Modifier.padding(end = 16.dp)
                                     )
 
+                                    // 🧠 ACCESSIBILITÀ (A11y) & UX: Manteniamo la coerenza visiva dei premi
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = "La Fenice",
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = playerColor,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(

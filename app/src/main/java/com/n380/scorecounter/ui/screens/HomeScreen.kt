@@ -797,16 +797,24 @@ fun HomeScreen(
                                                     style = MaterialTheme.typography.displaySmall,
                                                     modifier = Modifier.padding(end = 16.dp)
                                                 )
+                                                // 🧠 ACCESSIBILITÀ (A11y) & UX:
+                                                // 1. Usiamo il colore 'primary' dell'app per il titolo del premio. Questo tocco da
+                                                // maestro Material 3 garantisce perfetta leggibilità sia in Light che in Dark mode
+                                                // e dà vivacità al testo rispetto al grigio spento di prima.
+                                                // 2. Usiamo 'onSurface' per il nome del giocatore: garantisce contrasto assoluto
+                                                // (Bianco puro su sfondo scuro, Nero puro su sfondo chiaro).
+                                                // L'identità cromatica del giocatore rimane preservata nell'alone dello sfondo e nel badge!
                                                 Column(modifier = Modifier.weight(1f)) {
                                                     Text(
-                                                        "Il Cecchino",
+                                                        text = "Il Cecchino",
                                                         style = MaterialTheme.typography.labelLarge,
-                                                        color = playerColor,
+                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                     Text(
-                                                        player.name,
+                                                        text = player.name,
                                                         style = MaterialTheme.typography.titleLarge,
+                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
                                                         fontWeight = FontWeight.Black
                                                     )
                                                 }
@@ -855,14 +863,15 @@ fun HomeScreen(
                                                 )
                                                 Column(modifier = Modifier.weight(1f)) {
                                                     Text(
-                                                        "L'Inarrestabile",
+                                                        text = "L'Inarrestabile",
                                                         style = MaterialTheme.typography.labelLarge,
-                                                        color = playerColor,
+                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                     Text(
-                                                        player.name,
+                                                        text = player.name,
                                                         style = MaterialTheme.typography.titleLarge,
+                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
                                                         fontWeight = FontWeight.Black
                                                     )
                                                 }
@@ -911,14 +920,15 @@ fun HomeScreen(
                                                 )
                                                 Column(modifier = Modifier.weight(1f)) {
                                                     Text(
-                                                        "Il Gambero",
+                                                        text = "Il Gambero",
                                                         style = MaterialTheme.typography.labelLarge,
-                                                        color = playerColor,
+                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                     Text(
-                                                        player.name,
+                                                        text = player.name,
                                                         style = MaterialTheme.typography.titleLarge,
+                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
                                                         fontWeight = FontWeight.Black
                                                     )
                                                 }
@@ -967,14 +977,15 @@ fun HomeScreen(
                                                 )
                                                 Column(modifier = Modifier.weight(1f)) {
                                                     Text(
-                                                        "La Fenice",
+                                                        text = "La Fenice",
                                                         style = MaterialTheme.typography.labelLarge,
-                                                        color = playerColor,
+                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                     Text(
-                                                        player.name,
+                                                        text = player.name,
                                                         style = MaterialTheme.typography.titleLarge,
+                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
                                                         fontWeight = FontWeight.Black
                                                     )
                                                 }
