@@ -343,275 +343,307 @@ fun HomeScreen(
                 }
             }
 
-            if (viewModel.history.isEmpty()) {
-                // STATO VUOTO (Empty State)
-                Text(
-                    text = "Nessuna sfida salvata al momento.",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            } else {
-                // --------------------------------------------------------------------
-                // LAZYCOLUMN E IL SEGRETO DEL "CONTENT PADDING"
-                // --------------------------------------------------------------------
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+            // ====================================================================
+            // ---> IL TAVOLO DELLO STORICO (Scatola Grigia Contenitiva) <---
+            // ====================================================================
+            // Usiamo weight(1f) per dire alla Card: "Espanditi prendendo tutto lo spazio verticale vuoto"
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 16.dp) // Allinea il tavolo all'intestazione in alto
+                    // 🧠 FIX GEOMETRICO (L'illusione ottica svelata):
+                    // Prima il tavolo scivolava DIETRO il dock inferiore. Aggiungendo 'innerPadding.calculateBottomPadding()'
+                    // "appoggiamo" il fondo del tavolo esattamente sopra il dock, mantenendo 16.dp di respiro,
+                    // e svelando i bordi inferiori stondati.
+                    .padding(bottom = innerPadding.calculateBottomPadding() + 16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(24.dp) // Stondatura Material 3 massiccia
+            ) {
+                if (viewModel.history.isEmpty()) {
+                    // STATO VUOTO (Empty State)
+                    // Usiamo un Box per centrare perfettamente la scritta in mezzo al tavolo gigante
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Nessuna sfida salvata al momento.",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                } else {
+                    // --------------------------------------------------------------------
+                    // LAZYCOLUMN E IL SEGRETO DEL "CONTENT PADDING"
+                    // --------------------------------------------------------------------
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
 
-                    // LEZIONE CRITICA: Cos'è il contentPadding?
-                    // A differenza del 'modifier.padding' (che stringe la finestra dall'esterno),
-                    // il 'contentPadding' aggiunge spazio *dentro* la fine della lista scorrrevole.
-                    // Risultato visivo: le Card scorreranno liberamente "dietro" al FAB trasparente.
-                    // Ma quando arrivi all'ultimo elemento della lista, questo non rimarrà nascosto
-                    // sotto il bottone, perché la lista sa di dover aggiungere un margine finale
-                    // pari all'ingombro del FAB in basso (calculateBottomPadding) più 16dp extra.
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = innerPadding.calculateBottomPadding() + 20.dp//aggiungiamo un padding di 96 per superare il bottone
-                    )
-                ) {
-                    items(viewModel.history) { record ->
-                        // Variabile di stato locale per gestire l'apertura/chiusura della singola card
-                        var expanded by remember { mutableStateOf(false) }
+                        // LEZIONE CRITICA: Cos'è il contentPadding?
+                        // A differenza del 'modifier.padding' (che stringe la finestra dall'esterno),
+                        // il 'contentPadding' aggiunge spazio *dentro* la fine della lista scorrrevole.
+                        // Risultato visivo: le Card scorreranno liberamente "dietro" al FAB trasparente.
+                        // Ma quando arrivi all'ultimo elemento della lista, questo non rimarrà nascosto
+                        // sotto il bottone, perché la lista sa di dover aggiungere un margine finale
+                        // pari all'ingombro del FAB in basso (calculateBottomPadding) più 16dp extra.
+                        contentPadding = PaddingValues(
+                            top = 16.dp, // <--- Stacca la prima card dal bordo superiore del tavolo
+                            start = 12.dp, // Leggermente ridotto perché ci pensa già il padding esterno della Card
+                            end = 12.dp,
+                            bottom = 16.dp
+                        )
+                    ) {
+                        items(viewModel.history) { record ->
+                            // Variabile di stato locale per gestire l'apertura/chiusura della singola card
+                            var expanded by remember { mutableStateOf(false) }
 
-                        Card(
-                            modifier = Modifier.fillMaxWidth().clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                expanded = !expanded
-                            },
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Column(modifier = Modifier.padding(20.dp)) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    expanded = !expanded
+                                },
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                shape = RoundedCornerShape(20.dp) // Forziamo una stondatura morbida ed evidente
+                            ) {
+                                Column(modifier = Modifier.padding(20.dp)) {
 
-                                // --- PARTE SEMPRE VISIBILE DELLA CARD ---
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = record.title,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    // --- PARTE SEMPRE VISIBILE DELLA CARD ---
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = record.title,
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
 
-                                    if (record.durationSeconds > 0) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                Icons.Filled.Timer, null,
-                                                modifier = Modifier.size(16.dp).padding(end = 4.dp),
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            Text(
-                                                text = formatTime(record.durationSeconds),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
+                                        if (record.durationSeconds > 0) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    Icons.Filled.Timer, null,
+                                                    modifier = Modifier.size(16.dp)
+                                                        .padding(end = 4.dp),
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                Text(
+                                                    text = formatTime(record.durationSeconds),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
                                         }
                                     }
-                                }
 
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "🏆 Vincitore: ${record.winnerName}",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Icon(
-                                        imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "🏆 Vincitore: ${record.winnerName}",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Icon(
+                                            imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
 
-                              // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
-                                AnimatedVisibility(visible = expanded) {
-                                    Column(modifier = Modifier.padding(top = 20.dp)) {
-                                        HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
+                                    // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
+                                    AnimatedVisibility(visible = expanded) {
+                                        Column(modifier = Modifier.padding(top = 20.dp)) {
+                                            HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
 
-                                        // Ciclo che genera la classifica dei giocatori
-                                        record.allPlayers.forEachIndexed { index, playerRecord ->
+                                            // Ciclo che genera la classifica dei giocatori
+                                            record.allPlayers.forEachIndexed { index, playerRecord ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth()
+                                                        .padding(vertical = 4.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    if (index == 0) {
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(
+                                                                Icons.Filled.EmojiEvents, null,
+                                                                tint = MaterialTheme.colorScheme.primary,
+                                                                modifier = Modifier.padding(end = 8.dp)
+                                                            )
+                                                            Text(
+                                                                text = "1° ${playerRecord.name}",
+                                                                style = MaterialTheme.typography.titleLarge,
+                                                                fontWeight = FontWeight.ExtraBold,
+                                                                color = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        }
+                                                    } else {
+                                                        Text(
+                                                            text = "${index + 1}° ${playerRecord.name}",
+                                                            style = MaterialTheme.typography.bodyLarge
+                                                        )
+                                                    }
+
+                                                    Text(
+                                                        text = "${playerRecord.score} pt",
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
+                                                    )
+                                                }
+                                            }
+
+                                            val validHistory = record.allPlayers.any {
+                                                (it.scoreHistory ?: emptyList()).size > 1
+                                            }
+                                            if (validHistory) {
+                                                Spacer(modifier = Modifier.height(16.dp))
+
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        "Andamento Punteggi",
+                                                        style = MaterialTheme.typography.labelMedium,
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                    Icon(
+                                                        Icons.Filled.Fullscreen,
+                                                        contentDescription = "Espandi Grafico",
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+
+                                                // Mini-grafico vettoriale
+                                                ScoreChart(
+                                                    players = record.allPlayers,
+                                                    modifier = Modifier
+                                                        .height(120.dp)
+                                                        .fillMaxWidth()
+                                                        .padding(top = 8.dp)
+                                                        // Gestione dei tap lunghi e corti per aprire l'overlay a schermo intero
+                                                        .combinedClickable(
+                                                            onClick = {
+                                                                haptic.performHapticFeedback(
+                                                                    HapticFeedbackType.LongPress
+                                                                )
+                                                                expandedMatchIndex =
+                                                                    viewModel.history.indexOf(record)
+                                                            },
+                                                            onLongClick = {
+                                                                haptic.performHapticFeedback(
+                                                                    HapticFeedbackType.LongPress
+                                                                )
+                                                                expandedMatchIndex =
+                                                                    viewModel.history.indexOf(record)
+                                                            }
+                                                        )
+                                                )
+                                                HorizontalDivider(
+                                                    modifier = Modifier.padding(
+                                                        top = 16.dp,
+                                                        bottom = 8.dp
+                                                    )
+                                                )
+                                            }
+
+                                            // Data della partita e pulsanti di Azione (Condividi / Elimina)
                                             Row(
                                                 modifier = Modifier.fillMaxWidth()
-                                                    .padding(vertical = 4.dp),
+                                                    .padding(top = 8.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                if (index == 0) {
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = if (record.timestamp > 0L) formatDate(
+                                                        record.timestamp
+                                                    ) else "",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                Row {
+                                                    // Logica di Condivisione (Intent)
+                                                    IconButton(onClick = {
+                                                        haptic.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress
+                                                        )
+
+                                                        var shareText =
+                                                            "🏆 Risultati Storici: ${record.title}\n"
+                                                        if (record.timestamp > 0L) shareText += "📅 Data: ${
+                                                            formatDate(
+                                                                record.timestamp
+                                                            )
+                                                        }\n"
+                                                        if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${
+                                                            formatTime(
+                                                                record.durationSeconds
+                                                            )
+                                                        }\n\n"
+                                                        record.allPlayers.forEachIndexed { index, player ->
+                                                            val medal = when (index) {
+                                                                0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
+                                                            }
+                                                            shareText += "$medal ${player.name} - ${player.score} pt\n"
+                                                        }
+                                                        shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
+
+                                                        val sendIntent = Intent().apply {
+                                                            action = Intent.ACTION_SEND
+                                                            putExtra(Intent.EXTRA_TEXT, shareText)
+                                                            type = "text/plain"
+                                                        }
+                                                        context.startActivity(
+                                                            Intent.createChooser(
+                                                                sendIntent,
+                                                                "Condividi partita"
+                                                            )
+                                                        )
+                                                    }) {
                                                         Icon(
-                                                            Icons.Filled.EmojiEvents, null,
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(end = 8.dp)
-                                                        )
-                                                        Text(
-                                                            text = "1° ${playerRecord.name}",
-                                                            style = MaterialTheme.typography.titleLarge,
-                                                            fontWeight = FontWeight.ExtraBold,
-                                                            color = MaterialTheme.colorScheme.primary
+                                                            Icons.Filled.Share,
+                                                            null,
+                                                            tint = MaterialTheme.colorScheme.primary
                                                         )
                                                     }
-                                                } else {
-                                                    Text(
-                                                        text = "${index + 1}° ${playerRecord.name}",
-                                                        style = MaterialTheme.typography.bodyLarge
-                                                    )
-                                                }
 
-                                                Text(
-                                                    text = "${playerRecord.score} pt",
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
-                                                )
-                                            }
-                                        }
+                                                    // Logica di Eliminazione con possibilità di annullamento (Undo)
+                                                    IconButton(onClick = {
+                                                        haptic.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress
+                                                        )
+                                                        val removedIndex =
+                                                            viewModel.history.indexOf(record)
+                                                        viewModel.deleteMatch(record)
 
-                                        val validHistory = record.allPlayers.any {
-                                            (it.scoreHistory ?: emptyList()).size > 1
-                                        }
-                                        if (validHistory) {
-                                            Spacer(modifier = Modifier.height(16.dp))
-
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    "Andamento Punteggi",
-                                                    style = MaterialTheme.typography.labelMedium,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                                Icon(
-                                                    Icons.Filled.Fullscreen,
-                                                    contentDescription = "Espandi Grafico",
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
-
-                                            // Mini-grafico vettoriale
-                                            ScoreChart(
-                                                players = record.allPlayers,
-                                                modifier = Modifier
-                                                    .height(120.dp)
-                                                    .fillMaxWidth()
-                                                    .padding(top = 8.dp)
-                                                    // Gestione dei tap lunghi e corti per aprire l'overlay a schermo intero
-                                                    .combinedClickable(
-                                                        onClick = {
-                                                            haptic.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress
-                                                            )
-                                                            expandedMatchIndex =
-                                                                viewModel.history.indexOf(record)
-                                                        },
-                                                        onLongClick = {
-                                                            haptic.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress
-                                                            )
-                                                            expandedMatchIndex =
-                                                                viewModel.history.indexOf(record)
+                                                        coroutineScope.launch {
+                                                            launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
+                                                            val result =
+                                                                snackbarHostState.showSnackbar(
+                                                                    "Partita eliminata",
+                                                                    "ANNULLA",
+                                                                    duration = SnackbarDuration.Indefinite
+                                                                )
+                                                            if (result == SnackbarResult.ActionPerformed) {
+                                                                viewModel.restoreMatch(
+                                                                    removedIndex,
+                                                                    record
+                                                                )
+                                                            }
                                                         }
-                                                    )
-                                            )
-                                            HorizontalDivider(
-                                                modifier = Modifier.padding(
-                                                    top = 16.dp,
-                                                    bottom = 8.dp
-                                                )
-                                            )
-                                        }
-
-                                        // Data della partita e pulsanti di Azione (Condividi / Elimina)
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = if (record.timestamp > 0L) formatDate(record.timestamp) else "",
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            Row {
-                                                // Logica di Condivisione (Intent)
-                                                IconButton(onClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                                    var shareText =
-                                                        "🏆 Risultati Storici: ${record.title}\n"
-                                                    if (record.timestamp > 0L) shareText += "📅 Data: ${
-                                                        formatDate(
-                                                            record.timestamp
+                                                    }) {
+                                                        Icon(
+                                                            Icons.Filled.Delete,
+                                                            null,
+                                                            tint = MaterialTheme.colorScheme.error
                                                         )
-                                                    }\n"
-                                                    if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${
-                                                        formatTime(
-                                                            record.durationSeconds
-                                                        )
-                                                    }\n\n"
-                                                    record.allPlayers.forEachIndexed { index, player ->
-                                                        val medal = when (index) {
-                                                            0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
-                                                        }
-                                                        shareText += "$medal ${player.name} - ${player.score} pt\n"
                                                     }
-                                                    shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
-
-                                                    val sendIntent = Intent().apply {
-                                                        action = Intent.ACTION_SEND
-                                                        putExtra(Intent.EXTRA_TEXT, shareText)
-                                                        type = "text/plain"
-                                                    }
-                                                    context.startActivity(
-                                                        Intent.createChooser(
-                                                            sendIntent,
-                                                            "Condividi partita"
-                                                        )
-                                                    )
-                                                }) {
-                                                    Icon(
-                                                        Icons.Filled.Share,
-                                                        null,
-                                                        tint = MaterialTheme.colorScheme.primary
-                                                    )
-                                                }
-
-                                                // Logica di Eliminazione con possibilità di annullamento (Undo)
-                                                IconButton(onClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    val removedIndex =
-                                                        viewModel.history.indexOf(record)
-                                                    viewModel.deleteMatch(record)
-
-                                                    coroutineScope.launch {
-                                                        launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
-                                                        val result = snackbarHostState.showSnackbar(
-                                                            "Partita eliminata",
-                                                            "ANNULLA",
-                                                            duration = SnackbarDuration.Indefinite
-                                                        )
-                                                        if (result == SnackbarResult.ActionPerformed) {
-                                                            viewModel.restoreMatch(
-                                                                removedIndex,
-                                                                record
-                                                            )
-                                                        }
-                                                    }
-                                                }) {
-                                                    Icon(
-                                                        Icons.Filled.Delete,
-                                                        null,
-                                                        tint = MaterialTheme.colorScheme.error
-                                                    )
                                                 }
                                             }
                                         }
@@ -619,23 +651,23 @@ fun HomeScreen(
                                 }
                             }
                         }
-                    }
 
-                    // --- LEZIONE: COPYRIGHT NEL FLUSSO SCORREVOLE ---
-                    // Inserendo il copyright come 'item' finale della LazyColumn,
-                    // beneficerà automaticamente del 'contentPadding' che abbiamo impostato sopra.
-                    // Non serve più forzare un padding enorme dal basso, si posizionerà da solo
-                    // in modo perfetto sotto all'ultima card e sopra all'ingombro del FAB.
-                    item {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                            // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                            textAlign = TextAlign.Center
-                        )
+                        // --- LEZIONE: COPYRIGHT NEL FLUSSO SCORREVOLE ---
+                        // Inserendo il copyright come 'item' finale della LazyColumn,
+                        // beneficerà automaticamente del 'contentPadding' che abbiamo impostato sopra.
+                        // Non serve più forzare un padding enorme dal basso, si posizionerà da solo
+                        // in modo perfetto sotto all'ultima card e sopra all'ingombro del FAB.
+                        item {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
