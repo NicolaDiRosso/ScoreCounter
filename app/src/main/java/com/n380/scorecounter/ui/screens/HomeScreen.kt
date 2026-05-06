@@ -716,504 +716,528 @@ fun HomeScreen(
                     // per coerenza con la Home e la ResultsScreen.
                     PatternedBackground()
 
-                    // LIVELLO 1 (Contenuto): La colonna con tutte le informazioni.
-                    Column(
-                        // systemBarsPadding() è vitale in un overlay a schermo intero: impedisce
-                        // che i nostri testi finiscano sotto l'orologio di Android in alto.
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .systemBarsPadding()
-                            .padding(16.dp)
-                    ) {
-                        // ====================================================================
-                        // --- INTESTAZIONE OVERLAY ---
-                        // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
-                        // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
-                        // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
-                        // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
-                        //    'secondary' per farlo risaltare in modo vibrante ed elegante.
-                        // ====================================================================
+                    // LIVELLO 1 (Contenuto): La struttura a colonna che separa area dati e dock comandi.
+                    Column(modifier = Modifier.fillMaxSize()) {
+
+                        // AREA DATI: Contiene Header e Tavolo.
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .weight(1f) // Prende tutto lo spazio tranne il dock inferiore
+                                // 🧠 LEZIONE SPAZIATURA: Usiamo 'statusBarsPadding' invece di 'systemBarsPadding'.
+                                // 'systemBars' aggiungerebbe spazio anche in basso (barra navigazione),
+                                // raddoppiando il vuoto dato che il Dock ha già il suo 'navigationBarsPadding'.
+                                .statusBarsPadding()
+                                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
                         ) {
-                            Text(
-                                text = "Analisi Partita",
-                                style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = match.title,
-                                style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
-                        }
-
-                        // ====================================================================
-                        // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
-                        // ====================================================================
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f) // 🧠 COMPOSE: Il weight(1f) spinge tutto ciò che segue verso il basso.
-                                .padding(bottom = 16.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            shape = RoundedCornerShape(24.dp)
-                        ) {
-                            // 🧠 RECOMPOSITION: Usiamo Column + verticalScroll invece di LazyColumn.
-                            // Forziamo il caricamento immediato di tutti gli elementi per avere animazioni fluide.
+                            // ====================================================================
+                            // --- INTESTAZIONE OVERLAY ---
+                            // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
+                            // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
+                            // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
+                            // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
+                            //    'secondary' per farlo risaltare in modo vibrante ed elegante.
+                            // ====================================================================
                             Column(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()) // Rende il contenuto del Tavolo scorrevole.
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp) // Spazio automatico tra i figli.
+                                    .fillMaxWidth()
+                                    .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                // --- IL GRAFICO ESPANSO ---
                                 Text(
-                                    "Andamento Punteggi",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    text = "Analisi Partita",
+                                    style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                Card(
-                                    modifier = Modifier.fillMaxWidth().height(350.dp),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                    shape = RoundedCornerShape(16.dp)
+                                Text(
+                                    text = match.title,
+                                    style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+
+                            // ====================================================================
+                            // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
+                            // ====================================================================
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    // 🧠 FIX GEOMETRICO: Aggiungiamo 'padding(bottom = 16.dp)'.
+                                    // In questo modo, la distanza tra la fine del tavolo grigio e l'inizio del dock bianco
+                                    // è di esattamente 16.dp, rispecchiando perfettamente il layout della Homepage
+                                    // dove il tavolo è distanziato dal dock principale della stessa misura.
+                                    .padding(bottom = 16.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                shape = RoundedCornerShape(24.dp)
+                            ) {
+                                // 🧠 RECOMPOSITION: Usiamo Column + verticalScroll invece di LazyColumn.
+                                // Forziamo il caricamento immediato di tutti gli elementi per avere animazioni fluide.
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .verticalScroll(rememberScrollState()) // Rende il contenuto del Tavolo scorrevole.
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp) // Spazio automatico tra i figli.
                                 ) {
-                                    ScoreChart(
-                                        players = match.allPlayers,
-                                        isDetailed = true, // Attiva la griglia e le etichette nel Canvas.
-                                        modifier = Modifier.fillMaxSize().padding(12.dp)
-                                    )
-                                }
-
-                                // --- AREA PREMI (Retrocompatibile) ---
-                                // 🧠 KOTLIN EXTENSION: Usiamo i metodi creati nel file Models per calcolare i dati.
-                                // 'remember(match)' assicura che il calcolo avvenga solo quando cambia la partita selezionata.
-                                val storiciCecchino =
-                                    remember(match) { match.getHistoricalCecchino() }
-                                val storiciInarrestabile =
-                                    remember(match) { match.getHistoricalInarrestabile() }
-                                val storiciGambero =
-                                    remember(match) { match.getHistoricalGambero() }
-                                val storiciFenice = remember(match) { match.getHistoricalFenice() }
-
-                                // 🧠 LOGICA CONDIZIONALE: Se tutti i calcoli sono 'null' (partite vecchie), il blocco sparisce.
-                                if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
-
-                                    // ====================================================================
-                                    // 🧠 UX: Intestazione con Icona Informativa
-                                    // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
-                                    // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
-                                    // ====================================================================
-                                    Row(verticalAlignment = Alignment.CenterVertically,
-                                    ){
-                                        // Pulsante icona che inverte la variabile di stato per aprire il popup
-                                        IconButton(
-                                            onClick = { showAwardsInfoDialog = true },
-                                            modifier = Modifier.size(30.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Info,//icona delle info piena
-                                                contentDescription = "Info Premi",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier
-                                                    .padding(end = 8.dp) // Spazietto per staccare l'icona dal testo
-
-                                            )
-                                        }
-
-                                        Text(
-                                            text = "Premi Partita",
-                                            // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-
-                                    // =========================================================
-                                    // POPUP INFORMATIVO SUI PREMI (AlertDialog)
-                                    // =========================================================
-                                    // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
-                                    if (showAwardsInfoDialog) {
-                                        AlertDialog(
-                                            // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
-                                            onDismissRequest = { showAwardsInfoDialog = false },
-                                            title = { Text("Guida ai Premi", fontWeight = FontWeight.Bold) },
-                                            text = {
-                                                // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                                                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-
-                                                    Text(
-                                                        "🎯 Il Cecchino",
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
-                                                    )
-                                                    Text(
-                                                        "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-
-                                                    Text(
-                                                        "🔥 L'Inarrestabile",
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                                    )
-                                                    Text(
-                                                        "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-
-                                                    Text(
-                                                        "🦞 Il Gambero",
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                                    )
-                                                    Text(
-                                                        "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-
-                                                    Text(
-                                                        "🦅 La Fenice",
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                                    )
-                                                    Text(
-                                                        "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-                                                }
-                                            },
-                                            confirmButton = {
-                                                // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
-                                                Button(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        showAwardsInfoDialog = false // Chiude il popup quando si preme il bottone
-                                                    },
-                                                    shape = RoundedCornerShape(20.dp)
-                                                ) {
-                                                    Text("Ho capito")
-                                                }
-                                            }
-                                        )
-                                    }
-
-                                    // --- CARD PREMIO: CECCHINO 🎯 ---
-                                    storiciCecchino?.let { (player, punti) ->
-                                        val playerColor = Color(player.color)
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            // 🎨 DESIGN: Alpha 0.15f crea uno sfondo tenue basato sul colore del giocatore.
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = playerColor.copy(
-                                                    alpha = 0.15f
-                                                )
-                                            ),
-                                            shape = RoundedCornerShape(20.dp),
-                                            border = BorderStroke(
-                                                1.dp,
-                                                playerColor.copy(alpha = 0.3f)
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    "🎯",
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    modifier = Modifier.padding(end = 16.dp)
-                                                )
-                                                // 🧠 ACCESSIBILITÀ (A11y) & UX:
-                                                // 1. Usiamo il colore 'primary' dell'app per il titolo del premio. Questo tocco da
-                                                // maestro Material 3 garantisce perfetta leggibilità sia in Light che in Dark mode
-                                                // e dà vivacità al testo rispetto al grigio spento di prima.
-                                                // 2. Usiamo 'onSurface' per il nome del giocatore: garantisce contrasto assoluto
-                                                // (Bianco puro su sfondo scuro, Nero puro su sfondo chiaro).
-                                                // L'identità cromatica del giocatore rimane preservata nell'alone dello sfondo e nel badge!
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    Text(
-                                                        text = "Il Cecchino",
-                                                        style = MaterialTheme.typography.labelLarge,
-                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                    Text(
-                                                        text = player.name,
-                                                        style = MaterialTheme.typography.titleLarge,
-                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                        fontWeight = FontWeight.Black
-                                                    )
-                                                }
-                                                Card(
-                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                ) {
-                                                    Text(
-                                                        "+$punti pt",
-                                                        modifier = Modifier.padding(
-                                                            horizontal = 12.dp,
-                                                            vertical = 6.dp
-                                                        ),
-                                                        color = Color.White,
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // --- CARD PREMIO: INARRESTABILE 🔥 ---
-                                    storiciInarrestabile?.let { (player, combo) ->
-                                        val playerColor = Color(player.color)
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = playerColor.copy(
-                                                    alpha = 0.15f
-                                                )
-                                            ),
-                                            shape = RoundedCornerShape(20.dp),
-                                            border = BorderStroke(
-                                                1.dp,
-                                                playerColor.copy(alpha = 0.3f)
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    "🔥",
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    modifier = Modifier.padding(end = 16.dp)
-                                                )
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    Text(
-                                                        text = "L'Inarrestabile",
-                                                        style = MaterialTheme.typography.labelLarge,
-                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                    Text(
-                                                        text = player.name,
-                                                        style = MaterialTheme.typography.titleLarge,
-                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                        fontWeight = FontWeight.Black
-                                                    )
-                                                }
-                                                Card(
-                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                ) {
-                                                    Text(
-                                                        "$combo Combo",
-                                                        modifier = Modifier.padding(
-                                                            horizontal = 12.dp,
-                                                            vertical = 6.dp
-                                                        ),
-                                                        color = Color.White,
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // --- CARD PREMIO: IL GAMBERO 🦞 ---
-                                    storiciGambero?.let { (player, punti) ->
-                                        val playerColor = Color(player.color)
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = playerColor.copy(
-                                                    alpha = 0.15f
-                                                )
-                                            ),
-                                            shape = RoundedCornerShape(20.dp),
-                                            border = BorderStroke(
-                                                1.dp,
-                                                playerColor.copy(alpha = 0.3f)
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    "🦞",
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    modifier = Modifier.padding(end = 16.dp)
-                                                )
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    Text(
-                                                        text = "Il Gambero",
-                                                        style = MaterialTheme.typography.labelLarge,
-                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                    Text(
-                                                        text = player.name,
-                                                        style = MaterialTheme.typography.titleLarge,
-                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                        fontWeight = FontWeight.Black
-                                                    )
-                                                }
-                                                Card(
-                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                ) {
-                                                    Text(
-                                                        "-$punti pt",
-                                                        modifier = Modifier.padding(
-                                                            horizontal = 12.dp,
-                                                            vertical = 6.dp
-                                                        ),
-                                                        color = Color.White,
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // --- CARD PREMIO: LA FENICE 🦅 ---
-                                    storiciFenice?.let { (player, punti) ->
-                                        val playerColor = Color(player.color)
-                                        Card(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = playerColor.copy(
-                                                    alpha = 0.15f
-                                                )
-                                            ),
-                                            shape = RoundedCornerShape(20.dp),
-                                            border = BorderStroke(
-                                                1.dp,
-                                                playerColor.copy(alpha = 0.3f)
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    "🦅",
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    modifier = Modifier.padding(end = 16.dp)
-                                                )
-                                                Column(modifier = Modifier.weight(1f)) {
-                                                    Text(
-                                                        text = "La Fenice",
-                                                        style = MaterialTheme.typography.labelLarge,
-                                                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                    Text(
-                                                        text = player.name,
-                                                        style = MaterialTheme.typography.titleLarge,
-                                                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                        fontWeight = FontWeight.Black
-                                                    )
-                                                }
-                                                Card(
-                                                    colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                    shape = RoundedCornerShape(12.dp)
-                                                ) {
-                                                    Text(
-                                                        "+$punti pt",
-                                                        modifier = Modifier.padding(
-                                                            horizontal = 12.dp,
-                                                            vertical = 6.dp
-                                                        ),
-                                                        color = Color.White,
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                /// ====================================================================
-                                // Footer informativo sulla durata
-                                // 🧠 UX & MATERIAL 3: Coerenza dei Colori. L'utente ha giustamente
-                                // notato che il grigio "spegne" questa informazione. Usiamo il colore
-                                // 'primary' per legarlo visivamente al bottone di chiusura sottostante!
-                                // ====================================================================
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                    horizontalArrangement = Arrangement.Center, // Bello centrato
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Timer,
-                                        contentDescription = "Durata",
-                                        tint = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
-                                        modifier = Modifier.size(18.dp)
-                                    )
+                                    // --- IL GRAFICO ESPANSO ---
                                     Text(
-                                        text = " Durata totale: ${formatTime(match.durationSeconds)}",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
-                                        modifier = Modifier.padding(start = 6.dp)
+                                        "Andamento Punteggi",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth().height(350.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        ScoreChart(
+                                            players = match.allPlayers,
+                                            isDetailed = true, // Attiva la griglia e le etichette nel Canvas.
+                                            modifier = Modifier.fillMaxSize().padding(12.dp)
+                                        )
+                                    }
+
+                                    // --- AREA PREMI (Retrocompatibile) ---
+                                    // 🧠 KOTLIN EXTENSION: Usiamo i metodi creati nel file Models per calcolare i dati.
+                                    // 'remember(match)' assicura che il calcolo avvenga solo quando cambia la partita selezionata.
+                                    val storiciCecchino =
+                                        remember(match) { match.getHistoricalCecchino() }
+                                    val storiciInarrestabile =
+                                        remember(match) { match.getHistoricalInarrestabile() }
+                                    val storiciGambero =
+                                        remember(match) { match.getHistoricalGambero() }
+                                    val storiciFenice = remember(match) { match.getHistoricalFenice() }
+
+                                    // 🧠 LOGICA CONDIZIONALE: Se tutti i calcoli sono 'null' (partite vecchie), il blocco sparisce.
+                                    if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
+
+                                        // ====================================================================
+                                        // 🧠 UX: Intestazione con Icona Informativa
+                                        // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
+                                        // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
+                                        // ====================================================================
+                                        Row(verticalAlignment = Alignment.CenterVertically,
+                                        ){
+                                            // Pulsante icona che inverte la variabile di stato per aprire il popup
+                                            IconButton(
+                                                onClick = { showAwardsInfoDialog = true },
+                                                modifier = Modifier.size(30.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Info,//icona delle info piena
+                                                    contentDescription = "Info Premi",
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier
+                                                        .padding(end = 8.dp) // Spazietto per staccare l'icona dal testo
+
+                                                )
+                                            }
+
+                                            Text(
+                                                text = "Premi Partita",
+                                                // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+
+                                        // =========================================================
+                                        // POPUP INFORMATIVO SUI PREMI (AlertDialog)
+                                        // =========================================================
+                                        // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
+                                        if (showAwardsInfoDialog) {
+                                            AlertDialog(
+                                                // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
+                                                onDismissRequest = { showAwardsInfoDialog = false },
+                                                title = { Text("Guida ai Premi", fontWeight = FontWeight.Bold) },
+                                                text = {
+                                                    // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
+                                                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                                                        Text(
+                                                            "🎯 Il Cecchino",
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                                                        )
+                                                        Text(
+                                                            "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
+                                                            style = MaterialTheme.typography.bodyMedium
+                                                        )
+
+                                                        Text(
+                                                            "🔥 L'Inarrestabile",
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                        )
+                                                        Text(
+                                                            "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
+                                                            style = MaterialTheme.typography.bodyMedium
+                                                        )
+
+                                                        Text(
+                                                            "🦞 Il Gambero",
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                        )
+                                                        Text(
+                                                            "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
+                                                            style = MaterialTheme.typography.bodyMedium
+                                                        )
+
+                                                        Text(
+                                                            "🦅 La Fenice",
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                        )
+                                                        Text(
+                                                            "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
+                                                            style = MaterialTheme.typography.bodyMedium
+                                                        )
+                                                    }
+                                                },
+                                                confirmButton = {
+                                                    // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
+                                                    Button(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            showAwardsInfoDialog = false // Chiude il popup quando si preme il bottone
+                                                        },
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    ) {
+                                                        Text("Ho capito")
+                                                    }
+                                                }
+                                            )
+                                        }
+
+                                        // --- CARD PREMIO: CECCHINO 🎯 ---
+                                        storiciCecchino?.let { (player, punti) ->
+                                            val playerColor = Color(player.color)
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                // 🎨 DESIGN: Alpha 0.15f crea uno sfondo tenue basato col colore del giocatore.
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = playerColor.copy(
+                                                        alpha = 0.30f
+                                                    )
+                                                ),
+                                                shape = RoundedCornerShape(20.dp),
+                                                border = BorderStroke(
+                                                    1.dp,
+                                                    playerColor.copy(alpha = 0.3f)
+                                                )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(16.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        "🎯",
+                                                        style = MaterialTheme.typography.displaySmall,
+                                                        modifier = Modifier.padding(end = 16.dp)
+                                                    )
+                                                    // 🧠 ACCESSIBILITÀ (A11y) & UX:
+                                                    // 1. Usiamo il colore 'primary' dell'app per il titolo del premio. Questo tocco da
+                                                    // maestro Material 3 garantisce perfetta leggibilità sia in Light che in Dark mode
+                                                    // e dà vivacità al testo rispetto al grigio spento di prima.
+                                                    // 2. Usiamo 'onSurface' per il nome del giocatore: garantisce contrasto assoluto
+                                                    // (Bianco puro su sfondo scuro, Nero puro su sfondo chiaro).
+                                                    // L'identità cromatica del giocatore rimane preservata nell'alone dello sfondo e nel badge!
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = "Il Cecchino",
+                                                            style = MaterialTheme.typography.labelLarge,
+                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        Text(
+                                                            text = player.name,
+                                                            style = MaterialTheme.typography.titleLarge,
+                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
+                                                            fontWeight = FontWeight.Black
+                                                        )
+                                                    }
+                                                    Card(
+                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    ) {
+                                                        Text(
+                                                            "+$punti pt",
+                                                            modifier = Modifier.padding(
+                                                                horizontal = 12.dp,
+                                                                vertical = 6.dp
+                                                            ),
+                                                            color = Color.White,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // --- CARD PREMIO: INARRESTABILE 🔥 ---
+                                        storiciInarrestabile?.let { (player, combo) ->
+                                            val playerColor = Color(player.color)
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = playerColor.copy(
+                                                        alpha = 0.30f
+                                                    )
+                                                ),
+                                                shape = RoundedCornerShape(20.dp),
+                                                border = BorderStroke(
+                                                    1.dp,
+                                                    playerColor.copy(alpha = 0.3f)
+                                                )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(16.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        "🔥",
+                                                        style = MaterialTheme.typography.displaySmall,
+                                                        modifier = Modifier.padding(end = 16.dp)
+                                                    )
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = "L'Inarrestabile",
+                                                            style = MaterialTheme.typography.labelLarge,
+                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        Text(
+                                                            text = player.name,
+                                                            style = MaterialTheme.typography.titleLarge,
+                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
+                                                            fontWeight = FontWeight.Black
+                                                        )
+                                                    }
+                                                    Card(
+                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    ) {
+                                                        Text(
+                                                            "$combo Combo",
+                                                            modifier = Modifier.padding(
+                                                                horizontal = 12.dp,
+                                                                vertical = 6.dp
+                                                            ),
+                                                            color = Color.White,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // --- CARD PREMIO: IL GAMBERO 🦞 ---
+                                        storiciGambero?.let { (player, punti) ->
+                                            val playerColor = Color(player.color)
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = playerColor.copy(
+                                                        alpha = 0.30f
+                                                    )
+                                                ),
+                                                shape = RoundedCornerShape(20.dp),
+                                                border = BorderStroke(
+                                                    1.dp,
+                                                    playerColor.copy(alpha = 0.3f)
+                                                )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(16.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        "🦞",
+                                                        style = MaterialTheme.typography.displaySmall,
+                                                        modifier = Modifier.padding(end = 16.dp)
+                                                    )
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = "Il Gambero",
+                                                            style = MaterialTheme.typography.labelLarge,
+                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        Text(
+                                                            text = player.name,
+                                                            style = MaterialTheme.typography.titleLarge,
+                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
+                                                            fontWeight = FontWeight.Black
+                                                        )
+                                                    }
+                                                    Card(
+                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    ) {
+                                                        Text(
+                                                            "-$punti pt",
+                                                            modifier = Modifier.padding(
+                                                                horizontal = 12.dp,
+                                                                vertical = 6.dp
+                                                            ),
+                                                            color = Color.White,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        // --- CARD PREMIO: LA FENICE 🦅 ---
+                                        storiciFenice?.let { (player, punti) ->
+                                            val playerColor = Color(player.color)
+                                            Card(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                colors = CardDefaults.cardColors(
+                                                    containerColor = playerColor.copy(
+                                                        alpha = 0.30f
+                                                    )
+                                                ),
+                                                shape = RoundedCornerShape(20.dp),
+                                                border = BorderStroke(
+                                                    1.dp,
+                                                    playerColor.copy(alpha = 0.3f)
+                                                )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(16.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        "🦅",
+                                                        style = MaterialTheme.typography.displaySmall,
+                                                        modifier = Modifier.padding(end = 16.dp)
+                                                    )
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Text(
+                                                            text = "La Fenice",
+                                                            style = MaterialTheme.typography.labelLarge,
+                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                        Text(
+                                                            text = player.name,
+                                                            style = MaterialTheme.typography.titleLarge,
+                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
+                                                            fontWeight = FontWeight.Black
+                                                        )
+                                                    }
+                                                    Card(
+                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
+                                                        shape = RoundedCornerShape(12.dp)
+                                                    ) {
+                                                        Text(
+                                                            "+$punti pt",
+                                                            modifier = Modifier.padding(
+                                                                horizontal = 12.dp,
+                                                                vertical = 6.dp
+                                                            ),
+                                                            color = Color.White,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    /// ====================================================================
+                                    // Footer informativo sulla durata
+                                    // 🧠 UX & MATERIAL 3: Coerenza dei Colori. L'utente ha giustamente
+                                    // notato che il grigio "spegne" questa informazione. Usiamo il colore
+                                    // 'primary' per legarlo visivamente al bottone di chiusura sottostante!
+                                    // ====================================================================
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                        horizontalArrangement = Arrangement.Center, // Bello centrato
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Timer,
+                                            contentDescription = "Durata",
+                                            tint = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Text(
+                                            text = " Durata totale: ${formatTime(match.durationSeconds)}",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
+                                            modifier = Modifier.padding(start = 6.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
 
-                        // --------------------------------------------------------------------
-                        // PULSANTE CHIUDI ANALISI (Versione Full Width)
-                        // --------------------------------------------------------------------
-                        ExtendedFloatingActionButton(
-                            onClick = {
-                                // Aggiunta la vibrazione per coerenza tattile
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                expandedMatchIndex = -1 // 🧠 STATE: Cambiando l'indice a -1, l'overlay scompare.
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth() // 🧠 UI: Rimosso lo 0.8f per occupare tutto lo spazio disponibile
-                                .height(72.dp)  // Altezza Expressive massiccia (72dp)
-                                .align(Alignment.CenterHorizontally),
-                            shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
-                            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp),
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = "Chiudi",
-                                    modifier = Modifier.size(28.dp) // Icona maggiorata
-                                )
-                            },
-                            text = {
-                                Text(
-                                    text = "Chiudi Analisi",
-                                    // Tipografia imponente (Headline) per richiamare la Home
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Bold
-                                )
+                        // ====================================================================
+                        // ---> NUOVO DOCK INFERIORE (Uguale alla Home e Stats) <---
+                        // ====================================================================
+                        Surface(
+                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                            // Arrotondamento solo in alto per incollarlo al fondo dello schermo
+                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding() // Rispetta lo spazio della barra di navigazione Android
+                                    .padding(horizontal = 16.dp, vertical = 16.dp) // Spaziatura interna per il bottone // Spaziatura interna per il bottone
+                            ) {
+                                // --------------------------------------------------------------------
+                                // PULSANTE CHIUDI ANALISI (Stile Nuova Sfida)
+                                // --------------------------------------------------------------------
+                                Button(
+                                    onClick = {
+                                        // Aggiunta la vibrazione per coerenza tattile
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        expandedMatchIndex = -1 // 🧠 STATE: Cambiando l'indice a -1, l'overlay scompare.
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(72.dp), // Manteniamo l'altezza massiccia (72dp) richiesta
+                                    shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
+                                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = "Chiudi",
+                                        modifier = Modifier.padding(end = 8.dp).size(28.dp) // Icona maggiorata
+                                    )
+                                    Text(
+                                        text = "Chiudi Analisi",
+                                        // Tipografia imponente (Headline) per richiamare la Home
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
-                        )
+                        }
                     }
                 }
             }

@@ -207,7 +207,7 @@ fun GlobalStatsScreen(
                         )
                         // Testo "Chiudi" con tipografia HeadlineSmall per massima leggibilità
                         Text(
-                            text = "Chiudi",
+                            text = "Chiudi Statistiche",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )

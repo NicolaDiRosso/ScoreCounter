@@ -194,7 +194,7 @@ fun ResultsScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp), // Altezza Expressive massiccia (72.dp)
+                                .height(52.dp), // Altezza Expressive massiccia (52.dp)
                             shape = RoundedCornerShape(20.dp), // Angoli coerenti per i bottoni (20.dp)
                             // Bordo rinforzato a 2.dp come fatto per il tasto "Azzera"
                             border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
@@ -434,10 +434,10 @@ fun ResultsScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 4.dp),
                                 colors = CardDefaults.cardColors(
-                                    // 🎨 COLORI ADATTIVI: Usiamo il colore del giocatore ma con opacità al 15% (alpha = 0.15f).
+                                    // 🎨 COLORI ADATTIVI: Usiamo il colore del giocatore ma con opacità al 30% (alpha = 0.30f).
                                     // Questo crea uno sfondo tenue che richiama l'identità del giocatore senza rubare
                                     // l'attenzione cromatica alle card della classifica principale.
-                                    containerColor = playerColor.copy(alpha = 0.15f)
+                                    containerColor = playerColor.copy(alpha = 0.30f)
                                 ),
                                 // 🎨 FORME DINAMICHE: Un raggio di 20.dp crea un bordo molto "rotondo" e moderno
                                 shape = RoundedCornerShape(20.dp),
@@ -523,7 +523,7 @@ fun ResultsScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 4.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = playerColor.copy(alpha = 0.15f)
+                                    containerColor = playerColor.copy(alpha = 0.30f)
                                 ),
                                 shape = RoundedCornerShape(20.dp),
                                 border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
@@ -598,7 +598,7 @@ fun ResultsScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 4.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = playerColor.copy(alpha = 0.15f)
+                                    containerColor = playerColor.copy(alpha = 0.30f)
                                 ),
                                 shape = RoundedCornerShape(20.dp),
                                 border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
@@ -673,7 +673,7 @@ fun ResultsScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 4.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = playerColor.copy(alpha = 0.15f)
+                                    containerColor = playerColor.copy(alpha = 0.30f)
                                 ),
                                 shape = RoundedCornerShape(20.dp),
                                 border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
