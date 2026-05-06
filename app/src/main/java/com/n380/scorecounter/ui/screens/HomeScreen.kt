@@ -89,6 +89,10 @@ fun HomeScreen(
     // ma anche ai cambi di configurazione del sistema (come la rotazione del display).
     var expandedMatchIndex by rememberSaveable { mutableIntStateOf(-1) }
 
+    // Stato per la visibilità del dialogo informativo sui premi nella schermata di analisi.
+    var showAwardsInfoDialog by rememberSaveable { mutableStateOf(false) }
+
+
     // Valutazione reattiva: Se l'indice è valido (>= 0), recuperiamo i dati della partita dal ViewModel.
     val expandedMatch =
         if (expandedMatchIndex >= 0) viewModel.history.getOrNull(expandedMatchIndex) else null
@@ -808,13 +812,109 @@ fun HomeScreen(
                                 // 🧠 LOGICA CONDIZIONALE: Se tutti i calcoli sono 'null' (partite vecchie), il blocco sparisce.
                                 if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
 
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Premi Partita",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                                    // ====================================================================
+                                    // 🧠 UX: Intestazione con Icona Informativa
+                                    // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
+                                    // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
+                                    // ====================================================================
+                                    Row(verticalAlignment = Alignment.CenterVertically,
+                                    ){
+                                        // Pulsante icona che inverte la variabile di stato per aprire il popup
+                                        IconButton(
+                                            onClick = { showAwardsInfoDialog = true },
+                                            modifier = Modifier.size(30.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Info,//icona delle info piena
+                                                contentDescription = "Info Premi",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier
+                                                    .padding(end = 8.dp) // Spazietto per staccare l'icona dal testo
+
+                                            )
+                                        }
+
+                                        Text(
+                                            text = "Premi Partita",
+                                            // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+
+                                    // =========================================================
+                                    // POPUP INFORMATIVO SUI PREMI (AlertDialog)
+                                    // =========================================================
+                                    // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
+                                    if (showAwardsInfoDialog) {
+                                        AlertDialog(
+                                            // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
+                                            onDismissRequest = { showAwardsInfoDialog = false },
+                                            title = { Text("Guida ai Premi", fontWeight = FontWeight.Bold) },
+                                            text = {
+                                                // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
+                                                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                                                    Text(
+                                                        "🎯 Il Cecchino",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                                                    )
+                                                    Text(
+                                                        "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        "🔥 L'Inarrestabile",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                    )
+                                                    Text(
+                                                        "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        "🦞 Il Gambero",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                    )
+                                                    Text(
+                                                        "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        "🦅 La Fenice",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                    )
+                                                    Text(
+                                                        "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+                                                }
+                                            },
+                                            confirmButton = {
+                                                // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
+                                                Button(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        showAwardsInfoDialog = false // Chiude il popup quando si preme il bottone
+                                                    },
+                                                    shape = RoundedCornerShape(20.dp)
+                                                ) {
+                                                    Text("Ho capito")
+                                                }
+                                            }
+                                        )
+                                    }
 
                                     // --- CARD PREMIO: CECCHINO 🎯 ---
                                     storiciCecchino?.let { (player, punti) ->

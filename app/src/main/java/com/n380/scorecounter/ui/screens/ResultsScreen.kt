@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -373,15 +374,29 @@ fun ResultsScreen(
                             // Diamo un respiro di 12.dp per separare bene il blocco del grafico da quello dei premi
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // Usiamo una Row per disporre Titolo e Pulsante sulla stessa riga, spingendoli agli estremi (SpaceBetween)
-                            Row(
-                                modifier = staggeredModifier(rankedPlayers.size + 3)
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp)
-                                    .padding(bottom = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            // ====================================================================
+                            // 🧠 UX: Intestazione con Icona Informativa
+                            // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
+                            // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
+                            // ====================================================================
+                            Row(modifier = staggeredModifier(rankedPlayers.size + 3),//diamo un ritardo per la comparsa dell'icona
+                                verticalAlignment = Alignment.CenterVertically,
+                            ){
+                                // Pulsante icona che inverte la variabile di stato per aprire il popup
+                                IconButton(
+                                    onClick = { showAwardsInfoDialog = true },
+                                    modifier = Modifier.size(30.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Info,//icona delle info piena
+                                        contentDescription = "Info Premi",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier
+                                            .padding(end = 8.dp) // Spazietto per staccare l'icona dal testo
+
+                                    )
+                                }
+
                                 Text(
                                     text = "Premi Partita",
                                     // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
@@ -389,18 +404,6 @@ fun ResultsScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-
-                                // Pulsante icona che inverte la variabile di stato per aprire il popup
-                                IconButton(
-                                    onClick = { showAwardsInfoDialog = true },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Info,//icona delle info piena
-                                        contentDescription = "Info Premi",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
                             }
                         }
 
