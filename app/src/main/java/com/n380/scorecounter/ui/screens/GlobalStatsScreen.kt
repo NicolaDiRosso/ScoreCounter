@@ -792,7 +792,7 @@ fun GlobalStatsScreen(
                                             Text(
                                                 "Il Re dei Gamberi 🦞",
                                                 style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.error,
+                                                color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
                                             )
                                             // 💡 UX/UI: Breve descrizione
