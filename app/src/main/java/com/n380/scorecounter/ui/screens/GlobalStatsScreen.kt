@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.* // Strumenti per l'animazione infinita
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
@@ -26,6 +27,10 @@ import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.viewmodel.MatchViewModel
+//per misurare un solo tocco alla volta per il pulsante chiudi
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 /**
  * ====================================================================
@@ -39,6 +44,14 @@ fun GlobalStatsScreen(
     onNavigateBack: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
+
+    // ====================================================================
+    // 🧠 FIX BUG: PREVENZIONE DOPPIO CLICK (Debounce)
+    // ====================================================================
+    // TEORIA COMPOSE: 'remember' dice a Compose di non dimenticarsi questo valore
+    // quando la UI si ricarica (Recomposition). 'mutableStateOf' crea un contenitore
+    // reattivo. Parte da 'false' (non ho ancora cliccato).
+    var isClosing by remember { mutableStateOf(false) }
 
     // ====================================================================
     // ---> LA LOGICA DEI CALCOLI (MATEMATICA DIETRO LE QUINTE) <---
@@ -656,6 +669,59 @@ fun GlobalStatsScreen(
                         }
                     }
                 }
+
+                // ====================================================================
+                // --- BOTTONE DI CHIUSURA ---
+                // ====================================================================
+                // 🧠 UX & MATERIAL 3: Coerenza visiva e "Thumb Zone".
+                // Riprendiamo lo stesso identico bottone usato per chiudere l'Analisi Partita.
+                // Posizionandolo in fondo, lo rendiamo facilissimo da cliccare col pollice.
+
+                // Spacer funge da "cuscinetto" per non incollare il bottone all'ultima card
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    // 🧠 TEORIA KOTLIN: Protezione dallo State
+                    // Quando clicchiamo, controlliamo 'isClosing'. Se è false,
+                    // lo facciamo diventare true e scateniamo onNavigateBack().
+                    // Eventuali tocchi accidentali successivi troveranno isClosing a true
+                    // e non faranno assolutamente nulla!
+                    onClick = {
+                        if (!isClosing) {
+                            isClosing = true
+                            onNavigateBack()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth() // Il bottone si allarga per tutta la larghezza disponibile
+                        .height(56.dp), // Altezza standard M3 per i bottoni "Call to Action"
+                    colors = ButtonDefaults.buttonColors(
+                        // Usiamo il 'primary' per far capire che è l'azione principale
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(24.dp) // Stondatura massiccia a "Pillola"
+                ) {
+                    // 🧠 TEORIA COMPOSE: Il contenuto del Button è una Row invisibile.
+                    // Possiamo affiancare icone e testi con facilità.
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Chiudi Statistiche"
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp)) // Spazietto orizzontale tra icona e testo
+
+                    Text(
+                        text = "Chiudi Statistiche",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Aggiungiamo un ultimo cuscinetto sotto al bottone per non farlo
+                // appoggiare fisicamente sul bordo inferiore dello schermo del telefono
+                Spacer(modifier = Modifier.height(32.dp))
+
 
             }
 
