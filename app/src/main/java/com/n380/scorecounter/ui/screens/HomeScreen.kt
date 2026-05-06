@@ -689,26 +689,39 @@ fun HomeScreen(
                             .systemBarsPadding()
                             .padding(16.dp)
                     ) {
+                        // ====================================================================
                         // --- INTESTAZIONE OVERLAY ---
-                        Text(
-                            text = "Analisi Partita",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = "Sfida: ${match.title}",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
-                        Text(
-                            text = "Vinta da ${match.winnerName} con ${match.winningScore} pt",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
+                        // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
+                        // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
+                        // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
+                        // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
+                        //    'secondary' per farlo risaltare in modo vibrante ed elegante.
+                        // ====================================================================
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Analisi Partita",
+                                style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = match.title,
+                                style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
 
                         // ====================================================================
                         // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
@@ -1008,19 +1021,29 @@ fun HomeScreen(
                                     }
                                 }
 
+                                /// ====================================================================
                                 // Footer informativo sulla durata
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                // 🧠 UX & MATERIAL 3: Coerenza dei Colori. L'utente ha giustamente
+                                // notato che il grigio "spegne" questa informazione. Usiamo il colore
+                                // 'primary' per legarlo visivamente al bottone di chiusura sottostante!
+                                // ====================================================================
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                    horizontalArrangement = Arrangement.Center, // Bello centrato
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     Icon(
-                                        Icons.Filled.Timer,
-                                        null,
-                                        tint = Color.LightGray,
+                                        imageVector = Icons.Filled.Timer,
+                                        contentDescription = "Durata",
+                                        tint = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Text(
                                         text = " Durata totale: ${formatTime(match.durationSeconds)}",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.tertiary
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
+                                        modifier = Modifier.padding(start = 6.dp)
                                     )
                                 }
                             }
