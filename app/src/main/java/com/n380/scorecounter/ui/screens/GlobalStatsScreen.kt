@@ -21,6 +21,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
 import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
+import com.n380.scorecounter.model.getHistoricalCecchino
+import com.n380.scorecounter.model.getHistoricalFenice
+import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.viewmodel.MatchViewModel
 
@@ -103,6 +106,24 @@ fun GlobalStatsScreen(
         dictatorMatch.allPlayers[0].score - dictatorMatch.allPlayers[1].score
     } else 0
 
+    // ====================================================================
+    // ---> I RECORD GLOBALI DEI PREMI <---
+    // ====================================================================
+    // mapNotNull estrae i premi dalle partite ma scarta automaticamente
+    // e silenziosamente tutte le partite in cui il premio non c'era (null).
+    // Dopodiché, maxByOrNull trova la partita in cui il punteggio di quel premio è stato il più alto in assoluto!
+    val globalSniper = viewModel.history
+        .mapNotNull { it.getHistoricalCecchino() }
+        .maxByOrNull { it.second } // it.second è il punteggio del salto
+
+    val globalCrab = viewModel.history
+        .mapNotNull { it.getHistoricalGambero() }
+        .maxByOrNull { it.second } // it.second sono i punti persi
+
+    val globalPhoenix = viewModel.history
+        .mapNotNull { it.getHistoricalFenice() }
+        .maxByOrNull { it.second } // it.second sono i punti recuperati
+
 
 
     Scaffold(
@@ -172,38 +193,113 @@ fun GlobalStatsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // ---> MODIFICA ESTETICA: Spennelliamo la luce sopra la carta <---
                         .drawWithContent {
                             drawContent() // Disegna testo e icone normalmente
-                            drawRect(brush = shimmerBrush) // Passa il raggio di luce sopra a tutto!
+                            drawRect(brush = shimmerBrush) // Passa il raggio di luce animato sopra a tutto!
                         },
-                    // Colore speciale: Usiamo il primaryContainer per farla risaltare e darle un effetto "Oro/Premio"
+                    // Usiamo il primaryContainer per dare un effetto "Oro/Premio" che si stacca dalle altre card
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     shape = RoundedCornerShape(24.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally // Centra tutto perfettamente
+                    // ====================================================================
+                    // --- PRIMA CARD: IL CAMPIONE ASSOLUTO (Chi vince di più) ---
+                    // ====================================================================
+                    Card(
+                        // 'modifier' serve per alterare l'aspetto o il comportamento del componente.
+                        // 'fillMaxWidth()' dice alla Card di allargarsi fino a toccare i bordi (meno il padding esterno).
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawWithContent {
+                                drawContent() // 1. Disegna normalmente il contenuto della Card
+                                drawRect(brush = shimmerBrush) // 2. Ci passa sopra il "pennello" animato (Shimmer)
+                            },
+                        // 'colors' in Material 3 definisce la palette della Card.
+                        // 'primaryContainer' dà un colore di sfondo forte ed elegante (es. azzurro pastello o oro).
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        // 'shape' definisce i bordi. 24.dp crea angoli molto arrotondati, tipici del Material 3.
+                        shape = RoundedCornerShape(24.dp)
                     ) {
-                        Icon(Icons.Filled.WorkspacePremium, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(48.dp))
-                        Text("CAMPIONE ASSOLUTO", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f), modifier = Modifier.padding(top = 8.dp))
+                        // 🧠 TEORIA COMPOSE (Il Layout Box):
+                        // Invece di 'Row' (elementi in fila) o 'Column' (elementi impilati), usiamo 'Box'.
+                        // Il Box funziona a STRATI (Z-Index): il primo elemento scritto sta sul fondo,
+                        // i successivi gli vengono stampati sopra. Ottimo per sfondi e filigrane!
+                        Box(
+                            // Mettiamo un padding INTERNO al Box, così i testi non toccano i bordi della Card.
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 20.dp, horizontal = 24.dp)
+                        ) {
 
-                        // Stampiamo il NOME del giocatore con più vittorie.
-                        // '?.' è una protezione: se 'bestPlayer' è nullo (nessuno ha mai giocato), stampa "Nessuno".
-                        Text(
-                            text = bestPlayer?.key ?: "Nessuno",
-                            style = MaterialTheme.typography.displayMedium,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                            // ----------------------------------------------------------------
+                            // STRATO 1 (Sfondo): Medaglia Gigante in Filigrana
+                            // Questo elemento viene disegnato per primo, quindi sta "sotto".
+                            // ----------------------------------------------------------------
+                            Icon(
+                                imageVector = Icons.Filled.WorkspacePremium, // L'icona vettoriale della medaglia
+                                contentDescription = "Medaglia", // Testo per chi usa lo screen reader (Accessibilità)
 
-                        // Stampiamo il NUMERO di vittorie di quel giocatore.
-                        Text(
-                            text = "Con ${bestPlayer?.value ?: 0} vittorie totali",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
+                                // 🎨 UX/UI: La tua intuizione! Usiamo il colore 'primary' (es. Blu acceso).
+                                // In Kotlin, usiamo la funzione '.copy(alpha = 0.3f)' per clonare il colore
+                                // abbassandone l'opacità al 30%. Così risalta, ma non nasconde il testo.
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 1f),
+
+                                modifier = Modifier
+                                    .size(120.dp) // 'size' forza l'icona a diventare gigantesca
+                                    .align(Alignment.CenterEnd) // La calamitiamo al centro-destra del Box
+                                    .offset(x = 24.dp) // La spingiamo 24 pixel fuori dal bordo destro per tagliarla
+                            )
+
+                            // ----------------------------------------------------------------
+                            // STRATO 2 (Primo Piano): Testi e Badge
+                            // Viene disegnato per secondo, quindi si appoggia SOPRA la medaglia.
+                            // ----------------------------------------------------------------
+                            Column(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                // SOTTOTITOLO (Il Sopracciglio)
+                                Text(
+                                    text = "CAMPIONE ASSOLUTO",
+                                    style = MaterialTheme.typography.labelLarge, // Font piccolo e leggibile
+                                    // Se lo sfondo è 'primaryContainer', la regola d'oro di Material 3 impone
+                                    // di usare 'onPrimaryContainer' per i testi, per garantire il massimo contrasto.
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                                    fontWeight = FontWeight.Bold // Grassetto per dargli carattere
+                                )
+
+                                // TITOLO PRINCIPALE (Il Nome del Giocatore)
+                                Text(
+                                    // 'bestPlayer?.key' usa il Null Safety di Kotlin: se bestPlayer è null,
+                                    // usa la stringa dopo il '?:' (chiamato operatore Elvis).
+                                    text = bestPlayer?.key ?: "Nessuno",
+                                    style = MaterialTheme.typography.displayMedium, // Font gigantesco
+                                    fontWeight = FontWeight.Black, // Font extrabold (più doppio del Bold)
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+
+                                // BADGE (La "Pillola" col numero di vittorie)
+                                // Una Card dentro un'altra Card! Serve solo per creare lo sfondo colorato attorno al testo.
+                                Card(
+                                    modifier = Modifier.padding(top = 8.dp), // Spazio dal nome del giocatore
+                                    shape = RoundedCornerShape(12.dp), // Angoli molto stondati (effetto pillola)
+                                    // Questo badge usa il colore 'primary' puro come sfondo
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Text(
+                                        // Stampiamo il numero di vittorie ('value' della mappa)
+                                        text = "${bestPlayer?.value ?: 0} VITTORIE",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        // Essendo su sfondo 'primary', il testo DEVE essere 'onPrimary' (es. bianco)
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.padding(
+                                            horizontal = 12.dp,
+                                            vertical = 6.dp
+                                        ) // Padding interno della pillola
+                                    )
+                                }
+                            }
+                        } // Fine Box
+                    } // Fine Card
                 }
             }
             // ==============================================================
@@ -411,7 +507,159 @@ fun GlobalStatsScreen(
                         }
                     }
                 }
+
+                // ====================================================================
+                // --- NUOVE STATISTICHE GLOBALI (Premi Partita) ---
+                // ====================================================================
+
+                // 🎯 IL CECCHINO D'ORO (Record assoluto)
+                // 🧠 TEORIA KOTLIN (Smart Cast): La variabile 'globalSniper' potrebbe essere null
+                // se nessuno ha mai vinto questo premio in tutto lo storico.
+                // Usando l'if, Kotlin attiva la magia dello "Smart Cast": capisce matematicamente
+                // che qui dentro la variabile esiste di sicuro e ci permette di usare i suoi dati (.first e .second).
+                if (globalSniper != null) {
+                    Card(
+                        // modifier.padding(top = 16.dp) stacca questa card da quella precedente
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        // 'surfaceVariant' crea un colore di fondo leggermente diverso dalla pagina (grigio dinamico M3)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(20.dp) // Stondatura morbida e coerente
+                    ) {
+                        // 🧠 TEORIA COMPOSE: 'Row' allinea gli elementi da sinistra a destra.
+                        // Arrangement.SpaceBetween è il trucco per incollare la Column (coi testi) a sinistra
+                        // e il numerone del punteggio tutto a destra.
+                        Row(
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // 🧠 TEORIA COMPOSE: 'Column' impila gli elementi dall'alto in basso.
+                            // 'weight(1f)' dice alla Column: "Espanditi occupando tutto lo spazio orizzontale
+                            // che avanza, così spingi il punteggio sul bordo destro".
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Miglior Cecchino 🎯",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary, // Colore vibrante per il titolo
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    // '.first' accede all'oggetto Player salvato, da cui prendiamo il nome
+                                    text = globalSniper.first.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Black
+                                )
+                                // 💡 UX/UI: Breve descrizione per chiarire l'obiettivo
+                                Text(
+                                    text = "Maggior punteggio fatto in un singolo turno",
+                                    style = MaterialTheme.typography.bodySmall, // Font piccolo da didascalia
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f), // Grigio leggibile
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                            }
+                            Text(
+                                // '.second' accede al valore numerico del record (il punteggio)
+                                text = "+${globalSniper.second} pt",
+                                style = MaterialTheme.typography.displayMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // 🦞 IL RE DEI GAMBERI (Record negativo assoluto)
+                if (globalCrab != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Il Re dei Gamberi 🦞",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    // 🎨 UX/UI: Usiamo 'error' (rosso) perché è una statistica negativa (malus)
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = globalCrab.first.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Black
+                                )
+                                // 💡 UX/UI: Breve descrizione
+                                Text(
+                                    text = "Maggior numero di punti persi in una sola mossa",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                            }
+                            Text(
+                                // Non stampiamo il '+' perché globalCrab.second è già un numero negativo
+                                text = "${globalCrab.second} pt",
+                                style = MaterialTheme.typography.displayMedium,
+                                color = MaterialTheme.colorScheme.error, // Rosso anche per il numero
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // 🦅 LA FENICE SUPREMA (Miglior recupero di sempre)
+                if (globalPhoenix != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "La Fenice Suprema 🦅",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = globalPhoenix.first.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Black
+                                )
+                                // 💡 UX/UI: Breve descrizione
+                                Text(
+                                    text = "La rimonta più leggendaria dall'ultimo posto",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                            }
+                            Text(
+                                text = "+${globalPhoenix.second} pt",
+                                style = MaterialTheme.typography.displayMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
             }
+
+
 
             // ---> LEZIONE FAB FIX <---
             // Cuscinetto finale per non incollare l'ultima card in fondo allo schermo,
