@@ -1,4 +1,4 @@
-package com.n380.scorecounter
+package com.n380.scorecounter.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,6 +21,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
 import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
+import com.n380.scorecounter.ui.components.formatTime
+import com.n380.scorecounter.viewmodel.MatchViewModel
 
 /**
  * ====================================================================

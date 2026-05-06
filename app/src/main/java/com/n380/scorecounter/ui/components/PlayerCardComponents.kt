@@ -1,4 +1,4 @@
-package com.n380.scorecounter
+package com.n380.scorecounter.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -32,6 +32,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
+import com.n380.scorecounter.model.Player
 
 /**
  * ====================================================================

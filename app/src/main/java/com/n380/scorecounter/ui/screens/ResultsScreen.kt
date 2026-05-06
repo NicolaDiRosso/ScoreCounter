@@ -1,4 +1,4 @@
-package com.n380.scorecounter
+package com.n380.scorecounter.ui.screens
 
 import android.content.Intent
 import androidx.compose.animation.core.*
@@ -22,6 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Info
+import com.n380.scorecounter.model.PlayerRecord
+import com.n380.scorecounter.ui.components.ConfettiExplosion
+import com.n380.scorecounter.ui.components.PlayerResultCard
+import com.n380.scorecounter.ui.components.ScoreChart
+import com.n380.scorecounter.ui.components.formatDate
+import com.n380.scorecounter.ui.components.formatTime
+import com.n380.scorecounter.viewmodel.MatchViewModel
 
 // ====================================================================
 // LA SCHERMATA DELLA CLASSIFICA (RISULTATI) - VERSIONE ANIMATA
@@ -164,7 +171,11 @@ fun ResultsScreen(
                                 // --- LA LOGICA DI CONDIVISIONE RIMANE INVARIATA ---
                                 val finalTitle = if (viewModel.matchTitle.isEmpty()) "Sfida Senza Nome" else viewModel.matchTitle
                                 var shareText = "🏆 Risultati: $finalTitle\n"
-                                if (viewModel.matchDurationSeconds > 0) shareText += "⏱️ Durata: ${formatTime(viewModel.matchDurationSeconds)}\n"
+                                if (viewModel.matchDurationSeconds > 0) shareText += "⏱️ Durata: ${
+                                    formatTime(
+                                        viewModel.matchDurationSeconds
+                                    )
+                                }\n"
                                 shareText += "📅 Data: ${formatDate(System.currentTimeMillis())}\n\n"
 
                                 rankedPlayers.forEachIndexed { index, player ->

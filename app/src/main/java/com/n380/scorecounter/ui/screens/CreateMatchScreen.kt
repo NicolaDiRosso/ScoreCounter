@@ -1,7 +1,6 @@
-package com.n380.scorecounter
+package com.n380.scorecounter.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,6 +22,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.n380.scorecounter.model.Player
+import com.n380.scorecounter.ui.components.ColorPickerRow
+import com.n380.scorecounter.ui.components.PlayerAtTableCard
+import com.n380.scorecounter.ui.components.playerPalette
+import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

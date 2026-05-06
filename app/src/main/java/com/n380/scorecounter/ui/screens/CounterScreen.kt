@@ -1,4 +1,4 @@
-package com.n380.scorecounter
+package com.n380.scorecounter.ui.screens
 
 import android.app.Activity
 import android.view.WindowManager
@@ -24,12 +24,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 //Importiamo la classe Lifecycle per gestire il ciclo di vita della schermata.
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.n380.scorecounter.model.Player
+import com.n380.scorecounter.ui.components.PlayerScoreCard
+import com.n380.scorecounter.ui.components.formatTime
+import com.n380.scorecounter.viewmodel.MatchViewModel
 
 // ====================================================================
 // ====================================================================

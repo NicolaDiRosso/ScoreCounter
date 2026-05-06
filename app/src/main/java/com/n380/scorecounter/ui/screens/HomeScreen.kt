@@ -1,4 +1,4 @@
-package com.n380.scorecounter
+package com.n380.scorecounter.ui.screens
 
 import android.content.Intent
 import androidx.activity.compose.BackHandler
@@ -36,6 +36,16 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.n380.scorecounter.model.MatchRecord
+import com.n380.scorecounter.model.getHistoricalCecchino
+import com.n380.scorecounter.model.getHistoricalFenice
+import com.n380.scorecounter.model.getHistoricalGambero
+import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.ui.components.PatternedBackground
+import com.n380.scorecounter.ui.components.ScoreChart
+import com.n380.scorecounter.ui.components.formatDate
+import com.n380.scorecounter.ui.components.formatTime
+import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -175,7 +185,7 @@ fun HomeScreen(
                             contentColor = MaterialTheme.colorScheme.error
                         ),
                         // Applichiamo un bordo spesso 1 pixel usando lo stesso colore di errore
-                        border = androidx.compose.foundation.BorderStroke(
+                        border = BorderStroke(
                             1.dp,
                             MaterialTheme.colorScheme.error
                         )

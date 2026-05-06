@@ -18,7 +18,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.n380.scorecounter.ui.components.PatternedBackground
+import com.n380.scorecounter.ui.screens.CounterScreen
+import com.n380.scorecounter.ui.screens.CreateMatchScreen
+import com.n380.scorecounter.ui.screens.GlobalStatsScreen
+import com.n380.scorecounter.ui.screens.HomeScreen
+import com.n380.scorecounter.ui.screens.ResultsScreen
 import com.n380.scorecounter.ui.theme.ScoreCounterTheme
+import com.n380.scorecounter.viewmodel.MatchViewModel
 
 // ====================================================================
 // 2. INIZIALIZZAZIONE DEL DATABASE (DataStore) E FUNZIONI DI SUPPORTO
@@ -94,7 +101,12 @@ class MainActivity : ComponentActivity() {
                         composable("results") {
                             ResultsScreen(
                                 viewModel = matchViewModel,
-                                onNavigateHome = { navController.popBackStack("home", inclusive = false) }
+                                onNavigateHome = {
+                                    navController.popBackStack(
+                                        "home",
+                                        inclusive = false
+                                    )
+                                }
                             )
                         }
 

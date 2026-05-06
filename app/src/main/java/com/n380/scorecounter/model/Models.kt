@@ -1,12 +1,13 @@
-    package com.n380.scorecounter
+package com.n380.scorecounter.model
 
     import androidx.compose.runtime.getValue
     import androidx.compose.runtime.mutableIntStateOf
     import androidx.compose.runtime.mutableStateListOf
     import androidx.compose.runtime.mutableStateOf
     import androidx.compose.runtime.setValue
+    import kotlin.math.abs
 
-    // 1. IL MODELLO DATI (I Giocatori Attivi durante la partita corrente)
+// 1. IL MODELLO DATI (I Giocatori Attivi durante la partita corrente)
     // Usiamo "var name by mutableStateOf" invece del semplice "val".
     // Se fosse stato "val", Kotlin avrebbe vietato le modifiche testuali una volta creato l'oggetto.
     // "mutableStateOf" è lo Stato Magico di Compose: se tu cambi questo valore nel ViewModel,
@@ -120,7 +121,7 @@
                 .filter { it < 0 }
                 .sum()
 
-            val absoluteLost = kotlin.math.abs(pointsLost)
+            val absoluteLost = abs(pointsLost)
             if (absoluteLost > maxPointsLost) {
                 maxPointsLost = absoluteLost
                 worstPlayer = player

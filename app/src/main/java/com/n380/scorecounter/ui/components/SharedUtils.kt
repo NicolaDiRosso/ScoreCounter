@@ -1,5 +1,7 @@
-    package com.n380.scorecounter
+package com.n380.scorecounter.ui.components
 
+    import android.graphics.Paint
+    import android.graphics.Typeface
     import androidx.compose.animation.core.*
     import androidx.compose.foundation.Canvas
     import androidx.compose.foundation.background
@@ -30,6 +32,7 @@
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
     import androidx.compose.ui.unit.dp
+    import com.n380.scorecounter.model.PlayerRecord
     import java.text.SimpleDateFormat
     import java.util.*
     import kotlin.math.cos
@@ -172,11 +175,11 @@
                 // ==============================================================
                 if (isDetailed) {
                     // IL PENNELLO DI TESTO: Serve per comunicare con il sistema grafico base di Android
-                    val textPaint = android.graphics.Paint().apply {
+                    val textPaint = Paint().apply {
                         color = android.graphics.Color.LTGRAY // Grigio chiaro, ottimo per sfondi scuri
                         textSize = 32f // Dimensione del font
-                        textAlign = android.graphics.Paint.Align.RIGHT // Allinea i numeri a destra (contro l'asse)
-                        typeface = android.graphics.Typeface.DEFAULT_BOLD // Grassetto
+                        textAlign = Paint.Align.RIGHT // Allinea i numeri a destra (contro l'asse)
+                        typeface = Typeface.DEFAULT_BOLD // Grassetto
                     }
 
                     // --- ASSE Y (VERTICALE: I PUNTEGGI) E GRIGLIA ---
@@ -225,7 +228,7 @@
 
                     // Etichette per l'asse X (Rappresentano la cronologia della partita)
                     val xLabels = listOf("Inizio", "Metà", "Fine")
-                    textPaint.textAlign = android.graphics.Paint.Align.CENTER // Cambiamo allineamento al centro per l'Asse X
+                    textPaint.textAlign = Paint.Align.CENTER // Cambiamo allineamento al centro per l'Asse X
 
                     xLabels.forEachIndexed { i, label ->
                         // Calcoliamo la posizione orizzontale (0, Metà schermo, Fine schermo)
@@ -309,7 +312,7 @@
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)
                     ) {
-                        Box(modifier = Modifier.size(10.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(player.color)))
+                        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(Color(player.color)))
                         Text(text = player.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp))
                     }
                 }
