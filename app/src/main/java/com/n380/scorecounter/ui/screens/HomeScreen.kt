@@ -282,7 +282,7 @@ fun HomeScreen(
                     val features = listOf(
                         "Registrare punti e combo.",
                         "Analizzare grafici per dimostrare la tua superiorità.",
-                        "Assegnare titoli onorifici come a chi se li merita."
+                        "Assegnare titoli onorifici particolari a chi se li merita."
                     )
                     features.forEach { feature ->
                         Row(modifier = Modifier.padding(bottom = 4.dp)){
