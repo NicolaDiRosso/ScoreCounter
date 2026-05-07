@@ -41,6 +41,7 @@ import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.ui.components.AwardCard
 import com.n380.scorecounter.ui.components.PatternedBackground
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.formatDate
@@ -825,8 +826,9 @@ fun HomeScreen(
                                         // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
                                         // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
                                         // ====================================================================
-                                        Row(verticalAlignment = Alignment.CenterVertically,
-                                        ){
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
                                             // Pulsante icona che inverte la variabile di stato per aprire il popup
                                             IconButton(
                                                 onClick = { showAwardsInfoDialog = true },
@@ -859,16 +861,28 @@ fun HomeScreen(
                                             AlertDialog(
                                                 // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
                                                 onDismissRequest = { showAwardsInfoDialog = false },
-                                                title = { Text("Guida ai Premi", fontWeight = FontWeight.Bold) },
+                                                title = {
+                                                    Text(
+                                                        "Guida ai Premi",
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                },
                                                 text = {
                                                     // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                                                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                                    Column(
+                                                        modifier = Modifier.verticalScroll(
+                                                            rememberScrollState()
+                                                        )
+                                                    ) {
 
                                                         Text(
                                                             "🎯 Il Cecchino",
                                                             fontWeight = FontWeight.ExtraBold,
                                                             color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                                                            modifier = Modifier.padding(
+                                                                bottom = 2.dp,
+                                                                top = 8.dp
+                                                            )
                                                         )
                                                         Text(
                                                             "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
@@ -879,7 +893,10 @@ fun HomeScreen(
                                                             "🔥 L'Inarrestabile",
                                                             fontWeight = FontWeight.ExtraBold,
                                                             color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                            modifier = Modifier.padding(
+                                                                bottom = 2.dp,
+                                                                top = 16.dp
+                                                            )
                                                         )
                                                         Text(
                                                             "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
@@ -890,7 +907,10 @@ fun HomeScreen(
                                                             "🦞 Il Gambero",
                                                             fontWeight = FontWeight.ExtraBold,
                                                             color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                            modifier = Modifier.padding(
+                                                                bottom = 2.dp,
+                                                                top = 16.dp
+                                                            )
                                                         )
                                                         Text(
                                                             "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
@@ -901,7 +921,10 @@ fun HomeScreen(
                                                             "🦅 La Fenice",
                                                             fontWeight = FontWeight.ExtraBold,
                                                             color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                            modifier = Modifier.padding(
+                                                                bottom = 2.dp,
+                                                                top = 16.dp
+                                                            )
                                                         )
                                                         Text(
                                                             "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
@@ -913,8 +936,11 @@ fun HomeScreen(
                                                     // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
                                                     Button(
                                                         onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                            showAwardsInfoDialog = false // Chiude il popup quando si preme il bottone
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress
+                                                            )
+                                                            showAwardsInfoDialog =
+                                                                false // Chiude il popup quando si preme il bottone
                                                         },
                                                         shape = RoundedCornerShape(20.dp)
                                                     ) {
@@ -924,240 +950,54 @@ fun HomeScreen(
                                             )
                                         }
 
+                                        // ====================================================================
+                                        // 🧠 REFACTORING: UTILIZZO DEL COMPONENTE 'AwardCard'
+                                        // Grazie al nostro nuovo mattoncino, abbiamo eliminato centinaia di righe
+                                        // di codice duplicato. Passiamo solo i dati grezzi, e la grafica si autogenera!
+                                        // ====================================================================
+
                                         // --- CARD PREMIO: CECCHINO 🎯 ---
                                         storiciCecchino?.let { (player, punti) ->
-                                            val playerColor = Color(player.color)
-                                            Card(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                // 🎨 DESIGN: Alpha 0.15f crea uno sfondo tenue basato col colore del giocatore.
-                                                colors = CardDefaults.cardColors(
-                                                    containerColor = playerColor.copy(
-                                                        alpha = 0.30f
-                                                    )
-                                                ),
-                                                shape = RoundedCornerShape(20.dp),
-                                                border = BorderStroke(
-                                                    1.dp,
-                                                    playerColor.copy(alpha = 0.3f)
-                                                )
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.padding(16.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        "🎯",
-                                                        style = MaterialTheme.typography.displaySmall,
-                                                        modifier = Modifier.padding(end = 16.dp)
-                                                    )
-                                                    // 🧠 ACCESSIBILITÀ (A11y) & UX:
-                                                    // 1. Usiamo il colore 'primary' dell'app per il titolo del premio. Questo tocco da
-                                                    // maestro Material 3 garantisce perfetta leggibilità sia in Light che in Dark mode
-                                                    // e dà vivacità al testo rispetto al grigio spento di prima.
-                                                    // 2. Usiamo 'onSurface' per il nome del giocatore: garantisce contrasto assoluto
-                                                    // (Bianco puro su sfondo scuro, Nero puro su sfondo chiaro).
-                                                    // L'identità cromatica del giocatore rimane preservata nell'alone dello sfondo e nel badge!
-                                                    Column(modifier = Modifier.weight(1f)) {
-                                                        Text(
-                                                            text = "Il Cecchino",
-                                                            style = MaterialTheme.typography.labelLarge,
-                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                        Text(
-                                                            text = player.name,
-                                                            style = MaterialTheme.typography.titleLarge,
-                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                            fontWeight = FontWeight.Black
-                                                        )
-                                                    }
-                                                    Card(
-                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                        shape = RoundedCornerShape(12.dp)
-                                                    ) {
-                                                        Text(
-                                                            "+$punti pt",
-                                                            modifier = Modifier.padding(
-                                                                horizontal = 12.dp,
-                                                                vertical = 6.dp
-                                                            ),
-                                                            color = Color.White,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                            AwardCard(
+                                                icon = "🎯",
+                                                title = "Il Cecchino",
+                                                playerName = player.name,
+                                                playerColorInt = player.color,
+                                                valueText = "+$punti pt"
+                                            )
                                         }
 
                                         // --- CARD PREMIO: INARRESTABILE 🔥 ---
                                         storiciInarrestabile?.let { (player, combo) ->
-                                            val playerColor = Color(player.color)
-                                            Card(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                colors = CardDefaults.cardColors(
-                                                    containerColor = playerColor.copy(
-                                                        alpha = 0.30f
-                                                    )
-                                                ),
-                                                shape = RoundedCornerShape(20.dp),
-                                                border = BorderStroke(
-                                                    1.dp,
-                                                    playerColor.copy(alpha = 0.3f)
-                                                )
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.padding(16.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        "🔥",
-                                                        style = MaterialTheme.typography.displaySmall,
-                                                        modifier = Modifier.padding(end = 16.dp)
-                                                    )
-                                                    Column(modifier = Modifier.weight(1f)) {
-                                                        Text(
-                                                            text = "L'Inarrestabile",
-                                                            style = MaterialTheme.typography.labelLarge,
-                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                        Text(
-                                                            text = player.name,
-                                                            style = MaterialTheme.typography.titleLarge,
-                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                            fontWeight = FontWeight.Black
-                                                        )
-                                                    }
-                                                    Card(
-                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                        shape = RoundedCornerShape(12.dp)
-                                                    ) {
-                                                        Text(
-                                                            "$combo Combo",
-                                                            modifier = Modifier.padding(
-                                                                horizontal = 12.dp,
-                                                                vertical = 6.dp
-                                                            ),
-                                                            color = Color.White,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                            AwardCard(
+                                                icon = "🔥",
+                                                title = "L'Inarrestabile",
+                                                playerName = player.name,
+                                                playerColorInt = player.color,
+                                                valueText = "$combo Combo"
+                                            )
                                         }
 
                                         // --- CARD PREMIO: IL GAMBERO 🦞 ---
                                         storiciGambero?.let { (player, punti) ->
-                                            val playerColor = Color(player.color)
-                                            Card(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                colors = CardDefaults.cardColors(
-                                                    containerColor = playerColor.copy(
-                                                        alpha = 0.30f
-                                                    )
-                                                ),
-                                                shape = RoundedCornerShape(20.dp),
-                                                border = BorderStroke(
-                                                    1.dp,
-                                                    playerColor.copy(alpha = 0.3f)
-                                                )
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.padding(16.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        "🦞",
-                                                        style = MaterialTheme.typography.displaySmall,
-                                                        modifier = Modifier.padding(end = 16.dp)
-                                                    )
-                                                    Column(modifier = Modifier.weight(1f)) {
-                                                        Text(
-                                                            text = "Il Gambero",
-                                                            style = MaterialTheme.typography.labelLarge,
-                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                        Text(
-                                                            text = player.name,
-                                                            style = MaterialTheme.typography.titleLarge,
-                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                            fontWeight = FontWeight.Black
-                                                        )
-                                                    }
-                                                    Card(
-                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                        shape = RoundedCornerShape(12.dp)
-                                                    ) {
-                                                        Text(
-                                                            "-$punti pt",
-                                                            modifier = Modifier.padding(
-                                                                horizontal = 12.dp,
-                                                                vertical = 6.dp
-                                                            ),
-                                                            color = Color.White,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                            AwardCard(
+                                                icon = "🦞",
+                                                title = "Il Gambero",
+                                                playerName = player.name,
+                                                playerColorInt = player.color,
+                                                valueText = "-$punti pt"
+                                            )
                                         }
 
                                         // --- CARD PREMIO: LA FENICE 🦅 ---
                                         storiciFenice?.let { (player, punti) ->
-                                            val playerColor = Color(player.color)
-                                            Card(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                colors = CardDefaults.cardColors(
-                                                    containerColor = playerColor.copy(
-                                                        alpha = 0.30f
-                                                    )
-                                                ),
-                                                shape = RoundedCornerShape(20.dp),
-                                                border = BorderStroke(
-                                                    1.dp,
-                                                    playerColor.copy(alpha = 0.3f)
-                                                )
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.padding(16.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(
-                                                        "🦅",
-                                                        style = MaterialTheme.typography.displaySmall,
-                                                        modifier = Modifier.padding(end = 16.dp)
-                                                    )
-                                                    Column(modifier = Modifier.weight(1f)) {
-                                                        Text(
-                                                            text = "La Fenice",
-                                                            style = MaterialTheme.typography.labelLarge,
-                                                            color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                        Text(
-                                                            text = player.name,
-                                                            style = MaterialTheme.typography.titleLarge,
-                                                            color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
-                                                            fontWeight = FontWeight.Black
-                                                        )
-                                                    }
-                                                    Card(
-                                                        colors = CardDefaults.cardColors(containerColor = playerColor),
-                                                        shape = RoundedCornerShape(12.dp)
-                                                    ) {
-                                                        Text(
-                                                            "+$punti pt",
-                                                            modifier = Modifier.padding(
-                                                                horizontal = 12.dp,
-                                                                vertical = 6.dp
-                                                            ),
-                                                            color = Color.White,
-                                                            fontWeight = FontWeight.Bold
-                                                        )
-                                                    }
-                                                }
-                                            }
+                                            AwardCard(
+                                                icon = "🦅",
+                                                title = "La Fenice",
+                                                playerName = player.name,
+                                                playerColorInt = player.color,
+                                                valueText = "+$punti pt"
+                                            )
                                         }
                                     }
 

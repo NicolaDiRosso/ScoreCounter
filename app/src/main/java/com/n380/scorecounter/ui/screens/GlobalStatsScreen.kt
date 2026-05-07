@@ -814,7 +814,7 @@ fun GlobalStatsScreen(
                                         Text(
                                             text = "${globalCrab.second} pt",
                                             style = MaterialTheme.typography.displayMedium,
-                                            color = MaterialTheme.colorScheme.error,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
