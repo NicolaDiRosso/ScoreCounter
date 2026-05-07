@@ -16,10 +16,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType // Per il feedback tattile al click
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.animation.* // Per AnimatedVisibility e transizioni
 import androidx.compose.animation.core.* // Strumenti per l'animazione infinita
+import androidx.compose.foundation.clickable // Per rendere le card interattive
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ExpandLess // Icona freccia su
+import androidx.compose.material.icons.filled.ExpandMore // Icona freccia giù
+import androidx.compose.material.icons.materialIcon
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
@@ -27,6 +35,7 @@ import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
+import com.n380.scorecounter.ui.components.formatDate // Per mostrare la data nelle card espanse
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.viewmodel.MatchViewModel
 //per misurare un solo tocco alla volta per il pulsante chiudi
@@ -48,12 +57,58 @@ fun GlobalStatsScreen(
     val haptic = LocalHapticFeedback.current
 
     // ====================================================================
+    // 🧠 COMPONENTE DI SUPPORTO: AutoScalingScoreText
+    // ====================================================================
+    // Questa piccola funzione interna ci permette di disegnare i punteggi in modo intelligente.
+    // L'obiettivo è mantenere sempre lo stesso spazio visivo: 
+    // - Se il numero ha 1 o 2 cifre, usa una dimensione grande.
+    // - Se supera le 2 cifre, si rimpicciolisce automaticamente per non allargare la Card.
+    @Composable
+    fun AutoScalingScoreText(
+        text: String,
+        suffix: String = "",
+        color: Color = MaterialTheme.colorScheme.primary,
+        maxSize: TextUnit = 45.sp // Dimensione standard per 2 cifre
+    ) {
+        // Calcoliamo la dimensione in base alla lunghezza del testo (numero + eventuale " pt")
+        val fullText = text + suffix
+        val scaledSize = when {
+            fullText.length <= 3 -> maxSize // Es: "99" o "5 pt" -> Grande
+            fullText.length <= 5 -> maxSize * 0.8f // Es: "150 pt" -> Medio
+            else -> maxSize * 0.6f // Es: "+1200 pt" -> Piccolo
+        }
+
+        Text(
+            text = fullText,
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontSize = scaledSize,
+                lineHeight = scaledSize
+            ),
+            fontWeight = FontWeight.Black,
+            color = color,
+            textAlign = TextAlign.End,
+            maxLines = 1
+        )
+    }
+
+    // ====================================================================
     // 🧠 FIX BUG: PREVENZIONE DOPPIO CLICK (Debounce)
     // ====================================================================
     // TEORIA COMPOSE: 'remember' dice a Compose di non dimenticarsi questo valore
     // quando la UI si ricarica (Recomposition). 'mutableStateOf' crea un contenitore
     // reattivo. Parte da 'false' (non ho ancora cliccato).
     var isClosing by remember { mutableStateOf(false) }
+
+    // ====================================================================
+    // 🧠 STATI DI ESPANSIONE PER LE CARD (UX simile alla Home)
+    // ====================================================================
+    // Questi stati controllano se le card dei record mostrano solo un riassunto
+    // o se si espandono per mostrare il titolo completo e la data della partita.
+    var isExpRecord by remember { mutableStateOf(false) }
+    var isExpInfinita by remember { mutableStateOf(false) }
+    var isExpDittatore by remember { mutableStateOf(false) }
+    var isExpPiromane by remember { mutableStateOf(false) }
+
 
     // ====================================================================
     // ---> LA LOGICA DEI CALCOLI (MATEMATICA DIETRO LE QUINTE) <---
@@ -456,19 +511,38 @@ fun GlobalStatsScreen(
                             // --- TERZA CARD: IL RECORD DI PUNTI (La partita migliore) ---
                             // ==============================================================
                             Card(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    // 🧠 UX: Rendiamo la card cliccabile per espanderla e vedere il titolo completo
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpRecord = !isExpRecord
+                                    },
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
                                 Column(modifier = Modifier.padding(20.dp)) {
-                                    Text(
-                                        "Record di Punti (Singola Partita)",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    // Intestazione della Card con indicatore visivo di espansione
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            "Record di punti",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        // Icona che ruota o cambia per segnalare l'interattività
+                                        Icon(
+                                            imageVector = if (isExpRecord) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
 
-                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo "Record di Punti" e il nome dell'utente
+                                    Spacer(modifier = Modifier.height(5.dp))
 
                                     // Se esiste almeno una partita nel record...
                                     if (highestScoreRecord != null) {
@@ -478,35 +552,60 @@ fun GlobalStatsScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             // A sinistra: Chi ha fatto il record e in che partita lo ha fatto
-                                            Column {
+                                            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                                                 Text(
                                                     text = highestScoreRecord.winnerName,
                                                     style = MaterialTheme.typography.headlineSmall,
                                                     fontWeight = FontWeight.Bold
                                                 )
+
+                                                // 🧠 FIX TESTO TAGLIATO: Se espanso (isExpRecord), mostriamo tutto il titolo.
+                                                // Altrimenti, limitiamo a 1 riga con i tre puntini.
                                                 Text(
                                                     text = "in '${highestScoreRecord.title}'",
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = if (isExpRecord) Int.MAX_VALUE else 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                // 💡 UX/UI: Breve descrizione
+                                                Text(
+                                                    text = "Il punteggio massimo mai raggiunto da un singolo giocatore in una singola partita.",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(
+                                                        alpha = 0.8f
+                                                    ),
+                                                    modifier = Modifier.padding(bottom = 4.dp),
+                                                    //Se la card è espansa dà spazio infinito (Int.MAX_VALUE), altrimenti forza il testo su 1 sola riga
+                                                    maxLines = if (isExpRecord) Int.MAX_VALUE else 1,
+                                                    //Se il testo supera il limite di righe (maxLines), taglia l'eccesso e aggiunge i "..." alla fine
+                                                    overflow = TextOverflow.Ellipsis//Ellipsis si potrebbe tradurre come ellissi
+
                                                 )
                                             }
 
-                                            // A destra: Il numero di punti gigante
-                                            Row(verticalAlignment = Alignment.Bottom) {
-                                                Text(
-                                                    text = "${highestScoreRecord.winningScore}",
-                                                    style = MaterialTheme.typography.displayMedium,
-                                                    fontWeight = FontWeight.Black,
-                                                    color = MaterialTheme.colorScheme.primary
+                                            // A destra: Il numero di punti gigante (Ora Auto-Scaling!)
+                                            AutoScalingScoreText(
+                                                text = "${highestScoreRecord.winningScore}",
+                                                suffix = " pt"
+                                            )
+                                        }
+
+                                        // 🧠 AREA DETTAGLI EXTRA: Appare solo quando la card viene cliccata
+                                        AnimatedVisibility(
+                                            visible = isExpRecord,
+                                            enter = expandVertically() + fadeIn(),
+                                            exit = shrinkVertically() + fadeOut()
+                                        ) {
+                                            Column(modifier = Modifier.padding(top = 8.dp)) {
+                                                HorizontalDivider(
+                                                    modifier = Modifier.padding(vertical = 8.dp),
+                                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
                                                 )
                                                 Text(
-                                                    " pt",
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier.padding(
-                                                        bottom = 6.dp,
-                                                        start = 4.dp
-                                                    )
+                                                    text = "📅 Data record: ${formatDate(highestScoreRecord.timestamp)}",
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                             }
                                         }
@@ -524,17 +623,33 @@ fun GlobalStatsScreen(
                             // ---> QUARTA CARD: LA PARTITA INFINITA (La più lunga) <---
                             // ==============================================================
                             Card(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpInfinita = !isExpInfinita
+                                    },
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
                                 Column(modifier = Modifier.padding(20.dp)) {
-                                    Text(
-                                        "La Partita Infinita",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            "La Partita Infinita",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Icon(
+                                            imageVector = if (isExpInfinita) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
                                     // Se abbiamo trovato una partita che è durata almeno 1 secondo...
@@ -548,11 +663,12 @@ fun GlobalStatsScreen(
                                             Column(
                                                 modifier = Modifier.weight(1f).padding(end = 8.dp)
                                             ) {
+                                                // 🧠 FIX TESTO TAGLIATO: Espandiamo il titolo al click
                                                 Text(
                                                     text = longestMatch.title,
                                                     style = MaterialTheme.typography.headlineSmall,
                                                     fontWeight = FontWeight.Bold,
-                                                    maxLines = 1,
+                                                    maxLines = if (isExpInfinita) Int.MAX_VALUE else 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
                                                 Text(
@@ -578,6 +694,21 @@ fun GlobalStatsScreen(
                                                 )
                                             }
                                         }
+
+                                        // Area dettagli extra
+                                        AnimatedVisibility(visible = isExpInfinita) {
+                                            Column(modifier = Modifier.padding(top = 8.dp)) {
+                                                HorizontalDivider(
+                                                    modifier = Modifier.padding(vertical = 8.dp),
+                                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                                )
+                                                Text(
+                                                    text = "📅 Giocata il: ${formatDate(longestMatch.timestamp)}",
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
                                     } else {
                                         Text(
                                             "Nessuna partita cronometrata.",
@@ -591,17 +722,33 @@ fun GlobalStatsScreen(
                             // ---> QUINTA CARD: IL DITTATORE (Maggior Distacco) <---
                             // ==============================================================
                             Card(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpDittatore = !isExpDittatore
+                                    },
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
                                 Column(modifier = Modifier.padding(20.dp)) {
-                                    Text(
-                                        "Il Dittatore (Vittoria Schiacciante)",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            "Il Dittatore",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Icon(
+                                            imageVector = if (isExpDittatore) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
                                     // Se abbiamo trovato una partita e il distacco è maggiore di 0...
@@ -613,12 +760,9 @@ fun GlobalStatsScreen(
                                         ) {
 
                                             // A sinistra: Chi è il dittatore e in che partita ha dominato
-                                            // ---> FIX TESTO TAGLIATO <---
-                                            // Lasciamo il weight(1f) per dargli la priorità di spazio, ma RIMUOVIAMO i blocchi "maxLines" e "overflow"
-                                            // dalla scritta inferiore, così se è troppo lunga andrà dolcemente a capo su due righe!
                                             Column(
                                                 modifier = Modifier.weight(1f).padding(end = 12.dp)
-                                            ) {//padding destro a 12.dp per staccarlo bene dai numeri
+                                            ) {
                                                 Text(
                                                     text = dictatorMatch.winnerName,
                                                     style = MaterialTheme.typography.headlineSmall,
@@ -626,25 +770,39 @@ fun GlobalStatsScreen(
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
+                                                // 🧠 FIX TESTO TAGLIATO: Espandiamo la descrizione se cliccato
                                                 Text(
-                                                    text = "ha dominato in '${dictatorMatch.title}'",
+                                                    text = "Ha dominato in '${dictatorMatch.title}'",
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                    // Rimossi maxLines e overflow qui! Ora respira!
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = if (isExpDittatore) Int.MAX_VALUE else 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
 
-                                            // A destra: Il numero di punti di scarto gigante
-                                            // Usiamo Alignment.End per allineare i numeri a destra come una vera colonna
+                                            // A destra: Il numero di punti di scarto gigante (Ora Auto-Scaling!)
                                             Column(horizontalAlignment = Alignment.End) {
-                                                Text(
-                                                    text = "+$dictatorMargin pt",
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    fontWeight = FontWeight.Black,
-                                                    color = MaterialTheme.colorScheme.primary
+                                                AutoScalingScoreText(
+                                                    text = "+$dictatorMargin",
+                                                    suffix = " pt"
                                                 )
                                                 Text(
                                                     text = "dal 2° posto",
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+
+                                        // Area dettagli extra
+                                        AnimatedVisibility(visible = isExpDittatore) {
+                                            Column(modifier = Modifier.padding(top = 8.dp)) {
+                                                HorizontalDivider(
+                                                    modifier = Modifier.padding(vertical = 8.dp),
+                                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                                )
+                                                Text(
+                                                    text = "📅 Data del dominio: ${formatDate(dictatorMatch.timestamp)}",
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -661,53 +819,94 @@ fun GlobalStatsScreen(
                             }
 
                             // ==============================================================
-                            // ---> SESTA CARD: IL PIROMANE (Combo On Fire) <---
-                            // ==============================================================
+// --- SESTA CARD: IL PIROMANE (Record di Combo totali) ---
+// ==============================================================
                             Card(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp)
+                                    // 🧠 UX: Espandibile per leggere la descrizione completa
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpPiromane = !isExpPiromane
+                                    },
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
                                 Column(modifier = Modifier.padding(20.dp)) {
-                                    Text(
-                                        "Il Piromane 🔥",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
-                                    // Se esiste qualcuno che è andato "a fuoco" almeno una volta...
+                                    // --- INTESTAZIONE DELLA CARD ---
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Il Piromane 🔥",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+
+                                        // Icona di espansione (aggiunta per coerenza visiva)
+                                        Icon(
+                                            imageVector = if (isExpPiromane) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // Verifichiamo che esista un record
                                     if (topArsonist != null && topArsonist.value > 0) {
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Column(
-                                                modifier = Modifier.weight(1f).padding(end = 12.dp)
-                                            ) {
+                                            // A SINISTRA: Nome e Descrizione
+                                            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                                                 Text(
-                                                    text = topArsonist.key,
+                                                    text = topArsonist.key, // .key è il Nome del giocatore
                                                     style = MaterialTheme.typography.headlineSmall,
                                                     fontWeight = FontWeight.Bold
                                                 )
+
                                                 Text(
-                                                    text = "È il giocatore con più combo fatte in una partita",
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    text = "È il giocatore che ha accumulato il maggior numero di combo 'On Fire' totali.",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    // 🧠 Espansione del testo
+                                                    maxLines = if (isExpPiromane) Int.MAX_VALUE else 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
 
+                                            // A DESTRA: Il numero di combo
                                             Column(horizontalAlignment = Alignment.End) {
-                                                Text(
+                                                AutoScalingScoreText(
                                                     text = "${topArsonist.value}",
-                                                    style = MaterialTheme.typography.displaySmall,
-                                                    fontWeight = FontWeight.Black,
-                                                    color = Color(0xFFF3AF38)
+                                                    color = Color(0xFFF3AF38) // Colore Fuoco/Arancione
                                                 )
                                                 Text(
                                                     text = "volte On Fire",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+
+                                        // 🧠 AREA DETTAGLI EXTRA
+                                        // Nota: Qui non mettiamo la data perché 'topArsonist' è un totale di carriera.
+                                        AnimatedVisibility(visible = isExpPiromane) {
+                                            Column(modifier = Modifier.padding(top = 8.dp)) {
+                                                HorizontalDivider(
+                                                    modifier = Modifier.padding(vertical = 8.dp),
+                                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                                )
+                                                Text(
+                                                    text = "📈 Questo record tiene conto di tutte le partite giocate finora.",
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -715,13 +914,12 @@ fun GlobalStatsScreen(
                                         }
                                     } else {
                                         Text(
-                                            "Nessuno ha ancora scatenato l'inferno (3 punti di fila).",
+                                            "Nessuno ha ancora scatenato l'inferno.",
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
                                 }
                             }
-
                             // ====================================================================
                             // --- NUOVE STATISTICHE GLOBALI (Premi Partita) ---
                             // ====================================================================
@@ -769,11 +967,10 @@ fun GlobalStatsScreen(
                                                 modifier = Modifier.padding(bottom = 4.dp)
                                             )
                                         }
-                                        Text(
-                                            text = "+${globalSniper.second} pt",
-                                            style = MaterialTheme.typography.displayMedium,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold
+                                        // Record Cecchino (Ora Auto-Scaling!)
+                                        AutoScalingScoreText(
+                                            text = "+${globalSniper.second}",
+                                            suffix = " pt"
                                         )
                                     }
                                 }
@@ -816,11 +1013,10 @@ fun GlobalStatsScreen(
                                                 modifier = Modifier.padding(bottom = 4.dp)
                                             )
                                         }
-                                        Text(
-                                            text = "${globalCrab.second} pt",
-                                            style = MaterialTheme.typography.displayMedium,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold
+                                        // Record Gambero (Ora Auto-Scaling!)
+                                        AutoScalingScoreText(
+                                            text = "${globalCrab.second}",
+                                            suffix = " pt"
                                         )
                                     }
                                 }
@@ -863,11 +1059,10 @@ fun GlobalStatsScreen(
                                                 modifier = Modifier.padding(bottom = 4.dp)
                                             )
                                         }
-                                        Text(
-                                            text = "+${globalPhoenix.second} pt",
-                                            style = MaterialTheme.typography.displayMedium,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold
+                                        // Record Fenice (Ora Auto-Scaling!)
+                                        AutoScalingScoreText(
+                                            text = "+${globalPhoenix.second}",
+                                            suffix = " pt"
                                         )
                                     }
                                 }
