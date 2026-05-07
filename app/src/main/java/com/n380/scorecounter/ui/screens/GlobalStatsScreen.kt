@@ -389,7 +389,7 @@ fun GlobalStatsScreen(
                                         fontWeight = FontWeight.Bold
                                     )
 
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))
 
                                     // Riga Partite Giocate (Icona + Testo a sx, Numero gigante a dx)
                                     Row(
@@ -468,7 +468,7 @@ fun GlobalStatsScreen(
                                         fontWeight = FontWeight.Bold
                                     )
 
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo "Record di Punti" e il nome dell'utente
 
                                     // Se esiste almeno una partita nel record...
                                     if (highestScoreRecord != null) {
@@ -535,7 +535,7 @@ fun GlobalStatsScreen(
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
                                     // Se abbiamo trovato una partita che è durata almeno 1 secondo...
                                     if (longestMatch != null) {
@@ -602,7 +602,7 @@ fun GlobalStatsScreen(
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
                                     // Se abbiamo trovato una partita e il distacco è maggiore di 0...
                                     if (dictatorMatch != null && dictatorMargin > 0) {
@@ -675,7 +675,7 @@ fun GlobalStatsScreen(
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
                                     // Se esiste qualcuno che è andato "a fuoco" almeno una volta...
                                     if (topArsonist != null && topArsonist.value > 0) {
@@ -750,6 +750,15 @@ fun GlobalStatsScreen(
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
                                             )
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalSniper.first.name,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
+
                                             // 💡 UX/UI: Breve descrizione per chiarire l'obiettivo
                                             Text(
                                                 text = "Maggior punteggio fatto in un singolo turno",
@@ -758,12 +767,6 @@ fun GlobalStatsScreen(
                                                     alpha = 0.8f
                                                 ),
                                                 modifier = Modifier.padding(bottom = 4.dp)
-                                            )
-                                            Text(
-                                                text = globalSniper.first.name,
-                                                style = MaterialTheme.typography.titleLarge,
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                fontWeight = FontWeight.Black
                                             )
                                         }
                                         Text(
@@ -795,6 +798,14 @@ fun GlobalStatsScreen(
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
                                             )
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalCrab.first.name,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
                                             // 💡 UX/UI: Breve descrizione
                                             Text(
                                                 text = "Maggior numero di punti persi in una sola mossa",
@@ -803,12 +814,6 @@ fun GlobalStatsScreen(
                                                     alpha = 0.8f
                                                 ),
                                                 modifier = Modifier.padding(bottom = 4.dp)
-                                            )
-                                            Text(
-                                                text = globalCrab.first.name,
-                                                style = MaterialTheme.typography.titleLarge,
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                fontWeight = FontWeight.Black
                                             )
                                         }
                                         Text(
@@ -840,6 +845,14 @@ fun GlobalStatsScreen(
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
                                             )
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalPhoenix.first.name,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
                                             // 💡 UX/UI: Breve descrizione
                                             Text(
                                                 text = "La rimonta più leggendaria dall'ultimo posto",
@@ -848,12 +861,6 @@ fun GlobalStatsScreen(
                                                     alpha = 0.8f
                                                 ),
                                                 modifier = Modifier.padding(bottom = 4.dp)
-                                            )
-                                            Text(
-                                                text = globalPhoenix.first.name,
-                                                style = MaterialTheme.typography.titleLarge,
-                                                color = MaterialTheme.colorScheme.onSurface,
-                                                fontWeight = FontWeight.Black
                                             )
                                         }
                                         Text(
