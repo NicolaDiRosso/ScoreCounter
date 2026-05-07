@@ -101,7 +101,7 @@ fun CreateMatchScreen(
                 ) {
                     Button(
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             // La tua logica di sicurezza originale rimane intatta
                             if (canStart) {
                                 onNavigateToCounter()
@@ -209,7 +209,7 @@ fun CreateMatchScreen(
                             // ---> IL BOTTONE DEL DADO <---
                             OutlinedButton(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     showDiceSettingsDialog = true
                                 },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
@@ -284,14 +284,16 @@ fun CreateMatchScreen(
                             // Tasto TEMA ANIME
                             FilledTonalButton(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     viewModel.matchTitle = "Sfida Anime"
                                     showError = false
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = if (isAnimeTheme) ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
-                                else ButtonDefaults.filledTonalButtonColors()
+                                else ButtonDefaults.filledTonalButtonColors(),
+                                // 🧠 FIX VISIBILITÀ: Aggiungiamo un bordo con il colore primario quando il tasto NON è selezionato.
+                                border =  BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             ) {
                                 Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -301,14 +303,19 @@ fun CreateMatchScreen(
                             // Tasto TEMA CARTE
                             FilledTonalButton(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     viewModel.matchTitle = "Sfida Carte"
                                     showError = false
                                 },
                                 modifier = Modifier.weight(1f),
                                 shape = RoundedCornerShape(12.dp),
-                                colors = if (isCarteTheme) ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
-                                else ButtonDefaults.filledTonalButtonColors()
+                                colors = if (isCarteTheme) ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                )
+                                else ButtonDefaults.filledTonalButtonColors(),
+                                // 🧠 FIX VISIBILITÀ: Aggiungiamo un bordo con il colore primario quando il tasto NON è selezionato.
+                                border =  BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             ) {
                                 Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -356,7 +363,7 @@ fun CreateMatchScreen(
                             )
                             // Tasto Ingranaggio per aprire la gestione dei preferiti
                             IconButton(onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 showFavoritesDialog = true
                             }) {
                                 Icon(Icons.Filled.Settings, "Gestisci Giocatori Rapidi", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(25.dp))
@@ -391,6 +398,7 @@ fun CreateMatchScreen(
                                         selected = isAlreadyAtTable,
                                         onClick = {
                                             if (!isAlreadyAtTable) {
+                                                // --- LOGICA AGGIUNTA (GIÀ PRESENTE) ---
                                                 val finalColor = if (selectedColor == Color.Unspecified) {
                                                     val usedColors = viewModel.players.map { it.color }
                                                     val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
@@ -399,6 +407,26 @@ fun CreateMatchScreen(
                                                     selectedColor
                                                 }
                                                 viewModel.addPlayer(fav, finalColor.toArgb())
+                                            } else {
+                                                // ==========================================================
+                                                // 🧠 FIX DEFINITIVO: VIBRAZIONE INTELLIGENTE (Smart Haptic)
+                                                // ==========================================================
+                                                // Se c'è un solo giocatore al tavolo, sappiamo che l'animazione
+                                                // dell'Empty State annullerà la vibrazione di sistema.
+                                                // Quindi, in questo caso specifico, la forziamo a mano!
+                                                if (viewModel.players.size == 1) {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                }
+                                                // Se ci sono più giocatori (> 1), NON mettiamo nessun haptic manuale
+                                                // così non si crea la fastidiosa doppia vibrazione.
+
+                                                // Cerchiamo l'oggetto Player corrispondente al nome della chip
+                                                val playerToRemove = viewModel.players.find { it.name.equals(fav, ignoreCase = true) }
+
+                                                // Se lo troviamo, chiamiamo il metodo del viewModel per eliminarlo
+                                                playerToRemove?.let {
+                                                    viewModel.removePlayer(it)
+                                                }
                                             }
                                         },
                                         // Ingrandiamo il riquadro in modo sicuro!
@@ -406,15 +434,21 @@ fun CreateMatchScreen(
                                         //    più grande (48.dp), rendendolo molto più comodo da premere.
                                         modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                                         label = { Text(fav, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) },
-                                        /*leadingIcon = if (isAlreadyAtTable) {
-                                            { Icon(Icons.Filled.Check, null, modifier = Modifier.size(20.dp)) }
-                                        } else null,*/
                                         shape = RoundedCornerShape(12.dp),
                                         colors = FilterChipDefaults.filterChipColors(
                                             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        ),
+                                        // 🧠 FIX VISIBILITÀ: Forziamo il bordo a prendere il colore primario del sistema.
+                                        // Questo li renderà visibilissimi e super eleganti anche sui temi più scuri!
+                                        border = FilterChipDefaults.filterChipBorder(
+                                            enabled = true,
+                                            selected = isAlreadyAtTable,
+                                            borderColor = MaterialTheme.colorScheme.primary, // <--- ECCO LA MAGIA QUI
+                                            selectedBorderColor = Color.Transparent // Quando è premuto (tutto colorato), togliamo il bordo
                                         )
                                     )
+
                                 }
                             }
                         } else {
@@ -472,7 +506,7 @@ fun CreateMatchScreen(
                             Button(
                                 onClick = {
                                     if (isAddPlayerEnabled) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                         // ---> LOGICA MULTICOLOR (Inserimento Manuale) <---
                                         // Stessa logica di prima: Unspecified = colore a caso.
                                         val finalColor = if (selectedColor == Color.Unspecified) {

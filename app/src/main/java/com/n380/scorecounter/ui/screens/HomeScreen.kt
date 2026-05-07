@@ -93,6 +93,8 @@ fun HomeScreen(
     // Stato per la visibilità del dialogo informativo sui premi nella schermata di analisi.
     var showAwardsInfoDialog by rememberSaveable { mutableStateOf(false) }
 
+    // Stato per la visibilità del dialogo "Informazioni App"
+    var showAboutDialog by rememberSaveable { mutableStateOf(false) }
 
     // Valutazione reattiva: Se l'indice è valido (>= 0), recuperiamo i dati della partita dal ViewModel.
     val expandedMatch =
@@ -224,6 +226,110 @@ fun HomeScreen(
     }
 
     // --------------------------------------------------------------------
+    // DIALOGO MODALE: INFORMAZIONI APP (ABOUT)
+    // --------------------------------------------------------------------
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.VideogameAsset,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp) // Leggermente più piccola e raffinata
+                )
+            },
+            title = {
+                Text(
+                    "ScoreCounter",
+                    fontWeight = FontWeight.Black, // Più "pesante" per un look da titolo vero
+                    color = MaterialTheme.colorScheme.primary
+                )
+            },
+            text = {
+                // ==========================================================
+                // 🧠 FIX TESTO TAGLIATO E FORMATTAZIONE
+                // 1. Usiamo 'verticalScroll' per far scorrere il contenuto se lo schermo è piccolo.
+                // 2. Dividiamo le frasi in componenti 'Text' separati per gestire spazi e stili.
+                // ==========================================================
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                    /*Text(
+                        "Il tuo fedele segnapunti digitale! 🎮",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )*/
+
+                    Text(
+                        "Che tu stia giocando a carte, a un gioco in scatola o a chi mangia più tranci di pizza, questa app è qui per tenere il conto ed evitare litigi (o forse per incentivarli 😉).",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    // Sottotitolo colorato
+                    Text(
+                        "✨ Cosa puoi fare:",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // 🧠 FORMATTAZIONE PRO: Creiamo la lista puntata graficamente
+                    val features = listOf(
+                        "Registrare punti e combo.",
+                        "Analizzare grafici per dimostrare la tua superiorità.",
+                        "Assegnare titoli onorifici come a chi se li merita."
+                    )
+                    features.forEach { feature ->
+                        Row(modifier = Modifier.padding(bottom = 4.dp)){
+                            Text("• ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text(feature, style = MaterialTheme.typography.bodyMedium,fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        "Niente più foglietti volanti o calcoli a mente sbagliati. \nChe vinca il migliore!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        "Per segnalare bug o inviare consigli, scrivi al suo magnifico creatore 👌",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
+            confirmButton = {
+                // ==========================================================
+                // 🧠 FIX STILE BOTTONE: Il nostro Design Standard
+                // Forzando la larghezza (fillMaxWidth) e l'altezza a 48.dp,
+                // il bottone si stira diventando un bellissimo rettangolo stondato.
+                // ==========================================================
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        showAboutDialog = false
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text("Inizia a giocare!", fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
+
+    // --------------------------------------------------------------------
     // SCAFFOLD: L'ARCHITETTURA BASE E GLI "SLOT" MATERIAL
     // --------------------------------------------------------------------
     // Lo Scaffold non è un semplice contenitore, ma uno schema pre-fabbricato da Google.
@@ -328,22 +434,51 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                if (viewModel.history.isNotEmpty()) {
+                // 🧠 UX: Raggruppiamo i pulsanti in alto a destra in una sotto-riga (Row)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    // 🧠 FIX SPAZIATURA: Aumentato da 12.dp a 16.dp per farli "respirare"
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // ---> NUOVO PULSANTE INFO <---
                     IconButton(
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onNavigateToStats()
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            showAboutDialog = true
                         },
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                            // 🧠 FIX GRANDEZZA: Cerchio ridotto da 40.dp a 36.dp
+                            .size(36.dp)
+                            .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.BarChart,
-                            contentDescription = "Statistiche Globali",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(22.dp)
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = "Informazioni App",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            // 🧠 FIX ICONA: Icona ridotta a 20.dp per mantenere le proporzioni
+                            modifier = Modifier.size(20.dp)
                         )
+                    }
+
+                    // ---> VECCHIO PULSANTE STATISTICHE <---
+                    if (viewModel.history.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onNavigateToStats()
+                            },
+                            modifier = Modifier
+                                // Adattiamo anche questo a 36.dp per coerenza geometrica
+                                .size(36.dp)
+                                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.BarChart,
+                                contentDescription = "Statistiche Globali",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
