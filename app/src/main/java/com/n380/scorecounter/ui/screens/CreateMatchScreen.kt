@@ -170,39 +170,51 @@ fun CreateMatchScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // ====================================================================
-                // CARD 1: REGOLE DEL GIOCO (Nome, Tema, Punteggio e Dado)
-                // ====================================================================
+                // ==============================================================
+                // --- CARD 1: REGOLE DEL GIOCO ---
+                // ==============================================================
+                // 🧠 TEORIA COMPOSE: Usiamo la Card come contenitore principale.
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    shape = RoundedCornerShape(24.dp)
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        // Riga d'intestazione: Titolo a sinistra, Dado a destra
+                        // ==========================================================
+                        // 🧠 UX: Intestazione Iconica e Bottone Dado
+                        // ==========================================================
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween, // Separa gli elementi agli estremi
-                            verticalAlignment = Alignment.CenterVertically // Li allinea al centro verticale
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Regole del Gioco",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                /*Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = "Impostazioni Regole",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )*/
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = "Regole del Gioco",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
 
                             // ---> IL BOTTONE DEL DADO <---
                             OutlinedButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showDiceSettingsDialog = true // Apre il popup del dado
+                                    showDiceSettingsDialog = true
                                 },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                 modifier = Modifier.height(36.dp)
                             ) {
-                                // Aggiungiamo l'icona e inseriamo un testo per chiarire a cosa serve
                                 Icon(Icons.Filled.Casino, "Dado", modifier = Modifier.size(18.dp).padding(end = 4.dp))
                                 Text(
                                     text = "Dado (D${viewModel.diceSides})",
@@ -212,18 +224,19 @@ fun CreateMatchScreen(
                             }
                         }
 
-                        // ---> NOME DELLA SFIDA <---
+                        // ==========================================================
+                        // CAMPO DI TESTO: NOME SFIDA
+                        // ==========================================================
                         OutlinedTextField(
+                            // FIX: Richiamiamo correttamente il viewModel!
                             value = viewModel.matchTitle,
                             onValueChange = {
                                 viewModel.matchTitle = it
-                                if (it.isNotBlank()) showError = false // Spegne l'errore rosso se l'utente inizia a scrivere
+                                if (it.isNotBlank()) showError = false // Spegne l'errore rosso
                             },
+                            label = { Text("Nome della sfida") },
                             modifier = Modifier.fillMaxWidth(),
-                            label = { Text("Nome della Sfida") },
-                            placeholder = { Text("Es. Sfida Epica") },
-                            shape = RoundedCornerShape(20.dp),
-                            // Mostra il bordo rosso se showError è vero E il campo è ancora vuoto
+                            shape = RoundedCornerShape(16.dp),
                             isError = showError && viewModel.matchTitle.isBlank(),
                             supportingText = {
                                 if (showError && viewModel.matchTitle.isBlank()) {
@@ -232,103 +245,115 @@ fun CreateMatchScreen(
                             },
                             leadingIcon = {
                                 val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                                Icon(Icons.Filled.VideogameAsset, null, tint = iconColor)
+                                Icon(Icons.Default.VideogameAsset, null, tint = iconColor)
                             }
                         )
 
-                        // ---> BOTTONI DEI TEMI RAPIDI <---
-                        val isAnimeTheme = viewModel.matchTitle == "Sfida Anime"
-                        val isCarteTheme = viewModel.matchTitle == "Sfida Carte"
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            // BOTTONE TEMA ANIME
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    viewModel.matchTitle = "Sfida Anime"
-                                },
-                                modifier = Modifier.weight(1f), // Metà larghezza esatta
-                                shape = RoundedCornerShape(20.dp),
-                                colors = if (isAnimeTheme) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                else ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
-                                border = if (isAnimeTheme) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                            ) {
-                                Icon(Icons.Filled.Tv, null, modifier = Modifier.padding(end = 8.dp))
-                                Text("Anime")
-                            }
 
-                            // BOTTONE TEMA CARTE
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    viewModel.matchTitle = "Sfida Carte"
-                                },
-                                modifier = Modifier.weight(1f), // Metà larghezza esatta
-                                shape = RoundedCornerShape(20.dp),
-                                colors = if (isCarteTheme) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                else ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
-                                border = if (isCarteTheme) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                            ) {
-                                Icon(Icons.Filled.Style, null, modifier = Modifier.padding(end = 8.dp))
-                                Text("Carte")
-                            }
-                        }
-
-                        // ---> TRAGUARDO PUNTEGGIO <---
+                        // ==========================================================
+                        // CAMPO DI TESTO: TRAGUARDO (Solo Numeri)
+                        // ==========================================================
                         OutlinedTextField(
+                            // FIX: Richiamiamo correttamente il viewModel!
                             value = viewModel.targetScore,
                             onValueChange = { newValue ->
-                                // Blocca la tastiera permettendo di inserire SOLO numeri
                                 if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
                                     viewModel.targetScore = newValue
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth(),
                             label = { Text("Traguardo (Opzionale)") },
-                            placeholder = { Text("Es. 50") },
-                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            leadingIcon = { Icon(Icons.Filled.EmojiEvents, null, tint = MaterialTheme.colorScheme.primary) }
+                            shape = RoundedCornerShape(16.dp),
+                            leadingIcon = { Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
                         )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // ==========================================================
+                        // 🧠 UI: SELEZIONE TEMA RAPIDO tramite TonalButton
+                        // ==========================================================
+                        val isAnimeTheme = viewModel.matchTitle == "Sfida Anime"
+                        val isCarteTheme = viewModel.matchTitle == "Sfida Carte"
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Tasto TEMA ANIME
+                            FilledTonalButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.matchTitle = "Sfida Anime"
+                                    showError = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = if (isAnimeTheme) ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
+                                else ButtonDefaults.filledTonalButtonColors()
+                            ) {
+                                Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Anime")
+                            }
+
+                            // Tasto TEMA CARTE
+                            FilledTonalButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.matchTitle = "Sfida Carte"
+                                    showError = false
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = if (isCarteTheme) ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
+                                else ButtonDefaults.filledTonalButtonColors()
+                            ) {
+                                Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Carte")
+                            }
+                        }
                     }
                 }
 
                 // ====================================================================
-                // CARD 2: GESTIONE PARTECIPANTI (Giocatori Rapidi e Manuali)
+                // --- CARD 2: GESTIONE PARTECIPANTI (Giocatori Rapidi e Manuali) ---
                 // ====================================================================
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    shape = RoundedCornerShape(24.dp)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            text = "Gestione Partecipanti",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 1.dp)
-                        )
+
+                        // ==========================================================
+                        // 🧠 UX: Intestazione con Icona
+                        // ==========================================================
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
+                            Icon(Icons.Filled.PersonAddAlt1, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Gestione Partecipanti",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
 
                         // --- 1. SEZIONE GIOCATORI RAPIDI (PREFERITI) ---
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(top = 1.dp, bottom = 8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // ---> MODIFICA ESTETICA: Uniformiamo lo stile <---
-                            // Usiamo labelLarge e il colore primario per allinearlo visivamente a "Scegli un colore"
                             Text(
                                 text = "Giocatori Rapidi:",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )
-
-                            // Tasto Ingranaggio per aprire la gestione dei preferiti
-
                             // Tasto Ingranaggio per aprire la gestione dei preferiti
                             IconButton(onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -338,55 +363,58 @@ fun CreateMatchScreen(
                             }
                         }
 
-                        // Crea i bottoncini dei preferiti scorrevoli
+                        // ==========================================================
+                        // 🧠 UX/UI: GIOCATORI RAPIDI (FilterChips)
+                        // Trasformiamo i vecchi bottoni giganti in "Pillole" eleganti.
+                        // ==========================================================
                         if (viewModel.favoriteNames.isNotEmpty()) {
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(end = 32.dp) // Taglia il quarto bottone a metà visivamente
+                                contentPadding = PaddingValues(end = 16.dp)
                             ) {
+                                // FIX: Usiamo 'favoriteNames' dal ViewModel!
                                 items(viewModel.favoriteNames) { fav ->
+                                    // STATE: Controlliamo se è già al tavolo leggendo dal ViewModel
                                     val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
 
-                                    OutlinedButton(
+                                    // ==========================================================
+                                    // Dimensione Chip e Doppia Vibrazione
+                                    // ==========================================================
+                                    // 🎓 NUOVA LEZIONE: Dimensione Chip e Vibrazione
+
+                                    // 2. Non scriviamo NESSUN comando di vibrazione (haptic) qui dentro!
+                                    //    Il telefono vibra già da solo quando si preme un Chip.
+                                    //    Scriverlo a mano causava il fastidioso "doppio colpo".
+                                    // ==========================================================
+                                    FilterChip(
+                                        selected = isAlreadyAtTable,
                                         onClick = {
                                             if (!isAlreadyAtTable) {
-                                                //haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                                // ---> NUOVA LOGICA MULTICOLOR INTELLIGENTE (Colori Univoci) <---
                                                 val finalColor = if (selectedColor == Color.Unspecified) {
-
-                                                    // 1. Estraiamo tutti i colori già assegnati ai giocatori attualmente al tavolo
-                                                    // (Estraiamo il valore numerico 'color' dal database)
                                                     val usedColors = viewModel.players.map { it.color }
-
-                                                    // 2. Filtriamo la tavolozza: teniamo SOLO i colori che NON sono presenti nella lista 'usedColors'
                                                     val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
-
-                                                    // 3. Estraiamo un colore a caso da quelli rimasti.
-                                                    // CONTROLLO DI SICUREZZA: Se abbiamo finito i colori liberi (es. 8 giocatori e 8 colori),
-                                                    // l'app crasherebbe. Quindi, se la lista è vuota, peschiamo a caso da tutta la tavolozza.
-                                                    if (availableColors.isNotEmpty()) {
-                                                        availableColors.random()
-                                                    } else {
-                                                        playerPalette.random()
-                                                    }
-
+                                                    if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
                                                 } else {
-                                                    // Se l'utente ha toccato un pallino colorato specifico, usiamo quello ignorando i duplicati
                                                     selectedColor
                                                 }
-
                                                 viewModel.addPlayer(fav, finalColor.toArgb())
                                             }
                                         },
-                                        shape = RoundedCornerShape(20.dp),
-                                        // Se già al tavolo, facciamo sembrare il pulsante esaurito/trasparente
-                                        colors = ButtonDefaults.outlinedButtonColors(
-                                            contentColor = if (!isAlreadyAtTable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                                        ),
-                                        border = BorderStroke(1.dp, if (!isAlreadyAtTable) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                    ) { Text(fav) }
+                                        // Ingrandiamo il riquadro in modo sicuro!
+                                        // 1. Usiamo 'defaultMinSize' per dare al chip un'altezza minima
+                                        //    più grande (48.dp), rendendolo molto più comodo da premere.
+                                        modifier = Modifier.defaultMinSize(minHeight = 48.dp),
+                                        label = { Text(fav, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) },
+                                        /*leadingIcon = if (isAlreadyAtTable) {
+                                            { Icon(Icons.Filled.Check, null, modifier = Modifier.size(20.dp)) }
+                                        } else null,*/
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    )
                                 }
                             }
                         } else {
@@ -394,25 +422,25 @@ fun CreateMatchScreen(
                         }
 
                         // --- 2. DIVISORE ---
-                        Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(modifier = Modifier.padding(bottom = 1.dp), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
-                        Spacer(modifier = Modifier.height(5.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         // --- 3. SEZIONE INSERIMENTO MANUALE E SCELTA COLORE ---
-
-                        // Sotto-titolo 1: Il Colore
                         Text("Scegli un colore:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
 
                         // La Tavolozza importata da SharedUtils
                         ColorPickerRow(
                             selectedColor = selectedColor,
-                            onColorSelected = { selectedColor = it },
+                            onColorSelected = { 
+                                // 🧠 UX: Vibrazione di conferma quando si tocca un colore
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                selectedColor = it 
+                            },
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
 
-                        // ---> VALUTAZIONE UX: Respirare <---
-                        // Aggiungiamo un piccolo spazio per separare visivamente i pallini dal campo di testo sottostante
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Sotto-titolo 2: Il Nome
                         // ---> VALUTAZIONE UX: Testo più conciso <---
@@ -436,14 +464,15 @@ fun CreateMatchScreen(
                                 leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
                             )
 
-                            // Verifica se si può aggiungere (il campo non deve essere vuoto e il nome non deve già esistere)
+
+                            // Verifica di sicurezza (Nomi unici)
                             val isAddPlayerEnabled = newPlayerName.trim().isNotEmpty() && viewModel.players.none { it.name.equals(newPlayerName.trim(), ignoreCase = true) }
 
+                            // 2. PULSANTE AGGIUNGI
                             Button(
                                 onClick = {
                                     if (isAddPlayerEnabled) {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
                                         // ---> LOGICA MULTICOLOR (Inserimento Manuale) <---
                                         // Stessa logica di prima: Unspecified = colore a caso.
                                         val finalColor = if (selectedColor == Color.Unspecified) {
@@ -459,7 +488,7 @@ fun CreateMatchScreen(
                                         selectedColor = Color.Unspecified
                                     }
                                 },
-                                modifier = Modifier.padding(top = 6.dp).height(56.dp),
+                                modifier = Modifier.padding(top = 6.dp).height(63.dp),shape = RoundedCornerShape(20.dp),
                                 // ---> DIDATTICA UX: Bottone "Spento" con la regola del 12% / 38%
                                 border = if (isAddPlayerEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
                                 colors = ButtonDefaults.buttonColors(
@@ -472,48 +501,77 @@ fun CreateMatchScreen(
                 }
 
                 // ====================================================================
-                // CARD 3: IL TAVOLO (Chi sta per giocare)
+                // --- CARD 3: IL TAVOLO (Chi sta per giocare) ---
                 // ====================================================================
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    shape = RoundedCornerShape(24.dp)
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp), // Padding bottom per staccarlo dalla BottomBar
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    shape = RoundedCornerShape(24.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        Text(
-                            text = "Giocatori al Tavolo",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 5.dp)
-                        )
+                        // 🧠 UX: Intestazione con Icona + Badge Contatore
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Filled.Groups, null, tint = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "Al Tavolo",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
 
-                        if (viewModel.players.isEmpty()) {
-                            // STATO VUOTO: Illustrazione e testo
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Icon(
-                                    Icons.Filled.Group,
-                                    contentDescription = "Vuoto",
-                                    modifier = Modifier.size(64.dp).padding(bottom = 16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            // 🧠 COMPONENTE M3: Il Badge!
+                            // Legge la grandezza della lista ufficiale 'viewModel.players'
+                            Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                                Text(
+                                    text = "${viewModel.players.size}",
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelLarge
                                 )
-                                Text("Il tavolo è vuoto!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f), fontWeight = FontWeight.Bold)
-                                Text("Aggiungi qualcuno per iniziare la sfida.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
+                            }
+                        }
+
+                        // ==========================================================
+                        // 🧠 TEORIA UX/UI: L'EMPTY STATE ("Stato Vuoto")
+                        // ==========================================================
+                        if (viewModel.players.isEmpty()) {
+                            // La Surface crea un "buco" visivo usando un colore più scuro (surface)
+                            Surface(
+                                modifier = Modifier.fillMaxWidth().height(120.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                            ) {
+                                Column(
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(Icons.Filled.PersonAdd, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(36.dp))
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("Il tavolo è vuoto!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
+                                    Text("Aggiungi giocatori per iniziare la sfida.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f))
+                                }
                             }
                         } else {
-                            // STATO PIENO: Generiamo una riga (Mini-Card) per ogni giocatore
+                            // ==========================================================
+                            // STATO PIENO: Generiamo una riga per ogni giocatore
+                            // 🧠 FIX: Leggiamo direttamente da 'viewModel.players'
+                            // ==========================================================
                             viewModel.players.forEachIndexed { index, player ->
-                                // =============================================================================
-                                // Richiamiamo la funzione che abbiamo costruito nel file PlayerCardComponents
-                                // =============================================================================
                                 PlayerAtTableCard(
                                     player = player,
-                                    isFirst = index == 0, // Vero se è il primo della lista
-                                    isLast = index == viewModel.players.size - 1, // Vero se è l'ultimo
+                                    isFirst = index == 0,
+                                    isLast = index == viewModel.players.size - 1,
+
+                                    // ---> DELEGAZIONE AL VIEWMODEL (State Hoisting) <---
                                     onMoveUp = { viewModel.movePlayer(index, index - 1) },
                                     onMoveDown = { viewModel.movePlayer(index, index + 1) },
                                     onEdit = { playerToEdit = player },
@@ -536,10 +594,13 @@ fun CreateMatchScreen(
                                         }
                                     },
                                     onColorChange = { newColorArgb ->
-                                        // Questa funzione fa aggiornare il colore salvato nel ViewModel
                                         viewModel.updatePlayerColor(player, newColorArgb)
                                     }
                                 )
+                                // Piccolo spazio extra tra una card e l'altra per farle respirare
+                                if (index != viewModel.players.size - 1) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
                             }
                         }
                     }
@@ -626,22 +687,49 @@ fun CreateMatchScreen(
         ModalBottomSheet(onDismissRequest = { showFavoritesDialog = false }, sheetState = sheetState) {
             Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.93f).padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
 
-                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Giocatori Rapidi", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                    IconButton(onClick = { showFavoritesDialog = false }) { Icon(Icons.Filled.Close, "Chiudi") }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically)
+                {
+                    Text("Giocatori Rapidi",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        showFavoritesDialog = false }) {
+                        Icon(Icons.Filled.Close, "Chiudi")}
                 }
 
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // ==========================================================
+                // RIGA INSERIMENTO NUOVO PREFERITO
+                // 🧠 UI UNIFORMATA: Usiamo la stessa logica di altezza e curvatura
+                // usata nella sezione "Aggiungi manualmente".
+                // ==========================================================
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // 1. CAMPO DI TESTO (Nome Rapido)
                     OutlinedTextField(
                         value = newFavName,
                         onValueChange = { newFavName = it },
+                        // 🧠 FIX PROPORZIONI: Copiamo la "quadra" trovata dall'utente.
+                        // Rimuoviamo l'altezza fissa lasciando che il componente respiri.
                         modifier = Modifier.weight(1f),
                         label = { Text("Nuovo nome") },
-                        shape = RoundedCornerShape(16.dp)
+                        // 🎨 DESIGN: Stondatura a 20.dp per coerenza totale.
+                        shape = RoundedCornerShape(20.dp),
+                        // 🧠 AGGIUNTA ICONA: Inseriamo l'icona della persona per coerenza
+                        leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
                     )
 
                     val isAddFavEnabled = newFavName.trim().isNotEmpty() && viewModel.favoriteNames.none { it.equals(newFavName.trim(), ignoreCase = true) }
 
+                    // 2. PULSANTE AGGIUNGI PREFERITO
                     Button(
                         onClick = {
                             if (isAddFavEnabled) {
@@ -650,7 +738,10 @@ fun CreateMatchScreen(
                                 newFavName = ""
                             }
                         },
-                        modifier = Modifier.height(56.dp).padding(top = 6.dp),
+                        // 🧠 FIX PROPORZIONI: Copiamo l'altezza di 63.dp e il padding top di 6.dp
+                        modifier = Modifier.padding(top = 6.dp).height(64.dp),
+                        // 🎨 DESIGN: Stondatura a 20.dp.
+                        shape = RoundedCornerShape(20.dp),
                         border = if (isAddFavEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
@@ -680,7 +771,11 @@ fun CreateMatchScreen(
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     // Freccia SU
                                     IconButton(
-                                        onClick = { viewModel.moveFavorite(index, index - 1) },
+                                        onClick = {
+                                            // 🧠 UX: Aggiungiamo un feedback tattile leggero (Medium) per gli spostamenti
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            viewModel.moveFavorite(index, index - 1)
+                                        },
                                         // Disabilitato se è il primo elemento (non può andare più su di 0)
                                         enabled = index > 0,
                                         modifier = Modifier.size(28.dp)
@@ -690,7 +785,10 @@ fun CreateMatchScreen(
 
                                     // Freccia GIÙ
                                     IconButton(
-                                        onClick = { viewModel.moveFavorite(index, index + 1) },
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            viewModel.moveFavorite(index, index + 1)
+                                        },
                                         // Disabilitato se è l'ultimo elemento della lista
                                         enabled = index < viewModel.favoriteNames.size - 1,
                                         modifier = Modifier.size(28.dp)
@@ -709,12 +807,20 @@ fun CreateMatchScreen(
                                 )
 
                                 // Tasto Modifica (Matita)
-                                IconButton(onClick = { favToEdit = fav }) {
+                                IconButton(onClick = {
+                                    // 🧠 UX: Vibrazione di conferma azione
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    favToEdit = fav
+                                }) {
                                     Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.primary)
                                 }
 
                                 // Tasto Elimina (Cestino)
-                                IconButton(onClick = { viewModel.removeFavorite(fav) }) {
+                                IconButton(onClick = {
+                                    // 🧠 UX: Vibrazione di conferma azione
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    viewModel.removeFavorite(fav)
+                                }) {
                                     Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
                                 }
                             }
@@ -725,22 +831,80 @@ fun CreateMatchScreen(
         }
     }
 
-    // (Sotto-Popup di modifica per un singolo preferito)
+    // ====================================================================
+    // SOTTO-POPUP: MODIFICA NOME GIOCATORE RAPIDO
+    // 🧠 DESIGN CONSISTENCY: Usiamo lo stesso identico stile del popup
+    // "Modifica Nome" usato per i giocatori al tavolo.
+    // ====================================================================
     if (favToEdit != null) {
         var editedFavName by remember { mutableStateOf(favToEdit!!) }
         AlertDialog(
             onDismissRequest = { favToEdit = null },
-            title = { Text("Modifica Nome Rapido") },
-            text = { OutlinedTextField(value = editedFavName, onValueChange = { editedFavName = it }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) },
-            confirmButton = {
-                Button(onClick = {
-                    if (editedFavName.isNotBlank()) {
-                        viewModel.editFavorite(favToEdit!!, editedFavName.trim())
-                        favToEdit = null
-                    }
-                }) { Text("Salva") }
+            // Aggiungiamo il grassetto al titolo per renderlo più elegante e coerente
+            title = {
+                Text("Modifica Nome Rapido",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                ) },
+            text = {
+                OutlinedTextField(
+                    value = editedFavName,
+                    onValueChange = { editedFavName = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                )
             },
-            dismissButton = { TextButton(onClick = { favToEdit = null }) { Text("Annulla") } }
+            // ---> GRAFICA PULSANTI AFFIANCATI <---
+            // Mettiamo tutto dentro confirmButton per forzare la riga al 100% della larghezza
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp) // Spazio esatto tra i due bottoni
+                ) {
+
+                    // TASTO ANNULLA (Sinistra)
+                    OutlinedButton(
+                        onClick = {
+                            // 🧠 UX: Vibrazione anche per l'annullamento
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            favToEdit = null
+                        },
+                        modifier = Modifier
+                            .weight(1f) // 🧠 TEORIA UX: .weight(1f) divide lo spazio a metà esatta col bottone accanto
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // Usiamo colori neutri per il tasto secondario
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                    // TASTO SALVA (Destra)
+                    Button(
+                        onClick = {
+                            // 🧠 UX: Vibrazione di conferma salvataggio
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            if (editedFavName.isNotBlank()) {
+                                viewModel.editFavorite(favToEdit!!, editedFavName.trim())
+                                favToEdit = null
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f) // L'altra metà dello spazio
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // Usiamo il PrimaryContainer (lo stesso azzurro/blu chiaro del resto dell'app)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Text("Salva", fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+            // Spegniamo il dismissButton nativo perché abbiamo integrato "Annulla" nella Row
+            dismissButton = null
         )
     }
 
