@@ -157,7 +157,7 @@ fun CreateMatchScreen(
         // LazyColumn fa sì che la pagina possa scorrere dall'alto verso il basso.
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = 32.dp) // Cuscinetto in fondo prima della BottomBar
+            //contentPadding = PaddingValues(bottom = 32.dp) // Cuscinetto in fondo prima della BottomBar
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -177,7 +177,7 @@ fun CreateMatchScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
@@ -323,7 +323,7 @@ fun CreateMatchScreen(
                 // ====================================================================
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
                     shape = RoundedCornerShape(24.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
@@ -504,8 +504,8 @@ fun CreateMatchScreen(
                 // --- CARD 3: IL TAVOLO (Chi sta per giocare) ---
                 // ====================================================================
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 80.dp), // Padding bottom per staccarlo dalla BottomBar
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), // Padding bottom per staccarlo dalla BottomBar del pulsante Inizia
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
                     shape = RoundedCornerShape(24.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
