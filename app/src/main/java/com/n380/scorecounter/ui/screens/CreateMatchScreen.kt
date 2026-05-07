@@ -519,7 +519,7 @@ fun CreateMatchScreen(
                             Icon(Icons.Filled.Groups, null, tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Al Tavolo",
+                                text = "Tavolo Partecipanti",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
