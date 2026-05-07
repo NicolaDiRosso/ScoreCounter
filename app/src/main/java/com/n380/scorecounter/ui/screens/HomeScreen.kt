@@ -507,49 +507,59 @@ fun HomeScreen(
                                             if (validHistory) {
                                                 Spacer(modifier = Modifier.height(16.dp))
 
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
+                                                // ==========================================================
+                                                // AREA DI INTERAZIONE (HITBOX) AMPLIATA
+                                                // Avvolgiamo Intestazione e Grafico in una singola Column.
+                                                // Spostando il modifier 'combinedClickable' qui sopra,
+                                                // l'utente potrà premere SIA sulla scritta, SIA sull'icona,
+                                                // SIA sul grafico per aprire i dettagli della partita!
+                                                // ==========================================================
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        // Aggiungiamo un leggero bordo invisibile/padding
+                                                        // per rendere l'area tattile ancora più comoda
+                                                        .padding(vertical = 4.dp)
+                                                        .combinedClickable(
+                                                            onClick = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                expandedMatchIndex = viewModel.history.indexOf(record)
+                                                            },
+                                                            onLongClick = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                expandedMatchIndex = viewModel.history.indexOf(record)
+                                                            }
+                                                        )
                                                 ) {
-                                                    Text(
-                                                        "Andamento Punteggi",
-                                                        style = MaterialTheme.typography.labelMedium,
-                                                        color = MaterialTheme.colorScheme.primary
-                                                    )
-                                                    Icon(
-                                                        Icons.Filled.Fullscreen,
-                                                        contentDescription = "Espandi Grafico",
-                                                        tint = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.size(18.dp)
+                                                    // 1. INTESTAZIONE (Titolo + Icona Espandi)
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                                        verticalAlignment = Alignment.CenterVertically
+                                                    ) {
+                                                        Text(
+                                                            "Andamento Punteggi",
+                                                            style = MaterialTheme.typography.labelMedium,
+                                                            color = MaterialTheme.colorScheme.primary
+                                                        )
+                                                        Icon(
+                                                            Icons.Filled.Fullscreen,
+                                                            contentDescription = "Espandi Grafico",
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                    }
+
+                                                    // 2. IL MINI-GRAFICO (Ora privato del clickable, che è gestito dal Padre)
+                                                    ScoreChart(
+                                                        players = record.allPlayers,
+                                                        modifier = Modifier
+                                                            .height(120.dp)
+                                                            .fillMaxWidth()
+                                                            .padding(top = 8.dp)
                                                     )
                                                 }
 
-                                                // Mini-grafico vettoriale
-                                                ScoreChart(
-                                                    players = record.allPlayers,
-                                                    modifier = Modifier
-                                                        .height(120.dp)
-                                                        .fillMaxWidth()
-                                                        .padding(top = 8.dp)
-                                                        // Gestione dei tap lunghi e corti per aprire l'overlay a schermo intero
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                haptic.performHapticFeedback(
-                                                                    HapticFeedbackType.LongPress
-                                                                )
-                                                                expandedMatchIndex =
-                                                                    viewModel.history.indexOf(record)
-                                                            },
-                                                            onLongClick = {
-                                                                haptic.performHapticFeedback(
-                                                                    HapticFeedbackType.LongPress
-                                                                )
-                                                                expandedMatchIndex =
-                                                                    viewModel.history.indexOf(record)
-                                                            }
-                                                        )
-                                                )
                                                 HorizontalDivider(
                                                     modifier = Modifier.padding(
                                                         top = 16.dp,
