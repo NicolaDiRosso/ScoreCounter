@@ -529,7 +529,7 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "Record di punti",
+                                            "🔝 Record di punti",
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -639,7 +639,7 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "La Partita Infinita",
+                                            "⏳ La Partita Infinita",
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -738,7 +738,7 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "Il Dittatore",
+                                            "👑 Il Dittatore",
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -819,13 +819,14 @@ fun GlobalStatsScreen(
                             }
 
                             // ==============================================================
-// --- SESTA CARD: IL PIROMANE (Record di Combo totali) ---
-// ==============================================================
+                            // --- SESTA CARD: IL PIROMANE (Record di Combo totali) ---
+                            // ==============================================================
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 12.dp)
-                                    // 🧠 UX: Espandibile per leggere la descrizione completa
+                                    // FIX Rimosso padding(bottom = 12.dp) perché
+                                    // la Column esterna gestisce già lo spazio tra le card (spacedBy 12.dp).
+                                    // Lasciandolo, lo spazio risultava raddoppiato rispetto alle altre carte.
                                     .clickable {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         isExpPiromane = !isExpPiromane
@@ -842,12 +843,11 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "Il Piromane 🔥",
+                                            text = "🔥 Il Piromane",
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
                                         )
-
                                         // Icona di espansione (aggiunta per coerenza visiva)
                                         Icon(
                                             imageVector = if (isExpPiromane) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
@@ -856,7 +856,7 @@ fun GlobalStatsScreen(
                                         )
                                     }
 
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
 
                                     // Verifichiamo che esista un record
                                     if (topArsonist != null && topArsonist.value > 0) {
@@ -866,11 +866,13 @@ fun GlobalStatsScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             // A SINISTRA: Nome e Descrizione
-                                            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                                            Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                                                 Text(
                                                     text = topArsonist.key, // .key è il Nome del giocatore
                                                     style = MaterialTheme.typography.headlineSmall,
-                                                    fontWeight = FontWeight.Bold
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
                                                 )
 
                                                 Text(
@@ -897,7 +899,7 @@ fun GlobalStatsScreen(
                                             }
                                         }
 
-                                        // 🧠 AREA DETTAGLI EXTRA
+                                        // AREA DETTAGLI EXTRA
                                         // Nota: Qui non mettiamo la data perché 'topArsonist' è un totale di carriera.
                                         AnimatedVisibility(visible = isExpPiromane) {
                                             Column(modifier = Modifier.padding(top = 8.dp)) {
@@ -943,7 +945,7 @@ fun GlobalStatsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "Miglior Cecchino 🎯",
+                                                "🎯 Miglior Cecchino",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
@@ -952,7 +954,7 @@ fun GlobalStatsScreen(
 
                                             Text(
                                                 text = globalSniper.first.name,
-                                                style = MaterialTheme.typography.titleLarge,
+                                                style = MaterialTheme.typography.titleMedium,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )
@@ -990,8 +992,8 @@ fun GlobalStatsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "Il Re dei Gamberi 🦞",
-                                                style = MaterialTheme.typography.labelLarge,
+                                                "🦞 Il Re dei Gamberi",
+                                                style = MaterialTheme.typography.titleMedium,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -1036,7 +1038,7 @@ fun GlobalStatsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "La Fenice Suprema 🦅",
+                                                "🦅 La Fenice Suprema",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
@@ -1045,7 +1047,7 @@ fun GlobalStatsScreen(
 
                                             Text(
                                                 text = globalPhoenix.first.name,
-                                                style = MaterialTheme.typography.titleLarge,
+                                                style = MaterialTheme.typography.titleMedium,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )

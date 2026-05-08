@@ -266,6 +266,7 @@ fun HomeScreen(
                         "Che tu stia giocando a carte, a un gioco in scatola o a chi mangia più tranci di pizza, questa app è qui per tenere il conto ed evitare litigi (o forse per incentivarli 😉).",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -280,13 +281,13 @@ fun HomeScreen(
 
                     // 🧠 FORMATTAZIONE PRO: Creiamo la lista puntata graficamente
                     val features = listOf(
-                        "Registrare punti e combo.",
+                        "Registrare partite con punti e combo.",
                         "Analizzare grafici per dimostrare la tua superiorità.",
                         "Assegnare titoli onorifici particolari a chi se li merita."
                     )
                     features.forEach { feature ->
                         Row(modifier = Modifier.padding(bottom = 4.dp)){
-                            Text("• ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text("• ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold,textAlign = TextAlign.Justify,)//l'oggetto TextAlign con Justify ci permette di giustificare il testo)
                             Text(feature, style = MaterialTheme.typography.bodyMedium,fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
@@ -297,11 +298,13 @@ fun HomeScreen(
                         "Niente più foglietti volanti o calcoli a mente sbagliati. \nChe vinca il migliore!",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         "Per segnalare bug o inviare consigli, scrivi al suo magnifico creatore 👌",
+                        textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
