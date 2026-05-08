@@ -297,7 +297,6 @@ fun HomeScreen(
                     Text(
                         "Niente più foglietti volanti o calcoli a mente sbagliati. \nChe vinca il migliore!",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -440,8 +439,10 @@ fun HomeScreen(
                 // 🧠 UX: Raggruppiamo i pulsanti in alto a destra in una sotto-riga (Row)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    // 🧠 FIX SPAZIATURA: Aumentato da 12.dp a 16.dp per farli "respirare"
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    // Impostati a 20.dp il margine tra i bottoni per dare più "aria" ai tasti.
+                    // Tecnicamente, Arrangement.spacedBy applica un margine fisso tra i figli della Row,
+                    // evitando che i bordi delle superfici (CircleShape) risultino troppo vicini.
+                    horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
                     // ---> NUOVO PULSANTE INFO <---
                     IconButton(

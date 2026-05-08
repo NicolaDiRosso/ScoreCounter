@@ -280,8 +280,15 @@ package com.n380.scorecounter.ui.components
                             if (turn == 0) path.moveTo(x, y) // Primo punto, poggia il pennarello
                             else path.lineTo(x, y) // Tira la riga
 
-                            // Disegna il pallino (Più grande se il grafico è dettagliato!)
-                            val radius = if (isDetailed) 8.dp.toPx() else 4.dp.toPx()
+                            // ====================================================================
+                            // 🧠 TEORIA VISIVA: IL "PESO" DEI PUNTI (Ink-to-Data Ratio)
+                            // Quando un grafico ha molti punti ravvicinati, pallini troppo grandi
+                            // creano un effetto "collana di perle" che spezza la continuità della linea.
+                            // Tecnicamente, riducendo il raggio (radius), abbassiamo il rumore visivo
+                            // sui vertici, permettendo all'occhio di seguire meglio la "rotta" (il Path).
+                            // 64.dp -> 3.dp (Dettagliato) e 2.dp (Semplice) è il bilanciamento ideale.
+                            // ====================================================================
+                            val radius = if (isDetailed) 3.dp.toPx() else 2.dp.toPx()
                             drawCircle(color, radius, Offset(x, y))
                         }
                     }
@@ -291,7 +298,7 @@ package com.n380.scorecounter.ui.components
                         path = path,
                         color = color,
                         style = Stroke(
-                            width = if (isDetailed) 4.dp.toPx() else 3.dp.toPx(), // Linea bella spessa
+                            width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(), // Linea proporzionata ai nuovi pallini
                             cap = StrokeCap.Round,
                             join = StrokeJoin.Round
                         )

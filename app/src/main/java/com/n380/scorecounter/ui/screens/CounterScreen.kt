@@ -171,9 +171,15 @@ fun CounterScreen(
     }
 
     // ---> IL SALVA-VITA (BackHandler) <---
-    // Intercetta il tasto "Indietro" fisico o lo swipe back del telefono. Invece di uscire, fa apparire un avviso!
+    // Intercetta il tasto "Indietro" fisico o lo swipe back del telefono.
+    // Invece di uscire direttamente, cambia lo stato per far apparire il dialogo di conferma.
     BackHandler {
-        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        // 🧠 BUG FIX: DOPPIA VIBRAZIONE
+        // Abbiamo rimosso 'haptic.performHapticFeedback(HapticFeedbackType.LongPress)' da qui.
+        // Motivo tecnico: I sistemi Android moderni forniscono già un feedback tattile nativo 
+        // quando viene eseguita la gesture "Back". Aggiungendone uno manuale, l'utente 
+        // percepiva un fastidioso "doppio colpo". Lasciando fare al sistema, il feedback 
+        // rimane singolo, pulito e coerente con il resto del sistema operativo.
         showExitWarning = true
     }
 
@@ -548,7 +554,7 @@ fun CounterScreen(
                             onDone = {
                                 // Rimuove il focus dal nodo attivo. Di conseguenza, il Window Manager di Android
                                 // nasconderà la tastiera automaticamente (Trigger implicito).
-                                focusManager.clearFocus()
+                                //focusManager.clearFocus()
 
                                 // Casting sicuro: converte la stringa in Int, se fallisce (es. vuoto o "-") usa 0 (Elvis Operator).
                                 val newScore = scoreInput.text.toIntOrNull() ?: 0
