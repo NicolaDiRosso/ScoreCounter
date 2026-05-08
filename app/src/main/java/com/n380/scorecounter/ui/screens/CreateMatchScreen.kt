@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -17,8 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Serve per convertire il Colore visivo in un numero da salvare nel Database
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -73,6 +77,8 @@ fun CreateMatchScreen(
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current//evochiamo il controllore della tastiera
+    val focusManager = LocalFocusManager.current // Recuperiamo il gestore del focus, ci serve altrimenti anche se chiudiamo la tastiera la text area rimane sempre su OnFocus (quindi attiva)
 
     // Scaffold è l'impalcatura della pagina (Sfondo, Contenuto, Barra in basso)
     Scaffold(
@@ -246,28 +252,78 @@ fun CreateMatchScreen(
                             leadingIcon = {
                                 val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                                 Icon(Icons.Default.VideogameAsset, null, tint = iconColor)
-                            }
+                            },
+                            // ==========================================================
+                            // UX FIX: CHIUSURA TASTIERA
+                            // ==========================================================
+                            singleLine = true, // Impedisce di andare a capo
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next), // Mostra il tasto "Fatto/Spunta"
+                            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() } // Azione: abbassa la tastiera
+                            )
                         )
+                        /**
+                         * ============================================================================
+                         * Le 'ImeAction' (Azioni della tastiera in basso a destra)
+                         * ============================================================================
+                         * L'ImeAction cambia l'icona del tasto di conferma della tastiera Android
+                         * per far capire all'utente cosa succederà premendolo:
+                         *
+                         * 1. ImeAction.Default : Il classico tasto "Invio" (va a capo riga).
+                         * 2. ImeAction.Done    : Mostra "✔️" (Fatto). Significa "Ho finito, chiudi la tastiera".
+                         * 3. ImeAction.Next    : Mostra "➡️" (Avanti). Passa automaticamente al campo di testo successivo.
+                         * 4. ImeAction.Search  : Mostra "🔍" (Cerca). Avvia una ricerca globale.
+                         * 5. ImeAction.Send    : Mostra "✈️" (Invia). Perfetto per le app di messaggistica.
+                         * 6. ImeAction.Go      : Mostra "🚀" (Vai). Esegue l'input immediato (es. aprire un link nel browser).
+                         * 7. ImeAction.Previous: Torna al campo di testo precedente.
+                         * * 👉 Ricorda: per farle funzionare bene, usa quasi sempre 'singleLine = true' nel TextField!
+                         */
 
 
 
                         // ==========================================================
-                        // CAMPO DI TESTO: TRAGUARDO (Solo Numeri)
+                        // CAMPO DI TESTO: TRAGUARDO (Solo Numeri + Chiusura Smart)
                         // ==========================================================
                         OutlinedTextField(
                             // FIX: Richiamiamo correttamente il viewModel!
                             value = viewModel.targetScore,
                             onValueChange = { newValue ->
+                                // Accetta solo numeri o campo vuoto
                                 if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
                                     viewModel.targetScore = newValue
                                 }
                             },
                             label = { Text("Traguardo (Opzionale)") },
                             modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            // ==========================================================
+                            // UX FIX: CHIUSURA TASTIERA
+                            // ==========================================================
+                            singleLine = true, // Impedisce di andare a capo
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done,
+                            ), // Mostra il tasto "Fatto/Spunta"
+
+                            // Si attiva il comando quando l'utente preme il tasto spunta
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+
+                                    /*Trucco per il futuro non utilizzato qui:
+                                    Esiste il comando:
+                                    keyboardController?.hide() 1.
+                                    Esso nasconde la tastiera fisica quando si preme il pulsante in basso a destra di conferma
+                                    In questo caso non ci serve perchè usando il comando clearFocus Jetpack Compose
+                                    capisce da solo che deve togliere non solo il focus sulla casella ma anche la tastiera aperta.
+                                    QUindi, questo codice porebbe tornare utile quando bisogna togliere solo la testiera ma non il focus.
+                                    */
+
+                                    // Eseguiamo il comando
+                                    focusManager.clearFocus()  // 2. Togliamo il cursore e il bordo attivo (Focus)
+                                }
+                            ),
                             shape = RoundedCornerShape(16.dp),
-                            leadingIcon = { Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
+                            leadingIcon = { Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         )
+
 
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -495,7 +551,20 @@ fun CreateMatchScreen(
                                 modifier = Modifier.weight(1f),
                                 label = { Text("Nome") },
                                 shape = RoundedCornerShape(20.dp),
-                                leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
+                                leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done,
+                                ),
+                                        keyboardActions = KeyboardActions(
+                                        onDone = {
+                                            // 🧠 UX FIX DEFINITIVO: Usiamo SOLO clearFocus().
+                                            // Togliendo il focus, Android capisce da solo che deve chiudere
+                                            // la tastiera, eseguendo un'unica animazione fluida e perfetta!
+                                            focusManager.clearFocus()
+                                        }
+                                        )
                             )
 
 
@@ -506,7 +575,7 @@ fun CreateMatchScreen(
                             Button(
                                 onClick = {
                                     if (isAddPlayerEnabled) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        //haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                         // ---> LOGICA MULTICOLOR (Inserimento Manuale) <---
                                         // Stessa logica di prima: Unspecified = colore a caso.
                                         val finalColor = if (selectedColor == Color.Unspecified) {

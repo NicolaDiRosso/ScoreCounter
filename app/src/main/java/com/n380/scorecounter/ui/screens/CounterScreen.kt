@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.input.ImeAction
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.PlayerScoreCard
 import com.n380.scorecounter.ui.components.formatTime
@@ -69,6 +72,8 @@ fun CounterScreen(
     // SISTEMA SNACKBAR (Tasto Annulla Azzeramento)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val focusManager = LocalFocusManager.current // Recuperiamo il gestore del focus, ci serve altrimenti anche se chiudiamo la tastiera la text area rimane sempre su OnFocus (quindi attiva)
 
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -405,55 +410,117 @@ fun CounterScreen(
     }
 
 
-    // ---> NUOVO: POPUP PER L'INSERIMENTO MANUALE DEL PUNTEGGIO DA TASTIERA <---
+    // ---> POPUP PER L'INSERIMENTO MANUALE ( con Smart Save) <---
     if (playerForManualEdit != null) {
-        // Stringa temporanea per ricordare cosa l'utente sta scrivendo. La pre-compiliamo col punteggio attuale!
+        // Stato locale per gestire l'input di testo nel TextField
         var scoreInput by remember { mutableStateOf(playerForManualEdit!!.score.toString()) }
 
         AlertDialog(
-            onDismissRequest = {
-                playerForManualEdit = null
-            }, // Se l'utente clicca fuori, si chiude annullando
-            title = { Text("Inserisci Punti per ${playerForManualEdit!!.name}") },
-            text = {
-                OutlinedTextField(
-                    value = scoreInput,
-                    onValueChange = { newValue ->
-                        // Controllo di Sicurezza: Consentiamo all'utente di scrivere SOLO numeri.
-                        // Accettiamo anche il segno meno "-" da solo, così l'utente può digitare punteggi negativi (es. "-10")
-                        if (newValue.isEmpty() || newValue == "-" || newValue.toIntOrNull() != null) {
-                            scoreInput = newValue
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    // ---> LEZIONE TASTIERA: Forza l'apertura del Tastierino Numerico del telefono (Niente lettere!) <---
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            onDismissRequest = { playerForManualEdit = null },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Calculate,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(36.dp)
                 )
             },
-            confirmButton = {
-                Button(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                    // Trasformiamo il testo digitato in un numero vero. Se l'utente ha scritto cavolate o ha lasciato vuoto, mettiamo 0 per sicurezza.
-                    val newScore = scoreInput.toIntOrNull() ?: 0
-
-                    // ---> IL TRUCCO PER IL GRAFICO E LA COMBO <---
-                    // Invece di dirgli "Il tuo nuovo punteggio è 50" (che romperebbe il grafico perché mancherebbe uno step),
-                    // Calcoliamo la DIFFERENZA: (Nuovo Punteggio - Vecchio Punteggio).
-                    // Es: Se aveva 10 e scrive 50, la differenza è +40.
-                    val diff = newScore - playerForManualEdit!!.score
-
-                    // Passiamo la differenza alla funzione updatePlayerScore!
-                    // Così l'inserimento manuale da tastiera vale anche per scatenare (o rompere) la combo "On Fire"!
-                    viewModel.updatePlayerScore(playerForManualEdit!!, diff)
-
-                    playerForManualEdit = null // Chiudiamo il popup soddisfatti
-                }) { Text("Salva") }
+            title = {
+                Text(
+                    text = "Modifica Punteggio",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
             },
-            dismissButton = {
-                TextButton(onClick = { playerForManualEdit = null }) { Text("Annulla") }
-            }
+            text = {
+                Column {
+                    Text(
+                        text = "Inserisci il nuovo punteggio totale per ${playerForManualEdit!!.name}:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = scoreInput,
+                        onValueChange = { newValue ->
+                            // 🧠 Logica di Validazione: Accetta solo numeri, campo vuoto o il segno meno
+                            if (newValue.isEmpty() || newValue == "-" || newValue.toIntOrNull() != null) {
+                                scoreInput = newValue
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true,
+
+                        // 🧠 TECHNICAL: KeyboardOptions configura l'ASPETTO della tastiera
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number, // Forza il tastierino numerico
+                            imeAction = ImeAction.Done          // Cambia l'icona "Invio" in "Spunta/Fine"
+                        ),
+
+                        // 🧠 TECHNICAL: KeyboardActions configura il COMPORTAMENTO del tasto speciale
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                // 1. Togliamo il focus (chiude la tastiera senza scatti)
+                                focusManager.clearFocus()
+
+                                // 2. TRIGGER SALVATAGGIO: Eseguiamo la stessa logica del pulsante Salva
+                                val newScore = scoreInput.toIntOrNull() ?: 0
+                                val diff = newScore - playerForManualEdit!!.score
+                                viewModel.updatePlayerScore(playerForManualEdit!!, diff)
+
+                                // 3. Chiudiamo il popup
+                                playerForManualEdit = null
+                            }
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Tasto Annulla
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            playerForManualEdit = null
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                    // Tasto Salva
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            // 🧠 Calcolo della differenza (necessario per non resettare la combo On Fire)
+                            val newScore = scoreInput.toIntOrNull() ?: 0
+                            val diff = newScore - playerForManualEdit!!.score
+                            viewModel.updatePlayerScore(playerForManualEdit!!, diff)
+
+                            playerForManualEdit = null
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text("Salva", fontWeight = FontWeight.Bold)
+                    }
+                }
+            },
+            // Spegniamo il tasto di default perché abbiamo integrato "Annulla" nella Row
+            dismissButton = null,
+            // 🎨 STILE: Angoli arrotondati dell'intero popup
+            shape = RoundedCornerShape(24.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceVariant//'containerColor' definisce il colore del "corpo" del dialog.
+            // Si possono usare:
+            // - MaterialTheme.colorScheme.surface (Classico)
+            // - MaterialTheme.colorScheme.surfaceVariant (Leggermente più grigio/scuro)
+            // - Color.White (Bianco puro, se si vuole massima luminosità)
         )
     }
 
