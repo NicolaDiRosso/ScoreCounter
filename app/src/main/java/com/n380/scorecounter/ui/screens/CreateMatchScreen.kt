@@ -1,9 +1,15 @@
 package com.n380.scorecounter.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Serve per convertire il Colore visivo in un numero da salvare nel Database
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -313,7 +320,7 @@ fun CreateMatchScreen(
                                     Esso nasconde la tastiera fisica quando si preme il pulsante in basso a destra di conferma
                                     In questo caso non ci serve perchè usando il comando clearFocus Jetpack Compose
                                     capisce da solo che deve togliere non solo il focus sulla casella ma anche la tastiera aperta.
-                                    QUindi, questo codice porebbe tornare utile quando bisogna togliere solo la testiera ma non il focus.
+                                    Quindi, questo codice potrebbe tornare utile quando bisogna togliere solo la testiera ma non il focus.
                                     */
 
                                     // Eseguiamo il comando
@@ -696,9 +703,9 @@ fun CreateMatchScreen(
                                             }
                                         }
                                     },
-                                    onColorChange = { newColorArgb ->
+                                    /*onColorChange = { newColorArgb ->
                                         viewModel.updatePlayerColor(player, newColorArgb)
-                                    }
+                                    }*/
                                 )
                                 // Piccolo spazio extra tra una card e l'altra per farle respirare
                                 if (index != viewModel.players.size - 1) {
@@ -716,59 +723,122 @@ fun CreateMatchScreen(
     // I 3 POPUP (Dialogs & BottomSheet)
     // ====================================================================
 
-    // 1. POPUP MODIFICA NOME GIOCATORE AL TAVOLO
-    // 1. POPUP MODIFICA NOME GIOCATORE AL TAVOLO
+
+    // ====================================================================
+    // 1. POPUP UNIFICATO: MODIFICA NOME E COLORE GIOCATORE
+    // ====================================================================
     if (playerToEdit != null) {
+        // Inizializzazione dello stato locale per gestire le modifiche senza intaccare il database fino al "Salva"
         var editedName by remember { mutableStateOf(playerToEdit!!.name) }
+        var editedColor by remember { mutableIntStateOf(playerToEdit!!.color) }
+
         AlertDialog(
-            onDismissRequest = { playerToEdit = null },
-            // Aggiungiamo il grassetto al titolo per renderlo più elegante
-            title = { Text("Modifica Nome", fontWeight = FontWeight.Bold) },
-            text = {
-                OutlinedTextField(
-                    value = editedName,
-                    onValueChange = { editedName = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+            onDismissRequest = { playerToEdit = null }, // Chiude il modale se si clicca fuori
+            title = {
+                Text(
+                    text = "Modifica Giocatore",
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
             },
-            // ---> GRAFICA PULSANTI AFFIANCATI <---
-            // Mettiamo tutto dentro confirmButton per forzare la riga al 100% della larghezza
+            text = {
+                // Column organizza gli elementi in verticale seguendo l'ordine di scrittura
+                Column(modifier = Modifier.fillMaxWidth()) {
+
+                    // Etichetta descrittiva per la sezione colori
+                    Text(
+                        text = "Scegli un nuovo colore:",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    // 🎨 GRIGLIA COLORI (Spostata in alto e rimpicciolita)
+                    LazyVerticalGrid(
+                        // GridCells.Adaptive adatta il numero di colonne alla larghezza disponibile
+                        columns = GridCells.Adaptive(minSize = 35.dp),//con 35.dp faccio distribuire i colori su 2 colonne
+                        horizontalArrangement = Arrangement.spacedBy(12.dp), // Spazio orizzontale tra le icone
+                        verticalArrangement = Arrangement.spacedBy(12.dp),   // Spazio verticale tra le righe
+                        // heightIn imposta un limite massimo di altezza per evitare che la griglia spinga fuori il resto
+                        modifier = Modifier
+                            .padding(top = 8.dp, bottom = 20.dp)
+                            .heightIn(max = 140.dp)
+                    ) {
+                        // Iterazione sulla palette predefinita definita nel ViewModel o nei componenti
+                        items(playerPalette) { color ->
+                            // Verifica se il colore corrente è quello attualmente selezionato
+                            val isSelected = color.toArgb() == editedColor
+
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp) // Dimensione ridotta per un look più raffinato
+                                    .clip(RoundedCornerShape(12.dp)) // Arrotondamento coerente con lo stile app
+                                    .background(color)
+                                    // Disegna un bordo visibile solo se l'elemento è selezionato (feedback visivo)
+                                    .border(
+                                        width = if (isSelected) 3.dp else 0.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    // Gestione dell'input: aggiorna lo stato locale e attiva il feedback tattile
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        editedColor = color.toArgb()
+                                    }
+                            )
+                        }
+                    }
+
+                    // CAMPO DI TESTO PER IL NOME (Spostato sotto la griglia)
+                    OutlinedTextField(
+                        value = editedName,
+                        onValueChange = { editedName = it }, // Aggiorna la stringa temporanea ad ogni digitazione
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Nuovo nome") },
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true, // Impedisce la creazione di nuove righe (fondamentale per ImeAction)
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        // keyboardActions intercetta la pressione del tasto di conferma sulla tastiera
+                        keyboardActions = KeyboardActions(onDone = {
+                            focusManager.clearFocus() // Rimuove il cursore e abbassa la tastiera
+                        })
+                    )
+                }
+            },
             confirmButton = {
+                // Row allinea i pulsanti d'azione orizzontalmente
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp) // Spazio esatto tra i due bottoni
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
-                    // TASTO ANNULLA (Sinistra)
+                    // Pulsante per annullare l'operazione senza salvare i cambiamenti
                     OutlinedButton(
                         onClick = {
                             playerToEdit = null
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm) },
-                        modifier = Modifier
-                            .weight(1f) // Prende metà spazio
-                            .height(48.dp),
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        },
+                        modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(20.dp),
-                        // Usiamo colori neutri (outline e onSurface) come hai richiesto, niente rosso!
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
                         Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
                     }
 
-                    // TASTO SALVA (Destra)
+                    // Pulsante per confermare e persistere le modifiche nel ViewModel/Database
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            // Validazione: procediamo al salvataggio solo se il nome non è vuoto
                             if (editedName.isNotBlank()) {
+                                // Aggiornamento dei campi dell'oggetto Player originale
                                 playerToEdit!!.name = editedName
-                                playerToEdit = null
+                                viewModel.updatePlayerColor(playerToEdit!!, editedColor)
+
+                                playerToEdit = null // Chiude il modale resettando la variabile di stato
                             }
                         },
-                        modifier = Modifier
-                            .weight(1f) // Prende l'altra metà dello spazio
-                            .height(48.dp),
+                        modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(20.dp),
-                        // Usiamo il PrimaryContainer (lo stesso azzurro/blu chiaro del tuo screenshot)
+                        // Uso di PrimaryContainer per coerenza cromatica con il resto dell'interfaccia
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -778,9 +848,8 @@ fun CreateMatchScreen(
                     }
                 }
             },
-            // Avendo messo entrambi i pulsanti dentro confirmButton, diciamo ad Android
-            // di spegnere il pulsante "Annulla" invisibile di default.
-            dismissButton = null
+            dismissButton = null, // Disattivato per usare la gestione personalizzata nella Row sopra
+            shape = RoundedCornerShape(24.dp) // Arrotondamento massimo per il contenitore del Dialog
         )
     }
 

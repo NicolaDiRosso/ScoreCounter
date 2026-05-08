@@ -53,7 +53,7 @@
         onMoveDown: () -> Unit,
         onEdit: () -> Unit,
         onRemove: () -> Unit,
-        onColorChange: (Int) -> Unit
+        //onColorChange: (Int) -> Unit
     ) {
         var haptic = LocalHapticFeedback.current //QUESTA VARIABILE DA PROBLEMI, LO DEVO RISOLVERE ALTRIMENTI MI RITROIVO DELLE VIBRAZIONI DOPPIE
         var showColorPalette by remember { mutableStateOf(false) }
@@ -64,13 +64,13 @@
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                // combinedClickable gestisce il tocco lungo sulla card per aprire la tavolozza dei colori
+                .padding(vertical = 4.dp),
+                 /*combinedClickable gestisce il tocco lungo sulla card per aprire la tavolozza dei colori
                 .combinedClickable(
                     onClick = {
                         showColorPalette = true
                     }
-                ),
+                ),*/
             // ---> Sfondo Colorato Trasparente (Tonal Surface) <---
             // Prendiamo il colore del giocatore e lo rendiamo trasparente al 12% (0.12f)
             // Questo crea un "bagliore" del colore del giocatore molto elegante.
@@ -81,7 +81,6 @@
             // ---> Bordo coordinato <---
             // Anche il bordo lo facciamo del colore del giocatore ma un po' più visibile (20%)
             border = BorderStroke(1.dp, playerColor.copy(alpha = 0.5f)),
-
             shape = RoundedCornerShape(16.dp)
         ) {
             // La riga principale che contiene tutto
@@ -148,7 +147,7 @@
             }
         }
 
-        // LAYER MODALE: POPUP SCELTA COLORE
+        /* LAYER MODALE: POPUP SCELTA COLORE
         if (showColorPalette) {
             AlertDialog(
                 onDismissRequest = { showColorPalette = false },
@@ -206,7 +205,7 @@
                 // Diciamo ad Android di non usare il bottone secondario invisibile
                 dismissButton = null
             )
-        }
+        }*/
     }
 
 

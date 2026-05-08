@@ -19,6 +19,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -31,11 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.PlayerScoreCard
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.viewmodel.MatchViewModel
+import kotlinx.coroutines.delay
 
 // ====================================================================
 // ====================================================================
@@ -409,14 +415,80 @@ fun CounterScreen(
         }
     }
 
+    /*
+     * =========================================================================================
+     * TEORIA POPUP INSERIMENTO MANUALE (SMART DIALOG)
+     * =========================================================================================
+     * Questo blocco condizionale genera un AlertDialog e applica 3 concetti avanzati di UX/UI
+     * per garantire un'esperienza utente fluida e professionale:
+     *
+     * 1. CONTROLLO DEL CURSORE (State Management avanzato):
+     * Al posto di una semplice String, usiamo un oggetto 'TextFieldValue'. Questo ci permette
+     * non solo di memorizzare il testo inserito, ma di forzare la posizione iniziale del
+     * cursore (Caret) alla fine della cifra tramite 'TextRange', evitando il fastidioso
+     * posizionamento predefinito a sinistra.
+     *
+     * 2. TASTIERA AUTOMATICA (Focus Management & Side Effects):
+     * Usiamo un 'FocusRequester' per creare un "bersaglio" sul campo di testo.
+     * Tramite un 'LaunchedEffect' (che scatta solo all'apertura) e un piccolo delay per
+     * attendere l'animazione del Dialog, inviamo il comando di focus.
+     * Risultato: la tastiera sale da sola senza costringere l'utente a cliccare di nuovo.
+     *
+     * 3. SMART CLOSE (Hardware-Software Integration):
+     * Istruiamo la tastiera Android a mostrare il tasto Spunta (ImeAction.Done).
+     * Tramite 'keyboardActions', intercettiamo quel tasto: togliamo il focus (facendo
+     * scendere la tastiera con un'animazione fluida) ed eseguiamo istantaneamente il
+     * salvataggio e la chiusura del popup.
+     * =========================================================================================
+     */
 
-    // ---> POPUP PER L'INSERIMENTO MANUALE ( con Smart Save) <---
+
+    // =========================================================================================
+    // MODALE INSERIMENTO MANUALE: GESTIONE AVANZATA DEL FOCUS E DEL TESTO (di MODFICA PUNTEGGIO)
+    // =========================================================================================
     if (playerForManualEdit != null) {
-        // Stato locale per gestire l'input di testo nel TextField
-        var scoreInput by remember { mutableStateOf(playerForManualEdit!!.score.toString()) }
 
+        // 1. STATE MANAGEMENT (Gestione dello Stato e del Cursore)
+        // Usiamo TextFieldValue invece di String. Una String contiene solo i caratteri.
+        // TextFieldValue è una data class complessa che memorizza:
+        // - text: La stringa attuale.
+        // - selection: L'oggetto TextRange che definisce dove si trova il cursore o la selezione evidenziata.
+        // - composition: Usato per le tastiere predittive.
+        var scoreInput by remember {
+            //dichiaro la variabile immutabile initialText e dico che è uguale alla variabile di stato che contiene il giocatore con un valore non nullo e lo converto in una stringa con ".toString()"
+            val initialText = playerForManualEdit!!.score.toString()
+            mutableStateOf(
+                TextFieldValue(
+                    text = initialText,
+                    // TextRange mappa un intervallo. Passando un solo valore (la lunghezza della stringa),
+                    // diciamo al motore di rendering del testo di piazzare il 'Caret' (cursore) alla fine.
+                    selection = TextRange(initialText.length)
+                )
+            )
+        }
+
+        // 2. FOCUS TREE (Albero del Focus)
+        // FocusRequester è un proxy che ci permette di inviare comandi all'albero del focus di Compose.
+        // Lo agganceremo al Modifier dell'OutlinedTextField più in basso.
+        val focusRequester = remember { FocusRequester() }
+
+        // 3. SIDE EFFECTS (Effetti Collaterali)
+        // LaunchedEffect entra nel ciclo di vita della composizione. La chiave 'Unit' significa
+        // che la coroutine al suo interno verrà lanciata una sola volta (al momento dell'attacco del nodo).
+        LaunchedEffect(Unit) {
+            // Sospendiamo la coroutine per 100 millisecondi.
+            // Motivo tecnico: L'AlertDialog ha un'animazione di entrata (Fade-In/Scale-In).
+            // Se richiediamo il focus prima che il layout node sia stato completato e misurato dal sistema
+            // (Window Manager), la richiesta viene scartata (Ignored). Il delay garantisce che il nodo sia pronto.
+            delay(100)
+            focusRequester.requestFocus() // Spinge programmaticamente l'evento di focus sul nodo collegato.
+        }
+
+        // 4. COMPONENTE UI: ALERT DIALOG (Material 3)
         AlertDialog(
+            // Callback invocata dal sistema se l'utente tocca lo 'Scrim' (sfondo oscurato) o preme il tasto Back.
             onDismissRequest = { playerForManualEdit = null },
+
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Calculate,
@@ -440,36 +512,51 @@ fun CounterScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // 5. COMPONENTE UI: CAMPO TESTUALE E TASTIERA
                     OutlinedTextField(
-                        value = scoreInput,
+                        value = scoreInput, // Associa lo stato (TextFieldValue) alla UI
                         onValueChange = { newValue ->
-                            // 🧠 Logica di Validazione: Accetta solo numeri, campo vuoto o il segno meno
-                            if (newValue.isEmpty() || newValue == "-" || newValue.toIntOrNull() != null) {
+                            // newValue è il nuovo stato emesso dalla tastiera.
+                            // Estraiamo la proprietà 'text' per eseguire la nostra Regex/Validazione.
+                            val newText = newValue.text
+                            // Condizione logica: Accetta vuoto, segno meno isolato, o un intero valido.
+                            if (newText.isEmpty() || newText == "-" || newText.toIntOrNull() != null) {
+                                // Se la validazione passa, sovrascriviamo lo stato con il NUOVO oggetto TextFieldValue
+                                // Questo mantiene sincronizzata sia la stringa che la posizione aggiornata del cursore.
                                 scoreInput = newValue
                             }
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        // Binding del FocusRequester al modificatore di questo specifico componente.
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+
                         shape = RoundedCornerShape(16.dp),
+
+                        // singleLine disabilita il comportamento "multiline" (non crea a capo "\n")
+                        // ed è propedeutico affinché imeAction venga rispettata dalla tastiera (IME).
                         singleLine = true,
 
-                        // 🧠 TECHNICAL: KeyboardOptions configura l'ASPETTO della tastiera
+                        // Configurazione dell'Input Method Editor (IME) del sistema Android.
                         keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number, // Forza il tastierino numerico
-                            imeAction = ImeAction.Done          // Cambia l'icona "Invio" in "Spunta/Fine"
+                            keyboardType = KeyboardType.Number, // Forza il layout numerico dell'hardware/software.
+                            imeAction = ImeAction.Done          // Setta l'action button della tastiera su "Fatto/Spunta".
                         ),
 
-                        // 🧠 TECHNICAL: KeyboardActions configura il COMPORTAMENTO del tasto speciale
+                        // Intercettazione dell'evento emesso dalla tastiera (quando l'utente preme la Spunta).
                         keyboardActions = KeyboardActions(
                             onDone = {
-                                // 1. Togliamo il focus (chiude la tastiera senza scatti)
+                                // Rimuove il focus dal nodo attivo. Di conseguenza, il Window Manager di Android
+                                // nasconderà la tastiera automaticamente (Trigger implicito).
                                 focusManager.clearFocus()
 
-                                // 2. TRIGGER SALVATAGGIO: Eseguiamo la stessa logica del pulsante Salva
-                                val newScore = scoreInput.toIntOrNull() ?: 0
+                                // Casting sicuro: converte la stringa in Int, se fallisce (es. vuoto o "-") usa 0 (Elvis Operator).
+                                val newScore = scoreInput.text.toIntOrNull() ?: 0
+                                // Calcolo del delta per non distruggere le statistiche/combo basate sull'aggiunta.
                                 val diff = newScore - playerForManualEdit!!.score
                                 viewModel.updatePlayerScore(playerForManualEdit!!, diff)
 
-                                // 3. Chiudiamo il popup
+                                // Azzera lo stato, innescando la recomposition che distruggerà l'AlertDialog.
                                 playerForManualEdit = null
                             }
                         )
@@ -477,11 +564,12 @@ fun CounterScreen(
                 }
             },
             confirmButton = {
+                // Layout orizzontale per i pulsanti (Pattern Material 3: Tasti affiancati a peso uguale)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Tasto Annulla
+                    // OutlinedButton è usato per azioni secondarie/distruttive deboli (Cancel/Annulla).
                     OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -494,15 +582,14 @@ fun CounterScreen(
                         Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
                     }
 
-                    // Tasto Salva
+                    // Filled Button è usato per l'azione primaria e affermativa (Confirm/Salva).
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            // 🧠 Calcolo della differenza (necessario per non resettare la combo On Fire)
-                            val newScore = scoreInput.toIntOrNull() ?: 0
+                            // Replicazione esatta della business logic presente nella KeyboardActions(onDone)
+                            val newScore = scoreInput.text.toIntOrNull() ?: 0
                             val diff = newScore - playerForManualEdit!!.score
                             viewModel.updatePlayerScore(playerForManualEdit!!, diff)
-
                             playerForManualEdit = null
                         },
                         modifier = Modifier.weight(1f).height(48.dp),
@@ -512,10 +599,9 @@ fun CounterScreen(
                     }
                 }
             },
-            // Spegniamo il tasto di default perché abbiamo integrato "Annulla" nella Row
-            dismissButton = null,
-            // 🎨 STILE: Angoli arrotondati dell'intero popup
-            shape = RoundedCornerShape(24.dp),
+
+            dismissButton = null,// Spegniamo il tasto di default perché abbiamo integrato "Annulla" nella Row
+            shape = RoundedCornerShape(24.dp),// Angoli arrotondati dell'intero popup
             containerColor = MaterialTheme.colorScheme.surfaceVariant//'containerColor' definisce il colore del "corpo" del dialog.
             // Si possono usare:
             // - MaterialTheme.colorScheme.surface (Classico)
@@ -556,7 +642,7 @@ fun CounterScreen(
             // title è l'intestazione in grassetto.
             title = {
                 Text(
-                    text = "Sei proprio sicuro?",
+                    text = "Vuoi proprio azzerare?",
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -564,7 +650,8 @@ fun CounterScreen(
             // text è il corpo del messaggio.
             text = {
                 Text(
-                    text = "Sei sicurissimo di voler azzerare tutto?\nQuesta azione non può essere annullata."
+                    text = "Sei sicuro di voler azzerare tutto?\nQuesta azione non può essere annullata.",
+                    textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                 )
             },
 
@@ -657,17 +744,20 @@ fun CounterScreen(
                     // Essendo un'azione potenzialmente distruttiva, applichiamo il colore di errore.
                     tint = MaterialTheme.colorScheme.error,
                     // Ingrandiamo l'icona per darle maggiore peso visivo, come fatto nei dialoghi precedenti.
-                    modifier = Modifier.size(36.dp)
-                )
+                    modifier = Modifier.size(36.dp),
+                    )
             },
             title = {
                 Text(
                     text = "Abbandonare la partita?",
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             },
             text = {
-                Text("Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?")
+                Text(
+                    text = "Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?",
+                    textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
+                )
             },
             // Replicando l'architettura del popup precedente, creiamo coerenza per l'utente.
             // Imparerà che due bottoni larghi colorati in un certo modo significano sempre la stessa cosa.
