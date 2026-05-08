@@ -781,7 +781,11 @@ fun CreateMatchScreen(
                                     )
                                     // Gestione dell'input: aggiorna lo stato locale e attiva il feedback tattile
                                     .clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        // 🧠 NOTA TECNICA: RIMOSSA VIBRAZIONE MANUALE
+                                        // Il modificatore .clickable su componenti con forme definite 
+                                        // e bordi attivi può innescare un feedback di sistema. 
+                                        // Rimuovendo la chiamata manuale, evitiamo il "doppio colpo" 
+                                        // mantenendo la risposta nativa del dispositivo.
                                         editedColor = color.toArgb()
                                     }
                             )
@@ -813,6 +817,9 @@ fun CreateMatchScreen(
                     // Pulsante per annullare l'operazione senza salvare i cambiamenti
                     OutlinedButton(
                         onClick = {
+                            // 🧠 NOTA TECNICA: CHIUSURA MODALE
+                            // L'azzeramento di 'playerToEdit' smonta il nodo del Dialog dall'albero 
+                            // della composizione, chiudendo l'interfaccia istantaneamente.
                             playerToEdit = null
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         },
@@ -826,8 +833,10 @@ fun CreateMatchScreen(
                     // Pulsante per confermare e persistere le modifiche nel ViewModel/Database
                     Button(
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            // Validazione: procediamo al salvataggio solo se il nome non è vuoto
+                            // 🧠 NOTA TECNICA: SALVATAGGIO REATTIVO
+                            // Procediamo al salvataggio solo se il nome non è vuoto. 
+                            // Aggiornando le proprietà dell'oggetto e notificando il ViewModel, 
+                            // inneschiamo la Recomposition della lista sottostante.
                             if (editedName.isNotBlank()) {
                                 // Aggiornamento dei campi dell'oggetto Player originale
                                 playerToEdit!!.name = editedName
