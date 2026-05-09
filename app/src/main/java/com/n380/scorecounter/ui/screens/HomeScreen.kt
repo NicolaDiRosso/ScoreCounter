@@ -821,7 +821,7 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                                 textAlign = TextAlign.Center
                             )
                         }
