@@ -1,5 +1,6 @@
 package com.n380.scorecounter.ui.components
 
+    import android.content.Intent
     import android.graphics.Paint
     import android.graphics.Typeface
     import androidx.compose.animation.core.*
@@ -483,4 +484,98 @@ package com.n380.scorecounter.ui.components
                 )
             }
         }
+    }
+
+    // ====================================================================
+    // MOTORE DI GENERAZIONE TESTO CONDIVISIONE (BUILDER ASTRATTO)
+    // ====================================================================
+    /**
+     * Questa funzione applica il principio di Astrazione: è completamente agnostica
+     * rispetto allo stato dell'app (non sa se la partita è in corso o finita da mesi).
+     * Accetta solo tipi di dati primitivi e costrutti standard (String, Long, Pair).
+     */
+    fun buildMatchShareText(
+        title: String,
+        durationSeconds: Long,
+        timestamp: Long,
+        // Pair<String, Int> è il nostro "formato universale".
+        // Il campo 'first' sarà sempre il Nome, il campo 'second' sarà il Punteggio.
+        rankedPlayersData: List<Pair<String, Int>>,
+        cecchinoData: Pair<String, Int>?,
+        inarrestabileData: Pair<String, Int>?,
+        gamberoData: Pair<String, Int>?,
+        feniceData: Pair<String, Int>?
+    ): String {
+        return buildString {
+            appendLine("🏆 Risultati: $title")
+
+            // Logica condizionale per l'inclusione del tempo di gioco
+            if (durationSeconds > 0) {
+                appendLine("⏱️ Durata: ${formatTime(durationSeconds)}")
+            }
+
+            // Il timestamp a 0L indica una partita legacy (vecchia) salvata prima
+            // che introducessimo la registrazione delle date. Lo saltiamo per retrocompatibilità.
+            if (timestamp > 0L) {
+                appendLine("📅 Data: ${formatDate(timestamp)}")
+            }
+
+            appendLine() // Separatore visivo dell'intestazione
+
+            // ITERAZIONE CLASSIFICA: Trasforma la lista di Coppie in testo formattato
+            rankedPlayersData.forEachIndexed { index, (name, score) ->
+                val medal = when (index) {
+                    0 -> "🥇 1°"
+                    1 -> "🥈 2°"
+                    2 -> "🥉 3°"
+                    else -> "- ${index + 1}°"
+                }
+                appendLine("$medal $name - $score pt")
+            }
+
+            // GESTIONE PREMI: Operatore logico OR (||) globale.
+            // Il blocco viene renderizzato solo se l'engine rileva almeno un'istanza valida di premio.
+            if (cecchinoData != null || inarrestabileData != null || gamberoData != null || feniceData != null) {
+                appendLine("\n🏅 PREMI SPECIALI:")
+
+                // DESTRUTTURAZIONE SCOPE FUNCTION:
+                // .let estrae il valore dal Nullable. (name, value) destruttura la Pair in due variabili locali.
+                cecchinoData?.let { (name, value) ->
+                    appendLine("  🎯 Cecchino: $name \n        (+$value pt in un colpo)")
+                }
+
+                inarrestabileData?.let { (name, value) ->
+                    appendLine("  🔥 Inarrestabile: $name \n         ($value combo On Fire)")
+                }
+
+                gamberoData?.let { (name, value) ->
+                    appendLine("  🦞 Il Gambero: $name \n        (-$value pt tolti)")
+                }
+
+                feniceData?.let { (name, value) ->
+                    appendLine("  🦅 La Fenice: $name \n         (rimonta da +$value pt)")
+                }
+            }
+
+            appendLine("\nGenerato con ScoreCounter 🎮")
+            append("© 2026 Creato da NicolA380")
+        }
+    }
+
+    // ====================================================================
+    // GESTORE INTENT DI SISTEMA (OS COMMUNICATION)
+    // ====================================================================
+    /**
+     * Isola l'implementazione specifica di Android (Context e Intent).
+     * Mantenere la logica di UI separata dalla logica di Sistema Operativo
+     * è un pilastro della Clean Architecture.
+     */
+    fun launchShareIntent(context: android.content.Context, shareText: String) {
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, "Condividi Classifica")
+        context.startActivity(shareIntent)
     }

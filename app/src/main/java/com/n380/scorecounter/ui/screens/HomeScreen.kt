@@ -1,6 +1,5 @@
 package com.n380.scorecounter.ui.screens
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -44,8 +43,10 @@ import com.n380.scorecounter.model.getHistoricalInarrestabile
 import com.n380.scorecounter.ui.components.AwardCard
 import com.n380.scorecounter.ui.components.PatternedBackground
 import com.n380.scorecounter.ui.components.ScoreChart
+import com.n380.scorecounter.ui.components.buildMatchShareText
 import com.n380.scorecounter.ui.components.formatDate
 import com.n380.scorecounter.ui.components.formatTime
+import com.n380.scorecounter.ui.components.launchShareIntent
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -722,43 +723,45 @@ fun HomeScreen(
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
                                                 Row {
-                                                    // Logica di Condivisione (Intent)
+                                                    // Logica di Condivisione (Intent) delegata all'Utility
                                                     IconButton(onClick = {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                                                        // ====================================================================
+                                                        // DATA MAPPING DA RECORD STORICO
+                                                        // ====================================================================
+                                                        // Mappiamo la lista dei giocatori estraendo solo Nome e Punteggio
+                                                        val playersData = record.allPlayers.map { Pair(it.name, it.score) }
+
+                                                        // ====================================================================
+                                                        // Invece di cercare variabili esterne inaccessibili, chiediamo
+                                                        // all'oggetto 'record' di calcolare i premi in questo esatto millisecondo.
+                                                        // Essendo dentro 'onClick', questo calcolo avviene SOLO se l'utente
+                                                        // preme il bottone. Zero spreco di RAM quando l'utente scorre la lista!
+                                                        // ====================================================================
+
+                                                        // 1. Chiamiamo la funzione di calcolo 'record.getHistoricalCecchino()'
+                                                        // 2. Se restituisce un dato, '?let' lo "spacchetta"
+                                                        // 3. Creiamo la nostra Pair universale isolando il nome (it.first.name) e i punti (it.second)
+                                                        val mappedCecchino = record.getHistoricalCecchino()?.let { Pair(it.first.name, it.second) }
+                                                        val mappedInarrestabile = record.getHistoricalInarrestabile()?.let { Pair(it.first.name, it.second) }
+                                                        val mappedGambero = record.getHistoricalGambero()?.let { Pair(it.first.name, it.second) }
+                                                        val mappedFenice = record.getHistoricalFenice()?.let { Pair(it.first.name, it.second) }
+
+                                                        // Costruzione delegata del report testuale chiamando il file SharedUtils
+                                                        val shareText = buildMatchShareText(
+                                                            title = record.title,
+                                                            durationSeconds = record.durationSeconds,
+                                                            timestamp = record.timestamp,
+                                                            rankedPlayersData = playersData,
+                                                            cecchinoData = mappedCecchino, // Passiamo i dati appena calcolati!
+                                                            inarrestabileData = mappedInarrestabile,
+                                                            gamberoData = mappedGambero,
+                                                            feniceData = mappedFenice
                                                         )
 
-                                                        var shareText =
-                                                            "🏆 Risultati Storici: ${record.title}\n"
-                                                        if (record.timestamp > 0L) shareText += "📅 Data: ${
-                                                            formatDate(
-                                                                record.timestamp
-                                                            )
-                                                        }\n"
-                                                        if (record.durationSeconds > 0) shareText += "⏱️ Durata: ${
-                                                            formatTime(
-                                                                record.durationSeconds
-                                                            )
-                                                        }\n\n"
-                                                        record.allPlayers.forEachIndexed { index, player ->
-                                                            val medal = when (index) {
-                                                                0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
-                                                            }
-                                                            shareText += "$medal ${player.name} - ${player.score} pt\n"
-                                                        }
-                                                        shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
-
-                                                        val sendIntent = Intent().apply {
-                                                            action = Intent.ACTION_SEND
-                                                            putExtra(Intent.EXTRA_TEXT, shareText)
-                                                            type = "text/plain"
-                                                        }
-                                                        context.startActivity(
-                                                            Intent.createChooser(
-                                                                sendIntent,
-                                                                "Condividi partita"
-                                                            )
-                                                        )
+                                                        // Esecuzione dell'Intent per aprire WhatsApp/Telegram/ecc.
+                                                        launchShareIntent(context, shareText)
                                                     }) {
                                                         Icon(
                                                             Icons.Filled.Share,

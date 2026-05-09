@@ -28,8 +28,10 @@
     import com.n380.scorecounter.ui.components.ConfettiExplosion
     import com.n380.scorecounter.ui.components.PlayerResultCard
     import com.n380.scorecounter.ui.components.ScoreChart
+    import com.n380.scorecounter.ui.components.buildMatchShareText
     import com.n380.scorecounter.ui.components.formatDate
     import com.n380.scorecounter.ui.components.formatTime
+    import com.n380.scorecounter.ui.components.launchShareIntent
     import com.n380.scorecounter.viewmodel.MatchViewModel
 
     // ====================================================================
@@ -172,38 +174,42 @@
                             // ========================================================
                             OutlinedButton(
                                 onClick = {
+                                    // Trigger aptico per la risposta fisica al tocco
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    // --- LA LOGICA DI CONDIVISIONE RIMANE INVARIATA ---
-                                    val finalTitle =
-                                        if (viewModel.matchTitle.isEmpty()) "Sfida Senza Nome" else viewModel.matchTitle
-                                    var shareText = "🏆 Risultati: $finalTitle\n"
-                                    if (viewModel.matchDurationSeconds > 0) shareText += "⏱️ Durata: ${
-                                        formatTime(
-                                            viewModel.matchDurationSeconds
-                                        )
-                                    }\n"
-                                    shareText += "📅 Data: ${formatDate(System.currentTimeMillis())}\n\n"
 
-                                    rankedPlayers.forEachIndexed { index, player ->
-                                        val medal = when (index) {
-                                            0 -> "🥇 1°"; 1 -> "🥈 2°"; 2 -> "🥉 3°"; else -> "${index + 1}°"
-                                        }
-                                        shareText += "$medal ${player.name} - ${player.score} pt\n"
-                                    }
-                                    shareText += "\nGenerato con ScoreCounter 🎮\n© 2026 Creato da Nicola"
+                                    val finalTitle = if (viewModel.matchTitle.isEmpty()) "Sfida Senza Nome" else viewModel.matchTitle
 
-                                    val sendIntent = Intent().apply {
-                                        action = Intent.ACTION_SEND; putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        shareText
-                                    ); type = "text/plain"
-                                    }
-                                    context.startActivity(
-                                        Intent.createChooser(
-                                            sendIntent,
-                                            "Condividi classifica"
-                                        )
+                                    // ====================================================================
+                                    // DATA MAPPING (Mappatura dei Dati)
+                                    // Operazione vitale: La funzione '.map' cicla tutti gli oggetti 'Player'
+                                    // e li converte nella nostra struttura universale Pair(Nome, Punteggio),
+                                    // estraendo solo i dati necessari e scartando il resto (es. i colori).
+                                    // ====================================================================
+                                    val playersData = rankedPlayers.map { Pair(it.name, it.score) }
+
+                                    // Mappatura sicura dei Nullable.
+                                    // 'it' rappresenta la Pair originale restituita dal ViewModel.
+                                    // Riformattiamo creando una nuova Pair contenente solo String e Int.
+                                    val mappedCecchino = cecchinoStat?.let { Pair(it.first.name, it.second) }
+                                    val mappedInarrestabile = inarrestabileStat?.let { Pair(it.first.name, it.second) }
+                                    val mappedGambero = gamberoStat?.let { Pair(it.first.name, it.second) }
+                                    val mappedFenice = feniceStat?.let { Pair(it.first.name, it.second) }
+
+                                    // DELEGA DELL'ELABORAZIONE
+                                    // Invochiamo la nostra utility passando i dati formattati al file ShareUtils.
+                                    val shareText = buildMatchShareText(
+                                        title = finalTitle,
+                                        durationSeconds = viewModel.matchDurationSeconds,
+                                        timestamp = System.currentTimeMillis(), // Timestamp catturato real-time
+                                        rankedPlayersData = playersData,
+                                        cecchinoData = mappedCecchino,
+                                        inarrestabileData = mappedInarrestabile,
+                                        gamberoData = mappedGambero,
+                                        feniceData = mappedFenice
                                     )
+
+                                    // Invocazione del bridge verso il Sistema Operativo
+                                    launchShareIntent(context, shareText)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
