@@ -23,15 +23,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb // Serve per convertire il Colore visivo in un numero da salvare nel Database
+import androidx.compose.ui.graphics.toArgb // Conversione del colore in valore numerico per il salvataggio nel database
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.ColorPickerRow
@@ -44,78 +44,79 @@ import kotlinx.coroutines.launch
 /**
  * ====================================================================
  * SCHERMATA CREAZIONE SFIDA
- * Qui l'utente imposta le regole (nome, traguardo, dado) e aggiunge i giocatori al tavolo.
+ * Definizione dei parametri iniziali (titolo, obiettivo, dado) e gestione dei partecipanti.
  * ====================================================================
  */
-@OptIn(ExperimentalMaterial3Api::class) // Consente l'uso di componenti UI sperimentali come il BottomSheet
+@OptIn(ExperimentalMaterial3Api::class) // Utilizzo di componenti Material 3 in fase sperimentale (BottomSheet)
 @Composable
 fun CreateMatchScreen(
-    viewModel: MatchViewModel, // Il "Cervello" che conserva i dati tra una schermata e l'altra
-    onNavigateToCounter: () -> Unit // La funzione per cambiare pagina
+    viewModel: MatchViewModel, // Riferimento al ViewModel per la gestione persistente dello stato
+    onNavigateToCounter: () -> Unit // Funzione di callback per la navigazione alla schermata successiva
 ) {
-    // ---> STATI DEL GIOCATORE MANUALE <---
+    // STATI LOCALI PER LA CREAZIONE MANUALE DI GIOCATORI
     var newPlayerName by remember { mutableStateOf("") }
 
-    // DIDATTICA: Inizializziamo il selettore con 'Color.Unspecified'.
-    // Questa è una parola d'ordine che in SharedUtils fa disegnare il pallino "Arcobaleno" (colore casuale).
+    // Inizializzazione del selettore cromatico con Color.Unspecified.
+    // Questo valore attiva il disegno del selettore "arcobaleno" per l'assegnazione di un colore casuale.
     var selectedColor by remember { mutableStateOf(Color.Unspecified) }
 
-    // Memorizza quale giocatore l'utente vuole modificare cliccando sull'icona della matita
+    // Memorizzazione temporanea del giocatore selezionato per la modifica tramite l'icona matita
     var playerToEdit by remember { mutableStateOf<Player?>(null) }
 
-    // ---> STATI DEI GIOCATORI RAPIDI (PREFERITI) <---
-    var showFavoritesDialog by remember { mutableStateOf(false) } // Apre/Chiude il pannello inferiore
-    var favToEdit by remember { mutableStateOf<String?>(null) }   // Per rinominare un preferito
+    // STATI PER LA GESTIONE DEI GIOCATORI RAPIDI (PREFERITI)
+    var showFavoritesDialog by remember { mutableStateOf(false) } // Controllo visibilità del pannello inferiore
+    var favToEdit by remember { mutableStateOf<String?>(null) }   // Riferimento per la rinomina di un preferito
 
-    // ---> LOGICA DI SICUREZZA (La porta d'ingresso) <---
-    // canStart diventa VERO (true) solo se il titolo non è vuoto E c'tè almeno un giocatore al tavolo.
+    // LOGICA DI VALIDAZIONE PER L'AVVIO DELLA SFIDA
+    // canStart è vero solo se il titolo non è vuoto e sono presenti giocatori.
     val canStart = viewModel.matchTitle.isNotBlank() && viewModel.players.isNotEmpty()
-    // showError diventa VERO se l'utente è un "furbetto" e prova a cliccare Inizia Sfida senza aver compilato i dati.
+    // Controllo per la visualizzazione di indicatori di errore in caso di campi obbligatori vuoti.
     var showError by remember { mutableStateOf(false) }
 
-    // ---> STATI DEL DADO <---
+    // STATI PER LA CONFIGURAZIONE DEL DADO
     var showDiceSettingsDialog by remember { mutableStateOf(false) }
 
-
-    // ---> IL MOTORE DEL BOTTOM SHEET <---
-    // Ricorda lo stato del pannello che scivola dal basso (se è aperto, mezzo aperto o chiuso)
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    // GESTORE DELLO STATO DEL BOTTOM SHEET
+    // skipPartiallyExpanded impostato su true per disabilitare lo stato di ancoraggio intermedio.
+    // Questo previene instabilità nel rendering (jittering) quando il contenuto è quasi a tutto schermo.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current//evochiamo il controllore della tastiera
-    val focusManager = LocalFocusManager.current // Recuperiamo il gestore del focus, ci serve altrimenti anche se chiudiamo la tastiera la text area rimane sempre su OnFocus (quindi attiva)
 
-    // Scaffold è l'impalcatura della pagina (Sfondo, Contenuto, Barra in basso)
+    // GESTIONE STATI MULTI-LAYER:
+    // Creiamo un host indipendente per le notifiche del Bottom Sheet.
+    // Essendo il Bottom Sheet renderizzato su una "finestra" (Window) di livello
+    // superiore (Z-Index maggiore), le notifiche dello Scaffold base verrebbero coperte.
+    val sheetSnackbarHostState = remember { SnackbarHostState() }
+
+    val coroutineScope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current // Controller per la gestione programmatica della tastiera
+    val focusManager = LocalFocusManager.current // Gestore del focus per la rimozione del cursore attivo dalle aree di testo
+
+    // Struttura principale della pagina (Scaffold)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent, // Permette di vedere la grafica a pattern sullo sfondo!
+        containerColor = Color.Transparent, // Supporto per la visualizzazione del pattern grafico di sfondo
         snackbarHost = { SnackbarHost(snackbarHostState) },
 
-        // ====================================================================
-        // LA BARRA INFERIORE (BottomBar) - Il grande pulsante d'avvio
-        // ====================================================================
+        // BARRA INFERIORE: Pulsante principale di avvio sfida
         bottomBar = {
-            // ---> IL DOCK "EXPRESSIVE" <---
-            // Avvolgiamo il pulsante nella Surface semi-trasparente che abbiamo usato
-            // nelle altre schermate. Questo crea il "cassetto" ancorato al fondo.
             Surface(
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                // Arrotondiamo solo i bordi superiori per un look da "Bottom Sheet"
+                // Arrotondamento dei soli bordi superiori per un look integrato alla base
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .navigationBarsPadding() // Protezione dalla barra di sistema
+                        .navigationBarsPadding() // Protezione dalle occlusioni della barra di navigazione di sistema
                         .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            // La tua logica di sicurezza originale rimane intatta
                             if (canStart) {
                                 onNavigateToCounter()
                             } else {
@@ -124,17 +125,15 @@ fun CreateMatchScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            // Portiamo l'altezza a 72.dp per coerenza con gli altri tasti principali
                             .height(72.dp),
                         shape = RoundedCornerShape(20.dp),
 
-                        // ELEVAZIONE: Si azzera se il pulsante è disabilitato per dare senso di piattezza
+                        // L'elevazione viene azzerata se il pulsante non è cliccabile per coerenza visiva
                         elevation = ButtonDefaults.buttonElevation(
                             defaultElevation = if (canStart) 8.dp else 0.dp
                         ),
 
-                        // LOGICA COLORI (Regola 12%/38%):
-                        // Manteniamo la tua ottima gestione della visibilità condizionale
+                        // Gestione cromatica condizionale basata sullo stato di validazione (Regola 12%/38%)
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (canStart)
                                 MaterialTheme.colorScheme.primaryContainer
@@ -146,7 +145,6 @@ fun CreateMatchScreen(
                                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        // Cambiamo l'icona da 'Add' a 'PlayArrow' per indicare l'avvio
                         Icon(
                             imageVector = Icons.Filled.PlayArrow,
                             contentDescription = "Inizia",
@@ -154,7 +152,6 @@ fun CreateMatchScreen(
                         )
                         Text(
                             text = "Inizia Sfida",
-                            // Usiamo lo stile HeadlineSmall come nel pulsante Home
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -164,17 +161,13 @@ fun CreateMatchScreen(
         }
     ) { innerPadding ->
 
-        // ====================================================================
-        // IL CORPO DELLA SCHERMATA (Lista Scorrevole)
-        // ====================================================================
-        // LazyColumn fa sì che la pagina possa scorrere dall'alto verso il basso.
+        // CONTENUTO SCORREVOLE: Configurazione e aggiunta partecipanti
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
-            //contentPadding = PaddingValues(bottom = 32.dp) // Cuscinetto in fondo prima della BottomBar
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                // ---> IL TITOLO DELLA PAGINA <---
+                
                 Text(
                     text = "Nuova Sfida",
                     style = MaterialTheme.typography.displaySmall,
@@ -183,10 +176,7 @@ fun CreateMatchScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // ==============================================================
-                // --- CARD 1: REGOLE DEL GIOCO ---
-                // ==============================================================
-                // 🧠 TEORIA COMPOSE: Usiamo la Card come contenitore principale.
+                // CARD 1: CONFIGURAZIONE REGOLE
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                     shape = RoundedCornerShape(24.dp),
@@ -195,21 +185,12 @@ fun CreateMatchScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        // ==========================================================
-                        // 🧠 UX: Intestazione Iconica e Bottone Dado
-                        // ==========================================================
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                /*Icon(
-                                    imageVector = Icons.Filled.Settings,
-                                    contentDescription = "Impostazioni Regole",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )*/
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = "Regole del Gioco",
@@ -219,7 +200,7 @@ fun CreateMatchScreen(
                                 )
                             }
 
-                            // ---> IL BOTTONE DEL DADO <---
+                            // Pulsante per le impostazioni del dado
                             OutlinedButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -237,15 +218,12 @@ fun CreateMatchScreen(
                             }
                         }
 
-                        // ==========================================================
-                        // CAMPO DI TESTO: NOME SFIDA
-                        // ==========================================================
+                        // CAMPO: NOME SFIDA
                         OutlinedTextField(
-                            // FIX: Richiamiamo correttamente il viewModel!
                             value = viewModel.matchTitle,
                             onValueChange = {
                                 viewModel.matchTitle = it
-                                if (it.isNotBlank()) showError = false // Spegne l'errore rosso
+                                if (it.isNotBlank()) showError = false 
                             },
                             label = { Text("Nome della sfida") },
                             modifier = Modifier.fillMaxWidth(),
@@ -260,83 +238,36 @@ fun CreateMatchScreen(
                                 val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                                 Icon(Icons.Default.VideogameAsset, null, tint = iconColor)
                             },
-                            // ==========================================================
-                            // UX FIX: CHIUSURA TASTIERA
-                            // ==========================================================
-                            singleLine = true, // Impedisce di andare a capo
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next), // Mostra il tasto "Fatto/Spunta"
-                            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() } // Azione: abbassa la tastiera
-                            )
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
                         )
-                        /**
-                         * ============================================================================
-                         * Le 'ImeAction' (Azioni della tastiera in basso a destra)
-                         * ============================================================================
-                         * L'ImeAction cambia l'icona del tasto di conferma della tastiera Android
-                         * per far capire all'utente cosa succederà premendolo:
-                         *
-                         * 1. ImeAction.Default : Il classico tasto "Invio" (va a capo riga).
-                         * 2. ImeAction.Done    : Mostra "✔️" (Fatto). Significa "Ho finito, chiudi la tastiera".
-                         * 3. ImeAction.Next    : Mostra "➡️" (Avanti). Passa automaticamente al campo di testo successivo.
-                         * 4. ImeAction.Search  : Mostra "🔍" (Cerca). Avvia una ricerca globale.
-                         * 5. ImeAction.Send    : Mostra "✈️" (Invia). Perfetto per le app di messaggistica.
-                         * 6. ImeAction.Go      : Mostra "🚀" (Vai). Esegue l'input immediato (es. aprire un link nel browser).
-                         * 7. ImeAction.Previous: Torna al campo di testo precedente.
-                         * * 👉 Ricorda: per farle funzionare bene, usa quasi sempre 'singleLine = true' nel TextField!
-                         */
 
-
-
-                        // ==========================================================
-                        // CAMPO DI TESTO: TRAGUARDO (Solo Numeri + Chiusura Smart)
-                        // ==========================================================
+                        // CAMPO: TRAGUARDO (Filtro input numerico)
                         OutlinedTextField(
-                            // FIX: Richiamiamo correttamente il viewModel!
                             value = viewModel.targetScore,
                             onValueChange = { newValue ->
-                                // Accetta solo numeri o campo vuoto
                                 if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
                                     viewModel.targetScore = newValue
                                 }
                             },
                             label = { Text("Traguardo (Opzionale)") },
                             modifier = Modifier.fillMaxWidth(),
-                            // ==========================================================
-                            // UX FIX: CHIUSURA TASTIERA
-                            // ==========================================================
-                            singleLine = true, // Impedisce di andare a capo
+                            singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Done,
-                            ), // Mostra il tasto "Fatto/Spunta"
-
-                            // Si attiva il comando quando l'utente preme il tasto spunta
+                            ),
                             keyboardActions = KeyboardActions(
-                                onDone = {
-
-                                    /*Trucco per il futuro non utilizzato qui:
-                                    Esiste il comando:
-                                    keyboardController?.hide() 1.
-                                    Esso nasconde la tastiera fisica quando si preme il pulsante in basso a destra di conferma
-                                    In questo caso non ci serve perchè usando il comando clearFocus Jetpack Compose
-                                    capisce da solo che deve togliere non solo il focus sulla casella ma anche la tastiera aperta.
-                                    Quindi, questo codice potrebbe tornare utile quando bisogna togliere solo la testiera ma non il focus.
-                                    */
-
-                                    // Eseguiamo il comando
-                                    focusManager.clearFocus()  // 2. Togliamo il cursore e il bordo attivo (Focus)
-                                }
+                                onDone = { focusManager.clearFocus() }
                             ),
                             shape = RoundedCornerShape(16.dp),
                             leadingIcon = { Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         )
 
-
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // ==========================================================
-                        // 🧠 UI: SELEZIONE TEMA RAPIDO tramite TonalButton
-                        // ==========================================================
+                        // SELETTORE TEMATICO RAPIDO
                         val isAnimeTheme = viewModel.matchTitle == "Sfida Anime"
                         val isCarteTheme = viewModel.matchTitle == "Sfida Carte"
 
@@ -344,7 +275,6 @@ fun CreateMatchScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Tasto TEMA ANIME
                             FilledTonalButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -355,7 +285,6 @@ fun CreateMatchScreen(
                                 shape = RoundedCornerShape(12.dp),
                                 colors = if (isAnimeTheme) ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
                                 else ButtonDefaults.filledTonalButtonColors(),
-                                // 🧠 FIX VISIBILITÀ: Aggiungiamo un bordo con il colore primario quando il tasto NON è selezionato.
                                 border =  BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             ) {
                                 Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
@@ -363,7 +292,6 @@ fun CreateMatchScreen(
                                 Text("Anime")
                             }
 
-                            // Tasto TEMA CARTE
                             FilledTonalButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -377,7 +305,6 @@ fun CreateMatchScreen(
                                     contentColor = MaterialTheme.colorScheme.onPrimary,
                                 )
                                 else ButtonDefaults.filledTonalButtonColors(),
-                                // 🧠 FIX VISIBILITÀ: Aggiungiamo un bordo con il colore primario quando il tasto NON è selezionato.
                                 border =  BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                             ) {
                                 Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
@@ -388,9 +315,7 @@ fun CreateMatchScreen(
                     }
                 }
 
-                // ====================================================================
-                // --- CARD 2: GESTIONE PARTECIPANTI (Giocatori Rapidi e Manuali) ---
-                // ====================================================================
+                // CARD 2: GESTIONE PARTECIPANTI (Preferiti e Manuali)
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
@@ -399,9 +324,6 @@ fun CreateMatchScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        // ==========================================================
-                        // 🧠 UX: Intestazione con Icona
-                        // ==========================================================
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
                             Icon(Icons.Filled.PersonAddAlt1, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(12.dp))
@@ -413,7 +335,7 @@ fun CreateMatchScreen(
                             )
                         }
 
-                        // --- 1. SEZIONE GIOCATORI RAPIDI (PREFERITI) ---
+                        // SEZIONE GIOCATORI RAPIDI (PREFERITI)
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -424,7 +346,6 @@ fun CreateMatchScreen(
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            // Tasto Ingranaggio per aprire la gestione dei preferiti
                             IconButton(onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 showFavoritesDialog = true
@@ -433,35 +354,19 @@ fun CreateMatchScreen(
                             }
                         }
 
-                        // ==========================================================
-                        // 🧠 UX/UI: GIOCATORI RAPIDI (FilterChips)
-                        // Trasformiamo i vecchi bottoni giganti in "Pillole" eleganti.
-                        // ==========================================================
                         if (viewModel.favoriteNames.isNotEmpty()) {
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxWidth(),
                                 contentPadding = PaddingValues(end = 16.dp)
                             ) {
-                                // FIX: Usiamo 'favoriteNames' dal ViewModel!
                                 items(viewModel.favoriteNames) { fav ->
-                                    // STATE: Controlliamo se è già al tavolo leggendo dal ViewModel
                                     val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
 
-                                    // ==========================================================
-                                    // Dimensione Chip e Doppia Vibrazione
-                                    // ==========================================================
-                                    // 🎓 NUOVA LEZIONE: Dimensione Chip e Vibrazione
-
-                                    // 2. Non scriviamo NESSUN comando di vibrazione (haptic) qui dentro!
-                                    //    Il telefono vibra già da solo quando si preme un Chip.
-                                    //    Scriverlo a mano causava il fastidioso "doppio colpo".
-                                    // ==========================================================
                                     FilterChip(
                                         selected = isAlreadyAtTable,
                                         onClick = {
                                             if (!isAlreadyAtTable) {
-                                                // --- LOGICA AGGIUNTA (GIÀ PRESENTE) ---
                                                 val finalColor = if (selectedColor == Color.Unspecified) {
                                                     val usedColors = viewModel.players.map { it.color }
                                                     val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
@@ -471,30 +376,14 @@ fun CreateMatchScreen(
                                                 }
                                                 viewModel.addPlayer(fav, finalColor.toArgb())
                                             } else {
-                                                // ==========================================================
-                                                // 🧠 FIX DEFINITIVO: VIBRAZIONE INTELLIGENTE (Smart Haptic)
-                                                // ==========================================================
-                                                // Se c'è un solo giocatore al tavolo, sappiamo che l'animazione
-                                                // dell'Empty State annullerà la vibrazione di sistema.
-                                                // Quindi, in questo caso specifico, la forziamo a mano!
+                                                // Feedback tattile attivato solo in caso di rimozione dell'ultimo giocatore
                                                 if (viewModel.players.size == 1) {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 }
-                                                // Se ci sono più giocatori (> 1), NON mettiamo nessun haptic manuale
-                                                // così non si crea la fastidiosa doppia vibrazione.
-
-                                                // Cerchiamo l'oggetto Player corrispondente al nome della chip
                                                 val playerToRemove = viewModel.players.find { it.name.equals(fav, ignoreCase = true) }
-
-                                                // Se lo troviamo, chiamiamo il metodo del viewModel per eliminarlo
-                                                playerToRemove?.let {
-                                                    viewModel.removePlayer(it)
-                                                }
+                                                playerToRemove?.let { viewModel.removePlayer(it) }
                                             }
                                         },
-                                        // Ingrandiamo il riquadro in modo sicuro!
-                                        // 1. Usiamo 'defaultMinSize' per dare al chip un'altezza minima
-                                        //    più grande (48.dp), rendendolo molto più comodo da premere.
                                         modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                                         label = { Text(fav, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) },
                                         shape = RoundedCornerShape(12.dp),
@@ -502,35 +391,29 @@ fun CreateMatchScreen(
                                             selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                             selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                                         ),
-                                        // 🧠 FIX VISIBILITÀ: Forziamo il bordo a prendere il colore primario del sistema.
-                                        // Questo li renderà visibilissimi e super eleganti anche sui temi più scuri!
                                         border = FilterChipDefaults.filterChipBorder(
                                             enabled = true,
                                             selected = isAlreadyAtTable,
-                                            borderColor = MaterialTheme.colorScheme.primary, // <--- ECCO LA MAGIA QUI
-                                            selectedBorderColor = Color.Transparent // Quando è premuto (tutto colorato), togliamo il bordo
+                                            borderColor = MaterialTheme.colorScheme.primary, 
+                                            selectedBorderColor = Color.Transparent 
                                         )
                                     )
-
                                 }
                             }
                         } else {
                             Text("Nessun giocatore rapido salvato.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
 
-                        // --- 2. DIVISORE ---
                         Spacer(modifier = Modifier.height(16.dp))
                         HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // --- 3. SEZIONE INSERIMENTO MANUALE E SCELTA COLORE ---
+                        // SEZIONE AGGIUNTA MANUALE E COLORE
                         Text("Scegli un colore:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
 
-                        // La Tavolozza importata da SharedUtils
                         ColorPickerRow(
                             selectedColor = selectedColor,
                             onColorSelected = { 
-                                // 🧠 UX: Vibrazione di conferma quando si tocca un colore
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 selectedColor = it 
                             },
@@ -538,15 +421,9 @@ fun CreateMatchScreen(
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        // Sotto-titolo 2: Il Nome
-                        // ---> VALUTAZIONE UX: Testo più conciso <---
-                        // Accorciamo la frase per non appesantire la UI, mantenendo lo stile rigorosamente blu (primary)
                         Text("Aggiungi manualmente:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Spacer(modifier = Modifier.height(8.dp)) // Altro piccolo respiro prima di scrivere
-
-                        // Riga dell'inserimento manuale (Testo + Tasto Aggiungi)
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -555,7 +432,7 @@ fun CreateMatchScreen(
                             OutlinedTextField(
                                 value = newPlayerName,
                                 onValueChange = { newPlayerName = it },
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).height(64.dp),
                                 label = { Text("Nome") },
                                 shape = RoundedCornerShape(20.dp),
                                 leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) },
@@ -564,42 +441,28 @@ fun CreateMatchScreen(
                                     keyboardType = KeyboardType.Text,
                                     imeAction = ImeAction.Done,
                                 ),
-                                        keyboardActions = KeyboardActions(
-                                        onDone = {
-                                            // 🧠 UX FIX DEFINITIVO: Usiamo SOLO clearFocus().
-                                            // Togliendo il focus, Android capisce da solo che deve chiudere
-                                            // la tastiera, eseguendo un'unica animazione fluida e perfetta!
-                                            focusManager.clearFocus()
-                                        }
-                                        )
+                                keyboardActions = KeyboardActions(
+                                    onDone = { focusManager.clearFocus() }
+                                )
                             )
 
-
-                            // Verifica di sicurezza (Nomi unici)
                             val isAddPlayerEnabled = newPlayerName.trim().isNotEmpty() && viewModel.players.none { it.name.equals(newPlayerName.trim(), ignoreCase = true) }
 
-                            // 2. PULSANTE AGGIUNGI
                             Button(
                                 onClick = {
                                     if (isAddPlayerEnabled) {
-                                        //haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        // ---> LOGICA MULTICOLOR (Inserimento Manuale) <---
-                                        // Stessa logica di prima: Unspecified = colore a caso.
                                         val finalColor = if (selectedColor == Color.Unspecified) {
                                             playerPalette.random()
                                         } else {
                                             selectedColor
                                         }
-
                                         viewModel.addPlayer(newPlayerName, finalColor.toArgb())
-                                        newPlayerName = "" // Svuota il campo di testo
-
-                                        // Riposizioniamo la selezione sul Pallino Arcobaleno per il prossimo giocatore!
+                                        newPlayerName = "" 
                                         selectedColor = Color.Unspecified
                                     }
                                 },
-                                modifier = Modifier.padding(top = 6.dp).height(63.dp),shape = RoundedCornerShape(20.dp),
-                                // ---> DIDATTICA UX: Bottone "Spento" con la regola del 12% / 38%
+                                modifier = Modifier.height(64.dp),
+                                shape = RoundedCornerShape(20.dp),
                                 border = if (isAddPlayerEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
@@ -610,18 +473,15 @@ fun CreateMatchScreen(
                     }
                 }
 
-                // ====================================================================
-                // --- CARD 3: IL TAVOLO (Chi sta per giocare) ---
-                // ====================================================================
+                // CARD 3: GIOCATORI AL TAVOLO
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), // Padding bottom per staccarlo dalla BottomBar del pulsante Inizia
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), 
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
                     shape = RoundedCornerShape(24.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        // 🧠 UX: Intestazione con Icona + Badge Contatore
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -637,8 +497,6 @@ fun CreateMatchScreen(
 
                             Spacer(modifier = Modifier.weight(1f))
 
-                            // 🧠 COMPONENTE M3: Il Badge!
-                            // Legge la grandezza della lista ufficiale 'viewModel.players'
                             Badge(containerColor = MaterialTheme.colorScheme.primary) {
                                 Text(
                                     text = "${viewModel.players.size}",
@@ -649,11 +507,8 @@ fun CreateMatchScreen(
                             }
                         }
 
-                        // ==========================================================
-                        // 🧠 TEORIA UX/UI: L'EMPTY STATE ("Stato Vuoto")
-                        // ==========================================================
+                        // EMPTY STATE: Visualizzato se la lista dei partecipanti è vuota
                         if (viewModel.players.isEmpty()) {
-                            // La Surface crea un "buco" visivo usando un colore più scuro (surface)
                             Surface(
                                 modifier = Modifier.fillMaxWidth().height(120.dp),
                                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
@@ -671,17 +526,12 @@ fun CreateMatchScreen(
                                 }
                             }
                         } else {
-                            // ==========================================================
-                            // STATO PIENO: Generiamo una riga per ogni giocatore
-                            // 🧠 FIX: Leggiamo direttamente da 'viewModel.players'
-                            // ==========================================================
+                            // Generazione dinamica delle card per ogni partecipante
                             viewModel.players.forEachIndexed { index, player ->
                                 PlayerAtTableCard(
                                     player = player,
                                     isFirst = index == 0,
                                     isLast = index == viewModel.players.size - 1,
-
-                                    // ---> DELEGAZIONE AL VIEWMODEL (State Hoisting) <---
                                     onMoveUp = { viewModel.movePlayer(index, index - 1) },
                                     onMoveDown = { viewModel.movePlayer(index, index + 1) },
                                     onEdit = { playerToEdit = player },
@@ -690,7 +540,6 @@ fun CreateMatchScreen(
                                         val removedPlayer = player
                                         viewModel.removePlayer(player)
 
-                                        // Logica della Snackbar per l'annullamento (Undo)
                                         coroutineScope.launch {
                                             launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
                                             val result = snackbarHostState.showSnackbar(
@@ -702,12 +551,8 @@ fun CreateMatchScreen(
                                                 viewModel.restorePlayer(removedIndex, removedPlayer)
                                             }
                                         }
-                                    },
-                                    /*onColorChange = { newColorArgb ->
-                                        viewModel.updatePlayerColor(player, newColorArgb)
-                                    }*/
+                                    }
                                 )
-                                // Piccolo spazio extra tra una card e l'altra per farle respirare
                                 if (index != viewModel.players.size - 1) {
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
@@ -719,21 +564,13 @@ fun CreateMatchScreen(
         }
     }
 
-    // ====================================================================
-    // I 3 POPUP (Dialogs & BottomSheet)
-    // ====================================================================
-
-
-    // ====================================================================
-    // 1. POPUP UNIFICATO: MODIFICA NOME E COLORE GIOCATORE
-    // ====================================================================
+    // MODALE UNIFICATO: MODIFICA GIOCATORE (Nome e Colore)
     if (playerToEdit != null) {
-        // Inizializzazione dello stato locale per gestire le modifiche senza intaccare il database fino al "Salva"
         var editedName by remember { mutableStateOf(playerToEdit!!.name) }
         var editedColor by remember { mutableIntStateOf(playerToEdit!!.color) }
 
         AlertDialog(
-            onDismissRequest = { playerToEdit = null }, // Chiude il modale se si clicca fuori
+            onDismissRequest = { playerToEdit = null },
             title = {
                 Text(
                     text = "Modifica Giocatore",
@@ -742,84 +579,58 @@ fun CreateMatchScreen(
                 )
             },
             text = {
-                // Column organizza gli elementi in verticale seguendo l'ordine di scrittura
                 Column(modifier = Modifier.fillMaxWidth()) {
-
-                    // Etichetta descrittiva per la sezione colori
                     Text(
                         text = "Scegli un nuovo colore:",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    // 🎨 GRIGLIA COLORI (Spostata in alto e rimpicciolita)
                     LazyVerticalGrid(
-                        // GridCells.Adaptive adatta il numero di colonne alla larghezza disponibile
-                        columns = GridCells.Adaptive(minSize = 35.dp),//con 35.dp faccio distribuire i colori su 2 colonne
-                        horizontalArrangement = Arrangement.spacedBy(12.dp), // Spazio orizzontale tra le icone
-                        verticalArrangement = Arrangement.spacedBy(12.dp),   // Spazio verticale tra le righe
-                        // heightIn imposta un limite massimo di altezza per evitare che la griglia spinga fuori il resto
+                        columns = GridCells.Adaptive(minSize = 35.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier
                             .padding(top = 8.dp, bottom = 20.dp)
                             .heightIn(max = 140.dp)
                     ) {
-                        // Iterazione sulla palette predefinita definita nel ViewModel o nei componenti
                         items(playerPalette) { color ->
-                            // Verifica se il colore corrente è quello attualmente selezionato
                             val isSelected = color.toArgb() == editedColor
 
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp) // Dimensione ridotta per un look più raffinato
-                                    .clip(RoundedCornerShape(12.dp)) // Arrotondamento coerente con lo stile app
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .background(color)
-                                    // Disegna un bordo visibile solo se l'elemento è selezionato (feedback visivo)
                                     .border(
                                         width = if (isSelected) 3.dp else 0.dp,
                                         color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
                                         shape = RoundedCornerShape(12.dp)
                                     )
-                                    // Gestione dell'input: aggiorna lo stato locale e attiva il feedback tattile
-                                    .clickable {
-                                        // 🧠 NOTA TECNICA: RIMOSSA VIBRAZIONE MANUALE
-                                        // Il modificatore .clickable su componenti con forme definite 
-                                        // e bordi attivi può innescare un feedback di sistema. 
-                                        // Rimuovendo la chiamata manuale, evitiamo il "doppio colpo" 
-                                        // mantenendo la risposta nativa del dispositivo.
-                                        editedColor = color.toArgb()
-                                    }
+                                    .clickable { editedColor = color.toArgb() }
                             )
                         }
                     }
 
-                    // CAMPO DI TESTO PER IL NOME (Spostato sotto la griglia)
                     OutlinedTextField(
                         value = editedName,
-                        onValueChange = { editedName = it }, // Aggiorna la stringa temporanea ad ogni digitazione
+                        onValueChange = { editedName = it },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Nuovo nome") },
                         shape = RoundedCornerShape(16.dp),
-                        singleLine = true, // Impedisce la creazione di nuove righe (fondamentale per ImeAction)
+                        singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        // keyboardActions intercetta la pressione del tasto di conferma sulla tastiera
-                        keyboardActions = KeyboardActions(onDone = {
-                            focusManager.clearFocus() // Rimuove il cursore e abbassa la tastiera
-                        })
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                     )
                 }
             },
             confirmButton = {
-                // Row allinea i pulsanti d'azione orizzontalmente
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Pulsante per annullare l'operazione senza salvare i cambiamenti
                     OutlinedButton(
                         onClick = {
-                            // 🧠 NOTA TECNICA: CHIUSURA MODALE
-                            // L'azzeramento di 'playerToEdit' smonta il nodo del Dialog dall'albero 
-                            // della composizione, chiudendo l'interfaccia istantaneamente.
                             playerToEdit = null
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         },
@@ -830,24 +641,16 @@ fun CreateMatchScreen(
                         Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
                     }
 
-                    // Pulsante per confermare e persistere le modifiche nel ViewModel/Database
                     Button(
                         onClick = {
-                            // 🧠 NOTA TECNICA: SALVATAGGIO REATTIVO
-                            // Procediamo al salvataggio solo se il nome non è vuoto. 
-                            // Aggiornando le proprietà dell'oggetto e notificando il ViewModel, 
-                            // inneschiamo la Recomposition della lista sottostante.
                             if (editedName.isNotBlank()) {
-                                // Aggiornamento dei campi dell'oggetto Player originale
                                 playerToEdit!!.name = editedName
                                 viewModel.updatePlayerColor(playerToEdit!!, editedColor)
-
-                                playerToEdit = null // Chiude il modale resettando la variabile di stato
+                                playerToEdit = null
                             }
                         },
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(20.dp),
-                        // Uso di PrimaryContainer per coerenza cromatica con il resto dell'interfaccia
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -857,171 +660,247 @@ fun CreateMatchScreen(
                     }
                 }
             },
-            dismissButton = null, // Disattivato per usare la gestione personalizzata nella Row sopra
-            shape = RoundedCornerShape(24.dp) // Arrotondamento massimo per il contenitore del Dialog
+            dismissButton = null,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 
-    // 2. BOTTOM SHEET: GESTIONE PREFERITI
+    // MODAL BOTTOM SHEET: GESTIONE PREFERITI
     if (showFavoritesDialog) {
         var newFavName by remember { mutableStateOf("") }
-        ModalBottomSheet(onDismissRequest = { showFavoritesDialog = false }, sheetState = sheetState) {
-            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.93f).padding(horizontal = 24.dp).padding(bottom = 32.dp)) {
 
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically)
-                {
-                    Text("Giocatori Rapidi",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        showFavoritesDialog = false }) {
-                        Icon(Icons.Filled.Close, "Chiudi")}
-                }
+        // ====================================================================
+        // Invece di far calcolare al BottomSheet la sua altezza in base al contenuto,
+        // calcoliamo un'altezza statica e assoluta basata sull'hardware del dispositivo.
+        // ====================================================================
 
-                // ==========================================================
-                // RIGA INSERIMENTO NUOVO PREFERITO
-                // 🧠 UI UNIFORMATA: Usiamo la stessa logica di altezza e curvatura
-                // usata nella sezione "Aggiungi manualmente".
-                // ==========================================================
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // 1. Otteniamo l'oggetto Configuration che contiene le specifiche fisiche dello schermo
+        val configuration = LocalConfiguration.current
+        // 2. Estraiamo l'altezza totale dello schermo in Dp (Density-independent Pixels)
+        val screenHeight = configuration.screenHeightDp.dp
+        // 3. Calcoliamo il nostro 85% in modo matematico e lo salviamo in una costante.
+        // Questo numero ora è fisso (es. 720.dp) e non dipende più dai ricalcoli grafici.
+        val maxSheetHeight = screenHeight * 0.80f
+
+        ModalBottomSheet(
+            onDismissRequest = {showFavoritesDialog = false},
+            sheetState = sheetState
+        ) {
+            // 🧠 Z-INDEX ARCHITECTURE: Uso del Box per la sovrapposizione.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Sostituiamo .fillMaxHeight(0.90f) con .height(maxSheetHeight).
+                    // Assegnando un'altezza immutabile, il layout node non ha più bisogno
+                    // di chiedere al genitore quanto spazio ha a disposizione durante lo scroll,
+                    // annullando totalmente il bug di ricalcolo infinito (Jittering).
+                    //.height(maxSheetHeight)
+                    .fillMaxHeight(0.80f)
+            ) {
+                // FOGLIO INFERIORE (Z-Index 0): Il contenuto reale (Testi, input, liste)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 32.dp)
                 ) {
-                    // 1. CAMPO DI TESTO (Nome Rapido)
-                    OutlinedTextField(
-                        value = newFavName,
-                        onValueChange = { newFavName = it },
-                        // 🧠 FIX PROPORZIONI: Copiamo la "quadra" trovata dall'utente.
-                        // Rimuoviamo l'altezza fissa lasciando che il componente respiri.
-                        modifier = Modifier.weight(1f),
-                        label = { Text("Nuovo nome") },
-                        // 🎨 DESIGN: Stondatura a 20.dp per coerenza totale.
-                        shape = RoundedCornerShape(20.dp),
-                        // 🧠 AGGIUNTA ICONA: Inseriamo l'icona della persona per coerenza
-                        leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
-                    )
 
-                    val isAddFavEnabled = newFavName.trim().isNotEmpty() && viewModel.favoriteNames.none { it.equals(newFavName.trim(), ignoreCase = true) }
-
-                    // 2. PULSANTE AGGIUNGI PREFERITO
-                    Button(
-                        onClick = {
-                            if (isAddFavEnabled) {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                viewModel.addFavorite(newFavName.trim())
-                                newFavName = ""
-                            }
-                        },
-                        // 🧠 FIX PROPORZIONI: Copiamo l'altezza di 63.dp e il padding top di 6.dp
-                        modifier = Modifier.padding(top = 6.dp).height(64.dp),
-                        // 🎨 DESIGN: Stondatura a 20.dp.
-                        shape = RoundedCornerShape(20.dp),
-                        border = if (isAddFavEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Giocatori Rapidi",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
                         )
-                    ) { Text("Aggiungi") }
-                }
+                        IconButton(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                showFavoritesDialog = false
+                            }
+                        }) {
+                            Icon(Icons.Filled.Close, "Chiudi")
+                        }
+                    }
+
+                    // INSERIMENTO NUOVO PREFERITO
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        // Allineamento verticale dei centri logici dei componenti "fratelli"
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newFavName,
+                            onValueChange = { newFavName = it },
+                            // GEOMETRIA INTERNA (Risoluzione Disallineamento)
+                            // Abbiamo rimosso '.height(64.dp)'.
+                            // L'OutlinedTextField utilizza una complessa gerarchia di padding interni
+                            // per gestire l'etichetta fluttuante e l'icona. Lasciandolo libero di
+                            // calcolare la propria altezza, assume lo standard Material di 56.dp,
+                            // ripristinando il perfetto allineamento tra Icona e Label.
+                            modifier = Modifier.weight(1f),
+                            // ==========================================================
+                            // Placeholder invece di label = { Text("Nuovo nome") },
+                            // Il 'placeholder' rimane confinato all'interno dei bordi visibili
+                            // e non richiede a Compose di generare "spazio invisibile" in cima.
+                            // Questo riporta l'ingombro logico a coincidere con l'ingombro visivo,
+                            // allineando magicamente il componente al bottone adiacente!
+                            // ==========================================================
+                            placeholder = { Text("Nuovo nome") },
+                            shape = RoundedCornerShape(20.dp),
+                            leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
+                        )
+
+                        val isAddFavEnabled = newFavName.trim().isNotEmpty() && viewModel.favoriteNames.none { it.equals(newFavName.trim(), ignoreCase = true) }
+
+                        Button(
+                            onClick = {
+                                if (isAddFavEnabled) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    viewModel.addFavorite(newFavName.trim())
+                                    newFavName = ""
+                                }
+                            },
+                            modifier = Modifier.height(63.dp),//altezza del bottone "Aggiungi" coerente con l'OutlinedTextField
+                            shape = RoundedCornerShape(20.dp),
+                            border = if (isAddFavEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        ) { Text("Aggiungi") }
+                    }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-
-                // La lista scorrevole dei preferiti nel popup
-                LazyColumn(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-
-                    // Usiamo itemsIndexed per avere sia la posizione (index) che il nome (fav)
-                    itemsIndexed(viewModel.favoriteNames) { index, fav ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                
+                // AREA ELENCO PREFERITI: Struttura a "Tavolo" coerente con il design system dell'app
+                Card(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        itemsIndexed(viewModel.favoriteNames) { index, fav ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                shape = RoundedCornerShape(16.dp)
                             ) {
-                                // ---> SISTEMA DI RIORDINO (IDENTICO AL TAVOLO) <---
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    // Freccia SU
-                                    IconButton(
-                                        onClick = {
-                                            // 🧠 UX: Aggiungiamo un feedback tattile leggero (Medium) per gli spostamenti
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            viewModel.moveFavorite(index, index - 1)
-                                        },
-                                        // Disabilitato se è il primo elemento (non può andare più su di 0)
-                                        enabled = index > 0,
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // SISTEMA DI RIORDINO
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        IconButton(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                viewModel.moveFavorite(index, index - 1)
+                                            },
+                                            enabled = index > 0,
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                                        }
+
+                                        IconButton(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                viewModel.moveFavorite(index, index + 1)
+                                            },
+                                            enabled = index < viewModel.favoriteNames.size - 1,
+                                            modifier = Modifier.size(28.dp)
+                                        ) {
+                                            Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                        }
                                     }
 
-                                    // Freccia GIÙ
-                                    IconButton(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                            viewModel.moveFavorite(index, index + 1)
-                                        },
-                                        // Disabilitato se è l'ultimo elemento della lista
-                                        enabled = index < viewModel.favoriteNames.size - 1,
-                                        modifier = Modifier.size(28.dp)
-                                    ) {
-                                        Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                    // Identificativo testuale in grassetto per risalto visivo
+                                    Text(
+                                        text = fav,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier
+                                            .weight(1f) 
+                                            .padding(start = 12.dp) 
+                                    )
+
+                                    // Gestione modifiche
+                                    IconButton(onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        favToEdit = fav
+                                    }) {
+                                        Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.primary)
                                     }
-                                }
 
-                                // Nome del giocatore preferito
-                                Text(
-                                    text = fav,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier
-                                        .weight(1f) // Occupa tutto lo spazio centrale
-                                        .padding(start = 12.dp) // Lo stacca dalle frecce
-                                )
+                                    // Gestione eliminazione
+                                    IconButton(onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
 
-                                // Tasto Modifica (Matita)
-                                IconButton(onClick = {
-                                    // 🧠 UX: Vibrazione di conferma azione
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    favToEdit = fav
-                                }) {
-                                    Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.primary)
-                                }
+                                        // Salvataggio dei riferimenti puntuali per la closure
+                                        val removedIndex = index
+                                        val removedFav = fav
 
-                                // Tasto Elimina (Cestino)
-                                IconButton(onClick = {
-                                    // 🧠 UX: Vibrazione di conferma azione
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    viewModel.removeFavorite(fav)
-                                }) {
-                                    Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
+                                        // Mutazione dello stato (viene riflessa istantaneamente dalla UI)
+                                        viewModel.removeFavorite(fav)
+
+                                        // 🧠 CONCORRENZA UI: Avvio dell'orchestrazione della notifica modale
+                                        coroutineScope.launch {
+                                            // Chiusura auto-temporizzata di sicurezza
+                                            launch {
+                                                delay(3000L)
+                                                // Utilizziamo lo stato dedicato al Bottom Sheet!
+                                                sheetSnackbarHostState.currentSnackbarData?.dismiss()
+                                            }
+
+                                            // Invocazione bloccante (suspend): attende input dell'utente o timeout
+                                            val result = sheetSnackbarHostState.showSnackbar(
+                                                message = "$fav rimosso dai rapidi",
+                                                actionLabel = "ANNULLA",
+                                                duration = SnackbarDuration.Indefinite
+                                            )
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                viewModel.restoreFavorite(removedIndex, removedFav)
+                                            }
+                                        }
+                                    }) {
+                                        Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                }
+
+
+                // FOGLIO SUPERIORE (Z-Index 1): Il palco per le notifiche (Snackbar)
+                // Posizionandolo alla fine del Box, viene disegnato "Sopra" a tutto il resto.
+                // Lo ancoriamo visivamente in basso e al centro.
+                SnackbarHost(
+                    hostState = sheetSnackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        // Aggiungiamo padding inferiore per non farla incollare ai margini fisici dello schermo
+                        .padding(bottom = 16.dp)
+                )
             }
         }
     }
 
-    // ====================================================================
-    // SOTTO-POPUP: MODIFICA NOME GIOCATORE RAPIDO
-    // 🧠 DESIGN CONSISTENCY: Usiamo lo stesso identico stile del popup
-    // "Modifica Nome" usato per i giocatori al tavolo.
-    // ====================================================================
+    // MODALE MODIFICA NOME PREFERITO
     if (favToEdit != null) {
         var editedFavName by remember { mutableStateOf(favToEdit!!) }
         AlertDialog(
             onDismissRequest = { favToEdit = null },
-            // Aggiungiamo il grassetto al titolo per renderlo più elegante e coerente
             title = {
                 Text("Modifica Nome Rapido",
                     fontWeight = FontWeight.Bold,
@@ -1035,35 +914,27 @@ fun CreateMatchScreen(
                     shape = RoundedCornerShape(16.dp)
                 )
             },
-            // ---> GRAFICA PULSANTI AFFIANCATI <---
-            // Mettiamo tutto dentro confirmButton per forzare la riga al 100% della larghezza
             confirmButton = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp) // Spazio esatto tra i due bottoni
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
-                    // TASTO ANNULLA (Sinistra)
                     OutlinedButton(
                         onClick = {
-                            // 🧠 UX: Vibrazione anche per l'annullamento
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             favToEdit = null
                         },
                         modifier = Modifier
-                            .weight(1f) // 🧠 TEORIA UX: .weight(1f) divide lo spazio a metà esatta col bottone accanto
+                            .weight(1f) 
                             .height(48.dp),
                         shape = RoundedCornerShape(20.dp),
-                        // Usiamo colori neutri per il tasto secondario
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
                         Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
                     }
 
-                    // TASTO SALVA (Destra)
                     Button(
                         onClick = {
-                            // 🧠 UX: Vibrazione di conferma salvataggio
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             if (editedFavName.isNotBlank()) {
                                 viewModel.editFavorite(favToEdit!!, editedFavName.trim())
@@ -1071,10 +942,9 @@ fun CreateMatchScreen(
                             }
                         },
                         modifier = Modifier
-                            .weight(1f) // L'altra metà dello spazio
+                            .weight(1f) 
                             .height(48.dp),
                         shape = RoundedCornerShape(20.dp),
-                        // Usiamo il PrimaryContainer (lo stesso azzurro/blu chiaro del resto dell'app)
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -1084,12 +954,11 @@ fun CreateMatchScreen(
                     }
                 }
             },
-            // Spegniamo il dismissButton nativo perché abbiamo integrato "Annulla" nella Row
             dismissButton = null
         )
     }
 
-    // 3. POPUP: IMPOSTAZIONI DEL DADO (Esternalizzato in DiceComponents.kt)
+    // DIALOG IMPOSTAZIONI DADO
     if (showDiceSettingsDialog) {
         DiceSettingsDialog(
             currentSides = viewModel.diceSides,
