@@ -401,14 +401,15 @@ fun HomeScreen(
                         // -------------------------------------------
                         // IL GARAGE FISSO
                         // -------------------------------------------
-                        // Creiamo un Box che occupa SEMPRE lo stesso spazio verticale.
-                        // 72dp (altezza bottone) + 16dp (margine inferiore) = 88.dp, per evitare che il table si prenda spazio
+                        // Definizione di un Box ad altezza invariabile (72dp) per stabilizzare il layout.
+                        // La rimozione del padding orizzontale in questo livello assicura che il pulsante 
+                        // occupi l'intera larghezza consentita dal contenitore padre (Column), 
+                        // garantendo simmetria geometrica con la schermata CreateMatchScreen.
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(72.dp) // Altezza bloccata: la tabella sopra non "salterà" più
-                                .padding(horizontal = 16.dp),
-                            contentAlignment = Alignment.TopCenter // Il bottone apparirà qui dentro
+                                .height(72.dp), // Altezza bloccata per prevenire oscillazioni del tavolo soprastante
+                            contentAlignment = Alignment.TopCenter // Posizionamento del contenuto al vertice centrale
                         ) {
                         // ====================================================================
                         // IL BOTTONE ANIMATO
