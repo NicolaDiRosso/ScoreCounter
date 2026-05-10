@@ -789,8 +789,7 @@ fun HomeScreen(
 
                                             // Data della partita e pulsanti di Azione (Condividi / Elimina)
                                             Row(
-                                                modifier = Modifier.fillMaxWidth()
-                                                    .padding(top = 8.dp),
+                                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {

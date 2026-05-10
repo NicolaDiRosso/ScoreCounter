@@ -131,7 +131,16 @@ fun CreateMatchScreen(
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            if (canStart) {
+                            
+                            // Controllo diretto dello stato della sorgente dati.
+                            // Invece di affidarsi alla variabile derivata 'canStart' (che dipende dalla Recomposition), 
+                            // si verifica la condizione direttamente sulla lista 'players' del ViewModel nel 
+                            // momento esatto del click. Questo previene race conditions in cui l'utente rimuove 
+                            // l'ultimo giocatore e preme il pulsante di avvio quasi simultaneamente, garantendo 
+                            // che la navigazione avvenga solo se i requisiti sono soddisfatti nell'istante di esecuzione.
+                            val isCurrentStateValid = viewModel.matchTitle.isNotBlank() && viewModel.players.isNotEmpty()
+
+                            if (isCurrentStateValid) {
                                 onNavigateToCounter()
                             } else {
                                 showError = true
