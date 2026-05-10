@@ -21,6 +21,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -71,8 +74,7 @@ fun HomeScreen(
     // CompositionLocal è un meccanismo di Compose per passare dati impliciti attraverso l'albero della UI
     // senza doverli passare manualmente in ogni singola funzione come parametro.
     val haptic = LocalHapticFeedback.current // Fornisce l'accesso al motore di vibrazione hardware.
-    val context =
-        LocalContext.current // Il contesto Android base, necessario per lanciare Intent (es. condivisione).
+    val context = LocalContext.current // Il contesto Android base, necessario per lanciare Intent (es. condivisione).
 
     // SnackbarHostState gestisce la coda dei messaggi a comparsa (Snackbar).
     // remember fa sì che l'oggetto non venga ricreato a ogni ricomposizione della UI.
@@ -108,6 +110,27 @@ fun HomeScreen(
     // Sincronizzazione: ogni volta che expandedMatch riceve una partita, aggiorniamo la cache.
     if (expandedMatch != null) {
         lastMatch = expandedMatch
+    }
+
+    // ====================================================================
+    // Animazione Anti-Crash (Lifecycle Observer)
+    // ====================================================================
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var showNewMatchButton by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // Quando la schermata torna in primo piano, INNESCA L'ANIMAZIONE
+                showNewMatchButton = true
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                // Quando l'utente va via (es. entra nella partita), NASCONDI il bottone
+                // così sarà pronto per essere ri-animato al suo ritorno.
+                showNewMatchButton = false
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     // --------------------------------------------------------------------
@@ -374,32 +397,88 @@ fun HomeScreen(
                         // evitando che risulti "troppo rialzato" rispetto alla base dello schermo.
                         .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onNavigateToCreate()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(72.dp), // Altezza Expressive massiccia (72dp)
-                        shape = RoundedCornerShape(20.dp), // Stondatura interna del bottone (20dp)
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Nuova Sfida",
-                            modifier = Modifier.padding(end = 8.dp).size(28.dp)
-                        )
-                        Text(
-                            text = "Nuova Sfida",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+
+                        // -------------------------------------------
+                        // IL GARAGE FISSO
+                        // -------------------------------------------
+                        // Creiamo un Box che occupa SEMPRE lo stesso spazio verticale.
+                        // 72dp (altezza bottone) + 16dp (margine inferiore) = 88.dp, per evitare che il table si prenda spazio
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp) // Altezza bloccata: la tabella sopra non "salterà" più
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.TopCenter // Il bottone apparirà qui dentro
+                        ) {
+                        // ====================================================================
+                        // IL BOTTONE ANIMATO
+                        // ====================================================================
+                            this@Column.AnimatedVisibility(
+                                // 1. IL TRIGGER:
+                                // Questa variabile Booleana (true/false) decide se il contenuto deve esistere.
+                                // Quando passa da false a true, l'animazione di 'enter' si avvia.
+                                visible = showNewMatchButton,
+
+                                // 2. ANIMAZIONE DI ENTRATA:
+                                enter = slideInVertically(
+                                    // A. SLIDE (Scorrimento):
+                                    // Definiamo da dove deve iniziare il movimento.
+                                    // '{ it }' è una funzione lambda dove 'it' rappresenta l'altezza del componente.
+                                    // Impostandolo a 'it', diciamo: "Inizia a disegnare il bottone esattamente
+                                    // un'altezza intera più in basso rispetto alla sua posizione finale".
+                                    initialOffsetY = { it },
+
+                                    // B. SPECIFICHE:
+                                    // tween (da 'between') definisce come muoversi tra l'inizio e la fine.
+                                    animationSpec = tween(
+                                        durationMillis = 200,            // Durata: 0.2 secondi
+                                        easing = FastOutSlowInEasing     // Curva: accelera subito e rallenta alla fine (molto naturale)
+                                    )
+                                ) + fadeIn(// Usiamo l'operatore '+' per combinare due effetti diversi contemporaneamente.
+                                    // C. DISSOLVENZA:
+                                    // Contemporaneamente allo scorrimento, il bottone passa da trasparente a opaco.
+                                    animationSpec = tween(durationMillis = 200)
+                                ),
+
+                                // 3. ANIMAZIONE DI USCITA (ExitTransition):
+                                // Definiamo cosa succede quando il bottone scompare (es. quando entri nella partita).
+                                exit = slideOutVertically(//slideOutVertically è una funzione nativa di Compose che ordina al componente di "scivolare via" lungo l'asse Y (su o giù).
+                                    targetOffsetY = { it },// Torna giù verso il fondo con { it } che rappresenta l'altezza totale del tuo bottone.
+                                    animationSpec = tween(durationMillis = 200, easing = FastOutLinearInEasing)
+                                ) + fadeOut(//È l'animazione che riduce gradualmente l'opacità (Alpha)
+                                    animationSpec = tween(durationMillis = 200)
+                                )
+                            ) {
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        // Facciamo comunque la pulizia di sicurezza
+                                        viewModel.clearMatch()
+                                        onNavigateToCreate()
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(72.dp),
+                                    shape = RoundedCornerShape(20.dp),
+                                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = null,
+                                        modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                                    )
+                                    Text(
+                                        text = "Nuova Sfida",
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
                 }
             }
         }

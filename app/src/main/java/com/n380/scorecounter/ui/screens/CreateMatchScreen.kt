@@ -446,8 +446,10 @@ fun CreateMatchScreen(
                             OutlinedTextField(
                                 value = newPlayerName,
                                 onValueChange = { newPlayerName = it },
-                                modifier = Modifier.weight(1f).height(64.dp),
-                                label = { Text("Nome") },
+                                modifier = Modifier.weight(1f).height(63.dp),
+                                // Sostituiamo 'label' con 'placeholder' per eliminare il padding
+                                // invisibile superiore e far combaciare l'ingombro logico con quello visivo
+                                placeholder = { Text("Nome") },
                                 shape = RoundedCornerShape(20.dp),
                                 leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) },
                                 singleLine = true,
@@ -475,7 +477,7 @@ fun CreateMatchScreen(
                                         selectedColor = Color.Unspecified
                                     }
                                 },
-                                modifier = Modifier.height(64.dp),
+                                modifier = Modifier.height(63.dp),
                                 shape = RoundedCornerShape(20.dp),
                                 border = if (isAddPlayerEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
                                 colors = ButtonDefaults.buttonColors(
