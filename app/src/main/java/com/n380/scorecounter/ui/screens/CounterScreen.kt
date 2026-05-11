@@ -5,6 +5,7 @@ import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -23,6 +24,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.AlignmentLine
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -276,75 +278,117 @@ fun CounterScreen(
                 .padding(horizontal = 16.dp)
         ) {
 
-            // Intestazione con TITOLO/CRONOMETRO a sinistra e PULSANTE DADO a destra
+            // ====================================================================
+            // 1. RIGA IN ALTO: SOLO IL TITOLO (Libero di espandersi)
+            // ====================================================================
+            Text(
+                text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp) // Diamo un po' di margine dal bordo superiore
+            )
+            // ====================================================================
+            // 2. RIGA STRUMENTI (Subito sotto il titolo)
+            // SINISTRA: Info + Timer <-----> DESTRA: Dado
+            // ====================================================================
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp), // Spazio tra titolo e resto della pagina
+                horizontalArrangement = Arrangement.SpaceBetween, // Spinge i blocchi ai lati opposti
+                verticalAlignment = Alignment.CenterVertically // Allinea tutto perfettamente al centro
             ) {
-                // Raggruppo Titolo, Cronometro e Info in una Colonna per tenerli vicini
-                Column(modifier = Modifier.weight(1f)) {
-                    // Titolo della sfida (Con salvagente se l'utente l'ha lasciato vuoto)
-                    Text(
-                        text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
-                        // Usiamo l'esatto stile gigante della schermata Home e Nuova Partita
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Bold, // Grassetto massiccio
-                        color = MaterialTheme.colorScheme.primary // Lo coloriamo a tema
-                    )
-                    // ---> CRONOMETRO DI PARTITA E INFO <---
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Filled.Timer,
-                            contentDescription = "Tempo di gioco",
-                            modifier = Modifier.size(18.dp).padding(end = 4.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        // Richiamiamo la nostra funzione di supporto per stampare il tempo bello "00:00"
-                        Text(
-                            text = formatTime(viewModel.matchDurationSeconds),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        )
 
-                        // ---> SPOSTATO QUI: L'icona delle Informazioni <---
-                        IconButton(
+                    // Sotto-riga con Info e Timer
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // ALLINEAMENTO VERTICALE: Icona Informazioni
+                        // Rimosso il padding sinistro per allineare l'icona perfettamente al bordo del titolo.
+                        // Utilizzato FilledIconButton con PrimaryContainer per un feedback visivo coerente con il brand.
+                        FilledIconButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                showInfoDialog =
-                                    true // Cambia lo stato a VERO e fa apparire il popup!
+                                showInfoDialog = true
                             },
-                            // Riduciamo la grandezza del bottone invisibile per non sformare la riga del cronometro
-                            modifier = Modifier.padding(start = 4.dp).size(32.dp)
+                            modifier = Modifier.size(32.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
                         ) {
                             Icon(
                                 Icons.Filled.Info,
                                 contentDescription = "Informazioni App",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp) // Icona leggermente più piccola per allinearsi al testo
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        // ---> CRONOMETRO DI PARTITA  <---
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Timer,
+                                contentDescription = "Tempo di gioco",
+                                modifier = Modifier.size(18.dp).padding(end = 4.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = formatTime(viewModel.matchDurationSeconds),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
-                }
 
-                // ---> PULSANTE LANCIA DADO (Dinamico) <---
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // ---> LA MAGIA <---
-                        // Invece di (1..6), usiamo (1..viewModel.diceSides).
-                        // Se hai scelto il D20, calcolerà un numero casuale da 1 a 20!
-                        diceResult = (1..viewModel.diceSides).random()
-                        showDiceDialog = true
-                    },
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    // Cambiamo il testo del bottone per mostrare SEMPRE quale dado stiamo usando (Es. "Lancia D20")
-                    Text("Lancia D${viewModel.diceSides} 🎲")
-                }
-            }
 
+
+                        // --- BLOCCO DESTRO: Pulsante Dado ---
+                        // Implementazione di un OutlinedButton con altezza standardizzata (44.dp) e
+                        // curvatura coerente (20.dp) per armonizzarsi con il resto dei componenti.
+                        // Il bordo sottile in 'outline' indica una priorità inferiore rispetto ai tasti primari.
+                        //OutlinedButton
+
+                        FilledTonalButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                // ---> LA MAGIA <---
+                                // Invece di (1..6), usiamo (1..viewModel.diceSides).
+                                // Se hai scelto il D20, calcolerà un numero casuale da 1 a 20!
+                                diceResult = (1..viewModel.diceSides).random()
+                                showDiceDialog = true
+                            },
+                            modifier = Modifier
+                                .height(50.dp)
+                                // 🧠 RITOCCO OTTICO: Aggiungiamo 4.dp di padding superiore.
+                                // Poiché il testo del titolo è molto grande, ha uno spazio invisibile sopra.
+                                // Con questo padding, il bottone sembrerà perfettamente allineato al testo.
+                                .padding(top = 4.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                            //border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Casino, // L'icona Material perfetta per il dado
+                                contentDescription = "Lancia Dado",
+                                modifier = Modifier
+                                    .size(25.dp)
+                                    .padding(end = 6.dp) // Piccolo spazio tra icona e testo
+                            )
+                            Text(
+                                text = "Dado", //"Lancia D${viewModel.diceSides} 🎲
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
 
             // ---> CALCOLO DELLA CORONA DEL LEADER IN TEMPO REALE <---
             // Per assegnare la corona, dobbiamo sapere chi ha il punteggio più alto in questo esatto millisecondo.
@@ -813,6 +857,7 @@ fun CounterScreen(
     if (showDiceDialog) {
         DiceRollDialog(
             result = diceResult,
+            diceSides = viewModel.diceSides,
             rollCount = diceRollCount, // <-- Passiamo il nuovo parametro
             onRollAgain = {
                 // Genera un nuovo numero casuale e lo salva
@@ -874,7 +919,7 @@ fun CounterScreen(
                         modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
                     )
                     Text(
-                        "Usa il tasto 'Lancia Dado' per decidere chi inizia tra le dispute con amici",
+                        "Usa il tasto 'Dado' per decidere chi inizia tra le dispute con amici",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
