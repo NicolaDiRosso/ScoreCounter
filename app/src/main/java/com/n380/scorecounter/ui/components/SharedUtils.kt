@@ -24,6 +24,7 @@ package com.n380.scorecounter.ui.components
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.Modifier
     import androidx.compose.ui.draw.clip
+    import androidx.compose.ui.draw.drawWithContent
     import androidx.compose.ui.geometry.Offset
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.graphics.Path
@@ -32,6 +33,9 @@ package com.n380.scorecounter.ui.components
     import androidx.compose.ui.graphics.drawscope.Stroke
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
+    import androidx.compose.ui.text.TextStyle
+    import androidx.compose.ui.text.font.FontWeight
+    import androidx.compose.ui.text.style.TextOverflow
     import androidx.compose.ui.unit.dp
     import com.n380.scorecounter.model.PlayerRecord
     import java.text.SimpleDateFormat
@@ -578,4 +582,91 @@ package com.n380.scorecounter.ui.components
         }
         val shareIntent = Intent.createChooser(sendIntent, "Condividi Classifica")
         context.startActivity(shareIntent)
+    }
+
+    // ====================================================================
+    // COMPONENTE CUSTOM: TESTO AUTO-ADATTIVO (Architettura Reattiva Iterativa)
+    // ====================================================================
+    @Composable
+    fun AutoResizedText(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.displaySmall,
+        color: Color = style.color,
+        fontWeight: FontWeight? = style.fontWeight
+    ) {
+
+        // 1. ALLOCAZIONE DELLO STATO TIPOGRAFICO (State Hoisting)
+        // Inizializza un MutableState contenente l'oggetto TextStyle originale.
+        // L'utilizzo di 'remember(text)' agisce come Cache Invalidation Key:
+        // istruisce il framework a distruggere lo stato corrente e a riallocarlo
+        // dal valore iniziale ('style') se e solo se la reference della stringa 'text' muta.
+        var resizedStyle by remember(text) {
+            mutableStateOf(style)
+        }
+
+        // 2. SEMAFORO DI RENDERING (Deferred Painting)
+        // Variabile di stato booleana che funge da gatekeeper per l'invio dei pixel alla GPU.
+        // Viene inizializzata a 'false' per impedire il rendering del componente
+        // finché l'algoritmo di misurazione non raggiunge la convergenza matematica.
+        var readyToDraw by remember {
+            mutableStateOf(false)
+        }
+
+        Text(
+            text = text,
+
+            // 3. INTERCETTAZIONE DELLA DRAW PHASE
+            // Il modificatore drawWithContent si inserisce nell'ultima fase del ciclo
+            // di rendering (Composition -> Layout -> Draw).
+            // Se 'readyToDraw' è false, il componente occupa spazio computazionale
+            // (permettendo i calcoli metrici) ma non esegue 'drawContent()',
+            // evitando il fenomeno del flickering (sfarfallio a schermo).
+            modifier = modifier.drawWithContent {
+                if (readyToDraw) {
+                    drawContent()
+                }
+            },
+
+            // Assegnazione dinamica dello stile. Essendo legata a uno State,
+            // ogni sua mutazione forzerà la Ricomposizione (Recomposition) di questo nodo.
+            style = resizedStyle,
+            color = color,
+            fontWeight = fontWeight,
+
+            // 4. VINCOLI SPAZIALI (Constraints)
+            // softWrap = false inibisce la segmentazione automatica delle stringhe (line-wrapping).
+            // maxLines = 1 obbliga l'engine a generare un singolo vettore orizzontale.
+            // Questi due parametri sono necessari per forzare la collisione con il Bounding Box genitore.
+            softWrap = false,
+            maxLines = 1,
+
+            // 5. OBSERVER DELLA LAYOUT PHASE (Motore Iterativo)
+            // Callback asincrona triggerata al termine del calcolo degli ingombri da parte del motore Skia.(motore grafico di Android)
+            onTextLayout = { result ->
+
+                // Valutazione della metrica di collisione spaziale.
+                // Si usa hasVisualOverflow che è una variabile booleana appartenente alla classe TextLayoutResult
+                // Se la dimensione orizzontale calcolata eccede il maxWidth allocato dal parent:
+                if (result.hasVisualOverflow) {
+
+                    // Mutazione di stato.
+                    // Sovrascrive l'oggetto resizedStyle clonandolo tramite .copy() e applicando
+                    // un fattore di degradazione del 5% (0.95) al fontSize corrente.
+                    // Questa assegnazione invalida lo stato e innesca immediatamente una nuova
+                    // Ricomposizione del componente Text, creando un loop ricorsivo invisibile all'utente.
+                    resizedStyle = resizedStyle.copy(
+                        fontSize = resizedStyle.fontSize * 0.95
+                    )
+
+                } else {
+
+                    // Condizione di uscita dal loop (Convergenza dell'Algoritmo).
+                    // Il testo rientra matematicamente nei vincoli imposti.
+                    // La mutazione di 'readyToDraw' innesca l'ultima Ricomposizione,
+                    // aprendo il gatekeeper nel drawWithContent e permettendo il flushing dei pixel a schermo.
+                    readyToDraw = true
+                }
+            }
+        )
     }

@@ -1,6 +1,7 @@
 package com.n380.scorecounter.ui.screens
 
 import android.app.Activity
+import com.n380.scorecounter.ui.components.AutoResizedText
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -237,8 +238,9 @@ fun CounterScreen(
                         shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
                         border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
                     ) {
-                        Text(
+                        AutoResizedText(
                             text = "Azzera",
+                            // Utilizziamo lo stile titleLarge (Proprietà di MaterialTheme)
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -263,7 +265,7 @@ fun CounterScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     ) {
-                        Text(
+                        AutoResizedText(
                             text = "Fine Match",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
@@ -279,16 +281,19 @@ fun CounterScreen(
         ) {
 
             // ====================================================================
-            // 1. RIGA IN ALTO: SOLO IL TITOLO (Libero di espandersi)
+            // 1. RIGA IN ALTO: SOLO IL TITOLO (Auto-Adattivo)
             // ====================================================================
-            Text(
+            // Sostituito "Text" normale con il nostro nuovo "AutoResizedText".
+            // Ora, se inserisci un titolo chilometrico, si restringerà automaticamente
+            // pur di rimanere su una singola riga pulita!
+            AutoResizedText(
                 text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp) // Diamo un po' di margine dal bordo superiore
+                    .padding(top = 16.dp)
             )
             // ====================================================================
             // 2. RIGA STRUMENTI (Subito sotto il titolo)
@@ -939,6 +944,5 @@ fun CounterScreen(
         )
     }
 }
-
 
 
