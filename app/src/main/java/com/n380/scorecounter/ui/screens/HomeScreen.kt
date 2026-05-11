@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.getHistoricalCecchino
@@ -639,10 +640,32 @@ fun HomeScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+                                        // COMPONENTE: Testo del Titolo
                                         Text(
+                                            // PROPRIETÀ: La stringa letta dal database
                                             text = record.title,
                                             style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
+
+                                            // LOGICA DI STATO PER L'ESPANSIONE:
+                                            // 'expanded' è una Variabile Booleana di Stato (MutableState).
+                                            // Se la card è aperta (true), assegniamo la Costante 'Int.MAX_VALUE' (Spazio infinito).
+                                            // Se la card è chiusa (false), limitiamo rigorosamente l'altezza a 1 singola riga.
+                                            maxLines = if (expanded) Int.MAX_VALUE else 1,
+
+                                            // PROPRIETÀ ENUM: TextOverflow
+                                            // Istruisce il motore grafico ad applicare i tre puntini (...)
+                                            // qualora il testo superi il limite imposto da maxLines.
+                                            overflow = TextOverflow.Ellipsis,
+
+                                            // MODIFICATORE: weight(1f)
+                                            // Fondamentale! Impone al Titolo di calcolare prima lo spazio occupato
+                                            // dal cronometro a destra, e poi di occupare SOLO lo spazio rimanente,
+                                            // impedendo al testo di spingere il timer fuori dallo schermo.
+                                            // Aggiungiamo padding(end = 12.dp) per non far incollare i tre puntini all'orologio.
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 12.dp)
                                         )
 
                                         if (record.durationSeconds > 0) {
@@ -982,7 +1005,7 @@ fun HomeScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                Text(
+                                AutoResizedText(
                                     text = match.title,
                                     style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
                                     fontWeight = FontWeight.Bold,

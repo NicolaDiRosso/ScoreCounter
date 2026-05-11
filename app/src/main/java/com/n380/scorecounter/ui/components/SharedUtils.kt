@@ -419,7 +419,7 @@ package com.n380.scorecounter.ui.components
     val playerPalette = listOf(
         Color(0xFFE53935), Color(0xFFD81B60), Color(0xFF8E24AA), Color(0xFF5E35B1),
         Color(0xFF1E88E5), Color(0xFF039BE5), Color(0xFF00ACC1), Color(0xFF00897B),
-        Color(0xFF43A047), Color(0xF5BD9813), Color(0xFFFB8C00), Color(0xFFF4511E)
+        Color(0xFF43A047), Color(0xFFD5C236), Color(0xFFFB8C00), Color(0xFFF4511E)
     )
 
     /**
