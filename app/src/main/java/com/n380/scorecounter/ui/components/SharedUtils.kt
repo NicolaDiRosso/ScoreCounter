@@ -35,7 +35,6 @@ package com.n380.scorecounter.ui.components
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
     import androidx.compose.ui.text.TextStyle
     import androidx.compose.ui.text.font.FontWeight
-    import androidx.compose.ui.text.style.TextOverflow
     import androidx.compose.ui.unit.dp
     import com.n380.scorecounter.model.PlayerRecord
     import java.text.SimpleDateFormat
@@ -420,7 +419,7 @@ package com.n380.scorecounter.ui.components
     val playerPalette = listOf(
         Color(0xFFE53935), Color(0xFFD81B60), Color(0xFF8E24AA), Color(0xFF5E35B1),
         Color(0xFF1E88E5), Color(0xFF039BE5), Color(0xFF00ACC1), Color(0xFF00897B),
-        Color(0xFF43A047), Color(0xFFFDD835), Color(0xFFFB8C00), Color(0xFFF4511E)
+        Color(0xFF43A047), Color(0xF5BD9813), Color(0xFFFB8C00), Color(0xFFF4511E)
     )
 
     /**
@@ -596,13 +595,19 @@ package com.n380.scorecounter.ui.components
         fontWeight: FontWeight? = style.fontWeight
     ) {
 
-        // 1. ALLOCAZIONE DELLO STATO TIPOGRAFICO (State Hoisting)
-        // Inizializza un MutableState contenente l'oggetto TextStyle originale.
-        // L'utilizzo di 'remember(text)' agisce come Cache Invalidation Key:
-        // istruisce il framework a distruggere lo stato corrente e a riallocarlo
-        // dal valore iniziale ('style') se e solo se la reference della stringa 'text' muta.
+        /// 1. ALLOCAZIONE DELLO STATO TIPOGRAFICO CON NEUTRALIZZAZIONE LINE-HEIGHT
+        // Inizializza un MutableState (Oggetto per la gestione reattiva della memoria).
         var resizedStyle by remember(text) {
-            mutableStateOf(style)
+            // La funzione .copy() della classe TextStyle permette di sovrascrivere parametri specifici.
+            // Assegnando la Costante 'TextUnit.Unspecified' alla Proprietà 'lineHeight',
+            // annulliamo i vincoli verticali rigidi del Material Design.
+            // In questo modo, l'ingombro sull'asse Y scalerà proporzionalmente alla Proprietà 'fontSize',
+            // scongiurando l'overflow verticale irreversibile.
+            mutableStateOf(
+                style.copy(
+                    lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified
+                )
+            )
         }
 
         // 2. SEMAFORO DI RENDERING (Deferred Painting)

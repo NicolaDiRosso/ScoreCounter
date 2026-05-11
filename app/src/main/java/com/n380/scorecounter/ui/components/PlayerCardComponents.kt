@@ -118,13 +118,13 @@
                     }
 
                     // 2. IL NOME DEL GIOCATORE
-                    Text(
+                    AutoResizedText(
                         text = player.name,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface, // Testo dello stesso colore della barra laterale!
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        //maxLines = 1,
+                        //overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f).padding(start = 8.dp)
                     )
 
@@ -146,66 +146,6 @@
                 }
             }
         }
-
-        /* LAYER MODALE: POPUP SCELTA COLORE
-        if (showColorPalette) {
-            AlertDialog(
-                onDismissRequest = { showColorPalette = false },
-                title = {
-                    Text(
-                        text = "Colore per ${player.name}",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                text = {
-                    // ---> MODIFICA 1: LA GRIGLIA INTELLIGENTE <---
-                    // Usiamo LazyVerticalGrid per creare una scacchiera di colori
-                    LazyVerticalGrid(
-                        // Adaptive(48.dp): Calcola in automatico quante palline larghe 48dp
-                        // riescono a stare in una riga in base alla larghezza dello schermo.
-                        columns = GridCells.Adaptive(minSize = 48.dp),
-                        // Spazio verticale e orizzontale tra un pallino e l'altro
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        // Mettiamo un limite di altezza, così se hai 30 colori la finestra
-                        // non esce fuori dallo schermo ma diventa scorrevole internamente.
-                        modifier = Modifier.padding(top = 16.dp).heightIn(max = 250.dp)
-                    ) {
-                        // Generiamo i pallini
-                        items(playerPalette) { color ->
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp) // Leggermente più grandi di prima per un tap più facile
-                                    .clip(RoundedCornerShape(20.dp))//// Applicando 20.dp manteniamo la coerenza esatta con la tavolozza principale
-                                    .background(color)
-                                    .clickable {
-                                        onColorChange(color.toArgb())
-                                        showColorPalette = false
-                                    }
-                            )
-                        }
-                    }
-                },
-                // ---> MODIFICA 2: IL VERO BOTTONE <---
-                // Spostiamo il bottone nel parametro 'confirmButton'
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showColorPalette = false
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth() // Si allarga per tutta la base del popup
-                            .height(48.dp), // Altezza comoda da premere
-                        shape = RoundedCornerShape(20.dp) // La tua stondatura classica!
-                    ) {
-                        Text("Chiudi", fontWeight = FontWeight.Bold)
-                    }
-                },
-                // Diciamo ad Android di non usare il bottone secondario invisibile
-                dismissButton = null
-            )
-        }*/
     }
 
 
@@ -265,14 +205,14 @@
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f).padding(end = 8.dp)
                     ) {
-                        Text(
+                        AutoResizedText(
                             text = player.name,
                             // ---> MODIFICA 1: Font del nome ridotto da headlineSmall a titleLarge <---
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                            //maxLines = 1,
+                            //overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
                         )
 

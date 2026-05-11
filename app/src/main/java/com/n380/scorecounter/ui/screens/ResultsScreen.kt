@@ -24,6 +24,7 @@
     import androidx.compose.foundation.verticalScroll
     import androidx.compose.material.icons.filled.Info
     import com.n380.scorecounter.model.PlayerRecord
+    import com.n380.scorecounter.ui.components.AutoResizedText
     import com.n380.scorecounter.ui.components.AwardCard
     import com.n380.scorecounter.ui.components.ConfettiExplosion
     import com.n380.scorecounter.ui.components.PlayerResultCard
@@ -227,7 +228,8 @@
                                     modifier = Modifier.padding(end = 8.dp)
                                         .size(28.dp) // Icona leggermente ingrandita
                                 )
-                                Text(
+                                // 🧠 UI REFINEMENT: Testo pulsante adattivo
+                                AutoResizedText(
                                     text = "Condividi Risultati",
                                     style = MaterialTheme.typography.titleLarge, // Aumentato a titleLarge
                                     fontWeight = FontWeight.Bold
@@ -264,7 +266,8 @@
                                     contentDescription = "Home",
                                     modifier = Modifier.padding(end = 8.dp).size(28.dp)
                                 )
-                                Text(
+                                // 🧠 UI REFINEMENT: Testo pulsante adattivo
+                                AutoResizedText(
                                     // Ho abbreviato leggermente il testo per non farlo sbordare
                                     // ora che c'è l'icona, mantenendo però il significato intatto
                                     text = "Salva e chiudi",
@@ -291,14 +294,16 @@
                             .padding(top = 16.dp, bottom = 10.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
+                        // 🧠 UI REFINEMENT: Titolo pagina adattivo
+                        AutoResizedText(
                             text = if (viewModel.matchTitle.isEmpty()) "Sfida" else viewModel.matchTitle,
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (viewModel.matchDurationSeconds > 0) {
-                            Text(
+                            // 🧠 UI REFINEMENT: Testo timer adattivo
+                            AutoResizedText(
                                 text = "⏱️ Tempo di gioco: ${formatTime(viewModel.matchDurationSeconds)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.primary
@@ -360,7 +365,8 @@
                                         .fillMaxWidth()
                                         .padding(horizontal = 4.dp)
                                 ) {
-                                    Text(
+                                    // 🧠 UI REFINEMENT: Titolo sezione adattivo
+                                    AutoResizedText(
                                         text = "Andamento Partita",
                                         style = MaterialTheme.typography.titleMedium, // Più discreto rispetto alla classifica
                                         fontWeight = FontWeight.Bold,
@@ -422,7 +428,8 @@
                                             )
                                         }
 
-                                        Text(
+                                        // 🧠 UI REFINEMENT: Titolo sezione adattivo
+                                        AutoResizedText(
                                             text = "Premi Partita",
                                             // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
                                             style = MaterialTheme.typography.titleMedium,
@@ -576,9 +583,10 @@
                                     showAwardsInfoDialog =
                                         false // Chiude il popup quando si preme il bottone
                                 },
+                                Modifier.height(48.dp),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
-                                Text("Ho capito")
+                                Text("Ho capito",fontWeight = FontWeight.Bold,)
                             }
                         }
                     )

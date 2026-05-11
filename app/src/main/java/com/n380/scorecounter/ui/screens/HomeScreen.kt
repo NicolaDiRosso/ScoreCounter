@@ -43,6 +43,7 @@ import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.AwardCard
 import com.n380.scorecounter.ui.components.PatternedBackground
 import com.n380.scorecounter.ui.components.ScoreChart
@@ -173,7 +174,7 @@ fun HomeScreen(
             },
 
             title = {
-                Text(
+                AutoResizedText(
                     text = "Partita in sospeso",
                     fontWeight = FontWeight.Bold
                 )
@@ -221,7 +222,7 @@ fun HomeScreen(
                             MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text(text = "Cancella")
+                        AutoResizedText(text = "Cancella",fontWeight = FontWeight.Bold,)
                     }
 
                     // AZIONE PRIMARIA / COSTRUTTIVA
@@ -239,7 +240,7 @@ fun HomeScreen(
                             .height(48.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        Text(
+                        AutoResizedText(
                             text = "Riprendi",
                             fontWeight = FontWeight.Bold
                         )
