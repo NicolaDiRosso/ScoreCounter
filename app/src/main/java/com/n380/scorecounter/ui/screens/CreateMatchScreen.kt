@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.model.Player
+import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.ColorPickerRow
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.playerPalette
@@ -77,6 +78,10 @@ fun CreateMatchScreen(
     val canStart = viewModel.matchTitle.isNotBlank() && viewModel.players.isNotEmpty()
     // Controllo per la visualizzazione di indicatori di errore in caso di campi obbligatori vuoti.
     var showError by remember { mutableStateOf(false) }
+
+    // BLOCCO ANTI-CRASH (State Lock)
+    // Variabile di Stato Booleana: funge da lucchetto per prevenire le Condizioni di Corsa (Race Conditions).
+    var isNavigating by remember { mutableStateOf(false) }
 
     // STATI: CONFIGURAZIONE DADO
     var showDiceSettingsDialog by remember { mutableStateOf(false) }
@@ -129,21 +134,42 @@ fun CreateMatchScreen(
                         .padding(horizontal = 16.dp, vertical = 16.dp)
                 ) {
                     Button(
+                        // Proprietà Lambda: Eseguita al tocco del pulsante "Inizia Sfida"
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            
-                            // Controllo diretto dello stato della sorgente dati.
-                            // Invece di affidarsi alla variabile derivata 'canStart' (che dipende dalla Recomposition), 
-                            // si verifica la condizione direttamente sulla lista 'players' del ViewModel nel 
-                            // momento esatto del click. Questo previene race conditions in cui l'utente rimuove 
-                            // l'ultimo giocatore e preme il pulsante di avvio quasi simultaneamente, garantendo 
-                            // che la navigazione avvenga solo se i requisiti sono soddisfatti nell'istante di esecuzione.
-                            val isCurrentStateValid = viewModel.matchTitle.isNotBlank() && viewModel.players.isNotEmpty()
+                            // 1. CONTROLLO LUCCHETTO
+                            // Costrutto Logico: Se isNavigating è true, interrompe istantaneamente la funzione.
+                            if (isNavigating) return@Button
 
-                            if (isCurrentStateValid) {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+
+                            // 2. LETTURA STATO ATTUALE
+                            val isTitleValid = viewModel.matchTitle.isNotBlank()
+                            val arePlayersPresent = viewModel.players.isNotEmpty()
+
+                            // 3. DECISIONE (Bivio Logico)
+                            if (isTitleValid && arePlayersPresent) {
+                                // CHIUSURA LUCCHETTO: Sigilliamo l'app per prevenire Race Conditions
+                                isNavigating = true
                                 onNavigateToCounter()
                             } else {
+                                // ATTIVAZIONE ALLARMI VISIVI (Colora i bordi di rosso)
                                 showError = true
+
+                                // Variabile Locale: Determina il messaggio tramite l'Espressione Condizionale 'when'
+                                val errorMessage = when {
+                                    !isTitleValid && !arePlayersPresent -> "Inserisci un titolo e almeno un giocatore."
+                                    !isTitleValid -> "Inserisci il nome della sfida."
+                                    else -> "Il tavolo è vuoto! Aggiungi un giocatore."
+                                }
+
+                                // Esecuzione Asincrona: Mostra la notifica a comparsa (Snackbar)
+                                coroutineScope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(
+                                        message = errorMessage,
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
                             }
                         },
                         modifier = Modifier
@@ -500,7 +526,7 @@ fun CreateMatchScreen(
 
                 // SEZIONE 3: TAVOLO PARTECIPANTI (Elenco Attivo)
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), 
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
                     shape = RoundedCornerShape(24.dp),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
@@ -546,8 +572,8 @@ fun CreateMatchScreen(
                                 ) {
                                     Icon(Icons.Filled.PersonAdd, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(36.dp))
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text("Il tavolo è vuoto!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
-                                    Text("Aggiungi giocatori per iniziare la sfida.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f))
+                                    AutoResizedText("Il tavolo è vuoto!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
+                                    AutoResizedText("Aggiungi giocatori per iniziare la sfida.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f))
                                 }
                             }
                         } else {
@@ -560,20 +586,26 @@ fun CreateMatchScreen(
                                     onMoveUp = { viewModel.movePlayer(index, index - 1) },
                                     onMoveDown = { viewModel.movePlayer(index, index + 1) },
                                     onEdit = { playerToEdit = player },
+                                    // Proprietà Lambda (Callback): Eseguita quando l'utente tocca il cestino
                                     onRemove = {
-                                        val removedIndex = index
-                                        val removedPlayer = player
-                                        viewModel.removePlayer(player)
+                                        // Costrutto Logico (Guard Statement):
+                                        // Blocca l'esecuzione se l'app sta già cambiando pagina
+                                        if (!isNavigating) {
+                                            val removedIndex = index
+                                            val removedPlayer = player
+                                            // Metodo della Classe MatchViewModel: Elimina il dato dalla memoria
+                                            viewModel.removePlayer(player)
 
-                                        coroutineScope.launch {
-                                            launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
-                                            val result = snackbarHostState.showSnackbar(
-                                                "${player.name} rimosso",
-                                                "ANNULLA",
-                                                duration = SnackbarDuration.Indefinite
-                                            )
-                                            if (result == SnackbarResult.ActionPerformed) {
-                                                viewModel.restorePlayer(removedIndex, removedPlayer)
+                                            coroutineScope.launch {
+                                                launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
+                                                val result = snackbarHostState.showSnackbar(
+                                                    "${player.name} rimosso",
+                                                    "ANNULLA",
+                                                    duration = SnackbarDuration.Indefinite
+                                                )
+                                                if (result == SnackbarResult.ActionPerformed) {
+                                                    viewModel.restorePlayer(removedIndex, removedPlayer)
+                                                }
                                             }
                                         }
                                     }
