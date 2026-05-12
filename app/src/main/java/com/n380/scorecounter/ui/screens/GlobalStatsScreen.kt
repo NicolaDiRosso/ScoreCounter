@@ -916,7 +916,7 @@ fun GlobalStatsScreen(
                                         }
                                     } else {
                                         Text(
-                                            "Nessuno ha ancora scatenato l'inferno.",
+                                            "È il giocatore che ha accumulato il maggior numero di combo 'On Fire' totali.\nAttualmente nessuno ha ancora scatenato l'inferno.",
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }

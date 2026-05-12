@@ -86,6 +86,12 @@ fun HomeScreen(
     // legati al ciclo di vita di questa schermata. Se la schermata muore, i processi si fermano.
     val coroutineScope = rememberCoroutineScope()
 
+    // PROPRIETÀ: Formattatore per l'ora (HH:mm -> es. 14:30)
+    // Utilizziamo la Classe SimpleDateFormat
+    val timeFormatter = remember {
+        java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+    }
+
     // --------------------------------------------------------------------
     // GESTIONE DELLO STATO (STATE MANAGEMENT)
     // --------------------------------------------------------------------
@@ -818,14 +824,45 @@ fun HomeScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(
-                                                    text = if (record.timestamp > 0L) formatDate(
-                                                        record.timestamp
-                                                    ) else "",
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                Row {
+                                                // ==========================================================
+                                                // 1. BLOCCO SINISTRO: ORA E DATA (Raggruppati in una Row)
+                                                // ==========================================================
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    // MODIFICATORE CHIAVE: weight(1f) protegge le icone a destra
+                                                    // limitando l'espansione di questo blocco di testo.
+                                                    modifier = Modifier.weight(1f).padding(end = 12.dp)
+                                                ) {
+                                                    // ==========================================================
+                                                    // 1. BLOCCO SINISTRO: UNICO TESTO PER ORA E DATA
+                                                    // ==========================================================
+                                                    // COMPONENTE CUSTOM: AutoResizedText
+                                                    AutoResizedText(
+                                                        // PROPRIETÀ text: Usiamo l'interpolazione ${} per eseguire entrambe le funzioni
+                                                        // (formattazione dell'ora e formattazione della data) dentro la stessa stringa.
+                                                        text = "Alle ${timeFormatter.format(java.util.Date(record.timestamp))} del ${if (record.timestamp > 0L) formatDate(record.timestamp) else ""}",
+
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+
+                                                        // MODIFICATORE: Essendo l'unico elemento a sinistra, gli diamo il weight(1f)
+                                                        // per occupare tutto lo spazio libero, e un padding per tenerlo staccato dalle icone.
+                                                        modifier = Modifier.weight(1f).padding(end = 12.dp)
+                                                    )
+                                                }
+
+                                                // ==========================================================
+                                                // 2. BLOCCO DESTRO: ICONE CONDIVIDI ED ELIMINA
+                                                // ==========================================================
+                                                // Essendo senza "weight", questa Row prende solo i pixel
+                                                // strettamente necessari per disegnare le due icone affiancate.
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    // PROPRIETÀ: distanzia leggermente le due icone tra di loro
+                                                    // per non farle sembrare un unico blocco.
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+
                                                     // Logica di Condivisione (Intent) delegata all'Utility
                                                     IconButton(onClick = {
                                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)

@@ -634,7 +634,7 @@ fun CounterScreen(
                         shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        AutoResizedText("Annulla", color = MaterialTheme.colorScheme.onSurface,fontWeight = FontWeight.Bold,)
+                        AutoResizedText("Annulla", style = MaterialTheme.typography.labelLarge,color = MaterialTheme.colorScheme.onSurface,fontWeight = FontWeight.Bold,)
                     }
 
                     // Filled Button è usato per l'azione primaria e affermativa (Confirm/Salva).
@@ -744,7 +744,7 @@ fun CounterScreen(
                         // 20.dp è un raggio molto alto, creando il tipico effetto a "pillola".
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        AutoResizedText(text = "Annulla",fontWeight = FontWeight.Bold,)
+                        AutoResizedText(text = "Annulla",style = MaterialTheme.typography.labelLarge,fontWeight = FontWeight.Bold,)
                     }
 
                     // Button è il pulsante pieno (Filled) standard. Indica l'azione primaria.
@@ -774,6 +774,7 @@ fun CounterScreen(
                     ) {
                         AutoResizedText(
                             text = "Sì, azzera",
+                            style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -830,7 +831,7 @@ fun CounterScreen(
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
-                        AutoResizedText("Annulla",fontWeight = FontWeight.Bold,)
+                        AutoResizedText("Annulla",style = MaterialTheme.typography.labelLarge,fontWeight = FontWeight.Bold,)
                     }
 
                     Button(
@@ -850,6 +851,7 @@ fun CounterScreen(
                     ) {
                         AutoResizedText(
                             text = "Sì, esci",
+                            style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }

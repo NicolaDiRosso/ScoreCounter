@@ -78,6 +78,14 @@
         // In questo modo, l'animazione partirà all'istante in cui compare la grafica.
         var showConfetti by remember { mutableStateOf(true) }
 
+        // ====================================================================
+        // PREVENZIONE DOPPIO CLICK (Debounce)
+        // ====================================================================
+        // TEORIA COMPOSE: 'remember' dice a Compose di non dimenticarsi questo valore
+        // quando la UI si ricarica (Recomposition). 'mutableStateOf' crea un contenitore
+        // reattivo. Parte da 'false' (non ho ancora cliccato).
+        var isClosing by remember { mutableStateOf(false) }
+
         // ======================================================
         // ---> LOGICA ANIMAZIONE A CASCATA (Staggered) <---
         // ======================================================
@@ -244,9 +252,18 @@
                             // ========================================================
                             Button(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    // PREVENZIONE DOPPIO CLICK (Debounce)
+                                    if (!isClosing) {
+                                        isClosing = true
+                                        // Feedback tattile premium come nella Home
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        viewModel.saveCurrentMatch()
+                                        onNavigateHome() // Ritorno alla schermata precedente
+                                    }
+                                    //questo codice non impedisce di effettuare più durnate l'animazione di chiusura
+                                    /*haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     viewModel.saveCurrentMatch()
-                                    onNavigateHome()
+                                    onNavigateHome()*/
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
