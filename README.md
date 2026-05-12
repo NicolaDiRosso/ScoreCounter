@@ -1,15 +1,24 @@
 # 🎮 ScoreCounter - Il segnapunti che mancava
 
-ScoreCounter è un'applicazione Android moderna costruita con **Kotlin** e **Jetpack Compose**. È nata per gestire punteggi di giochi da tavolo, carte o sfide tra amici in modo rapido, elegante e senza errori.
+ScoreCounter è un'applicazione Android d'avanguardia, sviluppata nativamente in Kotlin con Jetpack Compose. Progettata con un estetica in Material You, l'app trasforma il modo in cui gestisci i punteggi di giochi da tavolo, tornei di carte o sfide amichevoli, eliminando carta, penna e calcoli errati.
 
-## ✨ Funzionalità 
-- 👑 **Corona del Leader:** Visualizza in tempo reale chi è in vantaggio con un'icona stilizzata Material 3.
-- 📈 **Statistiche di Gara:** Un grafico dinamico mostra l'andamento dei punti durante tutta la partita.
-- ⏱️ **Cronometro Integrato:** Tieni traccia della durata della sfida.
-- 🎲 **Dado Virtuale:** Lancia un dado 1-6 con un tocco direttamente dall'app.
-- 🎯 **Obiettivo di Vittoria:** Imposta un punteggio traguardo per terminare la partita automaticamente.
-- 🔄 **Sistema Annulla (Undo):** Hai eliminato un giocatore o azzerato per sbaglio? Hai tempo per annullare l'azione.
-- 📤 **Condivisione Rapida:** Invia la classifica finale e la data su WhatsApp o altre app.
+## ✨ Caratteristiche Principali
+- 💎 **Design System "Table-First":** Un'interfaccia coerente e moderna basata su una gerarchia visiva pulita, angoli stondati armonizzati (24dp/20dp) e un dock comandi ergonomico sempre a portata di pollice.
+- 👑 **Corona del Leader & Hall of Fame:** Identificazione istantanea del vincitore in tempo reale con icone dinamiche e un effetto "Shimmer" (riflesso di luce) sulla card del campione a fine partita.
+- 📈 **Analisi Vettoriale dei Punteggi:** Grafici lineari dinamici (ScoreChart) che mostrano l'andamento della sfida dallo 0% al 100% della durata, permettendo di visualizzare sorpassi e rimonte epiche.
+- 🏅 **Sistema Premi Speciali:** L'engine di analisi assegna automaticamente titoli leggendari come:
+  - 🎯 **Il Cecchino:** Per il colpo più letale (salto di punti maggiore).
+  - 🔥 **L'Inarrestabile:** Per la striscia di punti consecutivi più lunga.
+  - 🦞 **Il Gambero:** Per chi ha subito il maggior numero di penalità.
+  - 🦅 **La Fenice:** Per la rimonta più incredibile dal punto più basso.
+- 🎲 **Motore Dadi Universale:** Non un semplice D6. Configura il tuo dado virtuale (D6, D20, D100 o facce personalizzate) per spareggi o per decidere chi inizia.
+- 📏 **Tipografia Adattiva (DPI-Ready):** Grazie alla tecnologia AutoResizedText, ogni titolo e punteggio si adatta matematicamente alla larghezza dello schermo, garantendo una leggibilità perfetta su qualsiasi dispositivo, indipendentemente dai DPI o dalle impostazioni dei font di sistema.
+- 📊 **Statistiche Globali:** Una sezione dedicata ai record storici con card espandibili per analizzare ogni singola sessione passata nei minimi dettagli.
+- ⏱️ **Cronometro Intelligente:** Tracciamento preciso della durata, con pausa automatica intelligente quando l'app va in background per preservare la batteria e l'integrità dei dati.
+- 🛡️ **Sicurezza Atomica & UX Fluida:**
+  - **Atomic Navigation Guard:** Protezione contro i click accidentali per evitare l'avvio di partite senza giocatori.
+  - **Gestione Preferiti:** Pannello di gestione rapida dei giocatori con salvataggio persistente e blocco delle gesture per prevenire chiusure accidentali.
+  - **Universal Undo:** Ripristino istantaneo di punteggi azzerati o giocatori rimossi per errore.
 
 ## 🛠️ Tecnologie Utilizzate
 - **Linguaggio:** [Kotlin](https://kotlinlang.org/)
