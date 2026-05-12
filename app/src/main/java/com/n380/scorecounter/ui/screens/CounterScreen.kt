@@ -935,16 +935,26 @@ fun CounterScreen(
                 // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
                 Button(
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showInfoDialog = false // Chiude il popup quando si preme il bottone
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
+                        showInfoDialog = false// Chiude il popup quando si preme il bottone
                     },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("Ho capito")
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+
+                        )
+                    Spacer(Modifier.width(8.dp))
+                    AutoResizedText("Ho capito", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                 }
+
             }
         )
     }
 }
-
 

@@ -327,29 +327,77 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        "Niente più foglietti volanti o calcoli a mente sbagliati. \nChe vinca il migliore!",
+                        "Che vinca il migliore!", //Niente più foglietti volanti o calcoli a mente sbagliati.
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        "Per segnalare bug o inviare consigli, scrivi al suo magnifico creatore 👌",
+                        "Invece, per segnalare bug o inviare consigli, premi il pulsante e scrivi al creatore.",
+                        style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
-                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    //Spacer(modifier = Modifier.height(20.dp))
+
+
                 }
             },
+            // ==========================================================
+            // SCOMPARTIMENTO FISSO IN BASSO (confirmButton)
+            // ==========================================================
             confirmButton = {
-                // ==========================================================
-                // 🧠 FIX STILE BOTTONE: Il nostro Design Standard
-                // Forzando la larghezza (fillMaxWidth) e l'altezza a 48.dp,
-                // il bottone si stira diventando un bellissimo rettangolo stondato.
-                // ==========================================================
+                // IL CONTENITORE: Impila i bottoni uno sopra l'altro
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    // 1. PRIMO BOTTONE (Azione Secondaria: Email)
+                    // COMPONENTE: OutlinedButton per il contatto
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+
+                            // DEFINIZIONE DELL'INTENT
+                            // Creazione di un'istanza della Classe Intent con azione ACTION_SENDTO.
+                            // La Proprietà data viene impostata tramite Uri.parse per forzare il protocollo mailto.
+                            val emailIntent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                                data = android.net.Uri.parse("mailto:emailditest100@gmail.com")
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, "ScoreCounter: Feedback/Segnalazione Bug")
+                            }
+
+                            // Metodo della Classe Context: Avvia l'applicazione esterna
+                            try {
+                                context.startActivity(emailIntent)
+                            } catch (e: Exception) {
+                                // Gestione dell'eccezione nel caso non esistano app email installate
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        AutoResizedText("Invia segnalazione", style = MaterialTheme.typography.labelLarge)
+                    }
+
+                    // DISTANZIATORE: 12 pixel di respiro tra i due bottoni
+                    //Spacer(modifier = Modifier.height(5.dp))
+
+                }
+                // 2. SECONDO BOTTONE (Azione Primaria: Gioca)
                 Button(
                     onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
                         showAboutDialog = false
                     },
                     modifier = Modifier
@@ -357,7 +405,14 @@ fun HomeScreen(
                         .height(48.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text("Inizia a giocare!", fontWeight = FontWeight.Bold)
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    AutoResizedText("Inizia a giocare!", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         )
