@@ -26,6 +26,7 @@ import androidx.compose.material3.SheetValue // Controllo degli stati del Bottom
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged // Gestore dello stato di focus dei componenti
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Conversione cromatica per persistenza dati
@@ -65,6 +66,9 @@ fun CreateMatchScreen(
     // Inizializzazione del selettore cromatico con Color.Unspecified.
     // Questo valore attiva il disegno del selettore "arcobaleno" per l'assegnazione di un colore casuale.
     var selectedColor by remember { mutableStateOf(Color.Unspecified) }
+
+    // STATO FOCUS TITOLO: Monitora se il campo di testo del nome sfida è attivo
+    var isTitleFocused by remember { mutableStateOf(false) }
 
     // Memorizzazione temporanea del giocatore selezionato per la modifica tramite l'icona matita
     var playerToEdit by remember { mutableStateOf<Player?>(null) }
@@ -148,6 +152,9 @@ fun CreateMatchScreen(
 
                             // 3. DECISIONE (Bivio Logico)
                             if (isTitleValid && arePlayersPresent) {
+                                // SALVATAGGIO CRONOLOGIA: Aggiunge il titolo corrente alla lista dei recenti
+                                viewModel.addTitleToHistory(viewModel.matchTitle)
+
                                 // CHIUSURA LUCCHETTO: Sigilliamo l'app per prevenire Race Conditions
                                 isNavigating = true
                                 onNavigateToCounter()
@@ -240,14 +247,22 @@ fun CreateMatchScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Filled.MenuBook, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                                 Spacer(modifier = Modifier.width(12.dp))
-                                Text(
+                                AutoResizedText(
                                     text = "Regole del Gioco",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
+
+                            // SPAZIATORE DI SICUREZZA: 
+                            // Aggiungiamo un gap fisso di 5.dp.
+                            // se il titolo dovesse diventare troppo lungo (es. su schermi piccoli), 
+                            // l'AutoResizedText inizierà a rimpicciolirsi PRIMA di toccare il bottone del dado, 
+                            // garantendo che ci sia sempre questo spazio minimo tra i due.
+                            Spacer(modifier = Modifier.width(10.dp))
 
                             // Pulsante per le impostazioni del dado
                             OutlinedButton(
@@ -256,10 +271,10 @@ fun CreateMatchScreen(
                                     showDiceSettingsDialog = true
                                 },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                                modifier = Modifier.height(36.dp)
+                                modifier = Modifier.height(36.dp),
                             ) {
                                 Icon(Icons.Filled.Casino, "Dado", modifier = Modifier.size(18.dp).padding(end = 4.dp))
-                                Text(
+                                AutoResizedText(
                                     text = "Dado (D${viewModel.diceSides})",
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold
@@ -272,17 +287,21 @@ fun CreateMatchScreen(
                             value = viewModel.matchTitle,
                             onValueChange = {
                                 viewModel.matchTitle = it
+                                // Se l'utente scrive qualcosa, rimuoviamo l'eventuale segnale di errore rosso
                                 if (it.isNotBlank()) showError = false 
                             },
                             label = { Text("Nome della sfida") },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                // MONITORAGGIO FOCUS: Quando l'utente clicca sul campo, attiviamo la visualizzazione dei suggerimenti
+                                .onFocusChanged { isTitleFocused = it.isFocused }, 
                             shape = RoundedCornerShape(16.dp),
                             isError = showError && viewModel.matchTitle.isBlank(),
-                            supportingText = {
-                                if (showError && viewModel.matchTitle.isBlank()) {
-                                    Text("Il nome della sfida è obbligatorio", color = MaterialTheme.colorScheme.error)
-                                }
-                            },
+                            // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare" 
+                            // lo spazio vuoto inferiore e permettere ai titoli recenti di stare più vicini al box.
+                            supportingText = if (showError && viewModel.matchTitle.isBlank()) {
+                                { Text("Il nome della sfida è obbligatorio", color = MaterialTheme.colorScheme.error) }
+                            } else null,
                             leadingIcon = {
                                 val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                                 Icon(Icons.Default.VideogameAsset, null, tint = iconColor)
@@ -292,6 +311,59 @@ fun CreateMatchScreen(
                             keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
                         )
 
+                        // CRONOLOGIA TITOLI RECENTI (SISTEMA DI SUGGERIMENTO RAPIDO)
+                        // Mostriamo questo blocco solo se il campo è selezionato (focus) e se abbiamo almeno un titolo in memoria.
+                        if (isTitleFocused && viewModel.matchTitleHistory.isNotEmpty()) {
+                            // Usiamo offset(y = -12.dp) per annullare i margini nativi del box di testo e "attaccare" visivamente
+                            // la scritta "Titoli recenti" al bordo inferiore dell'input.
+                            Column(modifier = Modifier.padding(top = 0.dp, bottom = 16.dp).offset(y = (1).dp)) {
+                                Text(
+                                    text = "Titoli recenti:",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
+                                )
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    // Cicliamo i titoli salvati nel ViewModel (massimo 3 nomi diversi dai temi fissi)
+                                    items(viewModel.matchTitleHistory) { recentTitle ->
+                                        Button(
+                                            onClick = {
+                                                // Feedback tattile al tocco del suggerimento
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                
+                                                // 1. Inseriamo il titolo scelto nel campo di testo
+                                                viewModel.matchTitle = recentTitle
+                                                
+                                                // 2. Chiudiamo tastiera e suggerimenti togliendo il cursore dal campo (clearFocus)
+                                                focusManager.clearFocus() 
+                                            },
+                                            shape = RoundedCornerShape(12.dp),
+                                            // Design "Pieno con Bordino": garantisce visibilità e coerenza con i tasti "Anime" e "Carte"
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary
+                                            ),
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                            modifier = Modifier.height(36.dp)
+                                        ) {
+                                            // Testo auto-adattante per gestire titoli lunghi senza rompere il layout
+                                            AutoResizedText(
+                                                text = recentTitle,
+                                                style = MaterialTheme.typography.labelLarge
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // SPAZIATORE DI SICUREZZA: Quando i suggerimenti sono nascosti, inseriamo uno spazio fisso
+                            // per mantenere la distanza corretta tra il Nome della Sfida e il Traguardo.
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                         // INPUT: PUNTEGGIO OBIETTIVO (Filtro numerico)
                         OutlinedTextField(
                             value = viewModel.targetScore,
@@ -301,7 +373,7 @@ fun CreateMatchScreen(
                                 }
                             },
                             label = { Text("Traguardo (Opzionale)") },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().offset(y = (-10).dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
@@ -314,7 +386,7 @@ fun CreateMatchScreen(
                             leadingIcon = { Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
 
                         // TEMI RAPIDI: Configurazione automatica titolo
                         val isAnimeTheme = viewModel.matchTitle == "Sfida Anime"
