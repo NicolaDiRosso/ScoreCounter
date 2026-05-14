@@ -698,7 +698,7 @@ fun CreateMatchScreen(
         AlertDialog(
             onDismissRequest = { playerToEdit = null },
             title = {
-                Text(
+                AutoResizedText(
                     text = "Modifica Giocatore",
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -706,7 +706,7 @@ fun CreateMatchScreen(
             },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
+                    AutoResizedText(
                         text = "Scegli un nuovo colore:",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary

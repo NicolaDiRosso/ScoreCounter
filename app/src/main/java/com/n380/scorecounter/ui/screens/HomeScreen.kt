@@ -21,11 +21,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Search//icone per la barra di ricerca
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -644,353 +652,579 @@ fun HomeScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(24.dp) // Stondatura Material 3 massiccia
             ) {
-                if (viewModel.history.isEmpty()) {
-                    // STATO VUOTO (Empty State)
-                    // Usiamo un Box per centrare perfettamente la scritta in mezzo al tavolo gigante
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "Nessuna sfida salvata al momento.",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                // ISTANZIAMO IL FOCUS MANAGER
+                // Estrae il gestore globale del focus (che sa chi ha il cursore lampeggiante in questo momento)
+                val focusManager = LocalFocusManager.current
+                // --------------------------------------------------------------------
+                // MOTORE DI RICERCA: GESTIONE DELLO STATO (UI STATE)
+                // --------------------------------------------------------------------
+                // Dichiarazione dello stato locale per l'input di testo della barra di ricerca.
+                // - 'by': È un delegato Kotlin. Estrae direttamente la stringa dal wrapper MutableState.
+                // - 'rememberSaveable': Salva il dato nel 'Bundle' nativo di Android. Se l'utente
+                //   ruota lo schermo, la stringa digitata non viene distrutta.
+                // - 'mutableStateOf("")': Crea un "nodo osservabile". Quando cambia, Compose ridisegna.
+                var searchQuery by rememberSaveable { mutableStateOf("") }
+
+                // --------------------------------------------------------------------
+                // LOGICA DI FILTRAGGIO E MEMOIZATION (CACHE)
+                // --------------------------------------------------------------------
+                // 'remember(chiave1, chiave2)' ordina a Compose di eseguire il calcolo
+                // SOLO se cambia 'searchQuery' o 'viewModel.history'.
+                // Risparmia tantissima CPU evitando ricalcoli inutili durante lo scorrimento (Memoization).
+                val filteredHistory = remember(searchQuery, viewModel.history) {
+                    if (searchQuery.isBlank()) {
+                        // Nessuna ricerca = mostra tutto il database
+                        viewModel.history
+                    } else {
+                        // Filtro attivo: analizziamo ogni partita
+                        viewModel.history.filter { match ->
+                            // 1. Titolo della partita contiene la stringa? (ignoreCase = ignora maiuscole)
+                            val titleMatches = match.title.contains(searchQuery, ignoreCase = true)
+
+                            // 2. Almeno un giocatore ha un nome che contiene la stringa?
+                            val playerMatches = match.allPlayers.any { player ->
+                                player.name.contains(searchQuery, ignoreCase = true)
+                            }
+
+                            // Se una delle due è vera, il match viene tenuto nella lista visibile
+                            titleMatches || playerMatches
+                        }
+                    }
+                }
+
+                // Struttura verticale per impilare la barra di ricerca sopra la lista scorrevole.
+                // Questa Colum incorpora l'INTERCETTAZIONE DEI TOCCHI A VUOTO SULLA COLUMN PADRE
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    // pointerInput crea un recettore di eventi tattili su tutta l'area di questa colonna.
+                    // detectTapGestures ascolta i tap: se l'utente tocca uno spazio vuoto (non una card),
+                    // innesca 'focusManager.clearFocus()', spegnendo il cursore e abbassando la tastiera.
+                    // N.B: Questo non bloccherà i click sulle singole partite, perché Compose è intelligente
+                    // e dà la precedenza ai click sui "figli" prima che ai "padri".
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            focusManager.clearFocus()
+                        })
+                    }
+                ) {
+
+                    // --------------------------------------------------------------------
+                    // COMPONENTE UI: BARRA DI RICERCA (TextField)
+                    // --------------------------------------------------------------------
+                    // Appare solo se il database non è totalmente vuoto
+                    if (viewModel.history.isNotEmpty()) {
+                        OutlinedTextField(
+                            value = searchQuery, // Legge il testo dalla variabile di stato
+                            onValueChange = {
+                                searchQuery = it
+                            }, // Aggiorna lo stato quando si digita
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                            placeholder = { AutoResizedText("Cerca sfida o giocatore...") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = "Cerca"
+                                )
+                            },
+                            trailingIcon = {
+                                // Tasto "X" dinamico: esiste solo se c'è testo da cancellare
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            searchQuery = ""
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        }
+                                    ) {
+                                        Icon(Icons.Filled.Clear, contentDescription = "Cancella")
+                                    }
+                                }
+                            },
+
+                            // OPZIONI DELLA TASTIERA E AZIONI
+                            // 1. keyboardOptions = Trasforma il tasto "Invio" in basso a destra nella tastiera
+                            // in un tasto con la lente d'ingrandimento (ImeAction.Search).
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+
+                            // 2. keyboardActions = Cattura il momento esatto in cui l'utente preme
+                            // quel tasto "Cerca" e innesca la funzione di rimozione del focus.
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    focusManager.clearFocus()
+                                }
+                            ),
+
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true, // Impedisce di andare a capo premendo "Invio"
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                            )
                         )
                     }
-                } else {
-                    // --------------------------------------------------------------------
-                    // LAZYCOLUMN E IL SEGRETO DEL "CONTENT PADDING"
-                    // --------------------------------------------------------------------
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
 
-                        // LEZIONE CRITICA: Cos'è il contentPadding?
-                        // A differenza del 'modifier.padding' (che stringe la finestra dall'esterno),
-                        // il 'contentPadding' aggiunge spazio *dentro* la fine della lista scorrrevole.
-                        // Risultato visivo: le Card scorreranno liberamente "dietro" al FAB trasparente.
-                        // Ma quando arrivi all'ultimo elemento della lista, questo non rimarrà nascosto
-                        // sotto il bottone, perché la lista sa di dover aggiungere un margine finale
-                        // pari all'ingombro del FAB in basso (calculateBottomPadding) più 16dp extra.
-                        contentPadding = PaddingValues(
-                            top = 16.dp, // <--- Stacca la prima card dal bordo superiore del tavolo
-                            start = 12.dp, // Leggermente ridotto perché ci pensa già il padding esterno della Card
-                            end = 12.dp,
-                            bottom = 16.dp
-                        )
-                    ) {
-                        items(viewModel.history) { record ->
-                            // Variabile di stato locale per gestire l'apertura/chiusura della singola card
-                            var expanded by remember { mutableStateOf(false) }
-
-                            Card(
-                                modifier = Modifier.fillMaxWidth().clickable {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    expanded = !expanded
-                                },
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                shape = RoundedCornerShape(20.dp) // Forziamo una stondatura morbida ed evidente
+                    // --------------------------------------------------------------------
+                    // GESTIONE DEGLI EMPTY STATE E RENDERING DELLA LISTA
+                    // --------------------------------------------------------------------
+                    if (viewModel.history.isEmpty()) {
+                        // STATO VUOTO ASSOLUTO (Empty State)
+                        // Usiamo un Box per centrare perfettamente la scritta in mezzo al tavolo gigante
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AutoResizedText(
+                                text = "Nessuna sfida salvata al momento.",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                    } else if (filteredHistory.isEmpty()) {
+                        // --------------------------------------------------------------------
+                        // EMPTY STATE: NESSUN RISULTATO DI RICERCA
+                        // --------------------------------------------------------------------
+                        // Manteniamo il Box per centrare tutto il contenuto nel tavolo grigio
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Usiamo una Column per impilare verticalmente l'icona e il testo
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
-                                Column(modifier = Modifier.padding(20.dp)) {
+                                // 1. L'ICONA GIGANTE
+                                Icon(
+                                    // Usiamo la lente di ingrandimento (o SearchOff se usi le icone extended)
+                                    imageVector = Icons.Filled.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(64.dp) // Dimensione "Hero" (molto grande)
+                                        .padding(bottom = 16.dp), // Spazio per staccarla dal testo
+                                    // 🧠 UX: Abbassiamo l'opacità (alpha) al 50%.
+                                    // Questo fa capire che non è un bottone cliccabile, ma una grafica di sfondo.
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
 
-                                    // --- PARTE SEMPRE VISIBILE DELLA CARD ---
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        // COMPONENTE: Testo del Titolo
-                                        Text(
-                                            // PROPRIETÀ: La stringa letta dal database
-                                            text = record.title,
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Bold,
+                                // 2. IL TESTO (Il tuo codice originale, inserito qui)
+                                AutoResizedText(
+                                    text = "Nessun risultato trovato.",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
 
-                                            // LOGICA DI STATO PER L'ESPANSIONE:
-                                            // 'expanded' è una Variabile Booleana di Stato (MutableState).
-                                            // Se la card è aperta (true), assegniamo la Costante 'Int.MAX_VALUE' (Spazio infinito).
-                                            // Se la card è chiusa (false), limitiamo rigorosamente l'altezza a 1 singola riga.
-                                            maxLines = if (expanded) Int.MAX_VALUE else 1,
+                                // 3. SOTTOTITOLO OPZIONALE (Migliora l'empatia dell'interfaccia)
+                                Text(
+                                    text = "Prova a cercare un altro nome",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 8.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        // --------------------------------------------------------------------
+                        // LAZYCOLUMN E IL SEGRETO DEL "CONTENT PADDING"
+                        // --------------------------------------------------------------------
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
 
-                                            // PROPRIETÀ ENUM: TextOverflow
-                                            // Istruisce il motore grafico ad applicare i tre puntini (...)
-                                            // qualora il testo superi il limite imposto da maxLines.
-                                            overflow = TextOverflow.Ellipsis,
+                            // LEZIONE CRITICA: Cos'è il contentPadding?
+                            // A differenza del 'modifier.padding' (che stringe la finestra dall'esterno),
+                            // il 'contentPadding' aggiunge spazio *dentro* la fine della lista scorrrevole.
+                            // Risultato visivo: le Card scorreranno liberamente "dietro" al FAB trasparente.
+                            // Ma quando arrivi all'ultimo elemento della lista, questo non rimarrà nascosto
+                            // sotto il bottone, perché la lista sa di dover aggiungere un margine finale
+                            // pari all'ingombro del FAB in basso (calculateBottomPadding) più 16dp extra.
+                            contentPadding = PaddingValues(
+                                top = 8.dp, // <--- Ridotto rispetto a prima perché c'è già la barra di ricerca sopra!
+                                start = 12.dp, // Leggermente ridotto perché ci pensa già il padding esterno della Card
+                                end = 12.dp,
+                                bottom = 16.dp
+                            )
+                        ) {
+                            // MODIFICA FONDAMENTALE: Iteriamo su 'filteredHistory' invece che su 'viewModel.history'
+                            items(filteredHistory) { record ->
+                                // Variabile di stato locale per gestire l'apertura/chiusura della singola card
+                                var expanded by remember { mutableStateOf(false) }
 
-                                            // MODIFICATORE: weight(1f)
-                                            // Fondamentale! Impone al Titolo di calcolare prima lo spazio occupato
-                                            // dal cronometro a destra, e poi di occupare SOLO lo spazio rimanente,
-                                            // impedendo al testo di spingere il timer fuori dallo schermo.
-                                            // Aggiungiamo padding(end = 12.dp) per non far incollare i tre puntini all'orologio.
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 12.dp)
-                                        )
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        expanded = !expanded
+                                    },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(20.dp) // Forziamo una stondatura morbida ed evidente
+                                ) {
+                                    Column(modifier = Modifier.padding(20.dp)) {
 
-                                        if (record.durationSeconds > 0) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Icon(
-                                                    Icons.Filled.Timer, null,
-                                                    modifier = Modifier.size(16.dp)
-                                                        .padding(end = 4.dp),
-                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                Text(
-                                                    text = formatTime(record.durationSeconds),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
-                                        }
-                                    }
+                                        // --- PARTE SEMPRE VISIBILE DELLA CARD ---
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // COMPONENTE: Testo del Titolo
+                                            Text(
+                                                // PROPRIETÀ: La stringa letta dal database
+                                                text = record.title,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                fontWeight = FontWeight.Bold,
 
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "🏆 Vincitore: ${record.winnerName}",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        Icon(
-                                            imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                                // LOGICA DI STATO PER L'ESPANSIONE:
+                                                // 'expanded' è una Variabile Booleana di Stato (MutableState).
+                                                // Se la card è aperta (true), assegniamo la Costante 'Int.MAX_VALUE' (Spazio infinito).
+                                                // Se la card è chiusa (false), limitiamo rigorosamente l'altezza a 1 singola riga.
+                                                maxLines = if (expanded) Int.MAX_VALUE else 1,
 
-                                    // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
-                                    AnimatedVisibility(visible = expanded) {
-                                        Column(modifier = Modifier.padding(top = 20.dp)) {
-                                            HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
+                                                // PROPRIETÀ ENUM: TextOverflow
+                                                // Istruisce il motore grafico ad applicare i tre puntini (...)
+                                                // qualora il testo superi il limite imposto da maxLines.
+                                                overflow = TextOverflow.Ellipsis,
 
-                                            // Ciclo che genera la classifica dei giocatori
-                                            record.allPlayers.forEachIndexed { index, playerRecord ->
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth()
-                                                        .padding(vertical = 4.dp),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    if (index == 0) {
-                                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                                            Icon(
-                                                                Icons.Filled.EmojiEvents, null,
-                                                                tint = MaterialTheme.colorScheme.primary,
-                                                                modifier = Modifier.padding(end = 8.dp)
-                                                            )
-                                                            Text(
-                                                                text = "1° ${playerRecord.name}",
-                                                                style = MaterialTheme.typography.titleLarge,
-                                                                fontWeight = FontWeight.ExtraBold,
-                                                                color = MaterialTheme.colorScheme.primary
-                                                            )
-                                                        }
-                                                    } else {
-                                                        Text(
-                                                            text = "${index + 1}° ${playerRecord.name}",
-                                                            style = MaterialTheme.typography.bodyLarge
-                                                        )
-                                                    }
+                                                // MODIFICATORE: weight(1f)
+                                                // Fondamentale! Impone al Titolo di calcolare prima lo spazio occupato
+                                                // dal cronometro a destra, e poi di occupare SOLO lo spazio rimanente,
+                                                // impedendo al testo di spingere il timer fuori dallo schermo.
+                                                // Aggiungiamo padding(end = 12.dp) per non far incollare i tre puntini all'orologio.
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(end = 12.dp)
+                                            )
 
+                                            if (record.durationSeconds > 0) {
+                                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                                    Icon(
+                                                        Icons.Filled.Timer, null,
+                                                        modifier = Modifier.size(16.dp)
+                                                            .padding(end = 4.dp),
+                                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
                                                     Text(
-                                                        text = "${playerRecord.score} pt",
-                                                        style = MaterialTheme.typography.bodyLarge,
-                                                        fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
+                                                        text = formatTime(record.durationSeconds),
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                 }
                                             }
+                                        }
 
-                                            val validHistory = record.allPlayers.any {
-                                                (it.scoreHistory ?: emptyList()).size > 1
-                                            }
-                                            if (validHistory) {
-                                                Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "🏆 Vincitore: ${record.winnerName}",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Icon(
+                                                imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
 
-                                                // ==========================================================
-                                                // AREA DI INTERAZIONE (HITBOX) AMPLIATA
-                                                // Avvolgiamo Intestazione e Grafico in una singola Column.
-                                                // Spostando il modifier 'combinedClickable' qui sopra,
-                                                // l'utente potrà premere SIA sulla scritta, SIA sull'icona,
-                                                // SIA sul grafico per aprire i dettagli della partita!
-                                                // ==========================================================
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        // Aggiungiamo un leggero bordo invisibile/padding
-                                                        // per rendere l'area tattile ancora più comoda
-                                                        .padding(vertical = 4.dp)
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                expandedMatchIndex = viewModel.history.indexOf(record)
-                                                            },
-                                                            onLongClick = {
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                expandedMatchIndex = viewModel.history.indexOf(record)
-                                                            }
-                                                        )
-                                                ) {
-                                                    // 1. INTESTAZIONE (Titolo + Icona Espandi)
+                                        // --- PARTE ESPANDIBILE (DETTAGLI E GRAFICO) ---
+                                        AnimatedVisibility(visible = expanded) {
+                                            Column(modifier = Modifier.padding(top = 20.dp)) {
+                                                HorizontalDivider(modifier = Modifier.padding(bottom = 12.dp))
+
+                                                // Ciclo che genera la classifica dei giocatori
+                                                record.allPlayers.forEachIndexed { index, playerRecord ->
                                                     Row(
-                                                        modifier = Modifier.fillMaxWidth(),
+                                                        modifier = Modifier.fillMaxWidth()
+                                                            .padding(vertical = 4.dp),
                                                         horizontalArrangement = Arrangement.SpaceBetween,
                                                         verticalAlignment = Alignment.CenterVertically
                                                     ) {
-                                                        Text(
-                                                            "Andamento Punteggi",
-                                                            style = MaterialTheme.typography.labelMedium,
-                                                            color = MaterialTheme.colorScheme.primary
-                                                        )
-                                                        Icon(
-                                                            Icons.Filled.Fullscreen,
-                                                            contentDescription = "Espandi Grafico",
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.size(18.dp)
-                                                        )
-                                                    }
-
-                                                    // 2. IL MINI-GRAFICO (Ora privato del clickable, che è gestito dal Padre)
-                                                    ScoreChart(
-                                                        players = record.allPlayers,
-                                                        modifier = Modifier
-                                                            .height(120.dp)
-                                                            .fillMaxWidth()
-                                                            .padding(top = 8.dp)
-                                                    )
-                                                }
-
-                                                HorizontalDivider(
-                                                    modifier = Modifier.padding(
-                                                        top = 16.dp,
-                                                        bottom = 8.dp
-                                                    )
-                                                )
-                                            }
-
-                                            // Data della partita e pulsanti di Azione (Condividi / Elimina)
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                // ==========================================================
-                                                // 1. BLOCCO SINISTRO: ORA E DATA (Raggruppati in una Row)
-                                                // ==========================================================
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    // MODIFICATORE CHIAVE: weight(1f) protegge le icone a destra
-                                                    // limitando l'espansione di questo blocco di testo.
-                                                    modifier = Modifier.weight(1f).padding(end = 12.dp)
-                                                ) {
-                                                    // ==========================================================
-                                                    // 1. BLOCCO SINISTRO: UNICO TESTO PER ORA E DATA
-                                                    // ==========================================================
-                                                    // COMPONENTE CUSTOM: AutoResizedText
-                                                    AutoResizedText(
-                                                        // PROPRIETÀ text: Usiamo l'interpolazione ${} per eseguire entrambe le funzioni
-                                                        // (formattazione dell'ora e formattazione della data) dentro la stessa stringa.
-                                                        text = "Alle ${timeFormatter.format(java.util.Date(record.timestamp))} del ${if (record.timestamp > 0L) formatDate(record.timestamp) else ""}",
-
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-
-                                                        // MODIFICATORE: Essendo l'unico elemento a sinistra, gli diamo il weight(1f)
-                                                        // per occupare tutto lo spazio libero, e un padding per tenerlo staccato dalle icone.
-                                                        modifier = Modifier.weight(1f).padding(end = 12.dp)
-                                                    )
-                                                }
-
-                                                // ==========================================================
-                                                // 2. BLOCCO DESTRO: ICONE CONDIVIDI ED ELIMINA
-                                                // ==========================================================
-                                                // Essendo senza "weight", questa Row prende solo i pixel
-                                                // strettamente necessari per disegnare le due icone affiancate.
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    // PROPRIETÀ: distanzia leggermente le due icone tra di loro
-                                                    // per non farle sembrare un unico blocco.
-                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                                ) {
-
-                                                    // Logica di Condivisione (Intent) delegata all'Utility
-                                                    IconButton(onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                                        // ====================================================================
-                                                        // DATA MAPPING DA RECORD STORICO
-                                                        // ====================================================================
-                                                        // Mappiamo la lista dei giocatori estraendo solo Nome e Punteggio
-                                                        val playersData = record.allPlayers.map { Pair(it.name, it.score) }
-
-                                                        // ====================================================================
-                                                        // Invece di cercare variabili esterne inaccessibili, chiediamo
-                                                        // all'oggetto 'record' di calcolare i premi in questo esatto millisecondo.
-                                                        // Essendo dentro 'onClick', questo calcolo avviene SOLO se l'utente
-                                                        // preme il bottone. Zero spreco di RAM quando l'utente scorre la lista!
-                                                        // ====================================================================
-
-                                                        // 1. Chiamiamo la funzione di calcolo 'record.getHistoricalCecchino()'
-                                                        // 2. Se restituisce un dato, '?let' lo "spacchetta"
-                                                        // 3. Creiamo la nostra Pair universale isolando il nome (it.first.name) e i punti (it.second)
-                                                        val mappedCecchino = record.getHistoricalCecchino()?.let { Pair(it.first.name, it.second) }
-                                                        val mappedInarrestabile = record.getHistoricalInarrestabile()?.let { Pair(it.first.name, it.second) }
-                                                        val mappedGambero = record.getHistoricalGambero()?.let { Pair(it.first.name, it.second) }
-                                                        val mappedFenice = record.getHistoricalFenice()?.let { Pair(it.first.name, it.second) }
-
-                                                        // Costruzione delegata del report testuale chiamando il file SharedUtils
-                                                        val shareText = buildMatchShareText(
-                                                            title = record.title,
-                                                            durationSeconds = record.durationSeconds,
-                                                            timestamp = record.timestamp,
-                                                            rankedPlayersData = playersData,
-                                                            cecchinoData = mappedCecchino, // Passiamo i dati appena calcolati!
-                                                            inarrestabileData = mappedInarrestabile,
-                                                            gamberoData = mappedGambero,
-                                                            feniceData = mappedFenice
-                                                        )
-
-                                                        // Esecuzione dell'Intent per aprire WhatsApp/Telegram/ecc.
-                                                        launchShareIntent(context, shareText)
-                                                    }) {
-                                                        Icon(
-                                                            Icons.Filled.Share,
-                                                            null,
-                                                            tint = MaterialTheme.colorScheme.primary
-                                                        )
-                                                    }
-
-                                                    // Logica di Eliminazione con possibilità di annullamento (Undo)
-                                                    IconButton(onClick = {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress
-                                                        )
-                                                        val removedIndex =
-                                                            viewModel.history.indexOf(record)
-                                                        viewModel.deleteMatch(record)
-
-                                                        coroutineScope.launch {
-                                                            launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
-                                                            val result =
-                                                                snackbarHostState.showSnackbar(
-                                                                    "Partita eliminata",
-                                                                    "ANNULLA",
-                                                                    duration = SnackbarDuration.Indefinite
+                                                        if (index == 0) {
+                                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                                Icon(
+                                                                    Icons.Filled.EmojiEvents, null,
+                                                                    tint = MaterialTheme.colorScheme.primary,
+                                                                    modifier = Modifier.padding(end = 8.dp)
                                                                 )
-                                                            if (result == SnackbarResult.ActionPerformed) {
-                                                                viewModel.restoreMatch(
-                                                                    removedIndex,
-                                                                    record
+                                                                Text(
+                                                                    text = "1° ${playerRecord.name}",
+                                                                    style = MaterialTheme.typography.titleLarge,
+                                                                    fontWeight = FontWeight.ExtraBold,
+                                                                    color = MaterialTheme.colorScheme.primary
                                                                 )
                                                             }
+                                                        } else {
+                                                            Text(
+                                                                text = "${index + 1}° ${playerRecord.name}",
+                                                                style = MaterialTheme.typography.bodyLarge
+                                                            )
                                                         }
-                                                    }) {
-                                                        Icon(
-                                                            Icons.Filled.Delete,
-                                                            null,
-                                                            tint = MaterialTheme.colorScheme.error
+
+                                                        Text(
+                                                            text = "${playerRecord.score} pt",
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
                                                         )
+                                                    }
+                                                }
+
+                                                val validHistory = record.allPlayers.any {
+                                                    (it.scoreHistory ?: emptyList()).size > 1
+                                                }
+                                                if (validHistory) {
+                                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                                    // ==========================================================
+                                                    // AREA DI INTERAZIONE (HITBOX) AMPLIATA
+                                                    // Avvolgiamo Intestazione e Grafico in una singola Column.
+                                                    // Spostando il modifier 'combinedClickable' qui sopra,
+                                                    // l'utente potrà premere SIA sulla scritta, SIA sull'icona,
+                                                    // SIA sul grafico per aprire i dettagli della partita!
+                                                    // ==========================================================
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            // Aggiungiamo un leggero bordo invisibile/padding
+                                                            // per rendere l'area tattile ancora più comoda
+                                                            .padding(vertical = 4.dp)
+                                                            .combinedClickable(
+                                                                onClick = {
+                                                                    haptic.performHapticFeedback(
+                                                                        HapticFeedbackType.LongPress
+                                                                    )
+                                                                    expandedMatchIndex =
+                                                                        viewModel.history.indexOf(
+                                                                            record
+                                                                        )
+                                                                },
+                                                                onLongClick = {
+                                                                    haptic.performHapticFeedback(
+                                                                        HapticFeedbackType.LongPress
+                                                                    )
+                                                                    expandedMatchIndex =
+                                                                        viewModel.history.indexOf(
+                                                                            record
+                                                                        )
+                                                                }
+                                                            )
+                                                    ) {
+                                                        // 1. INTESTAZIONE (Titolo + Icona Espandi)
+                                                        Row(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            Text(
+                                                                "Andamento Punteggi",
+                                                                style = MaterialTheme.typography.labelMedium,
+                                                                color = MaterialTheme.colorScheme.primary
+                                                            )
+                                                            Icon(
+                                                                Icons.Filled.Fullscreen,
+                                                                contentDescription = "Espandi Grafico",
+                                                                tint = MaterialTheme.colorScheme.primary,
+                                                                modifier = Modifier.size(18.dp)
+                                                            )
+                                                        }
+
+                                                        // 2. IL MINI-GRAFICO (Ora privato del clickable, che è gestito dal Padre)
+                                                        ScoreChart(
+                                                            players = record.allPlayers,
+                                                            modifier = Modifier
+                                                                .height(120.dp)
+                                                                .fillMaxWidth()
+                                                                .padding(top = 8.dp)
+                                                        )
+                                                    }
+
+                                                    HorizontalDivider(
+                                                        modifier = Modifier.padding(
+                                                            top = 16.dp,
+                                                            bottom = 8.dp
+                                                        )
+                                                    )
+                                                }
+
+                                                // Data della partita e pulsanti di Azione (Condividi / Elimina)
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth()
+                                                        .padding(top = 8.dp),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    // ==========================================================
+                                                    // 1. BLOCCO SINISTRO: ORA E DATA (Raggruppati in una Row)
+                                                    // ==========================================================
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        // MODIFICATORE CHIAVE: weight(1f) protegge le icone a destra
+                                                        // limitando l'espansione di questo blocco di testo.
+                                                        modifier = Modifier.weight(1f)
+                                                            .padding(end = 12.dp)
+                                                    ) {
+                                                        // ==========================================================
+                                                        // 1. BLOCCO SINISTRO: UNICO TESTO PER ORA E DATA
+                                                        // ==========================================================
+                                                        // COMPONENTE CUSTOM: AutoResizedText
+                                                        AutoResizedText(
+                                                            // PROPRIETÀ text: Usiamo l'interpolazione ${} per eseguire entrambe le funzioni
+                                                            // (formattazione dell'ora e formattazione della data) dentro la stessa stringa.
+                                                            text = "Alle ${
+                                                                timeFormatter.format(
+                                                                    java.util.Date(
+                                                                        record.timestamp
+                                                                    )
+                                                                )
+                                                            } del ${
+                                                                if (record.timestamp > 0L) formatDate(
+                                                                    record.timestamp
+                                                                ) else ""
+                                                            }",
+
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+
+                                                            // MODIFICATORE: Essendo l'unico elemento a sinistra, gli diamo il weight(1f)
+                                                            // per occupare tutto lo spazio libero, e un padding per tenerlo staccato dalle icone.
+                                                            modifier = Modifier.weight(1f)
+                                                                .padding(end = 12.dp)
+                                                        )
+                                                    }
+
+                                                    // ==========================================================
+                                                    // 2. BLOCCO DESTRO: ICONE CONDIVIDI ED ELIMINA
+                                                    // ==========================================================
+                                                    // Essendo senza "weight", questa Row prende solo i pixel
+                                                    // strettamente necessari per disegnare le due icone affiancate.
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        // PROPRIETÀ: distanzia leggermente le due icone tra di loro
+                                                        // per non farle sembrare un unico blocco.
+                                                        horizontalArrangement = Arrangement.spacedBy(
+                                                            4.dp
+                                                        )
+                                                    ) {
+
+                                                        // Logica di Condivisione (Intent) delegata all'Utility
+                                                        IconButton(onClick = {
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress
+                                                            )
+
+                                                            // ====================================================================
+                                                            // DATA MAPPING DA RECORD STORICO
+                                                            // ====================================================================
+                                                            // Mappiamo la lista dei giocatori estraendo solo Nome e Punteggio
+                                                            val playersData =
+                                                                record.allPlayers.map {
+                                                                    Pair(
+                                                                        it.name,
+                                                                        it.score
+                                                                    )
+                                                                }
+
+                                                            // ====================================================================
+                                                            // Invece di cercare variabili esterne inaccessibili, chiediamo
+                                                            // all'oggetto 'record' di calcolare i premi in questo esatto millisecondo.
+                                                            // Essendo dentro 'onClick', questo calcolo avviene SOLO se l'utente
+                                                            // preme il bottone. Zero spreco di RAM quando l'utente scorre la lista!
+                                                            // ====================================================================
+
+                                                            // 1. Chiamiamo la funzione di calcolo 'record.getHistoricalCecchino()'
+                                                            // 2. Se restituisce un dato, '?let' lo "spacchetta"
+                                                            // 3. Creiamo la nostra Pair universale isolando il nome (it.first.name) e i punti (it.second)
+                                                            val mappedCecchino =
+                                                                record.getHistoricalCecchino()
+                                                                    ?.let {
+                                                                        Pair(
+                                                                            it.first.name,
+                                                                            it.second
+                                                                        )
+                                                                    }
+                                                            val mappedInarrestabile =
+                                                                record.getHistoricalInarrestabile()
+                                                                    ?.let {
+                                                                        Pair(
+                                                                            it.first.name,
+                                                                            it.second
+                                                                        )
+                                                                    }
+                                                            val mappedGambero =
+                                                                record.getHistoricalGambero()?.let {
+                                                                    Pair(
+                                                                        it.first.name,
+                                                                        it.second
+                                                                    )
+                                                                }
+                                                            val mappedFenice =
+                                                                record.getHistoricalFenice()?.let {
+                                                                    Pair(
+                                                                        it.first.name,
+                                                                        it.second
+                                                                    )
+                                                                }
+
+                                                            // Costruzione delegata del report testuale chiamando il file SharedUtils
+                                                            val shareText = buildMatchShareText(
+                                                                title = record.title,
+                                                                durationSeconds = record.durationSeconds,
+                                                                timestamp = record.timestamp,
+                                                                rankedPlayersData = playersData,
+                                                                cecchinoData = mappedCecchino, // Passiamo i dati appena calcolati!
+                                                                inarrestabileData = mappedInarrestabile,
+                                                                gamberoData = mappedGambero,
+                                                                feniceData = mappedFenice
+                                                            )
+
+                                                            // Esecuzione dell'Intent per aprire WhatsApp/Telegram/ecc.
+                                                            launchShareIntent(context, shareText)
+                                                        }) {
+                                                            Icon(
+                                                                Icons.Filled.Share,
+                                                                null,
+                                                                tint = MaterialTheme.colorScheme.primary
+                                                            )
+                                                        }
+
+                                                        // Logica di Eliminazione con possibilità di annullamento (Undo)
+                                                        IconButton(onClick = {
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.LongPress
+                                                            )
+                                                            val removedIndex =
+                                                                viewModel.history.indexOf(record)
+                                                            viewModel.deleteMatch(record)
+
+                                                            coroutineScope.launch {
+                                                                launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
+                                                                val result =
+                                                                    snackbarHostState.showSnackbar(
+                                                                        "Partita eliminata",
+                                                                        "ANNULLA",
+                                                                        duration = SnackbarDuration.Indefinite
+                                                                    )
+                                                                if (result == SnackbarResult.ActionPerformed) {
+                                                                    viewModel.restoreMatch(
+                                                                        removedIndex,
+                                                                        record
+                                                                    )
+                                                                }
+                                                            }
+                                                        }) {
+                                                            Icon(
+                                                                Icons.Filled.Delete,
+                                                                null,
+                                                                tint = MaterialTheme.colorScheme.error
+                                                            )
+                                                        }
                                                     }
                                                 }
                                             }
@@ -998,23 +1232,23 @@ fun HomeScreen(
                                     }
                                 }
                             }
-                        }
 
-                        // --- LEZIONE: COPYRIGHT NEL FLUSSO SCORREVOLE ---
-                        // Inserendo il copyright come 'item' finale della LazyColumn,
-                        // beneficerà automaticamente del 'contentPadding' che abbiamo impostato sopra.
-                        // Non serve più forzare un padding enorme dal basso, si posizionerà da solo
-                        // in modo perfetto sotto all'ultima card e sopra all'ingombro del FAB.
-                        item {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                                textAlign = TextAlign.Center
-                            )
+                            // --- LEZIONE: COPYRIGHT NEL FLUSSO SCORREVOLE ---
+                            // Inserendo il copyright come 'item' finale della LazyColumn,
+                            // beneficerà automaticamente del 'contentPadding' che abbiamo impostato sopra.
+                            // Non serve più forzare un padding enorme dal basso, si posizionerà da solo
+                            // in modo perfetto sotto all'ultima card e sopra all'ingombro del FAB.
+                            item {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                 }
