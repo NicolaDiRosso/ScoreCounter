@@ -22,7 +22,9 @@
     import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.verticalScroll
     import androidx.compose.material.icons.filled.Check
+    import androidx.compose.material.icons.filled.EmojiEvents
     import androidx.compose.material.icons.filled.Info
+    import androidx.compose.material.icons.filled.ShowChart
     import com.n380.scorecounter.model.PlayerRecord
     import com.n380.scorecounter.ui.components.AutoResizedText
     import com.n380.scorecounter.ui.components.AwardCard
@@ -381,14 +383,30 @@
                                         .fillMaxWidth()
                                         .padding(horizontal = 4.dp)
                                 ) {
-                                    // 🧠 UI REFINEMENT: Titolo sezione adattivo
-                                    AutoResizedText(
-                                        text = "Andamento Partita",
-                                        style = MaterialTheme.typography.titleMedium, // Più discreto rispetto alla classifica
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(bottom = 6.dp)
-                                    )
+                                    // ====================================================================
+                                    // --- SEZIONE: ANDAMENTO PUNTEGGI (CON ICONA) ---
+                                    // ====================================================================
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    ) {
+                                        // Inserimento icona tematica per il grafico a linee
+                                        Icon(
+                                            imageVector = Icons.Filled.ShowChart,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        AutoResizedText(
+                                            "Andamento Punteggi",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        // Molla spaziale (Weight): Spinge il pulsante seguente a destra
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
 
                                     val recordsForChart = viewModel.players.map {
                                         PlayerRecord(
@@ -421,30 +439,27 @@
                                     Spacer(modifier = Modifier.height(12.dp))
 
                                     // ====================================================================
-                                    // 🧠 UX: Intestazione con Icona Informativa
-                                    // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
-                                    // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
+                                    // --- SEZIONE: PREMI PARTITA (ICONIZZATA E PULSANTE A DESTRA) ---
                                     // ====================================================================
+                                    // 🧠 ANIMAZIONE A CASCATA: Applichiamo lo 'staggeredModifier' all'intera Row.
+                                    // Usiamo l'indice (rankedPlayers.size + 3) per far apparire l'intestazione dei premi
+                                    // subito dopo il grafico, ma poco prima della prima AwardCard.
                                     Row(
-                                        modifier = staggeredModifier(rankedPlayers.size + 3),//diamo un ritardo per la comparsa dell'icona
+                                        modifier = staggeredModifier(rankedPlayers.size + 3)
+                                            .fillMaxWidth(), // Occupa tutta la larghezza per spingere l'info a destra
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
-                                        // Pulsante icona che inverte la variabile di stato per aprire il popup
-                                        IconButton(
-                                            onClick = { showAwardsInfoDialog = true },
-                                            modifier = Modifier.size(30.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Info,//icona delle info piena
-                                                contentDescription = "Info Premi",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier
-                                                    .padding(end = 8.dp) // Spazietto per staccare l'icona dal testo
+                                        // 1. ICONA PREMI
+                                        Icon(
+                                            imageVector = Icons.Filled.EmojiEvents, // Icona trofeo/premi
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(22.dp)
+                                        )
 
-                                            )
-                                        }
+                                        Spacer(modifier = Modifier.width(8.dp))
 
-                                        // 🧠 UI REFINEMENT: Titolo sezione adattivo
+                                        // 2. TITOLO SEZIONE
                                         AutoResizedText(
                                             text = "Premi Partita",
                                             // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
@@ -452,170 +467,216 @@
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )
+                                        // 3. MOLLA LOGICA (Weight):
+                                        // Prende tutto lo spazio rimanente tra il testo e il prossimo componente,
+                                        // di fatto "spingendo" l'IconButton verso il bordo destro della Row.
+                                        Spacer(modifier = Modifier.weight(1f))
+
+                                        // 4. PULSANTE INFORMATIVO (Ancorato a destra)
+                                        IconButton(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                showAwardsInfoDialog = true
+                                            },
+                                            modifier = Modifier.size(32.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Info,
+                                                contentDescription = "Info Premi",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
                                     }
-                                }
 
+                                    // =========================================================
+                                    // POPUP INFORMATIVO SUI PREMI (AlertDialog)
+                                    // =========================================================
+                                    // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
+                                    if (showAwardsInfoDialog) {
+                                        AlertDialog(
+                                            // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
+                                            onDismissRequest = { showAwardsInfoDialog = false },
+                                            title = {
+                                                Text(
+                                                    "Guida ai Premi",
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            },
+                                            text = {
+                                                // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
+                                                Column(
+                                                    modifier = Modifier.verticalScroll(
+                                                        rememberScrollState()
+                                                    )
+                                                ) {
 
-                                // ====================================================================
-                                // STATISTICHE AVANZATE: IL CECCHINO 🎯
-                                // ====================================================================
-                                // 🧠 KOTLIN SCOPE FUNCTIONS: '?.let' esegue il blocco solo se cecchinoStat esiste.
-                                cecchinoStat?.let { stat ->
-                                    val (sniperPlayer, maxJump) = stat
-                                    // Usiamo il nostro componente globale.
-                                    // 🧠 TEORIA: Passiamo lo 'staggeredModifier' per innescare l'animazione di entrata!
-                                    AwardCard(
-                                        icon = "🎯",
-                                        title = "Il Cecchino",
-                                        playerName = sniperPlayer.name,
-                                        playerColorInt = sniperPlayer.color,
-                                        valueText = "+$maxJump pt",
-                                        modifier = staggeredModifier(rankedPlayers.size + 3).padding(
-                                            horizontal = 4.dp
+                                                    Text(
+                                                        "🎯 Il Cecchino",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(
+                                                            bottom = 2.dp,
+                                                            top = 8.dp
+                                                        )
+                                                    )
+                                                    Text(
+                                                        "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        "🔥 L'Inarrestabile",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(
+                                                            bottom = 2.dp,
+                                                            top = 16.dp
+                                                        )
+                                                    )
+                                                    Text(
+                                                        "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        "🦞 Il Gambero",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(
+                                                            bottom = 2.dp,
+                                                            top = 16.dp
+                                                        )
+                                                    )
+                                                    Text(
+                                                        "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+
+                                                    Text(
+                                                        "🦅 La Fenice",
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(
+                                                            bottom = 2.dp,
+                                                            top = 16.dp
+                                                        )
+                                                    )
+                                                    Text(
+                                                        "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+                                                }
+                                            },
+                                            confirmButton = {
+                                                // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
+                                                Button(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
+                                                        showAwardsInfoDialog =
+                                                            false// Chiude il popup quando si preme il bottone
+                                                    },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(48.dp),
+                                                    shape = RoundedCornerShape(20.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Check,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(22.dp),
+
+                                                        )
+                                                    Spacer(Modifier.width(8.dp))
+                                                    AutoResizedText(
+                                                        "Ho capito",
+                                                        fontWeight = FontWeight.Bold,
+                                                        style = MaterialTheme.typography.bodyLarge
+                                                    )
+                                                }
+                                            }
                                         )
-                                    )
-                                }
+                                    }
 
-                                // ====================================================================
-                                // STATISTICHE AVANZATE: L'INARRESTABILE 🔥
-                                // ====================================================================
-                                inarrestabileStat?.let { stat ->
-                                    val (firePlayer, comboCount) = stat
-                                    Spacer(modifier = Modifier.height(4.dp)) // Distanziatore
-                                    AwardCard(
-                                        icon = "🔥",
-                                        title = "L'Inarrestabile",
-                                        playerName = firePlayer.name,
-                                        playerColorInt = firePlayer.color,
-                                        valueText = "$comboCount Combo",
-                                        modifier = staggeredModifier(rankedPlayers.size + 4).padding(
-                                            horizontal = 4.dp
-                                        )
-                                    )
-                                }
 
-                                // ====================================================================
-                                // STATISTICHE AVANZATE: IL GAMBERO 🦞
-                                // ====================================================================
-                                gamberoStat?.let { stat ->
-                                    val (gamberoPlayer, pointsLost) = stat
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    AwardCard(
-                                        icon = "🦞",
-                                        title = "Il Gambero",
-                                        playerName = gamberoPlayer.name,
-                                        playerColorInt = gamberoPlayer.color,
-                                        valueText = "-$pointsLost pt",
-                                        modifier = staggeredModifier(rankedPlayers.size + 5).padding(
-                                            horizontal = 4.dp
+                                    // ====================================================================
+                                    // STATISTICHE AVANZATE: IL CECCHINO 🎯
+                                    // ====================================================================
+                                    // 🧠 KOTLIN SCOPE FUNCTIONS: '?.let' esegue il blocco solo se cecchinoStat esiste.
+                                    cecchinoStat?.let { stat ->
+                                        val (sniperPlayer, maxJump) = stat
+                                        // Usiamo il nostro componente globale.
+                                        // 🧠 TEORIA: Passiamo lo 'staggeredModifier' per innescare l'animazione di entrata!
+                                        AwardCard(
+                                            icon = "🎯",
+                                            title = "Il Cecchino",
+                                            playerName = sniperPlayer.name,
+                                            playerColorInt = sniperPlayer.color,
+                                            valueText = "+$maxJump pt",
+                                            modifier = staggeredModifier(rankedPlayers.size + 3).padding(
+                                                horizontal = 4.dp
+                                            )
                                         )
-                                    )
-                                }
+                                    }
 
-                                // ====================================================================
-                                // STATISTICHE AVANZATE: LA FENICE 🦅
-                                // ====================================================================
-                                feniceStat?.let { stat ->
-                                    val (comebackPlayer, recoveryPoints) = stat
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    AwardCard(
-                                        icon = "🦅",
-                                        title = "La Fenice",
-                                        playerName = comebackPlayer.name,
-                                        playerColorInt = comebackPlayer.color,
-                                        valueText = "+$recoveryPoints pt",
-                                        modifier = staggeredModifier(rankedPlayers.size + 6).padding(
-                                            horizontal = 4.dp
+                                    // ====================================================================
+                                    // STATISTICHE AVANZATE: L'INARRESTABILE 🔥
+                                    // ====================================================================
+                                    inarrestabileStat?.let { stat ->
+                                        val (firePlayer, comboCount) = stat
+                                        Spacer(modifier = Modifier.height(4.dp)) // Distanziatore
+                                        AwardCard(
+                                            icon = "🔥",
+                                            title = "L'Inarrestabile",
+                                            playerName = firePlayer.name,
+                                            playerColorInt = firePlayer.color,
+                                            valueText = "$comboCount Combo",
+                                            modifier = staggeredModifier(rankedPlayers.size + 4).padding(
+                                                horizontal = 4.dp
+                                            )
                                         )
-                                    )
-                                }
-                            }// <-- Fine della Column (ex LazyColumn)
-                        } // <-- FINE DEL TAVOLO (Card contenitiva)
+                                    }
+
+                                    // ====================================================================
+                                    // STATISTICHE AVANZATE: IL GAMBERO 🦞
+                                    // ====================================================================
+                                    gamberoStat?.let { stat ->
+                                        val (gamberoPlayer, pointsLost) = stat
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        AwardCard(
+                                            icon = "🦞",
+                                            title = "Il Gambero",
+                                            playerName = gamberoPlayer.name,
+                                            playerColorInt = gamberoPlayer.color,
+                                            valueText = "-$pointsLost pt",
+                                            modifier = staggeredModifier(rankedPlayers.size + 5).padding(
+                                                horizontal = 4.dp
+                                            )
+                                        )
+                                    }
+
+                                    // ====================================================================
+                                    // STATISTICHE AVANZATE: LA FENICE 🦅
+                                    // ====================================================================
+                                    feniceStat?.let { stat ->
+                                        val (comebackPlayer, recoveryPoints) = stat
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        AwardCard(
+                                            icon = "🦅",
+                                            title = "La Fenice",
+                                            playerName = comebackPlayer.name,
+                                            playerColorInt = comebackPlayer.color,
+                                            valueText = "+$recoveryPoints pt",
+                                            modifier = staggeredModifier(rankedPlayers.size + 6).padding(
+                                                horizontal = 4.dp
+                                            )
+                                        )
+                                    }
+                                }// <-- Fine della Column (ex LazyColumn)
+                            } // <-- FINE DEL TAVOLO (Card contenitiva)
+                        }
                     }
                 }
-                // =========================================================
-                // POPUP INFORMATIVO SUI PREMI (AlertDialog)
-                // =========================================================
-                // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
-                if (showAwardsInfoDialog) {
-                    AlertDialog(
-                        // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
-                        onDismissRequest = { showAwardsInfoDialog = false },
-                        title = { Text("Guida ai Premi", fontWeight = FontWeight.Bold) },
-                        text = {
-                            // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
 
-                                Text(
-                                    "🎯 Il Cecchino",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
-                                )
-                                Text(
-                                    "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-
-                                Text(
-                                    "🔥 L'Inarrestabile",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                )
-                                Text(
-                                    "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-
-                                Text(
-                                    "🦞 Il Gambero",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                )
-                                Text(
-                                    "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-
-                                Text(
-                                    "🦅 La Fenice",
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                )
-                                Text(
-                                    "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        },
-                        confirmButton = {
-                            // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
-                                    showAwardsInfoDialog = false// Chiude il popup quando si preme il bottone
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                shape = RoundedCornerShape(20.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(22.dp),
-
-                                    )
-                                Spacer(Modifier.width(8.dp))
-                                AutoResizedText("Ho capito", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                            }
-
-                        }
-                    )
-                }
 
                 // =========================================================
                 // ESECUZIONE DELL'ANIMAZIONE CORIANDOLI (Sovrapposta in alto)
