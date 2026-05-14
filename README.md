@@ -15,7 +15,7 @@ ScoreCounter è un'applicazione Android d'avanguardia, sviluppata nativamente in
 - 📏 **Tipografia Adattiva (DPI-Ready):** Grazie alla tecnologia AutoResizedText, ogni titolo e punteggio si adatta matematicamente alla larghezza dello schermo, garantendo una leggibilità perfetta su qualsiasi dispositivo, indipendentemente dai DPI o dalle impostazioni dei font di sistema.
 - 📊 **Statistiche Globali:** Una sezione dedicata ai record storici con card espandibili per analizzare ogni singola sessione passata nei minimi dettagli.
 - ⏱️ **Cronometro Intelligente:** Tracciamento preciso della durata, con pausa automatica intelligente quando l'app va in background per preservare la batteria e l'integrità dei dati.
-- 🛡️ **Sicurezza Atomica & UX Fluida:**
+- 🛡️ **Affidabilità & UX Fluida:**
   - **Atomic Navigation Guard:** Protezione contro i click accidentali per evitare l'avvio di partite senza giocatori.
   - **Gestione Preferiti:** Pannello di gestione rapida dei giocatori con salvataggio persistente e blocco delle gesture per prevenire chiusure accidentali.
   - **Universal Undo:** Ripristino istantaneo di punteggi azzerati o giocatori rimossi per errore.
