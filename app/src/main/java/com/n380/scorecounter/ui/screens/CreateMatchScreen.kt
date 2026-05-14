@@ -1,8 +1,5 @@
 package com.n380.scorecounter.ui.screens
 
-import android.graphics.Paint
-import android.graphics.Typeface
-import androidx.activity.compose.BackHandler // Controllo del tasto indietro di sistema
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

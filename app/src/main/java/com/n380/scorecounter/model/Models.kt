@@ -30,7 +30,7 @@ package com.n380.scorecounter.model
         // Cambia il punteggio e aggiorna la cronologia per il grafico a linee.
         fun changeScore(amount: Int) {
             score += amount
-            //scoreHistory.add(score)
+            //scoreHistory.add(score) non salviamo più qui la cronologia perchè è un copito che spetta al ViewModel
         }
     }
 

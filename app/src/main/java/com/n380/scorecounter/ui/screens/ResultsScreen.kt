@@ -1,6 +1,5 @@
     package com.n380.scorecounter.ui.screens
 
-    import android.content.Intent
     import androidx.compose.animation.core.*
     import androidx.compose.foundation.BorderStroke
     import androidx.compose.foundation.layout.*
@@ -22,6 +21,7 @@
     import androidx.compose.ui.unit.dp
     import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.verticalScroll
+    import androidx.compose.material.icons.filled.Check
     import androidx.compose.material.icons.filled.Info
     import com.n380.scorecounter.model.PlayerRecord
     import com.n380.scorecounter.ui.components.AutoResizedText
@@ -30,7 +30,6 @@
     import com.n380.scorecounter.ui.components.PlayerResultCard
     import com.n380.scorecounter.ui.components.ScoreChart
     import com.n380.scorecounter.ui.components.buildMatchShareText
-    import com.n380.scorecounter.ui.components.formatDate
     import com.n380.scorecounter.ui.components.formatTime
     import com.n380.scorecounter.ui.components.launchShareIntent
     import com.n380.scorecounter.viewmodel.MatchViewModel
@@ -596,15 +595,24 @@
                             // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
                             Button(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showAwardsInfoDialog =
-                                        false // Chiude il popup quando si preme il bottone
+                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
+                                    showAwardsInfoDialog = false// Chiude il popup quando si preme il bottone
                                 },
-                                Modifier.height(48.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp),
                                 shape = RoundedCornerShape(20.dp)
                             ) {
-                                Text("Ho capito",fontWeight = FontWeight.Bold,)
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(22.dp),
+
+                                    )
+                                Spacer(Modifier.width(8.dp))
+                                AutoResizedText("Ho capito", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                             }
+
                         }
                     )
                 }

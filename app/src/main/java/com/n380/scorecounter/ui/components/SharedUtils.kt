@@ -137,71 +137,66 @@ package com.n380.scorecounter.ui.components
      * @param modifier Modificatore per gestire dimensioni e padding esterni.
      * @param isDetailed Se VERO, il grafico disegna la griglia di sfondo, l'Asse Y (Punteggi) e l'Asse X (Cronologia).
      */
+    /**
+     * FUNZIONE: ScoreChart
+     * SCOPO: Rendering grafico dell'andamento dei punteggi nel tempo.
+     * LOGICA: Utilizza un sistema di coordinate cartesiane dove l'asse X rappresenta il tempo
+     * e l'asse Y il punteggio. Il sistema calcola dinamicamente i rapporti di scala
+     * per far rientrare i dati all'interno della dimensione del Canvas.
+     */
     @Composable
     fun ScoreChart(
         players: List<PlayerRecord>,
         modifier: Modifier = Modifier,
-        isDetailed: Boolean = false
+        isDetailed: Boolean = false,
+        durationSeconds: Long = 0L // Input fondamentale per mappare i pixel sui minuti reali
     ) {
-        // PROTEZIONE: Se non ci sono giocatori o non ci sono punteggi, fermati (evita crash)
+        // VALIDAZIONE DATI: Evita tentativi di calcolo su liste nulle che causerebbero crash per divisione per zero.
         if (players.isEmpty()) return
         val validPlayers = players.filter { (it.scoreHistory ?: emptyList()).isNotEmpty() }
         if (validPlayers.isEmpty()) return
 
-        // MATEMATICA DI BASE: Trova il punteggio massimo (Soffitto) e minimo (Pavimento)
-        // maxOrNull() controlla tutta la lista di un giocatore. maxOf() confronta tutti i giocatori.
+        // ESTREMI MATEMATICI: Determiniamo il range di valori dell'asse Y.
+        // maxScore e minScore definiscono il "tetto" e il "pavimento" del grafico.
         val maxScore = validPlayers.maxOf { (it.scoreHistory ?: emptyList()).maxOrNull() ?: 0 }
         val minScore = validPlayers.minOf { (it.scoreHistory ?: emptyList()).minOrNull() ?: 0 }
 
         Column(modifier = modifier) {
-            // Il Canvas è la "Tela" dove usiamo coordinate X (sinistra/destra) e Y (alto/basso)
             Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
-                // ==============================================================
-                // FASE 1: SPAZIO DI LAVORO E MARGINI (Padding)
-                // ==============================================================
-                // padYTop: Spazio in alto per non far sbattere la linea contro il bordo
+                // --------------------------------------------------------------------
+                // DEFINIZIONE AREA DI DISEGNO (BOUNDS)
+                // --------------------------------------------------------------------
+                // Calcoliamo i margini (Padding) per non far toccare le linee ai bordi dello schermo.
                 val padYTop = 10.dp.toPx()
-                // padYBottom: Se dettagliato, lasciamo molto spazio sotto (50.dp) per le scritte dell'Asse X
                 val padYBottom = if (isDetailed) 50.dp.toPx() else 16.dp.toPx()
-                // padX: Se dettagliato, lasciamo tanto spazio a sinistra (20.dp) per farci stare i numeri dell'Asse Y!
                 val padX = if (isDetailed) 20.dp.toPx() else 16.dp.toPx()
 
-                // drawW (Larghezza) e drawH (Altezza): Lo spazio EFFETTIVO in cui possiamo tracciare le linee
+                // drawW e drawH rappresentano l'area netta calpestabile per il disegno delle linee.
                 val drawW = (size.width - padX * 2).coerceAtLeast(1f)
                 val drawH = (size.height - padYTop - padYBottom).coerceAtLeast(1f)
 
-                // yRange: L'escursione totale dei punti (Es. se il min è -5 e il max è 20, il range è 25)
+                // yRange serve come denominatore per normalizzare i punteggi (da 0 a 1).
                 val yRange = (maxScore - minScore).coerceAtLeast(1).toFloat()
 
-                // ==============================================================
-                // FASE 2: DISEGNO DELLA GRIGLIA E DEGLI ASSI
-                // ==============================================================
                 if (isDetailed) {
-                    // IL PENNELLO DI TESTO: Serve per comunicare con il sistema grafico base di Android
+                    // Configurazione del "Pennello" nativo per il rendering del testo.
                     val textPaint = Paint().apply {
-                        color = android.graphics.Color.LTGRAY // Grigio chiaro, ottimo per sfondi scuri
-                        textSize = 32f // Dimensione del font
-                        textAlign = Paint.Align.RIGHT // Allinea i numeri a destra (contro l'asse)
-                        typeface = Typeface.DEFAULT_BOLD // Grassetto
+                        color = android.graphics.Color.LTGRAY
+                        textSize = 32f
+                        textAlign = Paint.Align.RIGHT
+                        typeface = Typeface.DEFAULT_BOLD
                     }
 
-                    // --- ASSE Y (VERTICALE: I PUNTEGGI) E GRIGLIA ---
-                    // Disegniamo la riga principale verticale (Il "Palo" dell'asse Y)
-                    drawLine(
-                        color = Color.LightGray.copy(alpha = 0.5f),
-                        start = Offset(padX, padYTop),
-                        end = Offset(padX, size.height - padYBottom),
-                        strokeWidth = 3f
-                    )
-
-                    // Creiamo 4 righe orizzontali di riferimento (0%, 25%, 50%, 75%, 100%)
-                    val steps = 4
+                    // --------------------------------------------------------------------
+                    // DISEGNO ASSE Y E GRIGLIA ORIZZONTALE
+                    // --------------------------------------------------------------------
+                    val steps = 4 // Dividiamo l'altezza in 4 fasce di punteggio.
                     for (i in 0..steps) {
-                        // Calcolo della Y: Partiamo dal basso (padYTop + drawH) e saliamo sottraendo pixel
+                        // y: Calcolo della posizione verticale invertita (in Android lo 0 e' in alto).
                         val y = padYTop + drawH - (i * (drawH / steps))
 
-                        // Disegniamo la riga della griglia (sottile e molto trasparente)
+                        // Griglia di sfondo: aiuta a leggere il valore della linea in quel punto.
                         drawLine(
                             color = Color.Gray.copy(alpha = 0.2f),
                             start = Offset(padX, y),
@@ -209,36 +204,27 @@ package com.n380.scorecounter.ui.components
                             strokeWidth = 2f
                         )
 
-                        // Calcoliamo quale valore numerico rappresenta questa riga
+                        // Etichette numeriche: Calcoliamo il valore testuale proporzionale allo step.
                         val value = minScore + (yRange / steps) * i
-
-                        // Disegniamo il testo (Es. "15", "30") a sinistra dell'asse Y
                         drawContext.canvas.nativeCanvas.drawText(
-                            value.toInt().toString(), // Arrotonda a intero
-                            padX - 24f, // Lo stacca di 24 pixel verso sinistra
-                            y + 10f, // Lo abbassa leggermente per centrarlo con la riga
+                            value.toInt().toString(),
+                            padX - 24f,
+                            y + 10f,
                             textPaint
                         )
                     }
 
-                    // --- ASSE X (ORIZZONTALE: IL PROGRESSO TEMPORALE) ---
-                    // Disegniamo la riga principale orizzontale (Il "Pavimento")
-                    drawLine(
-                        color = Color.LightGray.copy(alpha = 0.5f),
-                        start = Offset(padX, size.height - padYBottom),
-                        end = Offset(padX + drawW, size.height - padYBottom),
-                        strokeWidth = 3f
-                    )
+                    // --------------------------------------------------------------------
+                    // DISEGNO ASSE X E TIMELINE CRONOLOGICA
+                    // --------------------------------------------------------------------
+                    textPaint.textAlign = Paint.Align.CENTER
+                    val xSteps = 4 // Suddividiamo il tempo in 4 segmenti (0%, 25%, 50%, 75%, 100%).
 
-                    // Etichette per l'asse X (Rappresentano la cronologia della partita)
-                    val xLabels = listOf("Inizio", "Metà", "Fine")
-                    textPaint.textAlign = Paint.Align.CENTER // Cambiamo allineamento al centro per l'Asse X
+                    for (i in 0..xSteps) {
+                        // xPos: Calcola dove cade la "tacca" temporale sulla larghezza del Canvas.
+                        val xPos = padX + i * (drawW / xSteps)
 
-                    xLabels.forEachIndexed { i, label ->
-                        // Calcoliamo la posizione orizzontale (0, Metà schermo, Fine schermo)
-                        val xPos = padX + i * (drawW / 2)
-
-                        // Tacca grigia indicativa sull'asse
+                        // Disegno della tacca fisica (piccola linea verticale sull'asse).
                         drawLine(
                             color = Color.LightGray.copy(alpha = 0.5f),
                             start = Offset(xPos, size.height - padYBottom),
@@ -246,63 +232,70 @@ package com.n380.scorecounter.ui.components
                             strokeWidth = 3f
                         )
 
-                        // Scritta temporale ("Inizio", "Metà", "Fine") sotto la tacca
+                        // LOGICA TEMPORALE: Trasformazione degli indici in formati temporali leggibili.
+                        val label = if (durationSeconds > 0) {
+                            // 1. Calcoliamo i secondi relativi a questo step (es. 25% di 600 secondi = 150 secondi).
+                            val fractionSeconds = (durationSeconds.toFloat() / xSteps) * i
+                            // 2. Usiamo la funzione di utilita' formatTime per avere il formato "MM:SS".
+                            formatTime(fractionSeconds.toLong())
+                        } else {
+                            // Fallback per vecchie partite senza dato temporale.
+                            when(i) {
+                                0 -> "Inizio"
+                                1 -> "1/4"
+                                2 -> "Metà"
+                                3 -> "3/4"
+                                else -> "Fine"
+                            }
+                        }
+
+                        // Rendering finale dell'etichetta del tempo sotto l'asse.
                         drawContext.canvas.nativeCanvas.drawText(
                             label,
                             xPos,
-                            size.height - padYBottom + 45f, // Più in basso per non toccare la riga
+                            size.height - padYBottom + 45f,
                             textPaint
                         )
                     }
                 }
 
-                // ==============================================================
-                // FASE 3: IL DISEGNO DELLE LINEE DEI GIOCATORI
-                // ==============================================================
-                validPlayers.forEachIndexed { index, player ->
+                // --------------------------------------------------------------------
+                // RENDERING DELLE TRAIETTORIE (LINEE PUNTEGGIO)
+                // --------------------------------------------------------------------
+                validPlayers.forEach { player ->
                     val color = Color(player.color)
                     val path = Path()
                     val history = player.scoreHistory ?: emptyList()
 
-                    if (history.size == 1) {
-                        // Se c'è un solo punto (partita appena iniziata), disegna una linea dritta
-                        val y = padYTop + drawH - ((history[0] - minScore) / yRange * drawH)
-                        path.moveTo(padX, y)
-                        path.lineTo(padX + drawW, y)
-                        drawCircle(color, 6.dp.toPx(), Offset(padX, y))
-                        drawCircle(color, 6.dp.toPx(), Offset(padX + drawW, y))
-                    } else {
-                        // LA MAGIA: Calcoliamo il "Passo" orizzontale specifico per questo giocatore.
-                        // Facendo così, la sua linea partirà sempre dallo 0% (Inizio) e si stirerà fino al 100% (Fine),
-                        // risolvendo il bug grafico della linea storta!
-                        val localXStep = drawW / (history.size - 1).toFloat()
+                    if (history.size >= 1) {
+                        // localXStep: Determina la distanza tra un punto e l'altro.
+                        // Poiche' abbiamo sincronizzato le liste nel ViewModel, localXStep sara'
+                        // identico per tutti i giocatori, garantendo la coerenza temporale.
+                        val localXStep = drawW / (history.size - 1).coerceAtLeast(1).toFloat()
 
                         history.forEachIndexed { turn, score ->
-                            val x = padX + (turn * localXStep) // Avanzamento orizzontale nel tempo
-                            val y = padYTop + drawH - ((score - minScore) / yRange * drawH) // Altezza del punteggio
+                            // Calcolo coordinata X: basata sulla posizione nella lista (il turno).
+                            val x = padX + (turn * localXStep)
 
-                            if (turn == 0) path.moveTo(x, y) // Primo punto, poggia il pennarello
-                            else path.lineTo(x, y) // Tira la riga
+                            // Calcolo coordinata Y: Normalizziamo il punteggio rispetto al range
+                            // e lo scaliamo sull'altezza disponibile (drawH).
+                            val y = padYTop + drawH - ((score - minScore) / yRange * drawH)
 
-                            // ====================================================================
-                            // 🧠 TEORIA VISIVA: IL "PESO" DEI PUNTI (Ink-to-Data Ratio)
-                            // Quando un grafico ha molti punti ravvicinati, pallini troppo grandi
-                            // creano un effetto "collana di perle" che spezza la continuità della linea.
-                            // Tecnicamente, riducendo il raggio (radius), abbassiamo il rumore visivo
-                            // sui vertici, permettendo all'occhio di seguire meglio la "rotta" (il Path).
-                            // 64.dp -> 3.dp (Dettagliato) e 2.dp (Semplice) è il bilanciamento ideale.
-                            // ====================================================================
+                            if (turn == 0) path.moveTo(x, y) // Punto di partenza.
+                            else path.lineTo(x, y) // Connessione lineare al punto successivo.
+
+                            // Disegno dei nodi (pallini) per evidenziare i momenti di cambio punteggio.
                             val radius = if (isDetailed) 3.dp.toPx() else 2.dp.toPx()
                             drawCircle(color, radius, Offset(x, y))
                         }
                     }
 
-                    // Eseguiamo il disegno fisico del tracciato salvato nel 'path'
+                    // Disegno del tracciato completo (Path).
                     drawPath(
                         path = path,
                         color = color,
                         style = Stroke(
-                            width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(), // Linea proporzionata ai nuovi pallini
+                            width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(),
                             cap = StrokeCap.Round,
                             join = StrokeJoin.Round
                         )
@@ -310,7 +303,7 @@ package com.n380.scorecounter.ui.components
                 }
             }
 
-            // ---> LA LEGENDA IN FONDO (Invariata) <---
+            // LEGENDA: Mostra i nomi dei giocatori con i relativi colori sotto il grafico.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -318,7 +311,7 @@ package com.n380.scorecounter.ui.components
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.Center
             ) {
-                validPlayers.forEachIndexed { index, player ->
+                validPlayers.forEach { player ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)

@@ -45,8 +45,6 @@ import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
 import com.n380.scorecounter.ui.components.AutoResizedText
-import com.n380.scorecounter.ui.components.AwardCard
-import com.n380.scorecounter.ui.components.PatternedBackground
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.buildMatchShareText
 import com.n380.scorecounter.ui.components.formatDate
@@ -101,8 +99,6 @@ fun HomeScreen(
     // ma anche ai cambi di configurazione del sistema (come la rotazione del display).
     var expandedMatchIndex by rememberSaveable { mutableIntStateOf(-1) }
 
-    // Stato per la visibilità del dialogo informativo sui premi nella schermata di analisi.
-    var showAwardsInfoDialog by rememberSaveable { mutableStateOf(false) }
 
     // Stato per la visibilità del dialogo "Informazioni App"
     var showAboutDialog by rememberSaveable { mutableStateOf(false) }
@@ -1025,409 +1021,72 @@ fun HomeScreen(
             }
         }
     }
+    // ============================================================================
+    // LAYER MODALE: OVERLAY DEL GRAFICO DETTAGLIATO (ESTRATTO)
+    // ============================================================================
+                    // LEZIONE Z-INDEX: In Jetpack Compose, l'ordine in cui scrivi il codice determina
+                    // l'ordine in cui gli elementi vengono impilati l'uno sull'altro (Asse Z).
     // --------------------------------------------------------------------
-    // LAYER MODALE: OVERLAY DEL GRAFICO DETTAGLIATO
+    // COMPONENTE: AnimatedVisibility (Gestore delle Transizioni di Stato)
     // --------------------------------------------------------------------
-    // LEZIONE Z-INDEX: In Jetpack Compose, l'ordine in cui scrivi il codice determina
-    // l'ordine in cui gli elementi vengono impilati l'uno sull'altro (Asse Z).
-    // Inserendo questa AnimatedVisibility alla FINE della funzione HomeScreen (fuori dallo Scaffold),
-    // ci assicuriamo che quando appare venga disegnata *SOPRA* a tutto il resto (lista, bottoni, topbar).
+    // Questo Composable osserva un booleano e gestisce l'aggiunta/rimozione del contenuto
+    // dal grafo della UI. A differenza di un 'if' standard, mantiene il componente
+    // in memoria durante tutta la durata dell'animazione di uscita (ExitTransition).
     AnimatedVisibility(
-        // Il "Grilletto": l'animazione parte solo quando expandedMatch ha un valore (non è null)
+        // TRIGGER DI STATO: Valuta la nullabilità dell'oggetto.
+        // Se 'expandedMatch' contiene un'istanza, 'visible' diventa true.
+        // Compose attiva una "Recomposition" e innesca la 'EnterTransition'.
         visible = expandedMatch != null,
-        // Animazione di entrata: Svanimento (fadeIn) + scivolamento dal basso verso l'alto (slideInVertically)
-        enter = fadeIn(tween(300)) + slideInVertically(
+
+        // --------------------------------------------------------------------
+        // FASE DI ENTRATA (EnterTransition)
+        // --------------------------------------------------------------------
+        // Combiniamo due trasformazioni distinte tramite l'operatore '+'.
+        enter = fadeIn(
+            // Tween (Interpolazione Temporale): Definisce una durata fissa di 150ms.
+            animationSpec = tween(200)
+        ) + slideInVertically(
+            // OFFSET INIZIALE: Determina la coordinata Y di partenza.
+            // 'it' rappresenta l'altezza totale (in pixel) del contenuto dell'overlay.
+            // Dividendo per 10, il componente non parte dal fondo dello schermo,
+            // ma "slitta" verso l'alto solo per l'ultimo 10% della sua altezza,
+            // creando un effetto di comparsa più elegante e meno invasivo.
             initialOffsetY = { it / 10 },
-            animationSpec = tween(300, easing = FastOutSlowInEasing)
+
+            // EASING (Curva di Velocità): FastOutSlowInEasing.
+            // Utilizza una curva di Bezier cubica (0.4, 0.0, 0.2, 1.0).
+            // L'animazione parte velocemente e decelera verso la fine,
+            // simulando il comportamento fisico di un oggetto che si ferma.
+            animationSpec = tween(200, easing = FastOutSlowInEasing)
         ),
-        // Animazione di uscita: Svanimento veloce + scivolamento verso il basso
-        exit = fadeOut(tween(200)) + slideOutVertically(
+
+        // --------------------------------------------------------------------
+        // FASE DI USCITA (ExitTransition)
+        // --------------------------------------------------------------------
+        exit = fadeOut(
+            // Aumentiamo la durata a 200ms per rendere la sparizione meno brusca.
+            animationSpec = tween(200)
+        ) + slideOutVertically(
+            // TARGET OFFSET: Punto di arrivo della coordinata Y durante l'uscita.
+            // Muove il componente verso il basso del 10% della sua altezza prima di rimuoverlo.
             targetOffsetY = { it / 10 },
+
+            // EASING: FastOutLinearInEasing.
+            // Parte velocemente e mantiene un'accelerazione costante fino alla scomparsa.
+            // Ideale per componenti che lasciano lo schermo, poiché suggerisce
+            // che l'oggetto stia acquisendo slancio per uscire dal campo visivo.
             animationSpec = tween(200, easing = FastOutLinearInEasing)
         )
     ) {
-        //-------------------------------------------------------------------------------------------------------------------------------------------
-        //AGGIUNGIAMO LA SEZIONE DEI PREMI MA PRIMA DI QUESTO IMPOSTAIMO LOL SFONDO CON LE ICONE
         lastMatch?.let { match ->
-            // Usiamo lastMatch (la memoria fantasma) per assicurarci che i dati non spariscano
-            // improvvisamente mentre l'animazione di uscita sta ancora finendo di scivolare via.
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                // Riportiamo il colore a solido (senza alpha) perché lo sfondo a icone
-                // riempirà visivamente lo spazio.
-                color = MaterialTheme.colorScheme.background
-            ) {
-                // 🧠 LEZIONE Z-INDEX: Il Box ci permette di sovrapporre i livelli.
-                Box(modifier = Modifier.fillMaxSize()) {
-
-                    // LIVELLO 0 (Sfondo): Dipingiamo la griglia di icone dinamiche
-                    // per coerenza con la Home e la ResultsScreen.
-                    PatternedBackground()
-
-                    // LIVELLO 1 (Contenuto): La struttura a colonna che separa area dati e dock comandi.
-                    Column(modifier = Modifier.fillMaxSize()) {
-
-                        // AREA DATI: Contiene Header e Tavolo.
-                        Column(
-                            modifier = Modifier
-                                .weight(1f) // Prende tutto lo spazio tranne il dock inferiore
-                                // 🧠 LEZIONE SPAZIATURA: Usiamo 'statusBarsPadding' invece di 'systemBarsPadding'.
-                                // 'systemBars' aggiungerebbe spazio anche in basso (barra navigazione),
-                                // raddoppiando il vuoto dato che il Dock ha già il suo 'navigationBarsPadding'.
-                                .statusBarsPadding()
-                                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                        ) {
-                            // ====================================================================
-                            // --- INTESTAZIONE OVERLAY ---
-                            // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
-                            // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
-                            // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
-                            // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
-                            //    'secondary' per farlo risaltare in modo vibrante ed elegante.
-                            // ====================================================================
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "Analisi Partita",
-                                    style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                AutoResizedText(
-                                    text = match.title,
-                                    style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
-                                    modifier = Modifier.padding(top = 4.dp)
-                                )
-                            }
-
-                            // ====================================================================
-                            // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
-                            // ====================================================================
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    // 🧠 FIX GEOMETRICO: Aggiungiamo 'padding(bottom = 16.dp)'.
-                                    // In questo modo, la distanza tra la fine del tavolo grigio e l'inizio del dock bianco
-                                    // è di esattamente 16.dp, rispecchiando perfettamente il layout della Homepage
-                                    // dove il tavolo è distanziato dal dock principale della stessa misura.
-                                    .padding(bottom = 16.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                shape = RoundedCornerShape(24.dp)
-                            ) {
-                                // 🧠 RECOMPOSITION: Usiamo Column + verticalScroll invece di LazyColumn.
-                                // Forziamo il caricamento immediato di tutti gli elementi per avere animazioni fluide.
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .verticalScroll(rememberScrollState()) // Rende il contenuto del Tavolo scorrevole.
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp) // Spazio automatico tra i figli.
-                                ) {
-                                    // --- IL GRAFICO ESPANSO ---
-                                    Text(
-                                        "Andamento Punteggi",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth().height(350.dp),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                        shape = RoundedCornerShape(16.dp)
-                                    ) {
-                                        ScoreChart(
-                                            players = match.allPlayers,
-                                            isDetailed = true, // Attiva la griglia e le etichette nel Canvas.
-                                            modifier = Modifier.fillMaxSize().padding(12.dp)
-                                        )
-                                    }
-
-                                    // --- AREA PREMI (Retrocompatibile) ---
-                                    // 🧠 KOTLIN EXTENSION: Usiamo i metodi creati nel file Models per calcolare i dati.
-                                    // 'remember(match)' assicura che il calcolo avvenga solo quando cambia la partita selezionata.
-                                    val storiciCecchino =
-                                        remember(match) { match.getHistoricalCecchino() }
-                                    val storiciInarrestabile =
-                                        remember(match) { match.getHistoricalInarrestabile() }
-                                    val storiciGambero =
-                                        remember(match) { match.getHistoricalGambero() }
-                                    val storiciFenice = remember(match) { match.getHistoricalFenice() }
-
-                                    // 🧠 LOGICA CONDIZIONALE: Se tutti i calcoli sono 'null' (partite vecchie), il blocco sparisce.
-                                    if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
-
-                                        // ====================================================================
-                                        // 🧠 UX: Intestazione con Icona Informativa
-                                        // Usiamo una Row per allineare perfettamente al centro l'icona e il titolo.
-                                        // Icons.Outlined.Info è molto elegante e non appesantisce la UI.
-                                        // ====================================================================
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            // Pulsante icona che inverte la variabile di stato per aprire il popup
-                                            IconButton(
-                                                onClick = { showAwardsInfoDialog = true },
-                                                modifier = Modifier.size(30.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Info,//icona delle info piena
-                                                    contentDescription = "Info Premi",
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier
-                                                        .padding(end = 8.dp) // Spazietto per staccare l'icona dal testo
-
-                                                )
-                                            }
-
-                                            Text(
-                                                text = "Premi Partita",
-                                                // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                        }
-
-                                        // =========================================================
-                                        // POPUP INFORMATIVO SUI PREMI (AlertDialog)
-                                        // =========================================================
-                                        // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
-                                        if (showAwardsInfoDialog) {
-                                            AlertDialog(
-                                                // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
-                                                onDismissRequest = { showAwardsInfoDialog = false },
-                                                title = {
-                                                    Text(
-                                                        "Guida ai Premi",
-                                                        fontWeight = FontWeight.Bold
-                                                    )
-                                                },
-                                                text = {
-                                                    // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                                                    Column(
-                                                        modifier = Modifier.verticalScroll(
-                                                            rememberScrollState()
-                                                        )
-                                                    ) {
-
-                                                        Text(
-                                                            "🎯 Il Cecchino",
-                                                            fontWeight = FontWeight.ExtraBold,
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(
-                                                                bottom = 2.dp,
-                                                                top = 8.dp
-                                                            )
-                                                        )
-                                                        Text(
-                                                            "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
-                                                            style = MaterialTheme.typography.bodyMedium
-                                                        )
-
-                                                        Text(
-                                                            "🔥 L'Inarrestabile",
-                                                            fontWeight = FontWeight.ExtraBold,
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(
-                                                                bottom = 2.dp,
-                                                                top = 16.dp
-                                                            )
-                                                        )
-                                                        Text(
-                                                            "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
-                                                            style = MaterialTheme.typography.bodyMedium
-                                                        )
-
-                                                        Text(
-                                                            "🦞 Il Gambero",
-                                                            fontWeight = FontWeight.ExtraBold,
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(
-                                                                bottom = 2.dp,
-                                                                top = 16.dp
-                                                            )
-                                                        )
-                                                        Text(
-                                                            "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
-                                                            style = MaterialTheme.typography.bodyMedium
-                                                        )
-
-                                                        Text(
-                                                            "🦅 La Fenice",
-                                                            fontWeight = FontWeight.ExtraBold,
-                                                            color = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.padding(
-                                                                bottom = 2.dp,
-                                                                top = 16.dp
-                                                            )
-                                                        )
-                                                        Text(
-                                                            "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
-                                                            style = MaterialTheme.typography.bodyMedium
-                                                        )
-                                                    }
-                                                },
-                                                confirmButton = {
-                                                    // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
-                                                    Button(
-                                                        onClick = {
-                                                            haptic.performHapticFeedback(
-                                                                HapticFeedbackType.LongPress
-                                                            )
-                                                            showAwardsInfoDialog =
-                                                                false // Chiude il popup quando si preme il bottone
-                                                        },
-                                                        shape = RoundedCornerShape(20.dp)
-                                                    ) {
-                                                        Text("Ho capito")
-                                                    }
-                                                }
-                                            )
-                                        }
-
-                                        // ====================================================================
-                                        // 🧠 REFACTORING: UTILIZZO DEL COMPONENTE 'AwardCard'
-                                        // Grazie al nostro nuovo mattoncino, abbiamo eliminato centinaia di righe
-                                        // di codice duplicato. Passiamo solo i dati grezzi, e la grafica si autogenera!
-                                        // ====================================================================
-
-                                        // --- CARD PREMIO: CECCHINO 🎯 ---
-                                        storiciCecchino?.let { (player, punti) ->
-                                            AwardCard(
-                                                icon = "🎯",
-                                                title = "Il Cecchino",
-                                                playerName = player.name,
-                                                playerColorInt = player.color,
-                                                valueText = "+$punti pt"
-                                            )
-                                        }
-
-                                        // --- CARD PREMIO: INARRESTABILE 🔥 ---
-                                        storiciInarrestabile?.let { (player, combo) ->
-                                            AwardCard(
-                                                icon = "🔥",
-                                                title = "L'Inarrestabile",
-                                                playerName = player.name,
-                                                playerColorInt = player.color,
-                                                valueText = "$combo Combo"
-                                            )
-                                        }
-
-                                        // --- CARD PREMIO: IL GAMBERO 🦞 ---
-                                        storiciGambero?.let { (player, punti) ->
-                                            AwardCard(
-                                                icon = "🦞",
-                                                title = "Il Gambero",
-                                                playerName = player.name,
-                                                playerColorInt = player.color,
-                                                valueText = "-$punti pt"
-                                            )
-                                        }
-
-                                        // --- CARD PREMIO: LA FENICE 🦅 ---
-                                        storiciFenice?.let { (player, punti) ->
-                                            AwardCard(
-                                                icon = "🦅",
-                                                title = "La Fenice",
-                                                playerName = player.name,
-                                                playerColorInt = player.color,
-                                                valueText = "+$punti pt"
-                                            )
-                                        }
-                                    }
-
-                                    /// ====================================================================
-                                    // Footer informativo sulla durata
-                                    // 🧠 UX & MATERIAL 3: Coerenza dei Colori. L'utente ha giustamente
-                                    // notato che il grigio "spegne" questa informazione. Usiamo il colore
-                                    // 'primary' per legarlo visivamente al bottone di chiusura sottostante!
-                                    // ====================================================================
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                        horizontalArrangement = Arrangement.Center, // Bello centrato
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Timer,
-                                            contentDescription = "Durata",
-                                            tint = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Text(
-                                            text = " Durata totale: ${formatTime(match.durationSeconds)}",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
-                                            modifier = Modifier.padding(start = 6.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        // ====================================================================
-                        // ---> NUOVO DOCK INFERIORE (Uguale alla Home e Stats) <---
-                        // ====================================================================
-                        Surface(
-                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                            // Arrotondamento solo in alto per incollarlo al fondo dello schermo
-                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .navigationBarsPadding() // Rispetta lo spazio della barra di navigazione Android
-                                    .padding(horizontal = 16.dp, vertical = 16.dp) // Spaziatura interna per il bottone // Spaziatura interna per il bottone
-                            ) {
-                                // --------------------------------------------------------------------
-                                // PULSANTE CHIUDI ANALISI (Stile Nuova Sfida)
-                                // --------------------------------------------------------------------
-                                Button(
-                                    onClick = {
-                                        // Aggiunta la vibrazione per coerenza tattile
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        expandedMatchIndex = -1 // 🧠 STATE: Cambiando l'indice a -1, l'overlay scompare.
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(72.dp), // Manteniamo l'altezza massiccia (72dp) richiesta
-                                    shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
-                                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Chiudi",
-                                        modifier = Modifier.padding(end = 8.dp).size(28.dp) // Icona maggiorata
-                                    )
-                                    Text(
-                                        text = "Chiudi Analisi",
-                                        // Tipografia imponente (Headline) per richiamare la Home
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
-                    }
+            // Invochiamo il nostro nuovo file esterno, passandogli i dati e
+            // dicendogli cosa fare quando l'utente preme il tasto "Chiudi".
+            MatchAnalysisOverlay(
+                match = match,
+                onClose = {
+                    expandedMatchIndex = -1 // 🧠 STATE: Cambiando l'indice a -1, la Home nasconde l'overlay.
                 }
-            }
+            )
         }
     }
 }

@@ -27,7 +27,6 @@ import androidx.compose.foundation.clickable // Per rendere le card interattive
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess // Icona freccia su
 import androidx.compose.material.icons.filled.ExpandMore // Icona freccia giù
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
