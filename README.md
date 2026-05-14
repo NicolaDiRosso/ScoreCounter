@@ -26,24 +26,74 @@ ScoreCounter è un'applicazione Android d'avanguardia, sviluppata nativamente in
 - **Persistence:** [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) & [Gson](https://github.com/google/gson)
 - **Grafica:** Canvas API per i coriandoli e le statistiche.
 
-## 📸 Screenshot
-<p align="center">
-  <img width="250" alt="Home e Storico" src="https://github.com/user-attachments/assets/f82d8f3b-da7d-47a0-91cc-dfff905d33d5" />
- 
-  <img width="250" alt="Screenshot_20260415-002935" src="https://github.com/user-attachments/assets/5fe589db-c3d6-41e5-b02f-398b4078d1dd" />
+## 📸 Galleria dell'Applicazione
 
-</p>
+### 🏠 1. Home e Storico
+*Il centro di comando: avvia sfide rapide con un tocco o rivivi le glorie passate esplorando la tua Hall of Fame personale.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Homepage con storico</b><br>
+      <img src="https://github.com/user-attachments/assets/df7741bb-2b94-440a-b965-d610b47dc48c" width="250" alt="Home Screen con sfide rapide"/>
+    </td>
+     <td align="center">
+      <b>Storico per ogni partita</b><br>
+      <img src="https://github.com/user-attachments/assets/ccd5de6b-24e9-427c-a597-1b149f8f7e5f" width="250" alt="Storico partite e record assoluti"/>
+    </td>
+    <td align="center">
+      <b>Statistiche globali</b><br>
+      <img src="https://github.com/user-attachments/assets/ee48b1dc-3f4c-43c4-a7d2-dbea1757c582" width="250" alt="Storico partite e record assoluti"/>
+    </td>
+  </tr>
+</table>
 
-<p align="center">
-  <img width="250" alt="Popup Dado" src="https://github.com/user-attachments/assets/80ccafef-3aed-40a2-8e3a-f172f0beb355" />
-  <img width="250" alt="Modifica Punteggio" src="https://github.com/user-attachments/assets/16b77a54-14b3-4fef-8f30-40c01098af60" />
-  <img width="250" alt="Classifica Finale" src="https://github.com/user-attachments/assets/8625a19f-3108-48f3-8fd4-9d312c06e527" />
-</p>
+### ⚙️ 2. Creazione della sfida
+*Aggiungi il nome della sfida (anche con il completamento automatico), scegli le tue regole, poi inserisci i giocatori e scegli i colori.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Configurazione Partita</b><br>
+      <img src="https://github.com/user-attachments/assets/05e27699-671b-415b-bb9f-c959a237ed23" width="250" alt="Schermata di creazione match"/>
+    </td>
+    <td align="center">
+      <b>Personalizzazione del dado</b><br>
+      <img src="https://github.com/user-attachments/assets/e34acb2b-0309-4ac6-996d-6668cb54226b" width="250" alt="Storico partite e record assoluti"/>
+    </td>
+    <td align="center">
+      <b>Gestione Giocatori</b><br>
+      <img src="https://github.com/user-attachments/assets/df6aa4cc-b24b-440e-b531-ceca79a3409c" width="250" alt="Pannello gestione giocatori preferiti"/>
+    </td>
+  </tr>
+</table>
 
-<p align="center">
-  <img width="250" alt="Grafico Andamento" src="https://github.com/user-attachments/assets/c3bc9a2b-fb15-499e-9832-16dfda48fe99" />
-  <img width="250" alt="Condivisione Storico" src="https://github.com/user-attachments/assets/9c37ffc3-7d7c-4b16-b45a-92ced0069d73" />
-</p>
+### 🎲 3. La Sfida (Contatore)
+*Design "Table-First" per non perdere mai il focus: tieni i punti con ergonomia, tieni d'occhio le combo e usa gli strumenti integrati.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Contatore e Combo</b><br>
+      <img src="https://github.com/user-attachments/assets/b7fbe4c9-f7b7-4270-b2a4-0264a6a1ab6f" width="250" alt="Match in corso con effetto On Fire"/>
+    </td>
+    <td align="center">
+      <b>Strumenti integrati</b><br>
+      <img src="https://github.com/user-attachments/assets/802a9101-cd97-42aa-9426-c4840f869f46" width="250" alt="Popup del dado" />
+    </td>
+  </tr>
+</table>
 
+### 🏆 4. Risultati e Analisi
+*Molto più di un semplice punteggio: scopri chi si aggiudica i premi speciali e analizza l'andamento della gara sul grafico temporale.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Classifica finale con grafico della partita</b><br>
+      <img src="https://github.com/user-attachments/assets/843155fa-271c-4549-a7b8-9cb3fc681bbe" width="250" alt="Classifica finale con grafico della partita"/>
+    </td>
+    <td align="center">
+      <b>Gratification con medaglie scherzose</b><br>
+      <img src="https://github.com/user-attachments/assets/3d179504-7782-4f0b-bcbf-120a1e01566b" width="250" alt="Gratification con medaglie scherzose"/>
+    </td>
+  </tr>
+</table>
 
 © 2026 Creato da NicolA380
