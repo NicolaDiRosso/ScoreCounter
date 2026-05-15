@@ -661,7 +661,7 @@ fun HomeScreen(
                 // Dichiarazione dello stato locale per l'input di testo della barra di ricerca.
                 // - 'by': È un delegato Kotlin. Estrae direttamente la stringa dal wrapper MutableState.
                 // - 'rememberSaveable': Salva il dato nel 'Bundle' nativo di Android. Se l'utente
-                //   ruota lo schermo, la stringa digitata non viene distrutta.
+                //   ruota lo schermo, la stringa digitata non viene distrutta. Questa cosa non accade con il solo remebre
                 // - 'mutableStateOf("")': Crea un "nodo osservabile". Quando cambia, Compose ridisegna.
                 var searchQuery by rememberSaveable { mutableStateOf("") }
 
@@ -767,50 +767,76 @@ fun HomeScreen(
                     }
 
                     // --------------------------------------------------------------------
-                    // GESTIONE DEGLI EMPTY STATE E RENDERING DELLA LISTA
+                    // GESTIONE DEGLI EMPTY STATE (STATI VUOTI) E RENDERING DELLA LISTA
                     // --------------------------------------------------------------------
                     if (viewModel.history.isEmpty()) {
-                        // STATO VUOTO ASSOLUTO (Empty State)
-                        // Usiamo un Box per centrare perfettamente la scritta in mezzo al tavolo gigante
+                        // ====================================================================
+                        // CASO 1: EMPTY STATE ASSOLUTO (Database Totalmente Vuoto)
+                        // Innescato quando l'app è al primo avvio o dopo una pulizia dati.
+                        // ====================================================================
                         Box(
                             modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                            contentAlignment = Alignment.Center // Allineamento baricentrico rispetto al contenitore padre
                         ) {
-                            AutoResizedText(
-                                text = "Nessuna sfida salvata al momento.",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally, // Centratura orizzontale dei figli
+                                verticalArrangement = Arrangement.Center // Compattazione verticale al centro
+                            ) {
+                                //  Usiamo 'EmojiEvents' (il trofeo) per stimolare l'idea della vittoria.
+                                Icon(
+                                    imageVector = Icons.Filled.EmojiEvents,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(80.dp) // Dimensione maggiorata rispetto alla ricerca per dare più peso visivo
+                                        .padding(bottom = 16.dp),
+                                    // 🧠 ALPHA CHANNEL: Portiamo l'opacità al 30% (0.3f).
+                                    // In design, una trasparenza così alta indica uno "stato latente" o un "segnaposto".
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                )
+
+                                // TITOLO PRINCIPALE: Usa il tuo stile Typography per coerenza
+                                AutoResizedText(
+                                    text = "La tua cronologia è vuota",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                // CALL TO ACTION (INVITO ALL'AZIONE): Spieghiamo all'utente cosa fare.
+                                Text(
+                                    text = "Inizia una sfida per salvare la tua prima vittoria!",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center, // Centra il testo se va su due righe
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp)
+                                )
+                            }
                         }
                     } else if (filteredHistory.isEmpty()) {
-                        // --------------------------------------------------------------------
-                        // EMPTY STATE: NESSUN RISULTATO DI RICERCA
-                        // --------------------------------------------------------------------
-                        // Manteniamo il Box per centrare tutto il contenuto nel tavolo grigio
+                        // ====================================================================
+                        // CASO 2: EMPTY STATE RELATIVO (Nessun Risultato di Ricerca)
+                        // Innescato quando esistono dati, ma il filtro 'searchQuery' li esclude tutti.
+                        // ====================================================================
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Usiamo una Column per impilare verticalmente l'icona e il testo
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                // 1. L'ICONA GIGANTE
+                                // Usiamo 'Search' per indicare esplicitamente un fallimento del filtro.
                                 Icon(
-                                    // Usiamo la lente di ingrandimento (o SearchOff se usi le icone extended)
                                     imageVector = Icons.Filled.Search,
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(64.dp) // Dimensione "Hero" (molto grande)
-                                        .padding(bottom = 16.dp), // Spazio per staccarla dal testo
-                                    // 🧠 UX: Abbassiamo l'opacità (alpha) al 50%.
-                                    // Questo fa capire che non è un bottone cliccabile, ma una grafica di sfondo.
+                                        .size(64.dp)
+                                        .padding(bottom = 16.dp),
+                                    // Alpha al 50% per differenziarlo dallo stato assoluto (è un vuoto meno "grave")
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )
 
-                                // 2. IL TESTO (Il tuo codice originale, inserito qui)
+                                // Il componente AutoResizedText, perfetto per gestire stringhe lunghe
                                 AutoResizedText(
                                     text = "Nessun risultato trovato.",
                                     style = MaterialTheme.typography.titleLarge,
@@ -819,9 +845,8 @@ fun HomeScreen(
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 )
 
-                                // 3. SOTTOTITOLO OPZIONALE (Migliora l'empatia dell'interfaccia)
-                                Text(
-                                    text = "Prova a cercare un altro nome",
+                                AutoResizedText(
+                                    text = "Prova a cercare un altro nome o giocatore",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                     modifier = Modifier.padding(top = 8.dp)
@@ -829,9 +854,10 @@ fun HomeScreen(
                             }
                         }
                     } else {
-                        // --------------------------------------------------------------------
+                        // ====================================================================
+                        // CASO 3: RENDERING DELLA LISTA (Dati Presenti e/o Filtrati)
+                        // ====================================================================
                         // LAZYCOLUMN E IL SEGRETO DEL "CONTENT PADDING"
-                        // --------------------------------------------------------------------
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -849,7 +875,7 @@ fun HomeScreen(
                                 end = 12.dp,
                                 bottom = 16.dp
                             )
-                        ) {
+                        ) {380
                             // MODIFICA FONDAMENTALE: Iteriamo su 'filteredHistory' invece che su 'viewModel.history'
                             items(filteredHistory) { record ->
                                 // Variabile di stato locale per gestire l'apertura/chiusura della singola card

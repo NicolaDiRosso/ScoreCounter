@@ -66,6 +66,9 @@ fun CounterScreen(
     // ---> STATI PER IL DADO VIRTUALE <---
     var showDiceDialog by remember { mutableStateOf(false) }
 
+    // ---> STATI PER IL PULSANTE TIMER VIRTUALE <---
+    var showTimerDialog by remember { mutableStateOf(false) }
+
     var diceResult by remember { mutableIntStateOf(1) }
     // Contatore univoco per forzare l'aggiornamento dell'interfaccia ad ogni click
     var diceRollCount by remember { mutableIntStateOf(0) }
@@ -306,93 +309,105 @@ fun CounterScreen(
                 verticalAlignment = Alignment.CenterVertically // Allinea tutto perfettamente al centro
             ) {
 
-                    // Sotto-riga con Info e Timer
+                // Sotto-riga con Info e Timer
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // ALLINEAMENTO VERTICALE: Icona Informazioni
+                    // Rimosso il padding sinistro per allineare l'icona perfettamente al bordo del titolo.
+                    // Utilizzato FilledIconButton con PrimaryContainer per un feedback visivo coerente con il brand.
+                    FilledIconButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showInfoDialog = true
+                        },
+                        modifier = Modifier.size(32.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Icon(
+                            Icons.Filled.Info,
+                            contentDescription = "Informazioni App",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    // ---> CRONOMETRO DI PARTITA  <---
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // ALLINEAMENTO VERTICALE: Icona Informazioni
-                        // Rimosso il padding sinistro per allineare l'icona perfettamente al bordo del titolo.
-                        // Utilizzato FilledIconButton con PrimaryContainer per un feedback visivo coerente con il brand.
-                        FilledIconButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                showInfoDialog = true
-                            },
-                            modifier = Modifier.size(32.dp),
-                            colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        ) {
-                            Icon(
-                                Icons.Filled.Info,
-                                contentDescription = "Informazioni App",
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Filled.Timer,
+                            contentDescription = "Tempo di gioco",
+                            modifier = Modifier.size(18.dp).padding(end = 4.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = formatTime(viewModel.matchDurationSeconds),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
 
-                        // ---> CRONOMETRO DI PARTITA  <---
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Timer,
-                                contentDescription = "Tempo di gioco",
-                                modifier = Modifier.size(18.dp).padding(end = 4.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                text = formatTime(viewModel.matchDurationSeconds),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+
+                // --- BLOCCO DESTRO: Strumenti Partita (Timer e Dado) ---
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Spazio tra i due tasti
+                ) {
+
+                    // 1. IL NUOVO PULSANTE TIMER
+                    FilledTonalButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showTimerDialog = true // Accende il popup del timer
+                        },
+                        modifier = Modifier.height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Timer,
+                            contentDescription = "Timer",
+                            modifier = Modifier.size(20.dp).padding(end = 4.dp)
+                        )
+                        Text(
+                            text = "Timer",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
-
-
-                        // --- BLOCCO DESTRO: Pulsante Dado ---
-                        // Implementazione di un OutlinedButton con altezza standardizzata (44.dp) e
-                        // curvatura coerente (20.dp) per armonizzarsi con il resto dei componenti.
-                        // Il bordo sottile in 'outline' indica una priorità inferiore rispetto ai tasti primari.
-                        //OutlinedButton
-
-                        FilledTonalButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                // ---> LA MAGIA <---
-                                // Invece di (1..6), usiamo (1..viewModel.diceSides).
-                                // Se hai scelto il D20, calcolerà un numero casuale da 1 a 20!
-                                diceResult = (1..viewModel.diceSides).random()
-                                showDiceDialog = true
-                            },
-                            modifier = Modifier
-                                .height(50.dp)
-                                // 🧠 RITOCCO OTTICO: Aggiungiamo 4.dp di padding superiore.
-                                // Poiché il testo del titolo è molto grande, ha uno spazio invisibile sopra.
-                                // Con questo padding, il bottone sembrerà perfettamente allineato al testo.
-                                .padding(top = 4.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp)
-                            //border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Casino, // L'icona Material perfetta per il dado
-                                contentDescription = "Lancia Dado",
-                                modifier = Modifier
-                                    .size(25.dp)
-                                    .padding(end = 6.dp) // Piccolo spazio tra icona e testo
-                            )
-                            Text(
-                                text = "Dado", //"Lancia D${viewModel.diceSides} 🎲
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                    // 2. IL TUO VECCHIO PULSANTE DADO
+                    FilledTonalButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            diceResult = (1..viewModel.diceSides).random()
+                            showDiceDialog = true
+                        },
+                        modifier = Modifier.height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Casino,
+                            contentDescription = "Dado",
+                            modifier = Modifier.size(20.dp).padding(end = 4.dp)
+                        )
+                        AutoResizedText(
+                            text = "Dado",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
+                }
+            }
 
             // ---> CALCOLO DELLA CORONA DEL LEADER IN TEMPO REALE <---
             // Per assegnare la corona, dobbiamo sapere chi ha il punteggio più alto in questo esatto millisecondo.
@@ -955,5 +970,14 @@ fun CounterScreen(
             }
         )
     }
-}
+        // ---> POPUP DEL TIMER <---
+        // Viene invocato dal file TimerComponents.kt che abbiamo creato a parte
+        if (showTimerDialog) {
+            TimerSettingsDialog(
+                onDismiss = {
+                    showTimerDialog = false
+                }
+            )
+        }
+    }
 
