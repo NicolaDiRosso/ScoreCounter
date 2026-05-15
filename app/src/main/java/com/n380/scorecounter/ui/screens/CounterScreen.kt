@@ -314,7 +314,7 @@ fun CounterScreen(
                 shape = RoundedCornerShape(24.dp),
                 // Usiamo surfaceVariant con un tocco di trasparenza per non appesantire troppo la parte alta
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.80f)
                 ),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
             ) {
@@ -337,7 +337,7 @@ fun CounterScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 showInfoDialog = true
                             },
-                            modifier = Modifier.size(34.dp), // Leggermente più grande per facilità di tocco
+                            modifier = Modifier.size(38.dp), // Ingrandito per facilità di tocco (Standard Accessibilità)
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -351,12 +351,14 @@ fun CounterScreen(
                             )
                         }
 
-                        // DISPLAY CRONOMETRO: Tempo trascorso dall'inizio
+                        // DISPLAY CRONOMETRO: Tempo trascorso dall'inizio (Durata Match)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.Filled.Timer,
+                                // Abbiamo sostituito Icons.Filled.Timer con Icons.Filled.Schedule (un orologio classico)
+                                // per distinguere visivamente il tempo trascorso dal pulsante "Timer" (conto alla rovescia).
+                                imageVector = Icons.Filled.Schedule,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp).padding(end = 4.dp),
+                                modifier = Modifier.size(20.dp).padding(end = 4.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
@@ -379,11 +381,11 @@ fun CounterScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 showTimerDialog = true
                             },
-                            modifier = Modifier.height(40.dp), // Altezza ridotta per stare bene nella card
+                            modifier = Modifier.height(48.dp), // Altezza portata a 48dp per standard touch target
                             shape = RoundedCornerShape(16.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp)
                         ) {
-                            Icon(Icons.Filled.Timer, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
+                            Icon(Icons.Filled.Timer, null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
                             Text("Timer", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                         }
 
@@ -394,11 +396,11 @@ fun CounterScreen(
                                 diceResult = (1..viewModel.diceSides).random()
                                 showDiceDialog = true
                             },
-                            modifier = Modifier.height(40.dp),
+                            modifier = Modifier.height(48.dp), // Altezza portata a 48dp per standard touch target
                             shape = RoundedCornerShape(16.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp)
                         ) {
-                            Icon(Icons.Filled.Casino, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
+                            Icon(Icons.Filled.Casino, null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
                             AutoResizedText("Dado", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -903,8 +905,9 @@ fun CounterScreen(
                         modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
                     )
                     Text(
-                        "Tieni premuto il tasto '+' per aggiungere 10 punti o il tasto '-' per toglierne 5 istantaneamente.",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Tieni premuto il tasto '+' per aggiungere 10 punti o il tasto '-' per toglierne 5 in modo rapido.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Justify
                     )
 
                     Text(
@@ -914,8 +917,9 @@ fun CounterScreen(
                         modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
                     )
                     Text(
-                        "Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione. \nNon si applica nelle sfide a carte",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione. \nNon si applica nelle sfide a carte.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Justify
                     )
 
                     Text(
@@ -926,7 +930,8 @@ fun CounterScreen(
                     )
                     Text(
                         "Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Justify
                     )
 
                     Text(
@@ -936,8 +941,21 @@ fun CounterScreen(
                         modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
                     )
                     Text(
-                        "Usa il tasto 'Dado' per decidere chi inizia tra le dispute con amici",
-                        style = MaterialTheme.typography.bodyMedium
+                        "Usa il tasto 'Dado' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Justify
+                    )
+
+                    Text(
+                        "⏱️ Timer Personalizzato",
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                    )
+                    Text(
+                        "Usa il tasto 'Timer' per impostare un conto alla rovescia. L'app ti avviserà con una vibrazione e un suono al termine del tempo.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Justify
                     )
                 }
             },

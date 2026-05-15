@@ -301,7 +301,6 @@ fun HomeScreen(
                     Text(
                         "Che tu stia giocando a carte, a un gioco in scatola o a chi mangia più tranci di pizza, questa app è qui per tenere il conto ed evitare litigi (o forse per incentivarli 😉).",
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -338,7 +337,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        "Invece, per segnalare bug o inviare consigli, premi il pulsante e scrivi al creatore.",
+                        "Invece, per segnalare bug o inviare consigli, premi il pulsante e mandami una email 😊.",
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface

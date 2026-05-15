@@ -239,7 +239,7 @@ fun CreateMatchScreen(
                     Column(modifier = Modifier.padding(20.dp)) {
 
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -254,10 +254,10 @@ fun CreateMatchScreen(
                                 )
                             }
 
-                            // SPAZIATORE DI SICUREZZA: 
-                            // Aggiungiamo un gap fisso di 5.dp.
-                            // se il titolo dovesse diventare troppo lungo (es. su schermi piccoli), 
-                            // l'AutoResizedText inizierà a rimpicciolirsi PRIMA di toccare il bottone del dado, 
+                            // SPAZIATORE DI SICUREZZA:
+                            // Aggiungiamo un gap fisso di 10.dp.
+                            // se il titolo dovesse diventare troppo lungo (es. su schermi piccoli),
+                            // l'AutoResizedText inizierà a rimpicciolirsi PRIMA di toccare il bottone del dado,
                             // garantendo che ci sia sempre questo spazio minimo tra i due.
                             Spacer(modifier = Modifier.width(10.dp))
 
@@ -268,7 +268,8 @@ fun CreateMatchScreen(
                                     showDiceSettingsDialog = true
                                 },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                                modifier = Modifier.height(36.dp),
+                                modifier = Modifier.height(44.dp), // Aumentata l'altezza per migliore touch target
+                                shape = RoundedCornerShape(16.dp),
                             ) {
                                 Icon(Icons.Filled.Casino, "Dado", modifier = Modifier.size(18.dp).padding(end = 4.dp))
                                 AutoResizedText(
@@ -442,7 +443,7 @@ fun CreateMatchScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
 
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
                             Icon(Icons.Filled.PersonAddAlt1, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
@@ -455,7 +456,7 @@ fun CreateMatchScreen(
 
                         // GIOCATORI RAPIDI: Selezione da elenco preferiti
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -522,9 +523,9 @@ fun CreateMatchScreen(
                             Text("Nessun giocatore rapido salvato.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(15.dp))
                         HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(7.dp))
 
                         // SEZIONE AGGIUNTA MANUALE E COLORE
                         Text("Scegli un colore:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)

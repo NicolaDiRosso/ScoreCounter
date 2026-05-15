@@ -181,7 +181,8 @@ fun TimerSettingsDialog(
                 "⏱️ Timer Sfida",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                fontWeight = FontWeight.ExtraBold
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.primary,
             )
         },
         text = {
