@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -63,6 +64,9 @@ fun CounterScreen(
     // Variabile che indica se mostrare l'avviso di uscita "Salva-Vita" (se si preme Indietro per sbaglio)
     var showExitWarning by remember { mutableStateOf(false) }
 
+    // Variabile per ricordare il tempo impostato manualemnte nel timer:
+    var savedTimerMemory by rememberSaveable { mutableStateOf("") }
+
     // ---> STATI PER IL DADO VIRTUALE <---
     var showDiceDialog by remember { mutableStateOf(false) }
 
@@ -97,7 +101,7 @@ fun CounterScreen(
     }
 
     // ====================================================================
-    // LOGICA TIMER INTELLIGENTE (Pausa automatica in background)
+    // LOGICA CRONOMETRO INTELLIGENTE (Pausa automatica in background)
     // ====================================================================
 
     // 1. LocalLifecycleOwner: Recupera il "proprietario" del ciclo di vita.
@@ -106,13 +110,13 @@ fun CounterScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // 2. LA VARIABILE: isTimerRunning
-    // Creiamo una variabile locale per ricordare se il timer sta attualmente girando.
+    // Creiamo una variabile locale per ricordare se il cronometro sta attualmente girando.
     // Siccome poco sopra abbiamo eseguito viewModel.startTimer(), la facciamo partire a 'true'.
     var isTimerRunning by remember { mutableStateOf(true) }
 
     // 3. LA MEMORIA STORICA: wasTimerRunningBeforeBackground
-    // Serve per ricordare se il timer stava girando nell'istante PRIMA che l'utente bloccasse lo schermo.
-    // (Se il timer era GIA' in pausa prima di bloccare lo schermo, non vogliamo che riparta da solo sbloccandolo!).
+    // Serve per ricordare se il cronometro stava girando nell'istante PRIMA che l'utente bloccasse lo schermo.
+    // (Se il cronometro era GIA' in pausa prima di bloccare lo schermo, non vogliamo che riparta da solo sbloccandolo!).
     var wasTimerRunningBeforeBackground by remember { mutableStateOf(false) }
 
     // 4. DisposableEffect: Un effetto speciale di Compose.
@@ -127,7 +131,7 @@ fun CounterScreen(
 
                 // EVENTO A: L'app va in background o lo schermo si spegne
                 Lifecycle.Event.ON_PAUSE, Lifecycle.Event.ON_STOP -> {
-                    // Se il timer in questo momento stava scorrendo...
+                    // Se il cronometro in questo momento stava scorrendo...
                     if (isTimerRunning) {
                         wasTimerRunningBeforeBackground = true // ...ce lo appuntiamo nella memoria
                         isTimerRunning = false                 // ...aggiorniamo la variabile locale a falso
@@ -137,7 +141,7 @@ fun CounterScreen(
 
                 // EVENTO B: L'utente riapre l'app o sblocca lo schermo
                 Lifecycle.Event.ON_RESUME -> {
-                    // Controlliamo la nostra memoria: il timer stava girando prima dell'interruzione?
+                    // Controlliamo la nostra memoria: il cronometro stava girando prima dell'interruzione?
                     if (wasTimerRunningBeforeBackground) {
                         isTimerRunning = true                  // ...aggiorniamo la variabile locale a vero
                         viewModel.startTimer()                 // ...e Diciamo al ViewModel di FAR RIPARTIRE il cronometro
@@ -299,7 +303,7 @@ fun CounterScreen(
             )
             // ====================================================================
             // 2. RIGA STRUMENTI (Subito sotto il titolo)
-            // SINISTRA: Info + Timer <-----> DESTRA: Dado
+            // SINISTRA: Info + cronometro <-----> DESTRA: Dado
             // ====================================================================
             Row(
                 modifier = Modifier
@@ -309,7 +313,7 @@ fun CounterScreen(
                 verticalAlignment = Alignment.CenterVertically // Allinea tutto perfettamente al centro
             ) {
 
-                // Sotto-riga con Info e Timer
+                // Sotto-riga con Info e cronometro
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -972,12 +976,20 @@ fun CounterScreen(
     }
         // ---> POPUP DEL TIMER <---
         // Viene invocato dal file TimerComponents.kt che abbiamo creato a parte
-        if (showTimerDialog) {
-            TimerSettingsDialog(
-                onDismiss = {
-                    showTimerDialog = false
-                }
-            )
-        }
+    if (showTimerDialog) {
+        TimerSettingsDialog(
+            // 1. Passagli la memoria salvata
+            initialRawInput = savedTimerMemory,
+
+            // 2. Quando l'utente digita, salva il nuovo numero nella cassaforte
+            onInputChanged = { nuovoValore ->
+                savedTimerMemory = nuovoValore
+            },
+
+            onDismiss = {
+                showTimerDialog = false
+            }
+        )
+    }
     }
 
