@@ -43,6 +43,7 @@ import kotlin.math.abs
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
+import androidx.compose.material.icons.filled.Close
 
 /**
  * ====================================================================
@@ -420,7 +421,14 @@ fun TimerSettingsDialog(
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     shape = RoundedCornerShape(20.dp)
-                ) {
+                )
+                {
+                    // Icona Close (X) dimensionata a 28.dp per impatto visivo
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Chiudi",
+                        modifier = Modifier.padding(end = 8.dp)//.size(28.dp)
+                    )
                     Text("CHIUDI", fontWeight = FontWeight.Bold)
                 }
             }
