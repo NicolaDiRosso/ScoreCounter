@@ -120,7 +120,7 @@ class ScoreWidget : GlanceAppWidget() {
                 // ==========================================================
                 Column(
                     modifier = GlanceModifier
-                        .fillMaxSize() // Prende tutto lo spazio del widget (2x1)
+                        .fillMaxSize() // Prende tutto lo spazio del widget (3x1)
                         .cornerRadius(24.dp) // Angoli arrotondati standard per i widget moderni
                         .background(GlanceTheme.colors.background) // Sfondo dinamico Material You
                         .padding(12.dp), // Spazio interno di sicurezza
@@ -132,9 +132,11 @@ class ScoreWidget : GlanceAppWidget() {
                     // 1. INTESTAZIONE: ICONA + TITOLO (Affiancati in una Row)
                     // ==========================================================
                     Row(
-                        modifier = GlanceModifier.padding(bottom = 8.dp), // Distacco dal pulsante sotto
+                        modifier = GlanceModifier
+                        .fillMaxWidth() // Si allarga su tutto il widget
+                        .padding(bottom = 8.dp, start = 4.dp), // Aggiunto un briciolo di spazio a sinistra per simmetria
                         verticalAlignment = Alignment.CenterVertically, // Centra verticalmente icona e testo
-                        horizontalAlignment = Alignment.CenterHorizontally // Mantiene il blocco unito al centro
+                        horizontalAlignment = Alignment.Start // Mantiene il blocco unito al centro
                     ) {
 
                         // L'ICONA UFFICIALE DELLA TUA APP
@@ -152,8 +154,8 @@ class ScoreWidget : GlanceAppWidget() {
                             text = "ScoreCounter",
                             style = TextStyle(
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 14.sp,
-                                color = GlanceTheme.colors.onBackground
+                                fontSize = 12.sp,
+                                color = GlanceTheme.colors.onBackground,
                             ),
                             maxLines = 1, // Impedisce tassativamente di andare a capo in verticale
                         )
