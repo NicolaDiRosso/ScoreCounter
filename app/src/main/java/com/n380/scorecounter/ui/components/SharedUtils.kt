@@ -131,7 +131,7 @@ package com.n380.scorecounter.ui.components
      * Se invece scrivi 'isDetailed = true' (come faremo nel grafico gigante), attiverà gli assi!
      */
     /**
-     * COMPONENTE DIDATTICO: ScoreChart
+     * COMPONENTE DIDATTICO: ScoreChart(GRAFICO DEI PUNTEGGI)
      * Disegna il grafico cartesiano dei punteggi usando la geometria vettoriale (Canvas).
      * * @param players Lista dei giocatori con i loro storici punti.
      * @param modifier Modificatore per gestire dimensioni e padding esterni.
@@ -224,7 +224,15 @@ package com.n380.scorecounter.ui.components
                         // xPos: Calcola dove cade la "tacca" temporale sulla larghezza del Canvas.
                         val xPos = padX + i * (drawW / xSteps)
 
-                        // Disegno della tacca fisica (piccola linea verticale sull'asse).
+                        // Griglia di sfondo verticale: aiuta a leggere il tempo in corrispondenza dei punti.
+                        drawLine(
+                            color = Color.Gray.copy(alpha = 0.2f),
+                            start = Offset(xPos, padYTop),
+                            end = Offset(xPos, padYTop + drawH),
+                            strokeWidth = 2f
+                        )
+
+                        // Disegno della tacca fisica (piccola linea/riga verticale sull'asse).
                         drawLine(
                             color = Color.LightGray.copy(alpha = 0.5f),
                             start = Offset(xPos, size.height - padYBottom),
@@ -285,7 +293,7 @@ package com.n380.scorecounter.ui.components
                             else path.lineTo(x, y) // Connessione lineare al punto successivo.
 
                             // Disegno dei nodi (pallini) per evidenziare i momenti di cambio punteggio.
-                            val radius = if (isDetailed) 3.dp.toPx() else 2.dp.toPx()
+                            val radius = if (isDetailed) 2.dp.toPx() else 1.dp.toPx()
                             drawCircle(color, radius, Offset(x, y))
                         }
                     }

@@ -138,6 +138,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 val p = Player(record.name)
                 p.score = record.score
                 p.color = record.color//ricordiamo anche il colore del giocatore
+                p.fireComboCount = record.fireComboCount // ---> FIX: Recuperiamo il numero di combo
                 p.scoreHistory.clear()
                 p.scoreHistory.addAll(record.scoreHistory ?: listOf(0))
                 players.add(p)
@@ -157,6 +158,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     it.name,
                     it.score,
                     it.scoreHistory.toList(),
+                    fireComboCount = it.fireComboCount, // ---> Salviamo il numero di combo
                     color = it.color,
                 )
             },
