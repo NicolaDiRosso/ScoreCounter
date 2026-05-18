@@ -62,5 +62,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     // Libreria per convertire gli oggetti Kotlin in testo JSON e viceversa
     implementation("com.google.code.gson:gson:2.10.1")
+    // Jetpack Glance per i Widget della Home
+    implementation("androidx.glance:glance-appwidget:1.0.0")
+    implementation("androidx.glance:glance-material3:1.0.0")
 
 }
