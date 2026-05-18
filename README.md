@@ -1,6 +1,6 @@
 # 🎮 ScoreCounter - Il segnapunti che mancava
 
-ScoreCounter è un'applicazione Android d'avanguardia, sviluppata nativamente in Kotlin con Jetpack Compose. Progettata con un estetica in Material You, l'app trasforma il modo in cui gestisci i punteggi di giochi da tavolo, tornei di carte o sfide amichevoli, eliminando carta, penna e calcoli errati.
+ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Jetpack Compose. Progettata con un estetica in Material You che quindi cambia con i colori di sistema del proprio smarphone, l'app trasforma il modo in cui gestisci i punteggi di giochi da tavolo, tornei di carte o sfide amichevoli, eliminando carta, penna e calcoli errati.
 
 ## ✨ Caratteristiche Principali
 - 💎 **Design System "Table-First":** Un'interfaccia coerente e moderna basata su una gerarchia visiva pulita, angoli stondati armonizzati (24dp/20dp) e un dock comandi ergonomico sempre a portata di pollice.
