@@ -127,4 +127,35 @@
     <string name="btn_avvia_timer">AVVIA TIMER</string>
     <string name="btn_chiudi">CHIUDI</string>
 
+    <!-- TESTO PER IL  FILE ResultsScreen-->
+    <string name="sfida_senza_nome">Sfida Senza Nome</string>
+    <string name="desc_condividi">Condividi</string>
+    <string name="btn_condividi_risultati">Condividi Risultati</string>
+    <string name="desc_home_icon">Home</string>
+    <string name="btn_salva_chiudi">Salva e chiudi</string>
+    <string name="label_tempo_gioco">⏱️ Tempo di gioco: %s</string>
+    <string name="btn_premi_partita">Premi Partita</string>
+    <string name="desc_info_premi">Info Premi</string>
+    <string name="titolo_guida_premi">Guida ai Premi</string>
+
+    <string name="titolo_cecchino_guida">🎯 Il Cecchino</string>
+    <string name="msg_cecchino">Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.</string>
+    <string name="premio_cecchino">Il Cecchino</string>
+
+    <string name="titolo_inarrestabile_guida">🔥 L\'Inarrestabile</string>
+    <string name="msg_inarrestabile">Assegnato a chi innesca più volte la combo consecutiva \'On Fire\'.</string>
+    <string name="premio_inarrestabile">L\'Inarrestabile</string>
+
+    <string name="titolo_gambero_guida">🦞 Il Gambero</string>
+    <string name="msg_gambero">Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.</string>
+    <string name="premio_gambero">Il Gambero</string>
+
+    <string name="titolo_fenice_guida">🦅 La Fenice</string>
+    <string name="msg_fenice">Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.</string>
+    <string name="premio_fenice">La Fenice</string>
+
+    <string name="label_punti_positivi">+%d pt</string>
+    <string name="label_punti_negativi">-%d pt</string>
+    <string name="label_combo">%d Combo</string>
+
 </resources>

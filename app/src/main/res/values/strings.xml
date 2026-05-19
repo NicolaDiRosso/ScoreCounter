@@ -127,4 +127,35 @@
     <string name="btn_avvia_timer">START TIMER</string>
     <string name="btn_chiudi">CLOSE</string>
 
+    <!-- TESTO TRADOTTO PER IL  FILE ResultsScreen-->
+    <string name="sfida_senza_nome">Unnamed Challenge</string>
+    <string name="desc_condividi">Share</string>
+    <string name="btn_condividi_risultati">Share Results</string>
+    <string name="desc_home_icon">Home</string>
+    <string name="btn_salva_chiudi">Save &amp; Close</string>
+    <string name="label_tempo_gioco">⏱️ Playtime: %s</string>
+    <string name="btn_premi_partita">Match Awards</string>
+    <string name="desc_info_premi">Awards Info</string>
+    <string name="titolo_guida_premi">Awards Guide</string>
+
+    <string name="titolo_cecchino_guida">🎯 The Sniper</string>
+    <string name="msg_cecchino">Awarded to the player who makes the largest single positive jump in points.</string>
+    <string name="premio_cecchino">The Sniper</string>
+
+    <string name="titolo_inarrestabile_guida">🔥 The Unstoppable</string>
+    <string name="msg_inarrestabile">Awarded to the player who triggers the consecutive \'On Fire\' combo the most times.</string>
+    <string name="premio_inarrestabile">The Unstoppable</string>
+
+    <string name="titolo_gambero_guida">🦞 The Crawfish</string>
+    <string name="msg_gambero">Awarded to the player who accumulates the highest total of negative points in the match.</string>
+    <string name="premio_gambero">The Crawfish</string>
+
+    <string name="titolo_fenice_guida">🦅 The Phoenix</string>
+    <string name="msg_fenice">Awarded to the player with the most epic comeback, calculated between their lowest point and the final score.</string>
+    <string name="premio_fenice">The Phoenix</string>
+
+    <string name="label_punti_positivi">+%d pt</string>
+    <string name="label_punti_negativi">-%d pt</string>
+    <string name="label_combo">%d Combo</string>
+
 </resources>
