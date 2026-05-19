@@ -235,4 +235,8 @@
 
     <string name="titolo_fenice_suprema">🦅 La Fenice Suprema</string>
     <string name="desc_fenice_suprema">La rimonta più leggendaria dall\'ultimo posto</string>
+
+    <!-- TESTO PER IL FILE ScoreWidget-->
+    <string name="desc_logo_app">Logo App</string>
+    <string name="widget_btn_nuova_sfida">+ Nuova Sfida</string>
 </resources>

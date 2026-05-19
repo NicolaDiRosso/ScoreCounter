@@ -1,2 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">ScoreCounter</string>
+    <string name="desc_ripristina_salvataggio">Restaurar partida</string>
+    <string name="titolo_partita_in_sospeso">Partida pendiente</string>
+    <string name="msg_riprendi_partita">Has dejado una partida a medias.\n¿Quieres retomarla donde la dejaste?</string>
+    <string name="btn_cancella">Borrar</string>
+    <string name="btn_riprendi">Retomar</string>
+    <string name="desc_informazioni_app">Ya sea que juegues a las cartas, a un juego de mesa o a ver quién come más trozos de pizza, esta app está aquí para llevar la cuenta y evitar discusiones (o tal vez fomentarlas 😉).</string>
+    <string name="sottotitolo_cosa_puoi_fare">✨ Qué puedes hacer:</string>
+    <string name="feature_registra_partite">Registrar partidas con puntos y combos.</string>
+    <string name="feature_analizza_grafici">Analizar gráficos para demostrar tu superioridad.</string>
+    <string name="feature_assegna_titoli">Asignar títulos honoríficos especiales a quienes se los merecen.</string>
+    <string name="msg_vinca_il_migliore">¡Que gane el mejor!</string>
+    <string name="msg_segnalazione_bug">Para reportar errores o enviar sugerencias, pulsa el botón y envíame un correo (adjuntando imágenes o vídeos) 😊.</string>
+    <string name="oggetto_email_feedback">ScoreCounter: Feedback/Reporte de Error</string>
+    <string name="btn_invia_segnalazione">Enviar feedback</string>
+    <string name="btn_inizia_a_giocare">¡Empieza a jugar!</string>
+    <string name="btn_nuova_sfida">Nueva Partida</string>
+    <string name="titolo_storico_sfide">Historial de Partidas</string>
+    <string name="desc_informazioni_app_icon">Información de la App</string>
+    <string name="desc_statistiche_globali">Estadísticas Globales</string>
+    <string name="hint_cerca_sfida">Buscar partida o jugador&#8230;</string>
+    <string name="desc_cerca_icon">Buscar</string>
+    <string name="titolo_cronologia_vuota">Tu historial está vacío</string>
+    <string name="desc_inizia_sfida">¡Inicia una partida para guardar tu primera victoria!</string>
+    <string name="titolo_nessun_risultato">No se encontraron resultados.</string>
+    <string name="desc_prova_altra_ricerca">Prueba a buscar otro nombre o jugador</string>
+    <string name="label_vincitore">🏆 Ganador: %s</string>
+    <string name="label_classifica_primo">1º %s</string>
+    <string name="label_classifica_generico">%dº %s</string>
+    <string name="label_punti">%d pt</string>
+    <string name="titolo_andamento_punteggi">Tendencia de Puntos</string>
+    <string name="desc_espandi_grafico">Expandir Gráfico</string>
+    <string name="label_data_ora_partita">A las %1$s del %2$s</string>
+    <string name="msg_partita_eliminata">Partida eliminada</string>
+    <string name="btn_annulla_undo">DESHACER</string>
+    <string name="testo_copyright">© 2026 Creado por NicolA380✈️\nTodos los derechos reservados.</string>
+
+    <string name="label_chart_inizio">Inicio</string>
+    <string name="label_chart_meta">Mitad</string>
+    <string name="label_chart_fine">Fin</string>
+
+    <string name="share_title_prefix">Resultados:</string>
+    <string name="share_duration_prefix">Duración:</string>
+    <string name="share_date_prefix">Fecha:</string>
+    <string name="share_points_suffix">pt</string>
+    <string name="share_awards_title">PREMIOS ESPECIALES:</string>
+    <string name="share_sniper_detail">pt en un turno</string>
+    <string name="share_fire_detail">combos On Fire</string>
+    <string name="share_crab_detail">pt perdidos</string>
+    <string name="share_phoenix_detail_start">remontada de</string>
+    <string name="share_phoenix_detail_end">pt</string>
+    <string name="share_footer_generated">Generado con ScoreCounter 🎮</string>
+    <string name="share_intent_chooser">Compartir Clasificación</string>
+
+    <string name="titolo_nuova_sfida">Nueva Partida</string>
+    <string name="titolo_regole_gioco">Reglas del Juego</string>
+    <string name="desc_dado_icon">Dado</string>
+    <string name="label_dado">Dado (D%d)</string>
+    <string name="hint_nome_sfida">Nombre de la partida</string>
+    <string name="err_nome_sfida_obbligatorio">El nombre de la partida es obligatorio</string>
+    <string name="label_titoli_recenti">Títulos recientes:</string>
+    <string name="hint_traguardo">Objetivo (Opcional)</string>
+    <string name="tema_sfida_anime">Partida Anime</string>
+    <string name="tema_sfida_carte">Partida de Cartas</string>
+    <string name="btn_anime">Anime</string>
+    <string name="btn_carte">Cartas</string>
+    <string name="titolo_gestione_partecipanti">Gestión de Participantes</string>
+    <string name="label_giocatori_rapidi">Jugadores Rápidos:</string>
+    <string name="msg_nessun_giocatore_rapido">No hay jugadores rápidos guardados.</string>
+    <string name="label_scegli_colore">Elige un color:</string>
+    <string name="label_aggiungi_manualmente">Añadir manualmente:</string>
+    <string name="hint_nome_giocatore">Nombre</string>
+    <string name="btn_aggiungi">Añadir</string>
+    <string name="titolo_tavolo_partecipanti">Mesa de Participantes</string>
+    <string name="msg_tavolo_vuoto">¡La mesa está vacía!</string>
+    <string name="desc_tavolo_vuoto">Añade jugadores para empezar la partida.</string>
+    <string name="msg_giocatore_rimosso">%s eliminado</string>
+    <string name="titolo_modifica_giocatore">Editar Jugador</string>
+    <string name="label_nuovo_colore">Elige un nuevo color:</string>
+    <string name="hint_nuovo_nome">Nuevo nombre</string>
+    <string name="btn_salva">Guardar</string>
+    <string name="btn_annulla">Cancelar</string>
+    <string name="titolo_giocatori_rapidi_sheet">Jugadores Rápidos</string>
+    <string name="msg_rapido_rimosso">%s eliminado de rápidos</string>
+    <string name="btn_chiudi_gestione">Cerrar Gestión</string>
+    <string name="desc_chiudi_icon">Cerrar</string>
+    <string name="titolo_modifica_nome_rapido">Editar Nombre Rápido</string>
+    <string name="btn_inizia_sfida">Iniciar Partida</string>
+    <string name="err_titolo_e_giocatori">Introduce un título y al menos un jugador.</string>
+    <string name="err_solo_titolo">Introduce el nombre de la partida.</string>
+    <string name="err_solo_giocatori">¡La mesa está vacía! Añade un jugador.</string>
+    <string name="desc_inizia_icon">Iniciar</string>
+    <string name="desc_modifica_icon">Editar</string>
+    <string name="desc_elimina_icon">Eliminar</string>
+    <string name="desc_gestisci_rapidi_icon">Gestionar Jugadores Rápidos</string>
+
+    <string name="titolo_impostazioni_dado">Dado de Desempate 🎲</string>
+    <string name="desc_impostazioni_dado">Configura el dado que podrás lanzar durante la partida para decidir quién empieza o para resolver empates.</string>
+    <string name="label_scegli_formato_dado">Elige un formato rápido o crea el tuyo:</string>
+    <string name="label_inserimento_manuale">Entrada manual:</string>
+    <string name="hint_es_facce_dado">Ej. 380</string>
+    <string name="hint_n_facce">Nº Caras</string>
+    <string name="btn_applica">Aplicar</string>
+    <string name="titolo_lancio_dado">Lanzamiento de dado (D%d)</string>
+    <string name="btn_rilancia">Lanzar de nuevo</string>
+
+    <string name="btn_azzera">Reiniciar</string>
+    <string name="btn_fine_match">Fin Partida</string>
+    <string name="titolo_sfida_default">Partida</string>
+    <string name="desc_info_icon">Info</string>
+    <string name="btn_timer">Temporizador</string>
+    <string name="btn_dado">Dado</string>
+    <string name="titolo_modifica_punteggio">Editar Puntuación</string>
+    <string name="msg_inserisci_nuovo_punteggio">Introduce la nueva puntuación total para %s:</string>
+    <string name="desc_attenzione_icon">Atención</string>
+    <string name="titolo_conferma_azzeramento">¿Seguro que quieres reiniciar?</string>
+    <string name="msg_conferma_azzeramento">¿Estás seguro de que quieres reiniciar todo?\nEsta acción no se puede deshacer.</string>
+    <string name="btn_conferma_azzera">Sí, reiniciar</string>
+    <string name="desc_uscita_icon">Aviso de Salida</string>
+    <string name="titolo_conferma_uscita">¿Abandonar la partida?</string>
+    <string name="msg_conferma_uscita">Si vuelves al inicio, el progreso actual se perderá para siempre. ¿Seguro que quieres salir?</string>
+    <string name="btn_conferma_uscita">Sí, salir</string>
+    <string name="titolo_info_funzionalita">Info de funciones</string>
+    <string name="titolo_info_punteggio">🚀 Puntuación Rápida</string>
+    <string name="msg_info_punteggio">Mantén pulsado el botón \'+\' para añadir rápidamente 10 puntos o el botón \'-\' para restar 5.</string>
+    <string name="titolo_info_fire">🔥 Estado On Fire</string>
+    <string name="msg_info_fire">Si un jugador puntúa 3 veces seguidas sin interrupciones, su puntuación se vuelve naranja. \nNo se aplica en partidas de cartas.</string>
+    <string name="titolo_info_manuale">⌨️ Edición Manual</string>
+    <string name="msg_info_manuale">Haz clic directamente en el número de la puntuación para abrir el teclado e introducir un valor exacto.</string>
+    <string name="titolo_info_dado">🎲 Dado de la Suerte</string>
+    <string name="msg_info_dado">Usa el botón \'Dado\' para generar un número aleatorio para decidir quién empieza o resolver disputas.</string>
+    <string name="titolo_info_timer">⏱️ Temporizador Personalizado</string>
+    <string name="msg_info_timer">Usa el botón \'Temporizador\' para configurar una cuenta atrás. La app te avisará con vibración y sonido al finalizar el tiempo.</string>
+    <string name="btn_ho_capito">Entendido</string>
+
+    <string name="titolo_timer_sfida">⏱️ Temporizador Partida</string>
+    <string name="btn_ferma_timer">PARAR TIEMPO</string>
+    <string name="btn_avvia_timer">INICIAR TIEMPO</string>
+    <string name="btn_chiudi">CERRAR</string>
+
+    <string name="sfida_senza_nome">Partida Sin Nombre</string>
+    <string name="desc_condividi">Compartir</string>
+    <string name="btn_condividi_risultati">Compartir Resultados</string>
+    <string name="desc_home_icon">Inicio</string>
+    <string name="btn_salva_chiudi">Guardar y cerrar</string>
+    <string name="label_tempo_gioco">⏱️ Tiempo de juego: %s</string>
+    <string name="btn_premi_partita">Premios Partida</string>
+    <string name="desc_info_premi">Info Premios</string>
+    <string name="titolo_guida_premi">Guía de Premios</string>
+
+    <string name="titolo_cecchino_guida">🎯 El Francotirador</string>
+    <string name="msg_cecchino">Otorgado a quien realiza el mayor salto positivo de puntos en un solo turno.</string>
+    <string name="premio_cecchino">El Francotirador</string>
+
+    <string name="titolo_inarrestabile_guida">🔥 El Imparable</string>
+    <string name="msg_inarrestabile">Otorgado a quien activa más veces el combo consecutivo \'On Fire\'.</string>
+    <string name="premio_inarrestabile">El Imparable</string>
+
+    <string name="titolo_gambero_guida">🦞 El Cangrejo</string>
+    <string name="msg_gambero">Otorgado al jugador que acumula la mayor cantidad de puntos negativos totales.</string>
+    <string name="premio_gambero">El Cangrejo</string>
+
+    <string name="titolo_fenice_guida">🦅 El Fénix</string>
+    <string name="msg_fenice">Otorgado a quien logra la remontada más épica, calculada entre su punto más bajo y la puntuación final.</string>
+    <string name="premio_fenice">El Fénix</string>
+
+    <string name="label_punti_positivi">+%d pt</string>
+    <string name="label_punti_negativi">-%d pt</string>
+    <string name="label_combo">%d Combos</string>
+
+    <string name="titolo_analisi_partita">Análisis Partida</string>
+    <string name="label_vinta_da_con_punti">🏆 Ganada por %1$s con %2$d pt</string>
+    <string name="desc_info_grafico">Info Gráfico</string>
+    <string name="titolo_guida_grafico">Cómo leer el gráfico</string>
+    <string name="titolo_guida_punti">📈 Puntos (Eje Vertical)</string>
+    <string name="msg_guida_punti">Cuanto más sube la línea, mayor es la puntuación del jugador.</string>
+    <string name="titolo_guida_tempo">⏱️ Tiempo (Eje Horizontal)</string>
+    <string name="msg_guida_tempo">Muestra el transcurso de la partida, desde el inicio (izquierda) hasta el final (derecha).</string>
+    <string name="titolo_guida_pallini">🔵 Puntos y Líneas Planas</string>
+    <string name="msg_guida_pallini">Cada punto es un tanto marcado. Si la línea va recta (plana), significa que nadie ha puntuado en ese momento.</string>
+    <string name="titolo_guida_sorpassi">⚔️ Adelantamientos</string>
+    <string name="msg_guida_sorpassi">¡Cuando dos líneas se cruzan, significa que hubo un empate o un cambio en el liderazgo!</string>
+    <string name="label_durata_totale"> Duración total: %s</string>
+    <string name="btn_chiudi_analisi">Cerrar Análisis</string>
+
+    <string name="btn_chiudi_statistiche">Cerrar Estadísticas</string>
+    <string name="titolo_statistiche_partite">Estadísticas de partidas</string>
+    <string name="titolo_campione_assoluto">CAMPEÓN ABSOLUTO</string>
+    <string name="nessuno">Nadie</string>
+    <string name="label_vittorie">%d VICTORIAS</string>
+    <string name="titolo_riepilogo_generale">Resumen General</string>
+    <string name="label_partite_giocate"> Partidas Jugadas:</string>
+    <string name="label_tempo_giocato"> Tiempo en el campo:</string>
+
+    <string name="titolo_record_punti">🔝 Récord de puntos</string>
+    <string name="label_in_partita">en \'%s\'</string>
+    <string name="desc_record_punti">La máxima puntuación jamás alcanzada por un solo jugador en una partida.</string>
+    <string name="suffix_pt"> pt</string>
+    <string name="label_data_record">📅 Fecha del récord: %s</string>
+    <string name="msg_nessun_record">Aún no hay récords establecidos.</string>
+
+    <string name="titolo_partita_infinita">⏳ La Partida Infinita</string>
+    <string name="label_vinta_da">Ganada por %s</string>
+    <string name="label_giocata_il">📅 Jugada el: %s</string>
+    <string name="msg_nessuna_partita_cronometrata">Ninguna partida cronometrada.</string>
+
+    <string name="titolo_dittatore">👑 El Dictador</string>
+    <string name="label_ha_dominato_in">Dominó en \'%s\'</string>
+    <string name="label_dal_secondo_posto">desde el 2º puesto</string>
+    <string name="label_data_dominio">📅 Fecha de dominio: %s</string>
+    <string name="msg_nessun_dominio">Ningún dominio registrado. ¡Las partidas han sido muy equilibradas!</string>
+
+    <string name="titolo_piromane">🔥 El Pirómano</string>
+    <string name="desc_piromane">Es el jugador que ha acumulado la mayor cantidad de combos \'On Fire\' en total.</string>
+    <string name="label_volte_on_fire">veces On Fire</string>
+    <string name="msg_record_storico">📈 Este récord tiene en cuenta todas las partidas jugadas hasta ahora.</string>
+    <string name="msg_nessun_piromane">Es el jugador que ha acumulado más combos \'On Fire\'.\nActualmente nadie ha desatado el infierno.</string>
+
+    <string name="titolo_miglior_cecchino">🎯 Mejor Francotirador</string>
+    <string name="desc_miglior_cecchino">Mayor puntuación hecha en un solo turno</string>
+
+    <string name="titolo_re_gamberi">🦞 El Rey Cangrejo</string>
+    <string name="desc_re_gamberi">Mayor número de puntos perdidos en un solo movimiento</string>
+
+    <string name="titolo_fenice_suprema">🦅 El Fénix Supremo</string>
+    <string name="desc_fenice_suprema">La remontada más legendaria desde el último lugar</string>
+
+    <string name="desc_logo_app">Logo App</string>
+    <string name="widget_btn_nuova_sfida">+ Nueva Partida</string>
+</resources>

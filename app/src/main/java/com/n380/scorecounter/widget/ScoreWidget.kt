@@ -50,10 +50,12 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
+
 // ====================================================================
 // LA TUA APP
 // ====================================================================
 import com.n380.scorecounter.MainActivity // Importa la schermata principale della tua app, così l'Intent sa esattamente quale destinazione "puntare".
+import com.n380.scorecounter.R // Importa l'indice delle risorse, essenziale per estrarre le stringhe tradotte.
 
 /**
  * ====================================================================
@@ -116,7 +118,7 @@ class ScoreWidget : GlanceAppWidget() {
                 }
 
                 // ==========================================================
-                // 📱 SCHEDINA CONTENITORE (Segue il Material You dello sfondo)
+                // SCHEDINA CONTENITORE (Segue il Material You dello sfondo)
                 // ==========================================================
                 Column(
                     modifier = GlanceModifier
@@ -133,8 +135,8 @@ class ScoreWidget : GlanceAppWidget() {
                     // ==========================================================
                     Row(
                         modifier = GlanceModifier
-                        .fillMaxWidth() // Si allarga su tutto il widget
-                        .padding(bottom = 8.dp, start = 4.dp), // Aggiunto un briciolo di spazio a sinistra per simmetria
+                            .fillMaxWidth() // Si allarga su tutto il widget
+                            .padding(bottom = 8.dp, start = 4.dp), // Aggiunto un briciolo di spazio a sinistra per simmetria
                         verticalAlignment = Alignment.CenterVertically, // Centra verticalmente icona e testo
                         horizontalAlignment = Alignment.Start // Mantiene il blocco unito al centro
                     ) {
@@ -142,8 +144,12 @@ class ScoreWidget : GlanceAppWidget() {
                         // L'ICONA UFFICIALE DELLA TUA APP
                         // Usiamo ImageProvider per pescare la risorsa 'mipmap' (l'icona di lancio dell'app)
                         Image(
-                            provider = ImageProvider(com.n380.scorecounter.R.mipmap.ic_launcher),
-                            contentDescription = "Logo App",
+                            provider = ImageProvider(R.mipmap.ic_launcher),
+                            // LEZIONE TEORICA: Accesso alle risorse nel Widget tramite Context
+                            // A differenza di Compose standard, qui usiamo 'context.getString()' per leggere
+                            // la descrizione destinata ai non vedenti dal file XML. Il context ci e' stato fornito
+                            // all'inizio della funzione 'provideGlance'.
+                            contentDescription = context.getString(R.string.desc_logo_app),
                             modifier = GlanceModifier
                                 .size(20.dp) // Dimensione piccola e discreta per l'intestazione
                                 .padding(end = 6.dp) // Spazio di distacco dal testo alla sua destra
@@ -151,7 +157,8 @@ class ScoreWidget : GlanceAppWidget() {
 
                         // IL TESTO DEL TITOLO
                         Text(
-                            text = "ScoreCounter",
+                            // Recupera dinamicamente il nome dell'applicazione ("ScoreCounter")
+                            text = context.getString(R.string.app_name),
                             style = TextStyle(
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 12.sp,
@@ -162,7 +169,7 @@ class ScoreWidget : GlanceAppWidget() {
                     }
 
                     // ==========================================================
-                    // 🕹️ IL PULSANTE ADATTIVO (Si allarga/stringe col widget)
+                    // IL PULSANTE ADATTIVO (Si allarga/stringe col widget)
                     // ==========================================================
                     // Usiamo una Row come pulsante. Avendo ".fillMaxWidth()", se l'utente
                     // allarga il widget sulla Home, il pulsante si adattera' allungandosi da solo!
@@ -176,12 +183,16 @@ class ScoreWidget : GlanceAppWidget() {
                             // La cliccabilità la diamo SOLO ed esclusivamente al pulsante, non a tutto il widget!
                             .clickable(actionStartActivity(intent)),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalAlignment = Alignment.CenterHorizontally // Centra perfettamente il testo "+ Nuova Sfida" al suo interno
+                        horizontalAlignment = Alignment.CenterHorizontally // Centra perfettamente il testo all'interno
                     ) {
 
-                        // Il testo unico dentro al pulsante, come mi hai chiesto
+                        // Il testo unico dentro al pulsante
                         Text(
-                            text = "+ Nuova Sfida",
+                            // LEZIONE TEORICA: Recupero stringa per l'azione principale
+                            // Utilizziamo 'context.getString' per inserire l'etichetta del pulsante (+ Nuova Sfida).
+                            // Se il telefono passa all'inglese, il launcher aggiornera' automaticamente
+                            // il Widget mostrando la traduzione senza dover aprire l'app.
+                            text = context.getString(R.string.widget_btn_nuova_sfida),
                             style = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,// Dimensione di partenza ottimale

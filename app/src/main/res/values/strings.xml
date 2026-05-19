@@ -235,4 +235,8 @@
 
     <string name="titolo_fenice_suprema">🦅 Supreme Phoenix</string>
     <string name="desc_fenice_suprema">The most legendary comeback from last place</string>
+
+    <!-- TESTO TRADOTTO PER IL FILE ScoreWidget-->
+    <string name="desc_logo_app">App Logo</string>
+    <string name="widget_btn_nuova_sfida">+ New Challenge</string>
 </resources>

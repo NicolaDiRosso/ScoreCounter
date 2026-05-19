@@ -1,2 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">ScoreCounter</string>
+    <string name="desc_ripristina_salvataggio">बैकअप पुनर्स्थापित करें</string>
+    <string name="titolo_partita_in_sospeso">लंबित मैच</string>
+    <string name="msg_riprendi_partita">आपने एक मैच बीच में ही छोड़ दिया था।\nक्या आप वहीं से फिर से शुरू करना चाहते हैं?</string>
+    <string name="btn_cancella">हटाएं</string>
+    <string name="btn_riprendi">फिर से शुरू करें</string>
+    <string name="desc_informazioni_app">चाहे आप ताश खेल रहे हों, बोर्ड गेम खेल रहे हों, या यह देख रहे हों कि कौन सबसे ज़्यादा पिज्जा खाता है, यह ऐप स्कोर रखने और बहस से बचने के लिए यहाँ है (या शायद उन्हें बढ़ावा देने के लिए 😉)।</string>
+    <string name="sottotitolo_cosa_puoi_fare">✨ आप क्या कर सकते हैं:</string>
+    <string name="feature_registra_partite">अंक और कॉम्बो के साथ मैच रिकॉर्ड करें।</string>
+    <string name="feature_analizza_grafici">अपनी श्रेष्ठता साबित करने के लिए चार्ट का विश्लेषण करें।</string>
+    <string name="feature_assegna_titoli">जो इसके हकदार हैं उन्हें विशेष सम्मानजनक खिताब दें।</string>
+    <string name="msg_vinca_il_migliore">सर्वश्रेष्ठ खिलाड़ी की जीत हो!</string>
+    <string name="msg_segnalazione_bug">बग रिपोर्ट करने या सुझाव भेजने के लिए, बटन दबाएं और मुझे एक ईमेल भेजें (चित्र या वीडियो के साथ) 😊।</string>
+    <string name="oggetto_email_feedback">ScoreCounter: प्रतिक्रिया/बग रिपोर्ट</string>
+    <string name="btn_invia_segnalazione">प्रतिक्रिया भेजें</string>
+    <string name="btn_inizia_a_giocare">खेलना शुरू करें!</string>
+    <string name="btn_nuova_sfida">नई चुनौती</string>
+    <string name="titolo_storico_sfide">मैच का इतिहास</string>
+    <string name="desc_informazioni_app_icon">ऐप जानकारी</string>
+    <string name="desc_statistiche_globali">वैश्विक आंकड़े</string>
+    <string name="hint_cerca_sfida">मैच या खिलाड़ी खोजें&#8230;</string>
+    <string name="desc_cerca_icon">खोजें</string>
+    <string name="titolo_cronologia_vuota">आपका इतिहास खाली है</string>
+    <string name="desc_inizia_sfida">अपनी पहली जीत बचाने के लिए चुनौती शुरू करें!</string>
+    <string name="titolo_nessun_risultato">कोई परिणाम नहीं मिला।</string>
+    <string name="desc_prova_altra_ricerca">किसी अन्य नाम या खिलाड़ी को खोजने का प्रयास करें</string>
+    <string name="label_vincitore">🏆 विजेता: %s</string>
+    <string name="label_classifica_primo">पहला %s</string>
+    <string name="label_classifica_generico">%d° %s</string>
+    <string name="label_punti">%d अंक</string>
+    <string name="titolo_andamento_punteggi">स्कोर रुझान</string>
+    <string name="desc_espandi_grafico">चार्ट विस्तृत करें</string>
+    <string name="label_data_ora_partita">%1$s बजे, %2$s को</string>
+    <string name="msg_partita_eliminata">मैच हटा दिया गया</string>
+    <string name="btn_annulla_undo">पूर्ववत करें (UNDO)</string>
+    <string name="testo_copyright">© 2026 NicolA380✈️ द्वारा निर्मित\nसर्वाधिकार सुरक्षित।</string>
+
+    <string name="label_chart_inizio">शुरू</string>
+    <string name="label_chart_meta">मध्य</string>
+    <string name="label_chart_fine">अंत</string>
+
+    <string name="share_title_prefix">परिणाम:</string>
+    <string name="share_duration_prefix">अवधि:</string>
+    <string name="share_date_prefix">तारीख:</string>
+    <string name="share_points_suffix">अंक</string>
+    <string name="share_awards_title">विशेष पुरस्कार:</string>
+    <string name="share_sniper_detail">अंक एक बारी में</string>
+    <string name="share_fire_detail">ऑन फायर कॉम्बो</string>
+    <string name="share_crab_detail">अंक काटे गए</string>
+    <string name="share_phoenix_detail_start">की वापसी</string>
+    <string name="share_phoenix_detail_end">अंक</string>
+    <string name="share_footer_generated">ScoreCounter के साथ उत्पन्न 🎮</string>
+    <string name="share_intent_chooser">स्टैंडिंग साझा करें</string>
+
+    <string name="titolo_nuova_sfida">नई चुनौती</string>
+    <string name="titolo_regole_gioco">खेल के नियम</string>
+    <string name="desc_dado_icon">पासा</string>
+    <string name="label_dado">पासा (D%d)</string>
+    <string name="hint_nome_sfida">चुनौती का नाम</string>
+    <string name="err_nome_sfida_obbligatorio">चुनौती का नाम आवश्यक है</string>
+    <string name="label_titoli_recenti">हाल के शीर्षक:</string>
+    <string name="hint_traguardo">लक्ष्य (वैकल्पिक)</string>
+    <string name="tema_sfida_anime">एनीमे चुनौती</string>
+    <string name="tema_sfida_carte">कार्ड चुनौती</string>
+    <string name="btn_anime">एनीमे</string>
+    <string name="btn_carte">कार्ड</string>
+    <string name="titolo_gestione_partecipanti">प्रतिभागी प्रबंधन</string>
+    <string name="label_giocatori_rapidi">त्वरित खिलाड़ी:</string>
+    <string name="msg_nessun_giocatore_rapido">कोई त्वरित खिलाड़ी सहेजा नहीं गया।</string>
+    <string name="label_scegli_colore">एक रंग चुनें:</string>
+    <string name="label_aggiungi_manualmente">मैन्युअल रूप से जोड़ें:</string>
+    <string name="hint_nome_giocatore">नाम</string>
+    <string name="btn_aggiungi">जोड़ें</string>
+    <string name="titolo_tavolo_partecipanti">प्रतिभागी टेबल</string>
+    <string name="msg_tavolo_vuoto">टेबल खाली है!</string>
+    <string name="desc_tavolo_vuoto">चुनौती शुरू करने के लिए खिलाड़ी जोड़ें।</string>
+    <string name="msg_giocatore_rimosso">%s हटा दिया गया</string>
+    <string name="titolo_modifica_giocatore">खिलाड़ी संपादित करें</string>
+    <string name="label_nuovo_colore">नया रंग चुनें:</string>
+    <string name="hint_nuovo_nome">नया नाम</string>
+    <string name="btn_salva">सहेजें</string>
+    <string name="btn_annulla">रद्द करें</string>
+    <string name="titolo_giocatori_rapidi_sheet">त्वरित खिलाड़ी</string>
+    <string name="msg_rapido_rimosso">%s को त्वरित से हटाया गया</string>
+    <string name="btn_chiudi_gestione">प्रबंधन बंद करें</string>
+    <string name="desc_chiudi_icon">बंद करें</string>
+    <string name="titolo_modifica_nome_rapido">त्वरित नाम संपादित करें</string>
+    <string name="btn_inizia_sfida">चुनौती शुरू करें</string>
+    <string name="err_titolo_e_giocatori">एक शीर्षक और कम से कम एक खिलाड़ी दर्ज करें।</string>
+    <string name="err_solo_titolo">चुनौती का नाम दर्ज करें।</string>
+    <string name="err_solo_giocatori">टेबल खाली है! एक खिलाड़ी जोड़ें।</string>
+    <string name="desc_inizia_icon">शुरू करें</string>
+    <string name="desc_modifica_icon">संपादित करें</string>
+    <string name="desc_elimina_icon">हटाएं</string>
+    <string name="desc_gestisci_rapidi_icon">त्वरित खिलाड़ी प्रबंधित करें</string>
+
+    <string name="titolo_impostazioni_dado">टाई-ब्रेकर पासा 🎲</string>
+    <string name="desc_impostazioni_dado">वह पासा सेट करें जिसे आप यह तय करने के लिए फेंक सकते हैं कि कौन शुरू करेगा या टाई तोड़ने के लिए।</string>
+    <string name="label_scegli_formato_dado">एक प्रारूप चुनें या अपना बनाएं:</string>
+    <string name="label_inserimento_manuale">मैन्युअल प्रविष्टि:</string>
+    <string name="hint_es_facce_dado">उदा. 380</string>
+    <string name="hint_n_facce">पक्षों की संख्या</string>
+    <string name="btn_applica">लागू करें</string>
+    <string name="titolo_lancio_dado">पासा फेंकना (D%d)</string>
+    <string name="btn_rilancia">फिर से फेंकें</string>
+
+    <string name="btn_azzera">रीसेट करें</string>
+    <string name="btn_fine_match">मैच समाप्त करें</string>
+    <string name="titolo_sfida_default">चुनौती</string>
+    <string name="desc_info_icon">जानकारी</string>
+    <string name="btn_timer">टाइमर</string>
+    <string name="btn_dado">पासा</string>
+    <string name="titolo_modifica_punteggio">स्कोर संपादित करें</string>
+    <string name="msg_inserisci_nuovo_punteggio">%s के लिए नया कुल स्कोर दर्ज करें:</string>
+    <string name="desc_attenzione_icon">चेतावनी</string>
+    <string name="titolo_conferma_azzeramento">क्या आप वाकई रीसेट करना चाहते हैं?</string>
+    <string name="msg_conferma_azzeramento">क्या आप वाकई सब कुछ रीसेट करना चाहते हैं?\nइस क्रिया को पूर्ववत नहीं किया जा सकता है।</string>
+    <string name="btn_conferma_azzera">हाँ, रीसेट करें</string>
+    <string name="desc_uscita_icon">बाहर निकलने की चेतावनी</string>
+    <string name="titolo_conferma_uscita">मैच छोड़ दें?</string>
+    <string name="msg_conferma_uscita">यदि आप होम पर लौटते हैं, तो वर्तमान प्रगति हमेशा के लिए खो जाएगी। क्या आप वाकई बाहर निकलना चाहते हैं?</string>
+    <string name="btn_conferma_uscita">हाँ, बाहर निकलें</string>
+    <string name="titolo_info_funzionalita">सुविधा की जानकारी</string>
+    <string name="titolo_info_punteggio">🚀 त्वरित स्कोर</string>
+    <string name="msg_info_punteggio">जल्दी से 10 अंक जोड़ने के लिए \'+\' बटन या 5 घटाने के लिए \'-\' बटन को दबाकर रखें।</string>
+    <string name="titolo_info_fire">🔥 ऑन फायर स्थिति</string>
+    <string name="msg_info_fire">यदि कोई खिलाड़ी बिना किसी रुकावट के लगातार 3 बार स्कोर करता है, तो उसका स्कोर नारंगी हो जाता है। \nताश की चुनौतियों में लागू नहीं होता है।</string>
+    <string name="titolo_info_manuale">⌨️ मैन्युअल संपादन</string>
+    <string name="msg_info_manuale">कीबोर्ड खोलने और एक सटीक मान दर्ज करने के लिए सीधे स्कोर नंबर पर क्लिक करें।</string>
+    <string name="titolo_info_dado">🎲 भाग्यशाली पासा</string>
+    <string name="msg_info_dado">यह तय करने के लिए कि कौन शुरू करता है या विवादों को सुलझाने के लिए एक यादृच्छिक संख्या उत्पन्न करने हेतु \'पासा\' का उपयोग करें।</string>
+    <string name="titolo_info_timer">⏱️ कस्टम टाइमर</string>
+    <string name="msg_info_timer">काउंटडाउन सेट करने के लिए \'टाइमर\' बटन का उपयोग करें। समय समाप्त होने पर ऐप आपको कंपन और ध्वनि के साथ सूचित करेगा।</string>
+    <string name="btn_ho_capito">समझ गया</string>
+
+    <string name="titolo_timer_sfida">⏱️ मैच टाइमर</string>
+    <string name="btn_ferma_timer">टाइमर रोकें</string>
+    <string name="btn_avvia_timer">टाइमर शुरू करें</string>
+    <string name="btn_chiudi">बंद करें</string>
+
+    <string name="sfida_senza_nome">अनाम चुनौती</string>
+    <string name="desc_condividi">साझा करें</string>
+    <string name="btn_condividi_risultati">परिणाम साझा करें</string>
+    <string name="desc_home_icon">होम</string>
+    <string name="btn_salva_chiudi">सहेजें और बंद करें</string>
+    <string name="label_tempo_gioco">⏱️ खेलने का समय: %s</string>
+    <string name="btn_premi_partita">मैच पुरस्कार</string>
+    <string name="desc_info_premi">पुरस्कार जानकारी</string>
+    <string name="titolo_guida_premi">पुरस्कार गाइड</string>
+
+    <string name="titolo_cecchino_guida">🎯 स्नाइपर</string>
+    <string name="msg_cecchino">उस खिलाड़ी को दिया जाता है जो एक ही बारी में सबसे अधिक सकारात्मक अंक प्राप्त करता है।</string>
+    <string name="premio_cecchino">स्नाइपर</string>
+
+    <string name="titolo_inarrestabile_guida">🔥 अजेय</string>
+    <string name="msg_inarrestabile">उस खिलाड़ी को दिया जाता है जो सबसे अधिक बार \'ऑन फायर\' कॉम्बो को ट्रिगर करता है।</string>
+    <string name="premio_inarrestabile">अजेय</string>
+
+    <string name="titolo_gambero_guida">🦞 झींगा</string>
+    <string name="msg_gambero">उस खिलाड़ी को दिया जाता है जो मैच में सबसे अधिक नकारात्मक अंक जमा करता है।</string>
+    <string name="premio_gambero">झींगा</string>
+
+    <string name="titolo_fenice_guida">🦅 फीनिक्स</string>
+    <string name="msg_fenice">सबसे शानदार वापसी वाले खिलाड़ी को दिया जाता है, जिसकी गणना उनके सबसे निचले बिंदु और अंतिम स्कोर के बीच की जाती है।</string>
+    <string name="premio_fenice">फीनिक्स</string>
+
+    <string name="label_punti_positivi">+%d अंक</string>
+    <string name="label_punti_negativi">-%d अंक</string>
+    <string name="label_combo">%d कॉम्बो</string>
+
+    <string name="titolo_analisi_partita">मैच विश्लेषण</string>
+    <string name="label_vinta_da_con_punti">🏆 %1$s द्वारा %2$d अंकों के साथ जीता गया</string>
+    <string name="desc_info_grafico">चार्ट जानकारी</string>
+    <string name="titolo_guida_grafico">चार्ट कैसे पढ़ें</string>
+    <string name="titolo_guida_punti">📈 अंक (लंबवत अक्ष)</string>
+    <string name="msg_guida_punti">रेखा जितनी ऊपर जाएगी, खिलाड़ी का स्कोर उतना ही अधिक होगा।</string>
+    <string name="titolo_guida_tempo">⏱️ समय (क्षैतिज अक्ष)</string>
+    <string name="msg_guida_tempo">शुरू (बाएं) से अंत (दाएं) तक मैच की प्रगति दिखाता है।</string>
+    <string name="titolo_guida_pallini">🔵 बिंदु और सपाट रेखाएं</string>
+    <string name="msg_guida_pallini">प्रत्येक बिंदु एक स्कोर किया गया अंक है। यदि रेखा सपाट है, तो इसका मतलब है कि उस दौरान किसी ने स्कोर नहीं किया।</string>
+    <string name="titolo_guida_sorpassi">⚔️ ओवरटेक</string>
+    <string name="msg_guida_sorpassi">जब दो रेखाएं पार होती हैं, तो इसका मतलब है कि एक टाई या बढ़त में बदलाव हुआ था!</string>
+    <string name="label_durata_totale"> कुल अवधि: %s</string>
+    <string name="btn_chiudi_analisi">विश्लेषण बंद करें</string>
+
+    <string name="btn_chiudi_statistiche">आंकड़े बंद करें</string>
+    <string name="titolo_statistiche_partite">मैच के आंकड़े</string>
+    <string name="titolo_campione_assoluto">पूर्ण चैंपियन</string>
+    <string name="nessuno">कोई नहीं</string>
+    <string name="label_vittorie">%d जीत</string>
+    <string name="titolo_riepilogo_generale">सामान्य अवलोकन</string>
+    <string name="label_partite_giocate"> खेले गए मैच:</string>
+    <string name="label_tempo_giocato"> मैदान पर समय:</string>
+
+    <string name="titolo_record_punti">🔝 उच्चतम स्कोर</string>
+    <string name="label_in_partita">\'%s\' में</string>
+    <string name="desc_record_punti">एक ही मैच में किसी एक खिलाड़ी द्वारा अब तक का सबसे अधिक स्कोर।</string>
+    <string name="suffix_pt"> अंक</string>
+    <string name="label_data_record">📅 रिकॉर्ड की तारीख: %s</string>
+    <string name="msg_nessun_record">अभी तक कोई रिकॉर्ड स्थापित नहीं हुआ है।</string>
+
+    <string name="titolo_partita_infinita">⏳ अनंत मैच</string>
+    <string name="label_vinta_da">%s द्वारा जीता गया</string>
+    <string name="label_giocata_il">📅 खेला गया: %s</string>
+    <string name="msg_nessuna_partita_cronometrata">कोई समयबद्ध मैच नहीं।</string>
+
+    <string name="titolo_dittatore">👑 तानाशाह</string>
+    <string name="label_ha_dominato_in">\'%s\' में हावी रहा</string>
+    <string name="label_dal_secondo_posto">दूसरे स्थान से</string>
+    <string name="label_data_dominio">📅 प्रभुत्व की तारीख: %s</string>
+    <string name="msg_nessun_dominio">कोई प्रभुत्व दर्ज नहीं किया गया। मैच बहुत संतुलित रहे हैं!</string>
+
+    <string name="titolo_piromane">🔥 आग लगाने वाला</string>
+    <string name="desc_piromane">वह खिलाड़ी जिसने कुल मिलाकर सबसे अधिक \'ऑन फायर\' कॉम्बो जमा किए हैं।</string>
+    <string name="label_volte_on_fire">बार ऑन फायर</string>
+    <string name="msg_record_storico">📈 यह रिकॉर्ड अब तक खेले गए सभी मैचों का हिसाब रखता है।</string>
+    <string name="msg_nessun_piromane">वह खिलाड़ी जिसने सबसे अधिक \'ऑन फायर\' कॉम्बो जमा किए हैं।\nवर्तमान में किसी ने भी तबाही नहीं मचाई है।</string>
+
+    <string name="titolo_miglior_cecchino">🎯 सर्वश्रेष्ठ स्नाइपर</string>
+    <string name="desc_miglior_cecchino">एक बारी में किया गया उच्चतम स्कोर</string>
+
+    <string name="titolo_re_gamberi">🦞 झींगा का राजा</string>
+    <string name="desc_re_gamberi">एक चाल में सबसे अधिक अंक खोए</string>
+
+    <string name="titolo_fenice_suprema">🦅 सर्वोच्च फीनिक्स</string>
+    <string name="desc_fenice_suprema">अंतिम स्थान से सबसे शानदार वापसी</string>
+
+    <string name="desc_logo_app">ऐप लोगो</string>
+    <string name="widget_btn_nuova_sfida">+ नई चुनौती</string>
+</resources>

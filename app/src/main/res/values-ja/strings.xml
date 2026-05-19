@@ -1,2 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="app_name">ScoreCounter</string>
+    <string name="desc_ripristina_salvataggio">セーブデータを復元</string>
+    <string name="titolo_partita_in_sospeso">中断されたゲーム</string>
+    <string name="msg_riprendi_partita">途中で終了したゲームがあります。\n前回中断したところから再開しますか？</string>
+    <string name="btn_cancella">削除</string>
+    <string name="btn_riprendi">再開</string>
+    <string name="desc_informazioni_app">カードゲームでも、ボードゲームでも、誰が一番ピザを食べるかを競うときでも、このアプリはスコアを記録し、口論を防ぐ（あるいは助長する😉）ためにあります。</string>
+    <string name="sottotitolo_cosa_puoi_fare">✨ できること：</string>
+    <string name="feature_registra_partite">ポイントとコンボでゲームを記録する。</string>
+    <string name="feature_analizza_grafici">グラフを分析して自分の優位性を証明する。</string>
+    <string name="feature_assegna_titoli">それにふさわしい人に特別な名誉の称号を与える。</string>
+    <string name="msg_vinca_il_migliore">最高のプレイヤーが勝ちますように！</string>
+    <string name="msg_segnalazione_bug">バグを報告したりアドバイスを送る場合は、ボタンを押してメール（画像や動画を添付）を送ってください 😊。</string>
+    <string name="oggetto_email_feedback">ScoreCounter: フィードバック/バグ報告</string>
+    <string name="btn_invia_segnalazione">フィードバックを送信</string>
+    <string name="btn_inizia_a_giocare">プレイ開始！</string>
+    <string name="btn_nuova_sfida">新しいチャレンジ</string>
+    <string name="titolo_storico_sfide">対戦履歴</string>
+    <string name="desc_informazioni_app_icon">アプリ情報</string>
+    <string name="desc_statistiche_globali">全体統計</string>
+    <string name="hint_cerca_sfida">対戦やプレイヤーを検索&#8230;</string>
+    <string name="desc_cerca_icon">検索</string>
+    <string name="titolo_cronologia_vuota">履歴は空です</string>
+    <string name="desc_inizia_sfida">チャレンジを開始して最初の勝利を保存しよう！</string>
+    <string name="titolo_nessun_risultato">結果が見つかりません。</string>
+    <string name="desc_prova_altra_ricerca">別の名前やプレイヤーで検索してみてください</string>
+    <string name="label_vincitore">🏆 勝者： %s</string>
+    <string name="label_classifica_primo">1位 %s</string>
+    <string name="label_classifica_generico">%d位 %s</string>
+    <string name="label_punti">%d pt</string>
+    <string name="titolo_andamento_punteggi">スコアの傾向</string>
+    <string name="desc_espandi_grafico">グラフを拡大</string>
+    <string name="label_data_ora_partita">%2$s の %1$s</string>
+    <string name="msg_partita_eliminata">ゲームが削除されました</string>
+    <string name="btn_annulla_undo">元に戻す</string>
+    <string name="testo_copyright">© 2026 制作： NicolA380✈️\nAll rights reserved.</string>
+
+    <string name="label_chart_inizio">開始</string>
+    <string name="label_chart_meta">中間</string>
+    <string name="label_chart_fine">終了</string>
+
+    <string name="share_title_prefix">結果：</string>
+    <string name="share_duration_prefix">プレイ時間：</string>
+    <string name="share_date_prefix">日付：</string>
+    <string name="share_points_suffix">pt</string>
+    <string name="share_awards_title">特別賞：</string>
+    <string name="share_sniper_detail">pt（1ターンで）</string>
+    <string name="share_fire_detail">回の On Fire コンボ</string>
+    <string name="share_crab_detail">pt 失点</string>
+    <string name="share_phoenix_detail_start">からの逆転：</string>
+    <string name="share_phoenix_detail_end">pt</string>
+    <string name="share_footer_generated">ScoreCounterで作成 🎮</string>
+    <string name="share_intent_chooser">ランキングを共有</string>
+
+    <string name="titolo_nuova_sfida">新しいチャレンジ</string>
+    <string name="titolo_regole_gioco">ゲームのルール</string>
+    <string name="desc_dado_icon">サイコロ</string>
+    <string name="label_dado">サイコロ (D%d)</string>
+    <string name="hint_nome_sfida">チャレンジ名</string>
+    <string name="err_nome_sfida_obbligatorio">チャレンジ名は必須です</string>
+    <string name="label_titoli_recenti">最近のタイトル：</string>
+    <string name="hint_traguardo">目標スコア（任意）</string>
+    <string name="tema_sfida_anime">アニメチャレンジ</string>
+    <string name="tema_sfida_carte">カードチャレンジ</string>
+    <string name="btn_anime">アニメ</string>
+    <string name="btn_carte">カード</string>
+    <string name="titolo_gestione_partecipanti">参加者管理</string>
+    <string name="label_giocatori_rapidi">クイックプレイヤー：</string>
+    <string name="msg_nessun_giocatore_rapido">クイックプレイヤーが保存されていません。</string>
+    <string name="label_scegli_colore">色を選択：</string>
+    <string name="label_aggiungi_manualmente">手動で追加：</string>
+    <string name="hint_nome_giocatore">名前</string>
+    <string name="btn_aggiungi">追加</string>
+    <string name="titolo_tavolo_partecipanti">参加者テーブル</string>
+    <string name="msg_tavolo_vuoto">テーブルが空です！</string>
+    <string name="desc_tavolo_vuoto">プレイヤーを追加してチャレンジを開始してください。</string>
+    <string name="msg_giocatore_rimosso">%s を削除しました</string>
+    <string name="titolo_modifica_giocatore">プレイヤーを編集</string>
+    <string name="label_nuovo_colore">新しい色を選択：</string>
+    <string name="hint_nuovo_nome">新しい名前</string>
+    <string name="btn_salva">保存</string>
+    <string name="btn_annulla">キャンセル</string>
+    <string name="titolo_giocatori_rapidi_sheet">クイックプレイヤー</string>
+    <string name="msg_rapido_rimosso">%s をクイックから削除しました</string>
+    <string name="btn_chiudi_gestione">管理を閉じる</string>
+    <string name="desc_chiudi_icon">閉じる</string>
+    <string name="titolo_modifica_nome_rapido">クイック名を編集</string>
+    <string name="btn_inizia_sfida">チャレンジを開始</string>
+    <string name="err_titolo_e_giocatori">タイトルと少なくとも1人のプレイヤーを入力してください。</string>
+    <string name="err_solo_titolo">チャレンジ名を入力してください。</string>
+    <string name="err_solo_giocatori">テーブルが空です！プレイヤーを追加してください。</string>
+    <string name="desc_inizia_icon">開始</string>
+    <string name="desc_modifica_icon">編集</string>
+    <string name="desc_elimina_icon">削除</string>
+    <string name="desc_gestisci_rapidi_icon">クイックプレイヤーの管理</string>
+
+    <string name="titolo_impostazioni_dado">タイブレーカーサイコロ 🎲</string>
+    <string name="desc_impostazioni_dado">誰が始めるかを決めたり、同点を解決するためにゲーム中に振ることができるサイコロを設定します。</string>
+    <string name="label_scegli_formato_dado">クイックフォーマットを選択するか、自分で作成します：</string>
+    <string name="label_inserimento_manuale">手動入力：</string>
+    <string name="hint_es_facce_dado">例： 380</string>
+    <string name="hint_n_facce">面の数</string>
+    <string name="btn_applica">適用</string>
+    <string name="titolo_lancio_dado">サイコロを振る (D%d)</string>
+    <string name="btn_rilancia">もう一度振る</string>
+
+    <string name="btn_azzera">リセット</string>
+    <string name="btn_fine_match">ゲーム終了</string>
+    <string name="titolo_sfida_default">チャレンジ</string>
+    <string name="desc_info_icon">情報</string>
+    <string name="btn_timer">タイマー</string>
+    <string name="btn_dado">サイコロ</string>
+    <string name="titolo_modifica_punteggio">スコアを編集</string>
+    <string name="msg_inserisci_nuovo_punteggio">%s の新しい合計スコアを入力してください：</string>
+    <string name="desc_attenzione_icon">警告</string>
+    <string name="titolo_conferma_azzeramento">本当にリセットしますか？</string>
+    <string name="msg_conferma_azzeramento">すべてをリセットしてもよろしいですか？\nこの操作は元に戻せません。</string>
+    <string name="btn_conferma_azzera">はい、リセットします</string>
+    <string name="desc_uscita_icon">終了の警告</string>
+    <string name="titolo_conferma_uscita">ゲームを終了しますか？</string>
+    <string name="msg_conferma_uscita">ホームに戻ると、現在の進行状況は永遠に失われます。本当に終了しますか？</string>
+    <string name="btn_conferma_uscita">はい、終了します</string>
+    <string name="titolo_info_funzionalita">機能情報</string>
+    <string name="titolo_info_punteggio">🚀 クイックスコア</string>
+    <string name="msg_info_punteggio">\'+\' ボタンを長押しすると素早く10ポイント追加され、\'-\' ボタンを長押しすると5ポイント減点されます。</string>
+    <string name="titolo_info_fire">🔥 On Fire ステータス</string>
+    <string name="msg_info_fire">プレイヤーが他のプレイヤーに邪魔されずに3回連続でスコアを獲得すると、スコアがオレンジ色になります。\nカードゲームには適用されません。</string>
+    <string name="titolo_info_manuale">⌨️ 手動編集</string>
+    <string name="msg_info_manuale">スコアの数字を直接クリックしてキーボードを開き、正確な値を入力します。</string>
+    <string name="titolo_info_dado">🎲 ラッキーサイコロ</string>
+    <string name="msg_info_dado">誰が始めるかを決めたり、揉め事を解決するために \'サイコロ\' ボタンを使用して乱数を生成します。</string>
+    <string name="titolo_info_timer">⏱️ カスタムタイマー</string>
+    <string name="msg_info_timer">カウントダウンを設定するには \'タイマー\' ボタンを使用します。時間が経過すると、アプリが振動と音でお知らせします。</string>
+    <string name="btn_ho_capito">分かりました</string>
+
+    <string name="titolo_timer_sfida">⏱️ ゲームタイマー</string>
+    <string name="btn_ferma_timer">タイマー停止</string>
+    <string name="btn_avvia_timer">タイマー開始</string>
+    <string name="btn_chiudi">閉じる</string>
+
+    <string name="sfida_senza_nome">名前のないチャレンジ</string>
+    <string name="desc_condividi">共有</string>
+    <string name="btn_condividi_risultati">結果を共有</string>
+    <string name="desc_home_icon">ホーム</string>
+    <string name="btn_salva_chiudi">保存して閉じる</string>
+    <string name="label_tempo_gioco">⏱️ プレイ時間： %s</string>
+    <string name="btn_premi_partita">ゲームの賞</string>
+    <string name="desc_info_premi">賞の情報</string>
+    <string name="titolo_guida_premi">賞のガイド</string>
+
+    <string name="titolo_cecchino_guida">🎯 スナイパー</string>
+    <string name="msg_cecchino">1ターンで最も大きなプラスのポイントジャンプを達成したプレイヤーに贈られます。</string>
+    <string name="premio_cecchino">スナイパー</string>
+
+    <string name="titolo_inarrestabile_guida">🔥 アンストッパブル</string>
+    <string name="msg_inarrestabile">\'On Fire\' コンボを最も多く発動させたプレイヤーに贈られます。</string>
+    <string name="premio_inarrestabile">アンストッパブル</string>
+
+    <string name="titolo_gambero_guida">🦞 ザリガニ</string>
+    <string name="msg_gambero">ゲームで最も多くのマイナスポイントを蓄積したプレイヤーに贈られます。</string>
+    <string name="premio_gambero">ザリガニ</string>
+
+    <string name="titolo_fenice_guida">🦅 不死鳥</string>
+    <string name="msg_fenice">最低ポイントから最終スコアまでの間で、最も壮大な逆転劇を達成した人に贈られます。</string>
+    <string name="premio_fenice">不死鳥</string>
+
+    <string name="label_punti_positivi">+%d pt</string>
+    <string name="label_punti_negativi">-%d pt</string>
+    <string name="label_combo">%d コンボ</string>
+
+    <string name="titolo_analisi_partita">ゲーム分析</string>
+    <string name="label_vinta_da_con_punti">🏆 %1$s が %2$d pt で勝利</string>
+    <string name="desc_info_grafico">グラフ情報</string>
+    <string name="titolo_guida_grafico">グラフの読み方</string>
+    <string name="titolo_guida_punti">📈 ポイント（縦軸）</string>
+    <string name="msg_guida_punti">線が上に行くほど、プレイヤーのスコアが高くなります。</string>
+    <string name="titolo_guida_tempo">⏱️ 時間（横軸）</string>
+    <string name="msg_guida_tempo">ゲームの進行状況を、開始（左）から終了（右）まで表示します。</string>
+    <string name="titolo_guida_pallini">🔵 ドットと平らな線</string>
+    <string name="msg_guida_pallini">各ドットは得点したポイントです。線がまっすぐ（平ら）な場合、その時点で誰も得点していないことを意味します。</string>
+    <string name="titolo_guida_sorpassi">⚔️ 追い越し</string>
+    <string name="msg_guida_sorpassi">2つの線が交差するときは、同点またはトップの入れ替わりがあったことを意味します！</string>
+    <string name="label_durata_totale"> 合計時間： %s</string>
+    <string name="btn_chiudi_analisi">分析を閉じる</string>
+
+    <string name="btn_chiudi_statistiche">統計を閉じる</string>
+    <string name="titolo_statistiche_partite">ゲーム統計</string>
+    <string name="titolo_campione_assoluto">絶対的チャンピオン</string>
+    <string name="nessuno">なし</string>
+    <string name="label_vittorie">%d 勝</string>
+    <string name="titolo_riepilogo_generale">一般的な概要</string>
+    <string name="label_partite_giocate"> プレイしたゲーム：</string>
+    <string name="label_tempo_giocato"> フィールドでの時間：</string>
+
+    <string name="titolo_record_punti">🔝 ポイント記録</string>
+    <string name="label_in_partita">\'%s\' で</string>
+    <string name="desc_record_punti">1回のゲームで1人のプレイヤーが到達した過去最高のスコア。</string>
+    <string name="suffix_pt"> pt</string>
+    <string name="label_data_record">📅 記録日： %s</string>
+    <string name="msg_nessun_record">まだ記録がありません。</string>
+
+    <string name="titolo_partita_infinita">⏳ 無限のゲーム</string>
+    <string name="label_vinta_da">勝者 %s</string>
+    <string name="label_giocata_il">📅 プレイ日： %s</string>
+    <string name="msg_nessuna_partita_cronometrata">時間指定のゲームはありません。</string>
+
+    <string name="titolo_dittatore">👑 独裁者</string>
+    <string name="label_ha_dominato_in">\'%s\' で圧倒</string>
+    <string name="label_dal_secondo_posto">2位から</string>
+    <string name="label_data_dominio">📅 圧倒した日： %s</string>
+    <string name="msg_nessun_dominio">圧倒的な記録はありません。ゲームは非常にバランスが取れていました！</string>
+
+    <string name="titolo_piromane">🔥 放火魔</string>
+    <string name="desc_piromane">全体で最も多くの \'On Fire\' コンボを蓄積したプレイヤーです。</string>
+    <string name="label_volte_on_fire">回の On Fire</string>
+    <string name="msg_record_storico">📈 この記録はこれまでにプレイされたすべてのゲームを考慮しています。</string>
+    <string name="msg_nessun_piromane">最も多くの \'On Fire\' コンボを蓄積したプレイヤーです。\n現在、誰も地獄を解き放っていません。</string>
+
+    <string name="titolo_miglior_cecchino">🎯 ベストスナイパー</string>
+    <string name="desc_miglior_cecchino">1ターンでの最高スコア</string>
+
+    <string name="titolo_re_gamberi">🦞 ザリガニの王</string>
+    <string name="desc_re_gamberi">1回の行動で最も多くのポイントを失った</string>
+
+    <string name="titolo_fenice_suprema">🦅 究極の不死鳥</string>
+    <string name="desc_fenice_suprema">最下位からの最も伝説的な逆転劇</string>
+
+    <string name="desc_logo_app">アプリアイコン</string>
+    <string name="widget_btn_nuova_sfida">+ 新しいチャレンジ</string>
+</resources>
