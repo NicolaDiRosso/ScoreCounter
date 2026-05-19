@@ -158,4 +158,46 @@
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">%d Combo</string>
 
+    <!-- TESTO PER IL  FILE GlobalStatsScreen-->
+    <string name="btn_chiudi_statistiche">Chiudi Statistiche</string>
+    <string name="titolo_statistiche_partite">Statistiche partite</string>
+    <string name="titolo_campione_assoluto">CAMPIONE ASSOLUTO</string>
+    <string name="nessuno">Nessuno</string>
+    <string name="label_vittorie">%d VITTORIE</string>
+    <string name="titolo_riepilogo_generale">Riepilogo Generale</string>
+    <string name="label_partite_giocate"> Partite Giocate:</string>
+    <string name="label_tempo_giocato"> Tempo sul campo:</string>
+
+    <string name="titolo_record_punti">🔝 Record di punti</string>
+    <string name="label_in_partita">in \'%s\'</string>
+    <string name="desc_record_punti">Il punteggio massimo mai raggiunto da un singolo giocatore in una singola partita.</string>
+    <string name="suffix_pt"> pt</string>
+    <string name="label_data_record">📅 Data record: %s</string>
+    <string name="msg_nessun_record">Ancora nessun record stabilito.</string>
+
+    <string name="titolo_partita_infinita">⏳ La Partita Infinita</string>
+    <string name="label_vinta_da">Vinta da %s</string>
+    <string name="label_giocata_il">📅 Giocata il: %s</string>
+    <string name="msg_nessuna_partita_cronometrata">Nessuna partita cronometrata.</string>
+
+    <string name="titolo_dittatore">👑 Il Dittatore</string>
+    <string name="label_ha_dominato_in">Ha dominato in \'%s\'</string>
+    <string name="label_dal_secondo_posto">dal 2° posto</string>
+    <string name="label_data_dominio">📅 Data del dominio: %s</string>
+    <string name="msg_nessun_dominio">Nessun dominio registrato. Le partite sono state molto equilibrate!</string>
+
+    <string name="titolo_piromane">🔥 Il Piromane</string>
+    <string name="desc_piromane">È il giocatore che ha accumulato il maggior numero di combo \'On Fire\' totali.</string>
+    <string name="label_volte_on_fire">volte On Fire</string>
+    <string name="msg_record_storico">📈 Questo record tiene conto di tutte le partite giocate finora.</string>
+    <string name="msg_nessun_piromane">È il giocatore che ha accumulato il maggior numero di combo \'On Fire\' totali.\nAttualmente nessuno ha ancora scatenato l\'inferno.</string>
+
+    <string name="titolo_miglior_cecchino">🎯 Miglior Cecchino</string>
+    <string name="desc_miglior_cecchino">Maggior punteggio fatto in un singolo turno</string>
+
+    <string name="titolo_re_gamberi">🦞 Il Re dei Gamberi</string>
+    <string name="desc_re_gamberi">Maggior numero di punti persi in una sola mossa</string>
+
+    <string name="titolo_fenice_suprema">🦅 La Fenice Suprema</string>
+    <string name="desc_fenice_suprema">La rimonta più leggendaria dall\'ultimo posto</string>
 </resources>

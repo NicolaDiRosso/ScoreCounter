@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType // Per il feedback tattile al click
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource // Import fondamentale per la lettura dei dizionari XML
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
 import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
+import com.n380.scorecounter.R // Import per accedere agli ID delle risorse del progetto
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
@@ -56,10 +58,10 @@ fun GlobalStatsScreen(
     val haptic = LocalHapticFeedback.current
 
     // ====================================================================
-    // 🧠 COMPONENTE DI SUPPORTO: AutoScalingScoreText
+    // COMPONENTE DI SUPPORTO: AutoScalingScoreText
     // ====================================================================
     // Questa piccola funzione interna ci permette di disegnare i punteggi in modo intelligente.
-    // L'obiettivo è mantenere sempre lo stesso spazio visivo: 
+    // L'obiettivo è mantenere sempre lo stesso spazio visivo:
     // - Se il numero ha 1 o 2 cifre, usa una dimensione grande.
     // - Se supera le 2 cifre, si rimpicciolisce automaticamente per non allargare la Card.
     @Composable
@@ -91,7 +93,7 @@ fun GlobalStatsScreen(
     }
 
     // ====================================================================
-    // 🧠 FIX BUG: PREVENZIONE DOPPIO CLICK (Debounce)
+    // FIX BUG: PREVENZIONE DOPPIO CLICK (Debounce)
     // ====================================================================
     // TEORIA COMPOSE: 'remember' dice a Compose di non dimenticarsi questo valore
     // quando la UI si ricarica (Recomposition). 'mutableStateOf' crea un contenitore
@@ -99,7 +101,7 @@ fun GlobalStatsScreen(
     var isClosing by remember { mutableStateOf(false) }
 
     // ====================================================================
-    // 🧠 STATI DI ESPANSIONE PER LE CARD (UX simile alla Home)
+    // STATI DI ESPANSIONE PER LE CARD (UX simile alla Home)
     // ====================================================================
     // Questi stati controllano se le card dei record mostrano solo un riassunto
     // o se si espandono per mostrare il titolo completo e la data della partita.
@@ -165,8 +167,13 @@ fun GlobalStatsScreen(
 
     // 2. Raggruppiamo per nome e sommiamo tutti i loro 'fireComboCount'
     val fireStatsMap = allHistoricalPlayers
-        .groupBy { it.name }
+        .groupBy { it.name }//raggruppiamo (in cassetti) tutti i dati delle partite di un giocatore per il suo nome
         .mapValues { entry -> entry.value.sumOf { it.fireComboCount } }
+    /*
+    La funzione mapValues { ... } passa in rassegna il contenuto di ogni singolo cassetto (entry.value).
+    Nel nostro caso, usa sumOf per prendere tutte le carte di quel giocatore,
+    sommare il loro valore fireComboCount e sostituire l'intero cassetto con un singolo numero finale (il totale delle combo).
+     */
 
     // 3. Troviamo chi ha il totale più alto (Il Piromane Supremo)
     val topArsonist = fireStatsMap.maxByOrNull { it.value }
@@ -204,7 +211,7 @@ fun GlobalStatsScreen(
         // ====================================================================
         // NUOVO DOCK INFERIORE (Esattamente uguale a HomeScreen)
         // ====================================================================
-        // 🧠 TEORIA COMPOSE (Scaffold Slots):
+        // TEORIA COMPOSE (Scaffold Slots):
         // Lo 'Scaffold' ci offre degli slot predefiniti. 'bottomBar' è lo slot inferiore.
         // Tutto ciò che mettiamo qui dentro viene sganciato dalla lista scorrevole e
         // rimane FISSO in fondo allo schermo, galleggiando in primo piano.
@@ -215,7 +222,7 @@ fun GlobalStatsScreen(
             // i bordi fisici laterali e il bordo inferiore dello schermo del telefono.
             Surface(
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                // 🧠 FIX GEOMETRICO: ARROTONDAMENTO PARZIALE
+                // FIX GEOMETRICO: ARROTONDAMENTO PARZIALE
                 // Usiamo topStart e topEnd a 24.dp per creare la curva morbida solo in alto.
                 // Permette al dock di "incollarsi" perfettamente alla base dello schermo.
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -224,10 +231,10 @@ fun GlobalStatsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // 🧠 PROTEZIONE DI SISTEMA: navigationBarsPadding()
+                        // PROTEZIONE DI SISTEMA: navigationBarsPadding()
                         // "spinge" in alto il contenuto interno solo di quel tanto che basta per
                         // non finire sotto la riga orizzontale bianca di Android.
-                        .navigationBarsPadding() 
+                        .navigationBarsPadding()
                         .padding(horizontal = 16.dp, vertical = 16.dp) // Spaziatura interna per il bottone
                 ) {
                     // ====================================================================
@@ -235,7 +242,7 @@ fun GlobalStatsScreen(
                     // ====================================================================
                     Button(
                         onClick = {
-                            // 🧠 FIX BUG: PREVENZIONE DOPPIO CLICK (Debounce)
+                            // FIX BUG: PREVENZIONE DOPPIO CLICK (Debounce)
                             if (!isClosing) {
                                 isClosing = true
                                 // Feedback tattile premium come nella Home
@@ -245,7 +252,7 @@ fun GlobalStatsScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp), // 🛠️ FIX ALTEZZA: 56.dp come richiesto dall'utente
+                            .height(56.dp), // FIX ALTEZZA: 56.dp come richiesto dall'utente
                         shape = RoundedCornerShape(20.dp), // Stessa stondatura coerente dell'app
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -256,12 +263,14 @@ fun GlobalStatsScreen(
                         // Icona Close (X) dimensionata a 28.dp per impatto visivo
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Chiudi",
+                            // Traduce la descrizione per gli screen reader del pulsante di chiusura
+                            contentDescription = stringResource(R.string.desc_chiudi_icon),
                             modifier = Modifier.padding(end = 8.dp).size(28.dp)
                         )
                         // Testo "Chiudi" con tipografia HeadlineSmall per massima leggibilità
                         Text(
-                            text = "Chiudi Statistiche",
+                            // Assegna l'etichetta al pulsante principale per uscire dalle statistiche
+                            text = stringResource(R.string.btn_chiudi_statistiche),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -271,7 +280,7 @@ fun GlobalStatsScreen(
         }
     ) { innerPadding ->
 
-        // 🧠 FIX ARCHITETTURALE: Scroll del Contenuto vs Scroll della Pagina
+        // FIX ARCHITETTURALE: Scroll del Contenuto vs Scroll della Pagina
         // Sostituiamo la LazyColumn principale con una semplice Column.
         // In questo modo, l'intestazione resta FISSA in alto.
         Column(
@@ -290,7 +299,8 @@ fun GlobalStatsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Statistiche partite",
+                // Fornisce il titolo testuale fisso situato in cima a questa pagina
+                text = stringResource(R.string.titolo_statistiche_partite),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -303,7 +313,7 @@ fun GlobalStatsScreen(
             // ---> IL TAVOLO DELLE STATISTICHE (Ora include anche il Campione!) <---
             // ====================================================================
             Card(
-                // 🧠 TEORIA COMPOSE (Weight): Usando weight(1f) diciamo al Tavolo di
+                // TEORIA COMPOSE (Weight): Usando weight(1f) diciamo al Tavolo di
                 // espandersi verticalmente per occupare tutto lo spazio rimasto sullo schermo!
                 modifier = Modifier
                     .fillMaxWidth()
@@ -337,7 +347,7 @@ fun GlobalStatsScreen(
                     end = Offset(translateAnim + 400f, translateAnim + 400f)
                 )
 
-                // 🧠 TEORIA COMPOSE: Il trucco del singolo 'item'!
+                // TEORIA COMPOSE: Il trucco del singolo 'item'!
                 // Trasformiamo il Tavolo in una scatola che scorre (LazyColumn).
                 // Invece di modificare ogni singola carta aggiungendo 'item { }', creiamo
                 // una LazyColumn che contiene un solo gigantesco elemento 'item'.
@@ -357,7 +367,7 @@ fun GlobalStatsScreen(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    // 🎨 EFFETTO LUCE: drawWithContent ci permette di disegnare
+                                    // EFFETTO LUCE: drawWithContent ci permette di disegnare
                                     // il fascio luminoso SOPRA il contenuto normale della Card.
                                     .drawWithContent {
                                         drawContent() // 1. Disegna normalmente
@@ -366,7 +376,7 @@ fun GlobalStatsScreen(
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                                 shape = RoundedCornerShape(24.dp)
                             ) {
-                                // 🧠 TEORIA COMPOSE (Il Layout Box):
+                                // TEORIA COMPOSE (Il Layout Box):
                                 // Il Box funziona a STRATI (Z-Index): il primo elemento scritto sta sul fondo,
                                 // i successivi gli vengono stampati sopra. Ottimo per sfondi e filigrane!
                                 Box(
@@ -379,7 +389,7 @@ fun GlobalStatsScreen(
                                     // ----------------------------------------------------------------
                                     Icon(
                                         imageVector = Icons.Filled.WorkspacePremium,
-                                        contentDescription = "Medaglia",
+                                        contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 1f),
                                         modifier = Modifier
                                             .size(120.dp)
@@ -392,15 +402,21 @@ fun GlobalStatsScreen(
                                     // ----------------------------------------------------------------
                                     Column(modifier = Modifier.fillMaxWidth()) {
                                         Text(
-                                            text = "CAMPIONE ASSOLUTO",
+                                            // Traduce l'intestazione della carta del giocatore che ha vinto di più
+                                            text = stringResource(R.string.titolo_campione_assoluto),
                                             style = MaterialTheme.typography.labelLarge,
                                             // Regola d'oro: su 'primaryContainer' usiamo 'onPrimaryContainer'
                                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                                             fontWeight = FontWeight.Bold
                                         )
 
+                                        // LEZIONE TEORICA KOTLIN: Elvis Operator (?:)
+                                        // Questa riga tenta di leggere il nome del giocatore migliore. Se il database
+                                        // è vuoto, bestPlayer sarà nullo. L'operatore '?:' dice: "Se la variabile di
+                                        // sinistra è nulla, usa la stringa che ti passo a destra come paracadute".
                                         Text(
-                                            text = bestPlayer?.key ?: "Nessuno",
+                                            // Utilizza la stringa "Nessuno" dal dizionario se il giocatore è nullo
+                                            text = bestPlayer?.key ?: stringResource(R.string.nessuno),
                                             style = MaterialTheme.typography.displayMedium,
                                             fontWeight = FontWeight.Black,
                                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -413,7 +429,8 @@ fun GlobalStatsScreen(
                                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
                                         ) {
                                             Text(
-                                                text = "${bestPlayer?.value ?: 0} VITTORIE",
+                                                // Utilizza un segnaposto numerico (%d) per formattare il badge "X VITTORIE"
+                                                text = stringResource(R.string.label_vittorie, bestPlayer?.value ?: 0),
                                                 style = MaterialTheme.typography.labelMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onPrimary,
@@ -427,7 +444,7 @@ fun GlobalStatsScreen(
                             // ==============================================================
                             // --- SECONDA CARD: I NUMERI GENERALI (Partite e Tempo) ---
                             // ==============================================================
-                            // 🧠 UX/UI: Cambiamo containerColor in 'surface' per evitare l'effetto
+                            // UX/UI: Cambiamo containerColor in 'surface' per evitare l'effetto
                             // mimetico col Tavolo. Inoltre, riduciamo la stondatura a 20.dp per
                             // farla entrare elegantemente nei 24.dp del Tavolo esterno.
                             Card(
@@ -437,7 +454,8 @@ fun GlobalStatsScreen(
                             ) {
                                 Column(modifier = Modifier.padding(20.dp)) {
                                     Text(
-                                        "Riepilogo Generale",
+                                        // Titolo per la sezione dei conteggi totali
+                                        text = stringResource(R.string.titolo_riepilogo_generale),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
@@ -458,7 +476,8 @@ fun GlobalStatsScreen(
                                                 tint = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                " Partite Giocate:",
+                                                // Etichetta "Partite Giocate:" che affianca l'icona
+                                                text = stringResource(R.string.label_partite_giocate),
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 modifier = Modifier.padding(start = 8.dp)
                                             )
@@ -490,7 +509,8 @@ fun GlobalStatsScreen(
                                                 tint = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                " Tempo sul campo:",
+                                                // Etichetta "Tempo sul campo:" che affianca il timer
+                                                text = stringResource(R.string.label_tempo_giocato),
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 modifier = Modifier.padding(start = 8.dp)
                                             )
@@ -512,7 +532,7 @@ fun GlobalStatsScreen(
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    // 🧠 UX: Rendiamo la card cliccabile per espanderla e vedere il titolo completo
+                                    // UX: Rendiamo la card cliccabile per espanderla e vedere il titolo completo
                                     .clickable {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         isExpRecord = !isExpRecord
@@ -528,7 +548,8 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "🔝 Record di punti",
+                                            // Traduce l'intestazione della terza carta statistica
+                                            text = stringResource(R.string.titolo_record_punti),
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -558,18 +579,20 @@ fun GlobalStatsScreen(
                                                     fontWeight = FontWeight.Bold
                                                 )
 
-                                                // 🧠 FIX TESTO TAGLIATO: Se espanso (isExpRecord), mostriamo tutto il titolo.
+                                                // FIX TESTO TAGLIATO: Se espanso (isExpRecord), mostriamo tutto il titolo.
                                                 // Altrimenti, limitiamo a 1 riga con i tre puntini.
                                                 Text(
-                                                    text = "in '${highestScoreRecord.title}'",
+                                                    // Inietta il titolo della partita in un segnaposto per formattare la dicitura "in 'Nome Partita'"
+                                                    text = stringResource(R.string.label_in_partita, highestScoreRecord.title),
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     maxLines = if (isExpRecord) Int.MAX_VALUE else 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
-                                                // 💡 UX/UI: Breve descrizione
+                                                // UX/UI: Breve descrizione
                                                 Text(
-                                                    text = "Il punteggio massimo mai raggiunto da un singolo giocatore in una singola partita.",
+                                                    // Testo descrittivo discorsivo per chiarire di che record stiamo parlando
+                                                    text = stringResource(R.string.desc_record_punti),
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = MaterialTheme.colorScheme.onSurface.copy(
                                                         alpha = 0.8f
@@ -578,19 +601,19 @@ fun GlobalStatsScreen(
                                                     //Se la card è espansa dà spazio infinito (Int.MAX_VALUE), altrimenti forza il testo su 1 sola riga
                                                     maxLines = if (isExpRecord) Int.MAX_VALUE else 1,
                                                     //Se il testo supera il limite di righe (maxLines), taglia l'eccesso e aggiunge i "..." alla fine
-                                                    overflow = TextOverflow.Ellipsis//Ellipsis si potrebbe tradurre come ellissi
-
+                                                    overflow = TextOverflow.Ellipsis //Ellipsis si potrebbe tradurre come ellissi
                                                 )
                                             }
 
                                             // A destra: Il numero di punti gigante (Ora Auto-Scaling!)
                                             AutoScalingScoreText(
                                                 text = "${highestScoreRecord.winningScore}",
-                                                suffix = " pt"
+                                                // Sostituisce il suffisso fisso con la traduzione dinamica prelevata dall'XML
+                                                suffix = stringResource(R.string.suffix_pt)
                                             )
                                         }
 
-                                        // 🧠 AREA DETTAGLI EXTRA: Appare solo quando la card viene cliccata
+                                        // AREA DETTAGLI EXTRA: Appare solo quando la card viene cliccata
                                         AnimatedVisibility(
                                             visible = isExpRecord,
                                             enter = expandVertically() + fadeIn(),
@@ -602,7 +625,8 @@ fun GlobalStatsScreen(
                                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
                                                 )
                                                 Text(
-                                                    text = "📅 Data record: ${formatDate(highestScoreRecord.timestamp)}",
+                                                    // Formatta la stringa dinamica della data incapsulandola nel segnaposto del dizionario
+                                                    text = stringResource(R.string.label_data_record, formatDate(highestScoreRecord.timestamp)),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -611,7 +635,8 @@ fun GlobalStatsScreen(
                                     } else {
                                         // Se lo storico è completamente vuoto, mostra un messaggio di fallback
                                         Text(
-                                            "Ancora nessun record stabilito.",
+                                            // Mostra una frase di stato vuoto se non ci sono ancora partite giocate
+                                            text = stringResource(R.string.msg_nessun_record),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
@@ -638,7 +663,8 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "⏳ La Partita Infinita",
+                                            // Traduce l'intestazione della quarta carta
+                                            text = stringResource(R.string.titolo_partita_infinita),
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -649,7 +675,7 @@ fun GlobalStatsScreen(
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
+                                    Spacer(modifier = Modifier.height(5.dp)) //separatore tra il titolo e il nome dell'utente
 
                                     // Se abbiamo trovato una partita che è durata almeno 1 secondo...
                                     if (longestMatch != null) {
@@ -662,7 +688,7 @@ fun GlobalStatsScreen(
                                             Column(
                                                 modifier = Modifier.weight(1f).padding(end = 8.dp)
                                             ) {
-                                                // 🧠 FIX TESTO TAGLIATO: Espandiamo il titolo al click
+                                                // FIX TESTO TAGLIATO: Espandiamo il titolo al click
                                                 Text(
                                                     text = longestMatch.title,
                                                     style = MaterialTheme.typography.headlineSmall,
@@ -671,7 +697,8 @@ fun GlobalStatsScreen(
                                                     overflow = TextOverflow.Ellipsis
                                                 )
                                                 Text(
-                                                    text = "Vinta da ${longestMatch.winnerName}",
+                                                    // Inserisce il nome del vincitore nella stringa formattata "Vinta da [Nome]"
+                                                    text = stringResource(R.string.label_vinta_da, longestMatch.winnerName),
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -702,7 +729,8 @@ fun GlobalStatsScreen(
                                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
                                                 )
                                                 Text(
-                                                    text = "📅 Giocata il: ${formatDate(longestMatch.timestamp)}",
+                                                    // Impagina la data estratta all'interno del costrutto di testo per i dettagli estesi
+                                                    text = stringResource(R.string.label_giocata_il, formatDate(longestMatch.timestamp)),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -710,7 +738,8 @@ fun GlobalStatsScreen(
                                         }
                                     } else {
                                         Text(
-                                            "Nessuna partita cronometrata.",
+                                            // Fallback text in caso di database carente di log dei tempi
+                                            text = stringResource(R.string.msg_nessuna_partita_cronometrata),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
@@ -737,7 +766,8 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "👑 Il Dittatore",
+                                            // Traduce l'intestazione della carta del distacco record
+                                            text = stringResource(R.string.titolo_dittatore),
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -748,7 +778,7 @@ fun GlobalStatsScreen(
                                             tint = MaterialTheme.colorScheme.primary
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
+                                    Spacer(modifier = Modifier.height(5.dp)) //separatore tra il titolo e il nome dell'utente
 
                                     // Se abbiamo trovato una partita e il distacco è maggiore di 0...
                                     if (dictatorMatch != null && dictatorMargin > 0) {
@@ -769,9 +799,10 @@ fun GlobalStatsScreen(
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
-                                                // 🧠 FIX TESTO TAGLIATO: Espandiamo la descrizione se cliccato
+                                                // FIX TESTO TAGLIATO: Espandiamo la descrizione se cliccato
                                                 Text(
-                                                    text = "Ha dominato in '${dictatorMatch.title}'",
+                                                    // Incapsula il nome della partita nel segnaposto del dizionario per indicare il dominio
+                                                    text = stringResource(R.string.label_ha_dominato_in, dictatorMatch.title),
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     maxLines = if (isExpDittatore) Int.MAX_VALUE else 1,
@@ -783,10 +814,12 @@ fun GlobalStatsScreen(
                                             Column(horizontalAlignment = Alignment.End) {
                                                 AutoScalingScoreText(
                                                     text = "+$dictatorMargin",
-                                                    suffix = " pt"
+                                                    // Sostituisce il suffisso fisso con la traduzione dinamica
+                                                    suffix = stringResource(R.string.suffix_pt)
                                                 )
                                                 Text(
-                                                    text = "dal 2° posto",
+                                                    // Recupera la nota testuale che chiarisce il confronto col "2° posto"
+                                                    text = stringResource(R.string.label_dal_secondo_posto),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -801,7 +834,8 @@ fun GlobalStatsScreen(
                                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
                                                 )
                                                 Text(
-                                                    text = "📅 Data del dominio: ${formatDate(dictatorMatch.timestamp)}",
+                                                    // Passa la data al sistema di traduzione per mostrare quando è avvenuto il record
+                                                    text = stringResource(R.string.label_data_dominio, formatDate(dictatorMatch.timestamp)),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -810,7 +844,8 @@ fun GlobalStatsScreen(
                                     } else {
                                         // Se tutte le partite sono state dei pareggi (o si è giocato solo da soli)
                                         Text(
-                                            "Nessun dominio registrato. Le partite sono state molto equilibrate!",
+                                            // Testo di fallback se la condizione matematica per questo premio fallisce
+                                            text = stringResource(R.string.msg_nessun_dominio),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
@@ -842,7 +877,8 @@ fun GlobalStatsScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "🔥 Il Piromane",
+                                            // Titolo dell'award basato sul sistema di combo infuocate
+                                            text = stringResource(R.string.titolo_piromane),
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold
@@ -855,7 +891,7 @@ fun GlobalStatsScreen(
                                         )
                                     }
 
-                                    Spacer(modifier = Modifier.height(5.dp))//separatore tra il titolo e il nome dell'utente
+                                    Spacer(modifier = Modifier.height(5.dp)) //separatore tra il titolo e il nome dell'utente
 
                                     // Verifichiamo che esista un record
                                     if (topArsonist != null && topArsonist.value > 0) {
@@ -875,10 +911,11 @@ fun GlobalStatsScreen(
                                                 )
 
                                                 Text(
-                                                    text = "È il giocatore che ha accumulato il maggior numero di combo 'On Fire' totali.",
+                                                    // Spiegazione dettagliata della meccanica di questo record accumulativo
+                                                    text = stringResource(R.string.desc_piromane),
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    // 🧠 Espansione del testo
+                                                    // Espansione del testo
                                                     maxLines = if (isExpPiromane) Int.MAX_VALUE else 1,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
@@ -891,7 +928,8 @@ fun GlobalStatsScreen(
                                                     color = Color(0xFFF3AF38) // Colore Fuoco/Arancione
                                                 )
                                                 Text(
-                                                    text = "volte On Fire",
+                                                    // Etichetta specifica per il conteggio combo
+                                                    text = stringResource(R.string.label_volte_on_fire),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -907,7 +945,8 @@ fun GlobalStatsScreen(
                                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
                                                 )
                                                 Text(
-                                                    text = "📈 Questo record tiene conto di tutte le partite giocate finora.",
+                                                    // Nota informativa visibile espandendo la card, chiarisce che è un record storico globale
+                                                    text = stringResource(R.string.msg_record_storico),
                                                     style = MaterialTheme.typography.labelMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -915,7 +954,8 @@ fun GlobalStatsScreen(
                                         }
                                     } else {
                                         Text(
-                                            "È il giocatore che ha accumulato il maggior numero di combo 'On Fire' totali.\nAttualmente nessuno ha ancora scatenato l'inferno.",
+                                            // Messaggio che appare se nessuno ha mai innescato lo stato On Fire nel database
+                                            text = stringResource(R.string.msg_nessun_piromane),
                                             style = MaterialTheme.typography.bodyMedium
                                         )
                                     }
@@ -926,12 +966,12 @@ fun GlobalStatsScreen(
                             // ====================================================================
 
                             // 🎯 IL CECCHINO D'ORO (Record assoluto)
-                            // 🧠 TEORIA KOTLIN (Smart Cast): La variabile 'globalSniper' potrebbe essere null
+                            // TEORIA KOTLIN (Smart Cast): La variabile 'globalSniper' potrebbe essere null
                             // se nessuno ha mai vinto questo premio in tutto lo storico.
                             // Usando l'if, Kotlin attiva la magia dello "Smart Cast": capisce matematicamente
                             // che qui dentro la variabile esiste di sicuro e ci permette di usare i suoi dati (.first e .second).
                             if (globalSniper != null) {
-                                // 🧠 Niente più padding(top = 16.dp) qui, perché ci pensa già la Column esterna!
+                                // Niente più padding(top = 16.dp) qui, perché ci pensa già la Column esterna!
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -944,7 +984,8 @@ fun GlobalStatsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "🎯 Miglior Cecchino",
+                                                // Testo per l'intestazione del premio Cecchino a livello globale
+                                                text = stringResource(R.string.titolo_miglior_cecchino),
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
@@ -958,9 +999,10 @@ fun GlobalStatsScreen(
                                                 fontWeight = FontWeight.Black
                                             )
 
-                                            // 💡 UX/UI: Breve descrizione per chiarire l'obiettivo
+                                            // UX/UI: Breve descrizione per chiarire l'obiettivo
                                             Text(
-                                                text = "Maggior punteggio fatto in un singolo turno",
+                                                // Specifica qual è stata la prodezza compiuta per questo record
+                                                text = stringResource(R.string.desc_miglior_cecchino),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                                     alpha = 0.8f
@@ -971,7 +1013,8 @@ fun GlobalStatsScreen(
                                         // Record Cecchino (Ora Auto-Scaling!)
                                         AutoScalingScoreText(
                                             text = "+${globalSniper.second}",
-                                            suffix = " pt"
+                                            // Ricicla la traduzione del suffisso standard per i punteggi
+                                            suffix = stringResource(R.string.suffix_pt)
                                         )
                                     }
                                 }
@@ -991,7 +1034,8 @@ fun GlobalStatsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "🦞 Il Re dei Gamberi",
+                                                // Intestazione per la statistica del punteggio peggiore in assoluto
+                                                text = stringResource(R.string.titolo_re_gamberi),
                                                 style = MaterialTheme.typography.titleMedium,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
@@ -1004,9 +1048,10 @@ fun GlobalStatsScreen(
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )
-                                            // 💡 UX/UI: Breve descrizione
+                                            // UX/UI: Breve descrizione
                                             Text(
-                                                text = "Maggior numero di punti persi in una sola mossa",
+                                                // Descrive la natura negativa di questo curioso record
+                                                text = stringResource(R.string.desc_re_gamberi),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                                     alpha = 0.8f
@@ -1017,7 +1062,8 @@ fun GlobalStatsScreen(
                                         // Record Gambero (Ora Auto-Scaling!)
                                         AutoScalingScoreText(
                                             text = "${globalCrab.second}",
-                                            suffix = " pt"
+                                            // Applica il suffisso puntuale tradotto
+                                            suffix = stringResource(R.string.suffix_pt)
                                         )
                                     }
                                 }
@@ -1037,7 +1083,8 @@ fun GlobalStatsScreen(
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
                                             Text(
-                                                "🦅 La Fenice Suprema",
+                                                // Definisce l'intestazione per il premio globale del miglior recupero punti
+                                                text = stringResource(R.string.titolo_fenice_suprema),
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Bold
@@ -1050,9 +1097,10 @@ fun GlobalStatsScreen(
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )
-                                            // 💡 UX/UI: Breve descrizione
+                                            // UX/UI: Breve descrizione
                                             Text(
-                                                text = "La rimonta più leggendaria dall'ultimo posto",
+                                                // Sintetizza il significato epico di aver ottenuto la Fenice Suprema
+                                                text = stringResource(R.string.desc_fenice_suprema),
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                                     alpha = 0.8f
@@ -1063,7 +1111,8 @@ fun GlobalStatsScreen(
                                         // Record Fenice (Ora Auto-Scaling!)
                                         AutoScalingScoreText(
                                             text = "+${globalPhoenix.second}",
-                                            suffix = " pt"
+                                            // Applica la desinenza punti formattata dal file di risorse
+                                            suffix = stringResource(R.string.suffix_pt)
                                         )
                                     }
                                 }

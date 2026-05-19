@@ -158,4 +158,46 @@
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">%d Combo</string>
 
+    <!-- TESTO TRADOTTO PER IL  FILE GlobalStatsScreen-->
+    <string name="btn_chiudi_statistiche">Close Stats</string>
+    <string name="titolo_statistiche_partite">Match Statistics</string>
+    <string name="titolo_campione_assoluto">ABSOLUTE CHAMPION</string>
+    <string name="nessuno">None</string>
+    <string name="label_vittorie">%d WINS</string>
+    <string name="titolo_riepilogo_generale">General Overview</string>
+    <string name="label_partite_giocate"> Matches Played:</string>
+    <string name="label_tempo_giocato"> Time on Field:</string>
+
+    <string name="titolo_record_punti">🔝 Highest Score</string>
+    <string name="label_in_partita">in \'%s\'</string>
+    <string name="desc_record_punti">The highest score ever reached by a single player in a single match.</string>
+    <string name="suffix_pt"> pt</string>
+    <string name="label_data_record">📅 Record date: %s</string>
+    <string name="msg_nessun_record">No records established yet.</string>
+
+    <string name="titolo_partita_infinita">⏳ The Infinite Match</string>
+    <string name="label_vinta_da">Won by %s</string>
+    <string name="label_giocata_il">📅 Played on: %s</string>
+    <string name="msg_nessuna_partita_cronometrata">No timed matches.</string>
+
+    <string name="titolo_dittatore">👑 The Dictator</string>
+    <string name="label_ha_dominato_in">Dominated in \'%s\'</string>
+    <string name="label_dal_secondo_posto">from 2nd place</string>
+    <string name="label_data_dominio">📅 Domination date: %s</string>
+    <string name="msg_nessun_dominio">No domination recorded. Matches have been very balanced!</string>
+
+    <string name="titolo_piromane">🔥 The Arsonist</string>
+    <string name="desc_piromane">The player who has accumulated the most \'On Fire\' combos overall.</string>
+    <string name="label_volte_on_fire">times On Fire</string>
+    <string name="msg_record_storico">📈 This record accounts for all matches played so far.</string>
+    <string name="msg_nessun_piromane">The player who has accumulated the most \'On Fire\' combos overall.\nCurrently, no one has unleashed hell.</string>
+
+    <string name="titolo_miglior_cecchino">🎯 Best Sniper</string>
+    <string name="desc_miglior_cecchino">Highest score made in a single turn</string>
+
+    <string name="titolo_re_gamberi">🦞 King of Crawfish</string>
+    <string name="desc_re_gamberi">Most points lost in a single move</string>
+
+    <string name="titolo_fenice_suprema">🦅 Supreme Phoenix</string>
+    <string name="desc_fenice_suprema">The most legendary comeback from last place</string>
 </resources>
