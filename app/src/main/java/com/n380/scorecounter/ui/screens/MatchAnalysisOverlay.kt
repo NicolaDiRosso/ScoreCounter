@@ -1,264 +1,280 @@
-package com.n380.scorecounter.ui.screens
+    package com.n380.scorecounter.ui.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ShowChart
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.n380.scorecounter.model.*
-import com.n380.scorecounter.ui.components.AutoResizedText
-import com.n380.scorecounter.ui.components.AwardCard
-import com.n380.scorecounter.ui.components.PatternedBackground
-import com.n380.scorecounter.ui.components.ScoreChart
-import com.n380.scorecounter.ui.components.formatTime
+    import androidx.compose.foundation.BorderStroke
+    import androidx.compose.foundation.layout.*
+    import androidx.compose.foundation.rememberScrollState
+    import androidx.compose.foundation.shape.RoundedCornerShape
+    import androidx.compose.foundation.verticalScroll
+    import androidx.compose.material.icons.Icons
+    import androidx.compose.material.icons.filled.Check
+    import androidx.compose.material.icons.filled.Close
+    import androidx.compose.material.icons.filled.EmojiEvents
+    import androidx.compose.material.icons.filled.Info
+    import androidx.compose.material.icons.filled.ShowChart
+    import androidx.compose.material.icons.filled.Timer
+    import androidx.compose.material3.*
+    import androidx.compose.runtime.*
+    import androidx.compose.runtime.saveable.rememberSaveable
+    import androidx.compose.ui.Alignment
+    import androidx.compose.ui.Modifier
+    import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+    import androidx.compose.ui.platform.LocalHapticFeedback
+    import androidx.compose.ui.res.stringResource // 🌍 I18N: Import per il sistema di traduzione nativo Android
+    import androidx.compose.ui.text.font.FontWeight
+    import androidx.compose.ui.unit.dp
+    import com.n380.scorecounter.R // 🌍 I18N: Accesso all'indice (R)estources
+    import com.n380.scorecounter.model.*
+    import com.n380.scorecounter.ui.components.AutoResizedText
+    import com.n380.scorecounter.ui.components.AwardCard
+    import com.n380.scorecounter.ui.components.PatternedBackground
+    import com.n380.scorecounter.ui.components.ScoreChart
+    import com.n380.scorecounter.ui.components.formatTime
 
-/**
- * ====================================================================
- * COMPONENTE SCHERMATA: OVERLAY ANALISI PARTITA
- * ====================================================================
- * Gestisce esclusivamente la visualizzazione in primo piano del grafico
- * e dei premi di una partita passata. Estratto da HomeScreen per pulizia.
- */
-@Composable
-fun MatchAnalysisOverlay(
-    match: MatchRecord,
-    onClose: () -> Unit // Funzione lambda chiamata quando si preme "Chiudi Analisi"
-) {
-    val haptic = LocalHapticFeedback.current
-
-    // Stato per la visibilità del dialogo informativo sui premi nella schermata di analisi.
-    // 🧠 REFACTORING: Spostato qui dalla Home! Appartiene solo a questa schermata.
-    var showAwardsInfoDialog by rememberSaveable { mutableStateOf(false) }
-
-    //Controllo visibilità della guida alla lettura del grafico.
-    var showChartInfoDialog by rememberSaveable { mutableStateOf(false) }
-
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        // Riportiamo il colore a solido (senza alpha) perché lo sfondo a icone
-        // riempirà visivamente lo spazio.
-        color = MaterialTheme.colorScheme.background
+    /**
+     * ====================================================================
+     * COMPONENTE SCHERMATA: OVERLAY ANALISI PARTITA
+     * ====================================================================
+     * Gestisce esclusivamente la visualizzazione in primo piano del grafico
+     * e dei premi di una partita passata. Estratto da HomeScreen per pulizia.
+     */
+    @Composable
+    fun MatchAnalysisOverlay(
+        match: MatchRecord,
+        onClose: () -> Unit // Funzione lambda chiamata quando si preme "Chiudi Analisi"
     ) {
-        // 🧠 LEZIONE Z-INDEX: Il Box ci permette di sovrapporre i livelli.
-        Box(modifier = Modifier.fillMaxSize()) {
+        val haptic = LocalHapticFeedback.current
 
-            // LIVELLO 0 (Sfondo): Dipingiamo la griglia di icone dinamiche
-            // per coerenza con la Home e la ResultsScreen.
-            PatternedBackground()
+        // Stato per la visibilità del dialogo informativo sui premi nella schermata di analisi.
+        // 🧠 REFACTORING: Spostato qui dalla Home! Appartiene solo a questa schermata.
+        var showAwardsInfoDialog by rememberSaveable { mutableStateOf(false) }
 
-            // LIVELLO 1 (Contenuto): La struttura a colonna che separa area dati e dock comandi.
-            Column(modifier = Modifier.fillMaxSize()) {
+        //Controllo visibilità della guida alla lettura del grafico.
+        var showChartInfoDialog by rememberSaveable { mutableStateOf(false) }
 
-                // AREA DATI: Contiene Header e Tavolo.
-                Column(
-                    modifier = Modifier
-                        .weight(1f) // Prende tutto lo spazio tranne il dock inferiore
-                        // 🧠 LEZIONE SPAZIATURA: Usiamo 'statusBarsPadding' invece di 'systemBarsPadding'.
-                        // 'systemBars' aggiungerebbe spazio anche in basso (barra navigazione),
-                        // raddoppiando il vuoto dato che il Dock ha già il suo 'navigationBarsPadding'.
-                        .statusBarsPadding()
-                        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                ) {
-                    // ====================================================================
-                    // --- INTESTAZIONE OVERLAY ---
-                    // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
-                    // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
-                    // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
-                    // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
-                    //    'secondary' per farlo risaltare in modo vibrante ed elegante.
-                    // ====================================================================
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            // Riportiamo il colore a solido (senza alpha) perché lo sfondo a icone
+            // riempirà visivamente lo spazio.
+            color = MaterialTheme.colorScheme.background
+        ) {
+            // 🧠 LEZIONE Z-INDEX: Il Box ci permette di sovrapporre i livelli.
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                // LIVELLO 0 (Sfondo): Dipingiamo la griglia di icone dinamiche
+                // per coerenza con la Home e la ResultsScreen.
+                PatternedBackground()
+
+                // LIVELLO 1 (Contenuto): La struttura a colonna che separa area dati e dock comandi.
+                Column(modifier = Modifier.fillMaxSize()) {
+
+                    // AREA DATI: Contiene Header e Tavolo.
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .weight(1f) // Prende tutto lo spazio tranne il dock inferiore
+                            // 🧠 LEZIONE SPAZIATURA: Usiamo 'statusBarsPadding' invece di 'systemBarsPadding'.
+                            // 'systemBars' aggiungerebbe spazio anche in basso (barra navigazione),
+                            // raddoppiando il vuoto dato che il Dock ha già il suo 'navigationBarsPadding'.
+                            .statusBarsPadding()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
                     ) {
-                        Text(
-                            text = "Analisi Partita",
-                            style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        AutoResizedText(
-                            text = match.title,
-                            style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-
-                    // ====================================================================
-                    // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
-                    // ====================================================================
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            // 🧠 FIX GEOMETRICO: Aggiungiamo 'padding(bottom = 16.dp)'.
-                            // In questo modo, la distanza tra la fine del tavolo grigio e l'inizio del dock bianco
-                            // è di esattamente 16.dp, rispecchiando perfettamente il layout della Homepage
-                            // dove il tavolo è distanziato dal dock principale della stessa misura.
-                            .padding(bottom = 16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        // 🧠 RECOMPOSITION: Usiamo Column + verticalScroll invece di LazyColumn.
-                        // Forziamo il caricamento immediato di tutti gli elementi per avere animazioni fluide.
+                        // ====================================================================
+                        // --- INTESTAZIONE OVERLAY ---
+                        // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
+                        // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
+                        // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
+                        // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
+                        //    'secondary' per farlo risaltare in modo vibrante ed elegante.
+                        // ====================================================================
                         Column(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState()) // Rende il contenuto del Tavolo scorrevole.
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp) // Spazio automatico tra i figli.
+                                .fillMaxWidth()
+                                .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // ====================================================================
-                            // --- SEZIONE: ANDAMENTO PUNTEGGI (CON ICONA) ---
-                            // ====================================================================
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            ) {
-                                // Inserimento icona tematica per il grafico a linee
-                                Icon(
-                                    imageVector = Icons.Filled.ShowChart,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                AutoResizedText(
-                                    "Andamento Punteggi",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                // Molla spaziale (Weight): Spinge il pulsante seguente a destra
-                                Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                // 🧠 LEZIONE I18N: Lettura stringa fissa
+                                // Invece di scrivere in hardcode "Analisi Partita", usiamo la funzione
+                                // che va a leggere il dizionario associato alla lingua del dispositivo.
+                                text = stringResource(R.string.titolo_analisi_partita),
+                                style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            AutoResizedText(
+                                text = match.title, // Non si traduce: è un input libero dell'utente
+                                style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                // 🧠 LEZIONE I18N: Stringa formattata con due segnaposto multipli (%1$s, %2$d)
+                                // Nel vecchio codice si aveva: "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt".
+                                // Per tradurla, nel file XML creeremo una stringa con due "buchi numerati":
+                                // <string name="label_vinta_da_con_punti">🏆 Vinta da %1$s con %2$d pt</string>
+                                // %1$s: Qui andrà il PRIMO parametro di tipo testuale (Stringa -> il nome).
+                                // %2$d: Qui andrà il SECONDO parametro numerico (Decimal -> il punteggio).
+                                // Perché numerarli? Perché in lingue come il giapponese l'ordine grammaticale potrebbe essere invertito!
+                                text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
 
-                                // Pulsante Informativo ancorato a destra
-                                IconButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        showChartInfoDialog = true
-                                    },
-                                    modifier = Modifier.size(32.dp)
+                        // ====================================================================
+                        // ---> IL TAVOLO (Struttura verticale identica ai Risultati) <---
+                        // ====================================================================
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                // 🧠 FIX GEOMETRICO: Aggiungiamo 'padding(bottom = 16.dp)'.
+                                // In questo modo, la distanza tra la fine del tavolo grigio e l'inizio del dock bianco
+                                // è di esattamente 16.dp, rispecchiando perfettamente il layout della Homepage
+                                // dove il tavolo è distanziato dal dock principale della stessa misura.
+                                .padding(bottom = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            shape = RoundedCornerShape(24.dp)
+                        ) {
+                            // 🧠 RECOMPOSITION: Usiamo Column + verticalScroll invece di LazyColumn.
+                            // Forziamo il caricamento immediato di tutti gli elementi per avere animazioni fluide.
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()) // Rende il contenuto del Tavolo scorrevole.
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp) // Spazio automatico tra i figli.
+                            ) {
+                                // ====================================================================
+                                // --- SEZIONE: ANDAMENTO PUNTEGGI (CON ICONA) ---
+                                // ====================================================================
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(bottom = 4.dp)
                                 ) {
+                                    // Inserimento icona tematica per il grafico a linee
                                     Icon(
-                                        imageVector = Icons.Filled.Info,
-                                        contentDescription = "Info Grafico",
-                                        tint = MaterialTheme.colorScheme.primary
+                                        imageVector = Icons.Filled.ShowChart,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    AutoResizedText(
+                                        // 🧠 LEZIONE I18N: Riutilizzo
+                                        // Questa stringa è identica a quella che abbiamo creato nel file ResultsScreen.kt.
+                                        // Poiché abbiamo già la chiave 'R.string.titolo_andamento_punteggi',
+                                        // la riutilizziamo direttamente senza sprecare spazio nel file XML.
+                                        stringResource(R.string.titolo_andamento_punteggi),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    // Molla spaziale (Weight): Spinge il pulsante seguente a destra
+                                    Spacer(modifier = Modifier.weight(1f))
+
+                                    // Pulsante Informativo ancorato a destra
+                                    IconButton(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            showChartInfoDialog = true
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Info,
+                                            contentDescription = stringResource(R.string.desc_info_grafico), // 🌍 I18N
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                                // =========================================================
+                                // POPUP INFORMATIVO SULLA LETTURA DEL GRAFICO
+                                // =========================================================
+                                if (showChartInfoDialog) {
+                                    AlertDialog(
+                                        onDismissRequest = { showChartInfoDialog = false },
+                                        title = {
+                                            Text(
+                                                text = stringResource(R.string.titolo_guida_grafico), // 🌍 I18N
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        },
+                                        text = {
+                                            Column(
+                                                modifier = Modifier.verticalScroll(rememberScrollState())
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_guida_punti), // 🌍 I18N
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.msg_guida_punti), // 🌍 I18N
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+
+                                                Text(
+                                                    text = stringResource(R.string.titolo_guida_tempo), // 🌍 I18N
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.msg_guida_tempo), // 🌍 I18N
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+
+                                                Text(
+                                                    text = stringResource(R.string.titolo_guida_pallini), // 🌍 I18N
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.msg_guida_pallini), // 🌍 I18N
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+
+                                                Text(
+                                                    text = stringResource(R.string.titolo_guida_sorpassi), // 🌍 I18N
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.msg_guida_sorpassi), // 🌍 I18N
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
+                                            }
+                                        },
+                                        confirmButton = {
+                                            Button(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                    showChartInfoDialog = false
+                                                },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(48.dp),
+                                                shape = RoundedCornerShape(20.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Check,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(22.dp)
+                                                )
+                                                Spacer(Modifier.width(8.dp))
+                                                AutoResizedText(
+                                                    text = stringResource(R.string.btn_ho_capito), // 🌍 I18N: Riutilizzo chiave della CounterScreen
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.bodyLarge
+                                                )
+                                            }
+                                        }
                                     )
                                 }
-                            }
-                            // =========================================================
-                            // POPUP INFORMATIVO SULLA LETTURA DEL GRAFICO
-                            // =========================================================
-                            if (showChartInfoDialog) {
-                                AlertDialog(
-                                    onDismissRequest = { showChartInfoDialog = false },
-                                    title = {
-                                        Text(
-                                            "Come leggere il grafico",
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    },
-                                    text = {
-                                        Column(
-                                            modifier = Modifier.verticalScroll(rememberScrollState())
-                                        ) {
-                                            Text(
-                                                "📈 Punti (Asse Verticale)",
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
-                                            )
-                                            Text(
-                                                "Più la linea sale in alto, maggiore è il punteggio del giocatore.",
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-
-                                            Text(
-                                                "⏱️ Tempo (Asse Orizzontale)",
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                            )
-                                            Text(
-                                                "Mostra lo scorrere della partita, dall'inizio (a sinistra) fino alla fine (a destra).",
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-
-                                            Text(
-                                                "🔵 Pallini e Linee Piatte",
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                            )
-                                            Text(
-                                                "Ogni pallino è un punto segnato. Se la linea va dritta (piatta), significa che in quel momento nessuno ha fatto punti.",
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-
-                                            Text(
-                                                "⚔️ Sorpassi",
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                            )
-                                            Text(
-                                                "Quando due linee si incrociano, significa che c'è stato un pareggio o un sorpasso in classifica!",
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
-                                    },
-                                    confirmButton = {
-                                        Button(
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                showChartInfoDialog = false
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(48.dp),
-                                            shape = RoundedCornerShape(20.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(22.dp)
-                                            )
-                                            Spacer(Modifier.width(8.dp))
-                                            AutoResizedText(
-                                                "Ho capito",
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.bodyLarge
-                                            )
-                                        }
-                                    }
-                                )
-                            }
                                 Card(
                                     modifier = Modifier.fillMaxWidth().height(350.dp),
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -318,7 +334,7 @@ fun MatchAnalysisOverlay(
 
                                         // 2. TITOLO SEZIONE
                                         AutoResizedText(
-                                            text = "Premi Partita",
+                                            text = stringResource(R.string.btn_premi_partita), // 🌍 I18N: Riutilizzo chiave da ResultsScreen
                                             // Usiamo lo stesso stile tipografico di "Andamento Partita" per mantenere coerenza visiva
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
@@ -339,7 +355,7 @@ fun MatchAnalysisOverlay(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Filled.Info,
-                                                contentDescription = "Info Premi",
+                                                contentDescription = stringResource(R.string.desc_info_premi), // 🌍 I18N: Riutilizzo chiave da ResultsScreen
                                                 tint = MaterialTheme.colorScheme.primary
                                             )
                                         }
@@ -355,7 +371,7 @@ fun MatchAnalysisOverlay(
                                             onDismissRequest = { showAwardsInfoDialog = false },
                                             title = {
                                                 Text(
-                                                    "Guida ai Premi",
+                                                    text = stringResource(R.string.titolo_guida_premi), // 🌍 I18N: Riutilizzo chiave da ResultsScreen
                                                     fontWeight = FontWeight.Bold
                                                 )
                                             },
@@ -367,8 +383,11 @@ fun MatchAnalysisOverlay(
                                                     )
                                                 ) {
 
+                                                    // 🧠 LEZIONE I18N: Tutto questo blocco testuale per il popup
+                                                    // è stato clonato (riutilizzato) dalle medesime chiavi che abbiamo già
+                                                    // dichiarato nello step precedente per la ResultScreen. Massimo risparmio!
                                                     Text(
-                                                        "🎯 Il Cecchino",
+                                                        text = stringResource(R.string.titolo_cecchino_guida), // 🌍 I18N
                                                         fontWeight = FontWeight.ExtraBold,
                                                         color = MaterialTheme.colorScheme.primary,
                                                         modifier = Modifier.padding(
@@ -377,12 +396,12 @@ fun MatchAnalysisOverlay(
                                                         )
                                                     )
                                                     Text(
-                                                        "Assegnato a chi effettua il singolo salto positivo di punti più alto in un colpo solo.",
+                                                        text = stringResource(R.string.msg_cecchino), // 🌍 I18N
                                                         style = MaterialTheme.typography.bodyMedium
                                                     )
 
                                                     Text(
-                                                        "🔥 L'Inarrestabile",
+                                                        text = stringResource(R.string.titolo_inarrestabile_guida), // 🌍 I18N
                                                         fontWeight = FontWeight.ExtraBold,
                                                         color = MaterialTheme.colorScheme.primary,
                                                         modifier = Modifier.padding(
@@ -391,12 +410,12 @@ fun MatchAnalysisOverlay(
                                                         )
                                                     )
                                                     Text(
-                                                        "Assegnato a chi innesca più volte la combo consecutiva 'On Fire'.",
+                                                        text = stringResource(R.string.msg_inarrestabile), // 🌍 I18N
                                                         style = MaterialTheme.typography.bodyMedium
                                                     )
 
                                                     Text(
-                                                        "🦞 Il Gambero",
+                                                        text = stringResource(R.string.titolo_gambero_guida), // 🌍 I18N
                                                         fontWeight = FontWeight.ExtraBold,
                                                         color = MaterialTheme.colorScheme.primary,
                                                         modifier = Modifier.padding(
@@ -405,12 +424,12 @@ fun MatchAnalysisOverlay(
                                                         )
                                                     )
                                                     Text(
-                                                        "Assegnato al giocatore che accumula la maggior quantità di punti negativi totali nella partita.",
+                                                        text = stringResource(R.string.msg_gambero), // 🌍 I18N
                                                         style = MaterialTheme.typography.bodyMedium
                                                     )
 
                                                     Text(
-                                                        "🦅 La Fenice",
+                                                        text = stringResource(R.string.titolo_fenice_guida), // 🌍 I18N
                                                         fontWeight = FontWeight.ExtraBold,
                                                         color = MaterialTheme.colorScheme.primary,
                                                         modifier = Modifier.padding(
@@ -419,7 +438,7 @@ fun MatchAnalysisOverlay(
                                                         )
                                                     )
                                                     Text(
-                                                        "Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.",
+                                                        text = stringResource(R.string.msg_fenice), // 🌍 I18N
                                                         style = MaterialTheme.typography.bodyMedium
                                                     )
                                                 }
@@ -445,7 +464,7 @@ fun MatchAnalysisOverlay(
                                                         )
                                                     Spacer(Modifier.width(8.dp))
                                                     AutoResizedText(
-                                                        "Ho capito",
+                                                        text = stringResource(R.string.btn_ho_capito), // 🌍 I18N: Riutilizzo
                                                         fontWeight = FontWeight.Bold,
                                                         style = MaterialTheme.typography.bodyLarge
                                                     )
@@ -465,10 +484,12 @@ fun MatchAnalysisOverlay(
                                     storiciCecchino?.let { (player, punti) ->
                                         AwardCard(
                                             icon = "🎯",
-                                            title = "Il Cecchino",
+                                            title = stringResource(R.string.premio_cecchino), // 🌍 I18N
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = "+$punti pt"
+                                            // 🧠 LEZIONE I18N: Anche per il "valueText" riutilizziamo il formato %d pt che abbiamo
+                                            // già creato precedentemente nel file XML, infilandoci in mezzo la variabile matematica "punti".
+                                            valueText = stringResource(R.string.label_punti_positivi, punti)
                                         )
                                     }
 
@@ -476,10 +497,10 @@ fun MatchAnalysisOverlay(
                                     storiciInarrestabile?.let { (player, combo) ->
                                         AwardCard(
                                             icon = "🔥",
-                                            title = "L'Inarrestabile",
+                                            title = stringResource(R.string.premio_inarrestabile), // 🌍 I18N
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = "$combo Combo"
+                                            valueText = stringResource(R.string.label_combo, combo) // 🌍 I18N
                                         )
                                     }
 
@@ -487,10 +508,10 @@ fun MatchAnalysisOverlay(
                                     storiciGambero?.let { (player, punti) ->
                                         AwardCard(
                                             icon = "🦞",
-                                            title = "Il Gambero",
+                                            title = stringResource(R.string.premio_gambero), // 🌍 I18N
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = "-$punti pt"
+                                            valueText = stringResource(R.string.label_punti_negativi, punti) // 🌍 I18N
                                         )
                                     }
 
@@ -498,10 +519,10 @@ fun MatchAnalysisOverlay(
                                     storiciFenice?.let { (player, punti) ->
                                         AwardCard(
                                             icon = "🦅",
-                                            title = "La Fenice",
+                                            title = stringResource(R.string.premio_fenice), // 🌍 I18N
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = "+$punti pt"
+                                            valueText = stringResource(R.string.label_punti_positivi, punti) // 🌍 I18N
                                         )
                                     }
                                 }
@@ -525,7 +546,8 @@ fun MatchAnalysisOverlay(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     AutoResizedText(
-                                        text = " Durata totale: ${formatTime(match.durationSeconds)}",
+                                        // 🧠 LEZIONE I18N: Riutilizzo del Segnaposto per stringa (Time Formatter)
+                                        text = stringResource(R.string.label_durata_totale, formatTime(match.durationSeconds)), // 🌍 I18N: "%s"
                                         style = MaterialTheme.typography.titleLarge,
                                         color = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
                                         modifier = Modifier.padding(start = 6.dp)
@@ -577,12 +599,12 @@ fun MatchAnalysisOverlay(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Close,
-                                    contentDescription = "Chiudi",
+                                    contentDescription = stringResource(R.string.desc_chiudi_icon), // 🌍 I18N: Riutilizzo
                                     modifier = Modifier.padding(end = 8.dp)
                                         .size(28.dp) // Icona maggiorata
                                 )
                                 Text(
-                                    text = "Chiudi Analisi",
+                                    text = stringResource(R.string.btn_chiudi_analisi), // 🌍 I18N: Estratto stringa pulsante
                                     // Tipografia imponente (Headline) per richiamare la Home
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold
@@ -594,5 +616,3 @@ fun MatchAnalysisOverlay(
             }
         }
     }
-
-

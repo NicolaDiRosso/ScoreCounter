@@ -158,6 +158,22 @@
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">%d Combo</string>
 
+    <!-- TESTO PER IL  FILE MatchAnalysisOverlay-->
+    <string name="titolo_analisi_partita">Analisi Partita</string>
+    <string name="label_vinta_da_con_punti">🏆 Vinta da %1$s con %2$d pt</string>
+    <string name="desc_info_grafico">Info Grafico</string>
+    <string name="titolo_guida_grafico">Come leggere il grafico</string>
+    <string name="titolo_guida_punti">📈 Punti (Asse Verticale)</string>
+    <string name="msg_guida_punti">Più la linea sale in alto, maggiore è il punteggio del giocatore.</string>
+    <string name="titolo_guida_tempo">⏱️ Tempo (Asse Orizzontale)</string>
+    <string name="msg_guida_tempo">Mostra lo scorrere della partita, dall\'inizio (a sinistra) fino alla fine (a destra).</string>
+    <string name="titolo_guida_pallini">🔵 Pallini e Linee Piatte</string>
+    <string name="msg_guida_pallini">Ogni pallino è un punto segnato. Se la linea va dritta (piatta), significa che in quel momento nessuno ha fatto punti.</string>
+    <string name="titolo_guida_sorpassi">⚔️ Sorpassi</string>
+    <string name="msg_guida_sorpassi">Quando due linee si incrociano, significa che c\'è stato un pareggio o un sorpasso in classifica!</string>
+    <string name="label_durata_totale"> Durata totale: %s</string>
+    <string name="btn_chiudi_analisi">Chiudi Analisi</string>
+
     <!-- TESTO PER IL  FILE GlobalStatsScreen-->
     <string name="btn_chiudi_statistiche">Chiudi Statistiche</string>
     <string name="titolo_statistiche_partite">Statistiche partite</string>

@@ -158,6 +158,22 @@
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">%d Combo</string>
 
+    <!-- TESTO TRADOTTO PER IL  FILE MatchAnalysisOverlay-->
+    <string name="titolo_analisi_partita">Match Analysis</string>
+    <string name="label_vinta_da_con_punti">🏆 Won by %1$s with %2$d pt</string>
+    <string name="desc_info_grafico">Chart Info</string>
+    <string name="titolo_guida_grafico">How to read the chart</string>
+    <string name="titolo_guida_punti">📈 Points (Vertical Axis)</string>
+    <string name="msg_guida_punti">The higher the line goes, the higher the player\'s score.</string>
+    <string name="titolo_guida_tempo">⏱️ Time (Horizontal Axis)</string>
+    <string name="msg_guida_tempo">Shows the progression of the match, from start (left) to finish (right).</string>
+    <string name="titolo_guida_pallini">🔵 Dots and Flat Lines</string>
+    <string name="msg_guida_pallini">Each dot is a point scored. If the line is flat, it means no one scored during that time.</string>
+    <string name="titolo_guida_sorpassi">⚔️ Overtakes</string>
+    <string name="msg_guida_sorpassi">When two lines cross, it means there was a tie or a lead change!</string>
+    <string name="label_durata_totale"> Total duration: %s</string>
+    <string name="btn_chiudi_analisi">Close Analysis</string>
+
     <!-- TESTO TRADOTTO PER IL  FILE GlobalStatsScreen-->
     <string name="btn_chiudi_statistiche">Close Stats</string>
     <string name="titolo_statistiche_partite">Match Statistics</string>
