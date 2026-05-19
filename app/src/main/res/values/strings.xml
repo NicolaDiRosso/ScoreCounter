@@ -12,7 +12,7 @@
     <string name="feature_analizza_grafici">Analyze charts to prove your superiority.</string>
     <string name="feature_assegna_titoli">Assign special honorary titles to those who deserve them.</string>
     <string name="msg_vinca_il_migliore">May the best player win!</string>
-    <string name="msg_segnalazione_bug">To report bugs or send suggestions, press the button and send me an email 😊.</string>
+    <string name="msg_segnalazione_bug">To report bugs or send suggestions, press the button and send me an email (attach images or videos)😊.</string>
     <string name="oggetto_email_feedback">ScoreCounter: Feedback/Bug Report</string>
     <string name="btn_invia_segnalazione">Send feedback</string>
     <string name="btn_inizia_a_giocare">Start playing!</string>

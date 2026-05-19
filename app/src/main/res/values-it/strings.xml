@@ -12,7 +12,7 @@
     <string name="feature_analizza_grafici">Analizzare grafici per dimostrare la tua superiorità.</string>
     <string name="feature_assegna_titoli">Assegnare titoli onorifici particolari a chi se li merita.</string>
     <string name="msg_vinca_il_migliore">Che vinca il migliore!</string>
-    <string name="msg_segnalazione_bug">Invece, per segnalare bug o inviare consigli, premi il pulsante e mandami una email 😊.</string>
+    <string name="msg_segnalazione_bug">Invece, per segnalare bug o inviare consigli, premi il pulsante e mandami una email (allegando immagini o video) 😊.</string>
     <string name="oggetto_email_feedback">ScoreCounter: Feedback/Segnalazione Bug</string>
     <string name="btn_invia_segnalazione">Invia segnalazione</string>
     <string name="btn_inizia_a_giocare">Inizia a giocare!</string>
