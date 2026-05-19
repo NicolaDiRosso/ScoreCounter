@@ -29,6 +29,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource // 🌍 I18N: Import aggiunto per abilitare la traduzione dinamica delle stringhe
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -44,6 +45,7 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import androidx.compose.material.icons.filled.Close
+import com.n380.scorecounter.R // 🌍 I18N: Import del file R per accedere agli ID del dizionario strings.xml
 
 /**
  * ====================================================================
@@ -178,7 +180,7 @@ fun TimerSettingsDialog(
         onDismissRequest = { },
         title = {
             Text(
-                "⏱️ Timer Sfida",
+                text = stringResource(R.string.titolo_timer_sfida), // 🌍 I18N: Sostituzione con la stringa tradotta per il titolo del Timer
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.ExtraBold,
@@ -357,6 +359,7 @@ fun TimerSettingsDialog(
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
                                         // Mostriamo sul bottone il primo elemento della coppia (preset.first).
+                                        // Essendo stringhe puramente numeriche ("00:30") l'I18N non è richiesto.
                                         text = preset.first,
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.labelMedium
@@ -410,7 +413,11 @@ fun TimerSettingsDialog(
                 ) {
                     Icon(imageVector = if (isRunning) Icons.Filled.Stop else Icons.Filled.PlayArrow, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text(if (isRunning) "FERMA TIMER" else "AVVIA TIMER", fontWeight = FontWeight.Bold)
+                    Text(
+                        // 🌍 I18N: Costrutto logico che sceglie dinamicamente dal dizionario la voce "Ferma" o "Avvia" in base allo stato
+                        text = if (isRunning) stringResource(R.string.btn_ferma_timer) else stringResource(R.string.btn_avvia_timer),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 // TASTO CHIUDI E ANNULLA
@@ -427,10 +434,13 @@ fun TimerSettingsDialog(
                     // Icona Close (X) dimensionata a 28.dp per impatto visivo
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Chiudi",
+                        contentDescription = stringResource(R.string.desc_chiudi_icon), // 🌍 I18N: Riutilizzo della stringa "Chiudi/Close" già tradotta precedentemente per la screen di creazione
                         modifier = Modifier.padding(end = 8.dp)//.size(28.dp)
                     )
-                    Text("CHIUDI", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = stringResource(R.string.btn_chiudi), // 🌍 I18N: Sostituzione con testo del bottone tradotto
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

@@ -37,6 +37,7 @@
     <string name="btn_annulla_undo">UNDO</string>
     <string name="testo_copyright">© 2026 Created by NicolA380✈️\nAll rights reserved.</string>
 
+    <!-- TESTO TRADOTTO PER IL  FILE CreateMatchScreen-->
     <string name="titolo_nuova_sfida">New Challenge</string>
     <string name="titolo_regole_gioco">Game Rules</string>
     <string name="desc_dado_icon">Dice</string>
@@ -78,4 +79,12 @@
     <string name="desc_modifica_icon">Edit</string>
     <string name="desc_elimina_icon">Delete</string>
     <string name="desc_gestisci_rapidi_icon">Manage Quick Players</string>
+
+
+    <!-- TESTO TRADOTTO PER IL  FILE TimerComponents-->
+    <string name="titolo_timer_sfida">⏱️ Challenge Timer</string>
+    <string name="btn_ferma_timer">STOP TIMER</string>
+    <string name="btn_avvia_timer">START TIMER</string>
+    <string name="btn_chiudi">CLOSE</string>
+
 </resources>
