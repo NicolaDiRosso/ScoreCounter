@@ -28,7 +28,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import com.n380.scorecounter.R
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -172,7 +174,7 @@ fun HomeScreen(
             icon = {
                 Icon(
                     imageVector = Icons.Filled.Restore, // Oppure .PauseCircle o .SportsEsports
-                    contentDescription = "Ripristina salvataggio",
+                    contentDescription = stringResource(R.string.desc_ripristina_salvataggio), // Descrizione accessibilità per l'icona di ripristino
                     // Essendo un'opportunità per l'utente (non un'azione distruttiva),
                     // usiamo il colore primario dell'app e non quello di errore.
                     tint = MaterialTheme.colorScheme.primary,
@@ -186,12 +188,12 @@ fun HomeScreen(
 
             title = {
                 AutoResizedText(
-                    text = "Partita in sospeso",
+                    text = stringResource(R.string.titolo_partita_in_sospeso), // Titolo del dialogo partita pendente
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
-                Text("Hai lasciato una sfida a metà.\nVuoi riprenderla da dove l'avevi lasciata?")
+                Text(stringResource(R.string.msg_riprendi_partita)) // Messaggio che chiede se riprendere la partita
             },
 
             // Per uniformare il Design System dell'app, bypassiamo l'allineamento
@@ -233,7 +235,7 @@ fun HomeScreen(
                             MaterialTheme.colorScheme.error
                         )
                     ) {
-                        AutoResizedText(text = "Cancella",fontWeight = FontWeight.Bold,)
+                        AutoResizedText(text = stringResource(R.string.btn_cancella),fontWeight = FontWeight.Bold,) // Testo pulsante per cancellare il backup
                     }
 
                     // AZIONE PRIMARIA / COSTRUTTIVA
@@ -252,7 +254,7 @@ fun HomeScreen(
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         AutoResizedText(
-                            text = "Riprendi",
+                            text = stringResource(R.string.btn_riprendi), // Testo pulsante per riprendere la partita
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -277,7 +279,7 @@ fun HomeScreen(
             },
             title = {
                 Text(
-                    "ScoreCounter",
+                    stringResource(R.string.app_name), // Nome dell'applicazione nel titolo del dialogo About
                     fontWeight = FontWeight.Black, // Più "pesante" per un look da titolo vero
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -299,7 +301,7 @@ fun HomeScreen(
                     )*/
 
                     Text(
-                        "Che tu stia giocando a carte, a un gioco in scatola o a chi mangia più tranci di pizza, questa app è qui per tenere il conto ed evitare litigi (o forse per incentivarli 😉).",
+                        stringResource(R.string.desc_informazioni_app), // Descrizione lunga dell'applicazione
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface,
@@ -308,7 +310,7 @@ fun HomeScreen(
 
                     // Sottotitolo colorato
                     Text(
-                        "✨ Cosa puoi fare:",
+                        stringResource(R.string.sottotitolo_cosa_puoi_fare), // Intestazione sezione funzionalità
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -316,9 +318,9 @@ fun HomeScreen(
 
                     // 🧠 FORMATTAZIONE PRO: Creiamo la lista puntata graficamente
                     val features = listOf(
-                        "Registrare partite con punti e combo.",
-                        "Analizzare grafici per dimostrare la tua superiorità.",
-                        "Assegnare titoli onorifici particolari a chi se li merita."
+                        stringResource(R.string.feature_registra_partite), // Feature 1: Registrazione partite
+                        stringResource(R.string.feature_analizza_grafici), // Feature 2: Analisi grafici
+                        stringResource(R.string.feature_assegna_titoli) // Feature 3: Assegnazione titoli
                     )
                     features.forEach { feature ->
                         Row(modifier = Modifier.padding(bottom = 4.dp)){
@@ -330,14 +332,14 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        "Che vinca il migliore!", //Niente più foglietti volanti o calcoli a mente sbagliati.
+                        stringResource(R.string.msg_vinca_il_migliore), // Messaggio di augurio "Vinca il migliore"
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        "Invece, per segnalare bug o inviare consigli, premi il pulsante e mandami una email 😊.",
+                        stringResource(R.string.msg_segnalazione_bug), // Istruzioni per feedback e bug report
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
                         color = MaterialTheme.colorScheme.onSurface
@@ -366,9 +368,10 @@ fun HomeScreen(
                             // DEFINIZIONE DELL'INTENT
                             // Creazione di un'istanza della Classe Intent con azione ACTION_SENDTO.
                             // La Proprietà data viene impostata tramite Uri.parse per forzare il protocollo mailto.
+                            val emailSubject = context.getString(R.string.oggetto_email_feedback) // Recupera l'oggetto dell'email dalle risorse
                             val emailIntent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
                                 data = android.net.Uri.parse("mailto:emailditest100@gmail.com")
-                                putExtra(android.content.Intent.EXTRA_SUBJECT, "ScoreCounter: Feedback/Segnalazione Bug")
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, emailSubject)
                             }
 
                             // Metodo della Classe Context: Avvia l'applicazione esterna
@@ -390,7 +393,7 @@ fun HomeScreen(
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        AutoResizedText("Invia segnalazione", style = MaterialTheme.typography.labelLarge)
+                        AutoResizedText(stringResource(R.string.btn_invia_segnalazione), style = MaterialTheme.typography.labelLarge) // Testo pulsante invio feedback
                     }
 
                     // DISTANZIATORE: 12 pixel di respiro tra i due bottoni
@@ -415,7 +418,7 @@ fun HomeScreen(
 
                     )
                     Spacer(Modifier.width(8.dp))
-                    AutoResizedText("Inizia a giocare!", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                    AutoResizedText(stringResource(R.string.btn_inizia_a_giocare), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge) // Testo pulsante per iniziare a giocare
                 }
             }
         )
@@ -539,7 +542,7 @@ fun HomeScreen(
                                         modifier = Modifier.padding(end = 8.dp).size(28.dp)
                                     )
                                     Text(
-                                        text = "Nuova Sfida",
+                                        text = stringResource(R.string.btn_nuova_sfida), // Testo del pulsante flottante per una nuova sfida
                                         style = MaterialTheme.typography.headlineSmall,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -577,7 +580,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Storico Sfide",
+                    text = stringResource(R.string.titolo_storico_sfide), // Titolo principale della schermata Home
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -604,7 +607,7 @@ fun HomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Info,
-                            contentDescription = "Informazioni App",
+                            contentDescription = stringResource(R.string.desc_informazioni_app_icon), // Descrizione accessibilità per il pulsante info
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
                             // 🧠 FIX ICONA: Icona ridotta a 20.dp per mantenere le proporzioni
                             modifier = Modifier.size(20.dp)
@@ -625,7 +628,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.BarChart,
-                                contentDescription = "Statistiche Globali",
+                                contentDescription = stringResource(R.string.desc_statistiche_globali), // Descrizione accessibilità per il pulsante statistiche
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -720,11 +723,11 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
-                            placeholder = { AutoResizedText("Cerca sfida o giocatore...") },
+                            placeholder = { AutoResizedText(stringResource(R.string.hint_cerca_sfida)) }, // Placeholder della barra di ricerca
                             leadingIcon = {
                                 Icon(
                                     Icons.Filled.Search,
-                                    contentDescription = "Cerca"
+                                    contentDescription = stringResource(R.string.desc_cerca_icon) // Descrizione accessibilità icona ricerca
                                 )
                             },
                             trailingIcon = {
@@ -736,7 +739,7 @@ fun HomeScreen(
                                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                         }
                                     ) {
-                                        Icon(Icons.Filled.Clear, contentDescription = "Cancella")
+                                        Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.btn_cancella)) // Descrizione pulsante pulisci ricerca
                                     }
                                 }
                             },
@@ -795,7 +798,7 @@ fun HomeScreen(
 
                                 // TITOLO PRINCIPALE: Usa il tuo stile Typography per coerenza
                                 AutoResizedText(
-                                    text = "La tua cronologia è vuota",
+                                    text = stringResource(R.string.titolo_cronologia_vuota), // Messaggio quando lo storico è vuoto
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -803,7 +806,7 @@ fun HomeScreen(
 
                                 // CALL TO ACTION (INVITO ALL'AZIONE): Spieghiamo all'utente cosa fare.
                                 Text(
-                                    text = "Inizia una sfida per salvare la tua prima vittoria!",
+                                    text = stringResource(R.string.desc_inizia_sfida), // Invito a iniziare una nuova sfida
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center, // Centra il testo se va su due righe
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
@@ -837,7 +840,7 @@ fun HomeScreen(
 
                                 // Il componente AutoResizedText, perfetto per gestire stringhe lunghe
                                 AutoResizedText(
-                                    text = "Nessun risultato trovato.",
+                                    text = stringResource(R.string.titolo_nessun_risultato), // Messaggio quando la ricerca non produce risultati
                                     style = MaterialTheme.typography.titleLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Bold,
@@ -845,7 +848,7 @@ fun HomeScreen(
                                 )
 
                                 AutoResizedText(
-                                    text = "Prova a cercare un altro nome o giocatore",
+                                    text = stringResource(R.string.desc_prova_altra_ricerca), // Suggerimento per affinare la ricerca
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                     modifier = Modifier.padding(top = 8.dp)
@@ -947,7 +950,7 @@ fun HomeScreen(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = "🏆 Vincitore: ${record.winnerName}",
+                                                text = stringResource(R.string.label_vincitore, record.winnerName), // Testo che indica il vincitore della partita
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Medium
@@ -980,7 +983,7 @@ fun HomeScreen(
                                                                     modifier = Modifier.padding(end = 8.dp)
                                                                 )
                                                                 Text(
-                                                                    text = "1° ${playerRecord.name}",
+                                                                    text = stringResource(R.string.label_classifica_primo, playerRecord.name), // Etichetta per il primo classificato
                                                                     style = MaterialTheme.typography.titleLarge,
                                                                     fontWeight = FontWeight.ExtraBold,
                                                                     color = MaterialTheme.colorScheme.primary
@@ -988,13 +991,13 @@ fun HomeScreen(
                                                             }
                                                         } else {
                                                             Text(
-                                                                text = "${index + 1}° ${playerRecord.name}",
+                                                                text = stringResource(R.string.label_classifica_generico, index + 1, playerRecord.name), // Etichetta per gli altri classificati (2°, 3°, ecc.)
                                                                 style = MaterialTheme.typography.bodyLarge
                                                             )
                                                         }
 
                                                         Text(
-                                                            text = "${playerRecord.score} pt",
+                                                            text = stringResource(R.string.label_punti, playerRecord.score), // Testo che mostra i punti del giocatore
                                                             style = MaterialTheme.typography.bodyLarge,
                                                             fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
                                                         )
@@ -1048,13 +1051,13 @@ fun HomeScreen(
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
                                                             Text(
-                                                                "Andamento Punteggi",
+                                                                stringResource(R.string.titolo_andamento_punteggi), // Intestazione sezione grafico punti
                                                                 style = MaterialTheme.typography.labelMedium,
                                                                 color = MaterialTheme.colorScheme.primary
                                                             )
                                                             Icon(
                                                                 Icons.Filled.Fullscreen,
-                                                                contentDescription = "Espandi Grafico",
+                                                                contentDescription = stringResource(R.string.desc_espandi_grafico), // Descrizione accessibilità per espandere il grafico
                                                                 tint = MaterialTheme.colorScheme.primary,
                                                                 modifier = Modifier.size(18.dp)
                                                             )
@@ -1102,17 +1105,11 @@ fun HomeScreen(
                                                         AutoResizedText(
                                                             // PROPRIETÀ text: Usiamo l'interpolazione ${} per eseguire entrambe le funzioni
                                                             // (formattazione dell'ora e formattazione della data) dentro la stessa stringa.
-                                                            text = "Alle ${
-                                                                timeFormatter.format(
-                                                                    java.util.Date(
-                                                                        record.timestamp
-                                                                    )
-                                                                )
-                                                            } del ${
-                                                                if (record.timestamp > 0L) formatDate(
-                                                                    record.timestamp
-                                                                ) else ""
-                                                            }",
+                                                            text = stringResource(
+                                                                R.string.label_data_ora_partita, // Stringa formattata per data e ora della partita
+                                                                timeFormatter.format(java.util.Date(record.timestamp)),
+                                                                if (record.timestamp > 0L) formatDate(record.timestamp) else ""
+                                                            ),
 
                                                             style = MaterialTheme.typography.bodyMedium,
                                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1232,8 +1229,8 @@ fun HomeScreen(
                                                                 launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
                                                                 val result =
                                                                     snackbarHostState.showSnackbar(
-                                                                        "Partita eliminata",
-                                                                        "ANNULLA",
+                                                                        context.getString(R.string.msg_partita_eliminata), // Messaggio Snackbar: partita eliminata
+                                                                        context.getString(R.string.btn_annulla_undo), // Testo pulsante Snackbar: annulla eliminazione
                                                                         duration = SnackbarDuration.Indefinite
                                                                     )
                                                                 if (result == SnackbarResult.ActionPerformed) {
@@ -1266,7 +1263,7 @@ fun HomeScreen(
                             item {
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
-                                    text = "© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.",
+                                    text = stringResource(R.string.testo_copyright), // Testo del copyright a fondo pagina
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                     // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ScoreCounter</string>
+    <string name="desc_ripristina_salvataggio">Ripristina salvataggio</string>
+    <string name="titolo_partita_in_sospeso">Partita in sospeso</string>
+    <string name="msg_riprendi_partita">Hai lasciato una sfida a metà.\nVuoi riprenderla da dove l\'avevi lasciata?</string>
+    <string name="btn_cancella">Cancella</string>
+    <string name="btn_riprendi">Riprendi</string>
+    <string name="desc_informazioni_app">Che tu stia giocando a carte, a un gioco in scatola o a chi mangia più tranci di pizza, questa app è qui per tenere il conto ed evitare litigi (o forse per incentivarli 😉).</string>
+    <string name="sottotitolo_cosa_puoi_fare">✨ Cosa puoi fare:</string>
+    <string name="feature_registra_partite">Registrare partite con punti e combo.</string>
+    <string name="feature_analizza_grafici">Analizzare grafici per dimostrare la tua superiorità.</string>
+    <string name="feature_assegna_titoli">Assegnare titoli onorifici particolari a chi se li merita.</string>
+    <string name="msg_vinca_il_migliore">Che vinca il migliore!</string>
+    <string name="msg_segnalazione_bug">Invece, per segnalare bug o inviare consigli, premi il pulsante e mandami una email 😊.</string>
+    <string name="oggetto_email_feedback">ScoreCounter: Feedback/Segnalazione Bug</string>
+    <string name="btn_invia_segnalazione">Invia segnalazione</string>
+    <string name="btn_inizia_a_giocare">Inizia a giocare!</string>
+    <string name="btn_nuova_sfida">Nuova Sfida</string>
+    <string name="titolo_storico_sfide">Storico Sfide</string>
+    <string name="desc_informazioni_app_icon">Informazioni App</string>
+    <string name="desc_statistiche_globali">Statistiche Globali</string>
+    <string name="hint_cerca_sfida">Cerca sfida o giocatore&#8230;</string>
+    <string name="desc_cerca_icon">Cerca</string>
+    <string name="titolo_cronologia_vuota">La tua cronologia è vuota</string>
+    <string name="desc_inizia_sfida">Inizia una sfida per salvare la tua prima vittoria!</string>
+    <string name="titolo_nessun_risultato">Nessun risultato trovato.</string>
+    <string name="desc_prova_altra_ricerca">Prova a cercare un altro nome o giocatore</string>
+    <string name="label_vincitore">🏆 Vincitore: %s</string>
+    <string name="label_classifica_primo">1° %s</string>
+    <string name="label_classifica_generico">%d° %s</string>
+    <string name="label_punti">%d pt</string>
+    <string name="titolo_andamento_punteggi">Andamento Punteggi</string>
+    <string name="desc_espandi_grafico">Espandi Grafico</string>
+    <string name="label_data_ora_partita">Alle %1$s del %2$s</string>
+    <string name="msg_partita_eliminata">Partita eliminata</string>
+    <string name="btn_annulla_undo">ANNULLA</string>
+    <string name="testo_copyright">© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.</string>
+</resources>
