@@ -1,5 +1,6 @@
 package com.n380.scorecounter.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -105,7 +106,11 @@ fun DiceSettingsDialog(
                                         customDiceInput = ""
                                     },
                                     colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
-                                    shape = RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(12.dp),
+                                    // 🎨 UI DESIGN: Aggiungiamo un bordo per definire meglio la forma delle card.
+                                    // Utilizzare un BorderStroke aiuta a far risaltare il componente e a dare coerenza
+                                    // con il resto del design system (es. campi di testo e pulsanti secondari).
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                                 ) {
                                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                         // ==========================================================
