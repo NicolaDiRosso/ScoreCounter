@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- TESTO PER IL FILE HomeScreen-->
     <string name="app_name">ScoreCounter</string>
     <string name="desc_ripristina_salvataggio">Ripristina salvataggio</string>
     <string name="titolo_partita_in_sospeso">Partita in sospeso</string>
@@ -36,6 +37,24 @@
     <string name="msg_partita_eliminata">Partita eliminata</string>
     <string name="btn_annulla_undo">ANNULLA</string>
     <string name="testo_copyright">© 2026 Creato da NicolA380✈️\nTutti i diritti sono riservati.</string>
+
+    <!-- TESTO PER IL FILE ShareUtils-->
+    <string name="label_chart_inizio">Inizio</string>
+    <string name="label_chart_meta">Metà</string>
+    <string name="label_chart_fine">Fine</string>
+
+    <string name="share_title_prefix">Risultati:</string>
+    <string name="share_duration_prefix">Durata:</string>
+    <string name="share_date_prefix">Data:</string>
+    <string name="share_points_suffix">pt</string>
+    <string name="share_awards_title">PREMI SPECIALI:</string>
+    <string name="share_sniper_detail">pt in un colpo</string>
+    <string name="share_fire_detail">combo On Fire</string>
+    <string name="share_crab_detail">pt tolti</string>
+    <string name="share_phoenix_detail_start">rimonta da</string>
+    <string name="share_phoenix_detail_end">pt</string>
+    <string name="share_footer_generated">Generato con ScoreCounter 🎮</string>
+    <string name="share_intent_chooser">Condividi Classifica</string>
 
     <!-- TESTO PER IL  FILE CreateMatchScreen-->
     <string name="titolo_nuova_sfida">Nuova Sfida</string>

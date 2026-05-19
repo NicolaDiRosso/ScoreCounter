@@ -1196,6 +1196,8 @@ fun HomeScreen(
 
                                                             // Costruzione delegata del report testuale chiamando il file SharedUtils
                                                             val shareText = buildMatchShareText(
+                                                                // Passiamo il Context per consentire alla funzione non-Composable di accedere alle risorse di sistema e ai file strings.xml
+                                                                context = context,
                                                                 title = record.title,
                                                                 durationSeconds = record.durationSeconds,
                                                                 timestamp = record.timestamp,

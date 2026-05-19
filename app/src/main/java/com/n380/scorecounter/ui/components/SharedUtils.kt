@@ -1,480 +1,492 @@
 package com.n380.scorecounter.ui.components
 
-    import android.content.Intent
-    import android.graphics.Paint
-    import android.graphics.Typeface
-    import androidx.compose.animation.core.*
-    import androidx.compose.foundation.Canvas
-    import androidx.compose.foundation.background
-    import androidx.compose.foundation.border // <-- IMPORTANTE: Serve per disegnare il bordo del cerchio selezionato
-    import androidx.compose.foundation.clickable
-    import androidx.compose.foundation.horizontalScroll
-    import androidx.compose.foundation.layout.*
-    import androidx.compose.foundation.lazy.LazyRow // <-- IMPORTANTE: Serve per la riga dei colori scorrevole
-    import androidx.compose.foundation.lazy.items // <-- IMPORTANTE: Serve per ciclare la lista dei colori
-    import androidx.compose.foundation.rememberScrollState
-    import androidx.compose.foundation.shape.CircleShape
-    import androidx.compose.foundation.shape.RoundedCornerShape
-    import androidx.compose.material.icons.Icons
-    import androidx.compose.material.icons.filled.*
-    import androidx.compose.material3.Icon
-    import androidx.compose.material3.MaterialTheme
-    import androidx.compose.material3.Text
-    import androidx.compose.runtime.*
-    import androidx.compose.ui.Alignment
-    import androidx.compose.ui.Modifier
-    import androidx.compose.ui.draw.clip
-    import androidx.compose.ui.draw.drawWithContent
-    import androidx.compose.ui.geometry.Offset
-    import androidx.compose.ui.graphics.Color
-    import androidx.compose.ui.graphics.Path
-    import androidx.compose.ui.graphics.StrokeCap
-    import androidx.compose.ui.graphics.StrokeJoin
-    import androidx.compose.ui.graphics.drawscope.Stroke
-    import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
-    import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
-    import androidx.compose.ui.text.TextStyle
-    import androidx.compose.ui.text.font.FontWeight
-    import androidx.compose.ui.unit.dp
-    import com.n380.scorecounter.model.PlayerRecord
-    import java.text.SimpleDateFormat
-    import java.util.*
-    import kotlin.math.cos
-    import kotlin.math.sin
-    import kotlin.random.Random
+import android.content.Context
+import android.content.Intent
+import android.graphics.Paint
+import android.graphics.Typeface
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border // <-- IMPORTANTE: Serve per disegnare il bordo del cerchio selezionato
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow // <-- IMPORTANTE: Serve per la riga dei colori scorrevole
+import androidx.compose.foundation.lazy.items // <-- IMPORTANTE: Serve per ciclare la lista dei colori
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
+import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.n380.scorecounter.R // 🌍 I18N: Import fondamentale per accedere agli ID del dizionario
+import com.n380.scorecounter.model.PlayerRecord
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
 
-    // FUNZIONE DI SUPPORTO: Formatta i secondi in "Minuti:Secondi" (Es. 05:12)
-    fun formatTime(totalSeconds: Long): String {
-        val m = totalSeconds / 60
-        val s = totalSeconds % 60
-        return "${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}"
-    }
+// FUNZIONE DI SUPPORTO: Formatta i secondi in "Minuti:Secondi" (Es. 05:12)
+fun formatTime(totalSeconds: Long): String {
+    val m = totalSeconds / 60
+    val s = totalSeconds % 60
+    return "${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}"
+}
 
-    // FUNZIONE DI SUPPORTO: Formatta i millisecondi in una Data (Es. 8 Nov 2026)
-    fun formatDate(timestamp: Long): String {
-        if (timestamp == 0L) return ""
-        val sdf = SimpleDateFormat("d MMM yyyy", Locale.ITALIAN)
-        return sdf.format(Date(timestamp))
-    }
+// 🧠 LEZIONE TEORICA I18N: Formattazione Universale
+// Non "forziamo" più la lingua italiana fissa (Locale.ITALIAN). Usiamo `Locale.getDefault()`.
+// Il telefono capirà da solo se l'utente è americano, e stamperà la data come piace a lui!
+// FUNZIONE DI SUPPORTO: Formatta i millisecondi in una Data (Es. 8 Nov 2026)
+fun formatDate(timestamp: Long): String {
+    if (timestamp == 0L) return ""
+    val sdf = SimpleDateFormat("d MMM yyyy", Locale.getDefault())
+    return sdf.format(Date(timestamp))
+}
 
-    // ====================================================================
-    // COMPONENTE: SFONDO DECORATIVO GLOBALE
-    // ====================================================================
-    @Composable
-    fun PatternedBackground() {
-        // La lista delle nostre icone a tema (Giochi, Anime, Carte, Coppe, Timer, Medaglie)
-        val icons = listOf(
-            // Le tue originali
-            Icons.Filled.VideogameAsset,   // Controller Classico
-            Icons.Filled.Style,            // Carte
-            Icons.Filled.Tv,               // Anime/Schermo
-            Icons.Filled.EmojiEvents,      // Coppa del vincitore
-            Icons.Filled.Timer,            // Cronometro
-            Icons.Filled.WorkspacePremium, // Medaglia/Corona
+// ====================================================================
+// COMPONENTE: SFONDO DECORATIVO GLOBALE
+// ====================================================================
+@Composable
+fun PatternedBackground() {
+    // La lista delle nostre icone a tema (Giochi, Anime, Carte, Coppe, Timer, Medaglie)
+    val icons = listOf(
+        // Le tue originali
+        Icons.Filled.VideogameAsset,   // Controller Classico
+        Icons.Filled.Style,            // Carte
+        Icons.Filled.Tv,               // Anime/Schermo
+        Icons.Filled.EmojiEvents,      // Coppa del vincitore
+        Icons.Filled.Timer,            // Cronometro
+        Icons.Filled.WorkspacePremium, // Medaglia/Corona
 
-            // ICONE TEMATICHE ESCLUSIVE PER LO SFONDO
-            Icons.Filled.Casino,           // Dadi (Perfetto per i giochi da tavolo!)
-            Icons.Filled.SportsEsports,    // Controller Moderno (Per tornei e console)
-            Icons.Filled.Extension,        // Pezzo di Puzzle (Per giochi di strategia e logica)
-            Icons.Filled.Star,             // Stella (Il classico simbolo dei punti)
-            Icons.Filled.FlashOn,          // Fulmine (Richiama la combo "On Fire" e la velocità)
-        )
+        // ICONE TEMATICHE ESCLUSIVE PER LO SFONDO
+        Icons.Filled.Casino,           // Dadi (Perfetto per i giochi da tavolo!)
+        Icons.Filled.SportsEsports,    // Controller Moderno (Per tornei e console)
+        Icons.Filled.Extension,        // Pezzo di Puzzle (Per giochi di strategia e logica)
+        Icons.Filled.Star,             // Stella (Il classico simbolo dei punti)
+        Icons.Filled.FlashOn,          // Fulmine (Richiama la combo "On Fire" e la velocità)
+    )
 
-        // ---> IL MOTORE CASUALE BLOCCATO <---
-        // Creiamo una "mappa" bidimensionale fissa. Viene calcolata a caso la prima volta,
-        // ma grazie a 'remember' lo schermo non sfarfallerà mai durante la partita!
-        val randomGrid = remember {
-            List(34) { // 34 righe
-                List(11) { // 11 colonne
-                    icons.random() // Sceglie un'icona totalmente a caso per ogni singola cella
-                }
+    // ---> IL MOTORE CASUALE BLOCCATO <---
+    // Creiamo una "mappa" bidimensionale fissa. Viene calcolata a caso la prima volta,
+    // ma grazie a 'remember' lo schermo non sfarfallerà mai durante la partita!
+    val randomGrid = remember {
+        List(34) { // 34 righe
+            List(11) { // 11 colonne
+                icons.random() // Sceglie un'icona totalmente a caso per ogni singola cella
             }
         }
-        // Un contenitore grande quanto tutto lo schermo
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {//mette 15 pixel di vuoto tra un'icona e l'altra in verticale.
-                // Disegniamo 33 righe per coprire anche gli schermi più lunghi
-                for (row in 0..33) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(43.dp),//mette 43 pixel di vuoto tra un'icona e l'altra in orizzontale.
-                        // IL TRUCCO: Sfalsiamo leggermente le righe dispari per fare l'effetto "muro di mattoni" sfalsato
-                        modifier = if (row % 2 == 0) Modifier else Modifier.padding(start = 36.dp)
-                    ) {
-                        for (col in 0..10) {val icon = randomGrid[row][col] // Andiamo a leggere l'icona salvata nella nostra mappa casuale
+    }
+    // Un contenitore grande quanto tutto lo schermo
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {//mette 15 pixel di vuoto tra un'icona e l'altra in verticale.
+            // Disegniamo 33 righe per coprire anche gli schermi più lunghi
+            for (row in 0..33) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(43.dp),//mette 43 pixel di vuoto tra un'icona e l'altra in orizzontale.
+                    // IL TRUCCO: Sfalsiamo leggermente le righe dispari per fare l'effetto "muro di mattoni" sfalsato
+                    modifier = if (row % 2 == 0) Modifier else Modifier.padding(start = 36.dp)
+                ) {
+                    for (col in 0..10) {val icon = randomGrid[row][col] // Andiamo a leggere l'icona salvata nella nostra mappa casuale
 
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                //Usiamo il colore del testo, ma con opacità al 5% (0.05f). Sarà un'ombra elegantissima!
-                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            //Usiamo il colore del testo, ma con opacità al 5% (0.05f). Sarà un'ombra elegantissima!
+                            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
+                            modifier = Modifier.size(36.dp)
+                        )
                     }
                 }
             }
         }
     }
+}
 
-    // ====================================================================
+// ====================================================================
 // IL MOTORE DEL GRAFICO A LINEE (ScoreChart / Game Stats)
 // ====================================================================
 
-    /**
-     * ---> LEZIONE: PARAMETRI OPZIONALI <---
-     * Abbiamo aggiunto 'isDetailed: Boolean = false'.
-     * Il "= false" significa che è un parametro opzionale. Se non lo scrivi quando chiami
-     * la funzione (come fai nella card piccola), lui assume che sia falso.
-     * Se invece scrivi 'isDetailed = true' (come faremo nel grafico gigante), attiverà gli assi!
-     */
-    /**
-     * COMPONENTE DIDATTICO: ScoreChart(GRAFICO DEI PUNTEGGI)
-     * Disegna il grafico cartesiano dei punteggi usando la geometria vettoriale (Canvas).
-     * * @param players Lista dei giocatori con i loro storici punti.
-     * @param modifier Modificatore per gestire dimensioni e padding esterni.
-     * @param isDetailed Se VERO, il grafico disegna la griglia di sfondo, l'Asse Y (Punteggi) e l'Asse X (Cronologia).
-     */
-    /**
-     * FUNZIONE: ScoreChart
-     * SCOPO: Rendering grafico dell'andamento dei punteggi nel tempo.
-     * LOGICA: Utilizza un sistema di coordinate cartesiane dove l'asse X rappresenta il tempo
-     * e l'asse Y il punteggio. Il sistema calcola dinamicamente i rapporti di scala
-     * per far rientrare i dati all'interno della dimensione del Canvas.
-     */
-    @Composable
-    fun ScoreChart(
-        players: List<PlayerRecord>,
-        modifier: Modifier = Modifier,
-        isDetailed: Boolean = false,
-        durationSeconds: Long = 0L // Input fondamentale per mappare i pixel sui minuti reali
-    ) {
-        // VALIDAZIONE DATI: Evita tentativi di calcolo su liste nulle che causerebbero crash per divisione per zero.
-        if (players.isEmpty()) return
-        val validPlayers = players.filter { (it.scoreHistory ?: emptyList()).isNotEmpty() }
-        if (validPlayers.isEmpty()) return
+/**
+ * ---> LEZIONE: PARAMETRI OPZIONALI <---
+ * Abbiamo aggiunto 'isDetailed: Boolean = false'.
+ * Il "= false" significa che è un parametro opzionale. Se non lo scrivi quando chiami
+ * la funzione (come fai nella card piccola), lui assume che sia falso.
+ * Se invece scrivi 'isDetailed = true' (come faremo nel grafico gigante), attiverà gli assi!
+ */
+/**
+ * COMPONENTE DIDATTICO: ScoreChart(GRAFICO DEI PUNTEGGI)
+ * Disegna il grafico cartesiano dei punteggi usando la geometria vettoriale (Canvas).
+ * * @param players Lista dei giocatori con i loro storici punti.
+ * @param modifier Modificatore per gestire dimensioni e padding esterni.
+ * @param isDetailed Se VERO, il grafico disegna la griglia di sfondo, l'Asse Y (Punteggi) e l'Asse X (Cronologia).
+ */
+/**
+ * FUNZIONE: ScoreChart
+ * SCOPO: Rendering grafico dell'andamento dei punteggi nel tempo.
+ * LOGICA: Utilizza un sistema di coordinate cartesiane dove l'asse X rappresenta il tempo
+ * e l'asse Y il punteggio. Il sistema calcola dinamicamente i rapporti di scala
+ * per far rientrare i dati all'interno della dimensione del Canvas.
+ */
+@Composable
+fun ScoreChart(
+    players: List<PlayerRecord>,
+    modifier: Modifier = Modifier,
+    isDetailed: Boolean = false,
+    durationSeconds: Long = 0L // Input fondamentale per mappare i pixel sui minuti reali
+) {
+    // 🌍 I18N: Non potendo usare @Composable qui dentro il blocco del Canvas nativo in modo fluido,
+    // catturiamo tutte le stringhe di base (Inizio, Fine, ecc.) in anticipo.
+    val labelInizio = stringResource(R.string.label_chart_inizio)
+    val labelMeta = stringResource(R.string.label_chart_meta)
+    val labelFine = stringResource(R.string.label_chart_fine)
 
-        // ESTREMI MATEMATICI: Determiniamo il range di valori dell'asse Y.
-        // maxScore e minScore definiscono il "tetto" e il "pavimento" del grafico.
-        val maxScore = validPlayers.maxOf { (it.scoreHistory ?: emptyList()).maxOrNull() ?: 0 }
-        val minScore = validPlayers.minOf { (it.scoreHistory ?: emptyList()).minOrNull() ?: 0 }
+    // VALIDAZIONE DATI: Evita tentativi di calcolo su liste nulle che causerebbero crash per divisione per zero.
+    if (players.isEmpty()) return
+    val validPlayers = players.filter { (it.scoreHistory ?: emptyList()).isNotEmpty() }
+    if (validPlayers.isEmpty()) return
 
-        Column(modifier = modifier) {
-            Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
+    // ESTREMI MATEMATICI: Determiniamo il range di valori dell'asse Y.
+    // maxScore e minScore definiscono il "tetto" e il "pavimento" del grafico.
+    val maxScore = validPlayers.maxOf { (it.scoreHistory ?: emptyList()).maxOrNull() ?: 0 }
+    val minScore = validPlayers.minOf { (it.scoreHistory ?: emptyList()).minOrNull() ?: 0 }
 
-                // --------------------------------------------------------------------
-                // DEFINIZIONE AREA DI DISEGNO (BOUNDS)
-                // --------------------------------------------------------------------
-                // Calcoliamo i margini (Padding) per non far toccare le linee ai bordi dello schermo.
-                val padYTop = 10.dp.toPx()
-                val padYBottom = if (isDetailed) 50.dp.toPx() else 16.dp.toPx()
-                val padX = if (isDetailed) 20.dp.toPx() else 16.dp.toPx()
+    Column(modifier = modifier) {
+        Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
-                // drawW e drawH rappresentano l'area netta calpestabile per il disegno delle linee.
-                val drawW = (size.width - padX * 2).coerceAtLeast(1f)
-                val drawH = (size.height - padYTop - padYBottom).coerceAtLeast(1f)
+            // --------------------------------------------------------------------
+            // DEFINIZIONE AREA DI DISEGNO (BOUNDS)
+            // --------------------------------------------------------------------
+            // Calcoliamo i margini (Padding) per non far toccare le linee ai bordi dello schermo.
+            val padYTop = 10.dp.toPx()
+            val padYBottom = if (isDetailed) 50.dp.toPx() else 16.dp.toPx()
+            val padX = if (isDetailed) 20.dp.toPx() else 16.dp.toPx()
 
-                // yRange serve come denominatore per normalizzare i punteggi (da 0 a 1).
-                val yRange = (maxScore - minScore).coerceAtLeast(1).toFloat()
+            // drawW e drawH rappresentano l'area netta calpestabile per il disegno delle linee.
+            val drawW = (size.width - padX * 2).coerceAtLeast(1f)
+            val drawH = (size.height - padYTop - padYBottom).coerceAtLeast(1f)
 
-                if (isDetailed) {
-                    // Configurazione del "Pennello" nativo per il rendering del testo.
-                    val textPaint = Paint().apply {
-                        color = android.graphics.Color.LTGRAY
-                        textSize = 32f
-                        textAlign = Paint.Align.RIGHT
-                        typeface = Typeface.DEFAULT_BOLD
-                    }
+            // yRange serve come denominatore per normalizzare i punteggi (da 0 a 1).
+            val yRange = (maxScore - minScore).coerceAtLeast(1).toFloat()
 
-                    // --------------------------------------------------------------------
-                    // DISEGNO ASSE Y E GRIGLIA ORIZZONTALE
-                    // --------------------------------------------------------------------
-                    val steps = 4 // Dividiamo l'altezza in 4 fasce di punteggio.
-                    for (i in 0..steps) {
-                        // y: Calcolo della posizione verticale invertita (in Android lo 0 e' in alto).
-                        val y = padYTop + drawH - (i * (drawH / steps))
-
-                        // Griglia di sfondo: aiuta a leggere il valore della linea in quel punto.
-                        drawLine(
-                            color = Color.Gray.copy(alpha = 0.2f),
-                            start = Offset(padX, y),
-                            end = Offset(padX + drawW, y),
-                            strokeWidth = 2f
-                        )
-
-                        // Etichette numeriche: Calcoliamo il valore testuale proporzionale allo step.
-                        val value = minScore + (yRange / steps) * i
-                        drawContext.canvas.nativeCanvas.drawText(
-                            value.toInt().toString(),
-                            padX - 24f,
-                            y + 10f,
-                            textPaint
-                        )
-                    }
-
-                    // --------------------------------------------------------------------
-                    // DISEGNO ASSE X E TIMELINE CRONOLOGICA
-                    // --------------------------------------------------------------------
-                    textPaint.textAlign = Paint.Align.CENTER
-                    val xSteps = 4 // Suddividiamo il tempo in 4 segmenti (0%, 25%, 50%, 75%, 100%).
-
-                    for (i in 0..xSteps) {
-                        // xPos: Calcola dove cade la "tacca" temporale sulla larghezza del Canvas.
-                        val xPos = padX + i * (drawW / xSteps)
-
-                        // Griglia di sfondo verticale: aiuta a leggere il tempo in corrispondenza dei punti.
-                        drawLine(
-                            color = Color.Gray.copy(alpha = 0.2f),
-                            start = Offset(xPos, padYTop),
-                            end = Offset(xPos, padYTop + drawH),
-                            strokeWidth = 2f
-                        )
-
-                        // Disegno della tacca fisica (piccola linea/riga verticale sull'asse).
-                        drawLine(
-                            color = Color.LightGray.copy(alpha = 0.5f),
-                            start = Offset(xPos, size.height - padYBottom),
-                            end = Offset(xPos, size.height - padYBottom + 12f),
-                            strokeWidth = 3f
-                        )
-
-                        // LOGICA TEMPORALE: Trasformazione degli indici in formati temporali leggibili.
-                        val label = if (durationSeconds > 0) {
-                            // 1. Calcoliamo i secondi relativi a questo step (es. 25% di 600 secondi = 150 secondi).
-                            val fractionSeconds = (durationSeconds.toFloat() / xSteps) * i
-                            // 2. Usiamo la funzione di utilita' formatTime per avere il formato "MM:SS".
-                            formatTime(fractionSeconds.toLong())
-                        } else {
-                            // Fallback per vecchie partite senza dato temporale.
-                            when(i) {
-                                0 -> "Inizio"
-                                1 -> "1/4"
-                                2 -> "Metà"
-                                3 -> "3/4"
-                                else -> "Fine"
-                            }
-                        }
-
-                        // Rendering finale dell'etichetta del tempo sotto l'asse.
-                        drawContext.canvas.nativeCanvas.drawText(
-                            label,
-                            xPos,
-                            size.height - padYBottom + 45f,
-                            textPaint
-                        )
-                    }
+            if (isDetailed) {
+                // Configurazione del "Pennello" nativo per il rendering del testo.
+                val textPaint = Paint().apply {
+                    color = android.graphics.Color.LTGRAY
+                    textSize = 32f
+                    textAlign = Paint.Align.RIGHT
+                    typeface = Typeface.DEFAULT_BOLD
                 }
 
                 // --------------------------------------------------------------------
-                // RENDERING DELLE TRAIETTORIE (LINEE PUNTEGGIO)
+                // DISEGNO ASSE Y E GRIGLIA ORIZZONTALE
                 // --------------------------------------------------------------------
-                validPlayers.forEach { player ->
-                    val color = Color(player.color)
-                    val path = Path()
-                    val history = player.scoreHistory ?: emptyList()
+                val steps = 4 // Dividiamo l'altezza in 4 fasce di punteggio.
+                for (i in 0..steps) {
+                    // y: Calcolo della posizione verticale invertita (in Android lo 0 e' in alto).
+                    val y = padYTop + drawH - (i * (drawH / steps))
 
-                    if (history.size >= 1) {
-                        // localXStep: Determina la distanza tra un punto e l'altro.
-                        // Poiche' abbiamo sincronizzato le liste nel ViewModel, localXStep sara'
-                        // identico per tutti i giocatori, garantendo la coerenza temporale.
-                        val localXStep = drawW / (history.size - 1).coerceAtLeast(1).toFloat()
+                    // Griglia di sfondo: aiuta a leggere il valore della linea in quel punto.
+                    drawLine(
+                        color = Color.Gray.copy(alpha = 0.2f),
+                        start = Offset(padX, y),
+                        end = Offset(padX + drawW, y),
+                        strokeWidth = 2f
+                    )
 
-                        history.forEachIndexed { turn, score ->
-                            // Calcolo coordinata X: basata sulla posizione nella lista (il turno).
-                            val x = padX + (turn * localXStep)
+                    // Etichette numeriche: Calcoliamo il valore testuale proporzionale allo step.
+                    val value = minScore + (yRange / steps) * i
+                    drawContext.canvas.nativeCanvas.drawText(
+                        value.toInt().toString(),
+                        padX - 24f,
+                        y + 10f,
+                        textPaint
+                    )
+                }
 
-                            // Calcolo coordinata Y: Normalizziamo il punteggio rispetto al range
-                            // e lo scaliamo sull'altezza disponibile (drawH).
-                            val y = padYTop + drawH - ((score - minScore) / yRange * drawH)
+                // --------------------------------------------------------------------
+                // DISEGNO ASSE X E TIMELINE CRONOLOGICA
+                // --------------------------------------------------------------------
+                textPaint.textAlign = Paint.Align.CENTER
+                val xSteps = 4 // Suddividiamo il tempo in 4 segmenti (0%, 25%, 50%, 75%, 100%).
 
-                            if (turn == 0) path.moveTo(x, y) // Punto di partenza.
-                            else path.lineTo(x, y) // Connessione lineare al punto successivo.
+                for (i in 0..xSteps) {
+                    // xPos: Calcola dove cade la "tacca" temporale sulla larghezza del Canvas.
+                    val xPos = padX + i * (drawW / xSteps)
 
-                            // Disegno dei nodi (pallini) per evidenziare i momenti di cambio punteggio.
-                            val radius = if (isDetailed) 2.dp.toPx() else 1.dp.toPx()
-                            drawCircle(color, radius, Offset(x, y))
+                    // Griglia di sfondo verticale: aiuta a leggere il tempo in corrispondenza dei punti.
+                    drawLine(
+                        color = Color.Gray.copy(alpha = 0.2f),
+                        start = Offset(xPos, padYTop),
+                        end = Offset(xPos, padYTop + drawH),
+                        strokeWidth = 2f
+                    )
+
+                    // Disegno della tacca fisica (piccola linea/riga verticale sull'asse).
+                    drawLine(
+                        color = Color.LightGray.copy(alpha = 0.5f),
+                        start = Offset(xPos, size.height - padYBottom),
+                        end = Offset(xPos, size.height - padYBottom + 12f),
+                        strokeWidth = 3f
+                    )
+
+                    // LOGICA TEMPORALE: Trasformazione degli indici in formati temporali leggibili.
+                    val label = if (durationSeconds > 0) {
+                        // 1. Calcoliamo i secondi relativi a questo step (es. 25% di 600 secondi = 150 secondi).
+                        val fractionSeconds = (durationSeconds.toFloat() / xSteps) * i
+                        // 2. Usiamo la funzione di utilita' formatTime per avere il formato "MM:SS".
+                        formatTime(fractionSeconds.toLong())
+                    } else {
+                        // 🌍 I18N: Fallback testuale per vecchie partite senza dato temporale, ora internazionale!
+                        when(i) {
+                            0 -> labelInizio
+                            1 -> "1/4"
+                            2 -> labelMeta
+                            3 -> "3/4"
+                            else -> labelFine
                         }
                     }
 
-                    // Disegno del tracciato completo (Path).
-                    drawPath(
-                        path = path,
-                        color = color,
-                        style = Stroke(
-                            width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(),
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
-                        )
+                    // Rendering finale dell'etichetta del tempo sotto l'asse.
+                    drawContext.canvas.nativeCanvas.drawText(
+                        label,
+                        xPos,
+                        size.height - padYBottom + 45f,
+                        textPaint
                     )
                 }
             }
 
-            // LEGENDA: Mostra i nomi dei giocatori con i relativi colori sotto il grafico.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                validPlayers.forEach { player ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)
-                    ) {
-                        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(Color(player.color)))
-                        Text(text = player.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp))
+            // --------------------------------------------------------------------
+            // RENDERING DELLE TRAIETTORIE (LINEE PUNTEGGIO)
+            // --------------------------------------------------------------------
+            validPlayers.forEach { player ->
+                val color = Color(player.color)
+                val path = Path()
+                val history = player.scoreHistory ?: emptyList()
+
+                if (history.size >= 1) {
+                    // localXStep: Determina la distanza tra un punto e l'altro.
+                    // Poiche' abbiamo sincronizzato le liste nel ViewModel, localXStep sara'
+                    // identico per tutti i giocatori, garantendo la coerenza temporale.
+                    val localXStep = drawW / (history.size - 1).coerceAtLeast(1).toFloat()
+
+                    history.forEachIndexed { turn, score ->
+                        // Calcolo coordinata X: basata sulla posizione nella lista (il turno).
+                        val x = padX + (turn * localXStep)
+
+                        // Calcolo coordinata Y: Normalizziamo il punteggio rispetto al range
+                        // e lo scaliamo sull'altezza disponibile (drawH).
+                        val y = padYTop + drawH - ((score - minScore) / yRange * drawH)
+
+                        if (turn == 0) path.moveTo(x, y) // Punto di partenza.
+                        else path.lineTo(x, y) // Connessione lineare al punto successivo.
+
+                        // Disegno dei nodi (pallini) per evidenziare i momenti di cambio punteggio.
+                        val radius = if (isDetailed) 2.dp.toPx() else 1.dp.toPx()
+                        drawCircle(color, radius, Offset(x, y))
                     }
+                }
+
+                // Disegno del tracciato completo (Path).
+                drawPath(
+                    path = path,
+                    color = color,
+                    style = Stroke(
+                        width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                )
+            }
+        }
+
+        // LEGENDA: Mostra i nomi dei giocatori con i relativi colori sotto il grafico.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            validPlayers.forEach { player ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)
+                ) {
+                    Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(Color(player.color)))
+                    Text(text = player.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp))
                 }
             }
         }
     }
+}
 
-    // ====================================================================
-    // IL MOTORE GRAFICO DEI CORIANDOLI
-    // ====================================================================
+// ====================================================================
+// IL MOTORE GRAFICO DEI CORIANDOLI
+// ====================================================================
 
-    @Composable
-    fun ConfettiExplosion(colors: List<Color>, onAnimationFinished: () -> Unit) {
-        // Animatable: Il "timer/percentuale" dell'animazione. Parte da 0.0f (0%) e arriverà a 1.0f (100%).
-        val animationProgress = remember { Animatable(0f) }
+@Composable
+fun ConfettiExplosion(colors: List<Color>, onAnimationFinished: () -> Unit) {
+    // Animatable: Il "timer/percentuale" dell'animazione. Parte da 0.0f (0%) e arriverà a 1.0f (100%).
+    val animationProgress = remember { Animatable(0f) }
 
-        // LaunchedEffect fa partire il codice interno asincrono solo UNA VOLTA appena la funzione appare sullo schermo del telefono.
-        LaunchedEffect(Unit) {
-            animationProgress.animateTo(
-                targetValue = 1f, // L'obiettivo è arrivare a 1
-                // tween: Stabilisce che ci vorranno esattamente 1200 millisecondi (1.2 secondi) di orologio reale.
-                // FastOutSlowInEasing fa sì che l'animazione parta "col botto" scattante in modo realistico e poi rallenti dolcemente cadendo.
-                animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing)
-            )
-            // Quando la funzione animateTo ha finito di viaggiare verso l'1 (l'animazione è morta), diciamo all'app madre che abbiamo terminato!
-            onAnimationFinished()
-        }
+    // LaunchedEffect fa partire il codice interno asincrono solo UNA VOLTA appena la funzione appare sullo schermo del telefono.
+    LaunchedEffect(Unit) {
+        animationProgress.animateTo(
+            targetValue = 1f, // L'obiettivo è arrivare a 1
+            // tween: Stabilisce che ci vorranno esattamente 1200 millisecondi (1.2 secondi) di orologio reale.
+            // FastOutSlowInEasing fa sì che l'animazione parta "col botto" scattante in modo realistico e poi rallenti dolcemente cadendo.
+            animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing)
+        )
+        // Quando la funzione animateTo ha finito di viaggiare verso l'1 (l'animazione è morta), diciamo all'app madre che abbiamo terminato!
+        onAnimationFinished()
+    }
 
-        // Generazione della FISICA VETTORIALE dei coriandoli.
-        // Il "remember" ci garantisce che generiamo i 60 pallini casuali solo una singola volta all'inizio della scena,
-        // e non 60 volte al secondo per ogni frame video (cosa che distruggerebbe il processore fondendo il telefono)!
-        val particles = remember {
-            List(60) { // Creiamo 60 elementi (coriandoli fisici)
-                // 1. Direzione (Angolo Geometrico): Calcoliamo un angolo casuale da 0 a 360°.
-                // Nella matematica di Kotlin si usa il "Radiante" e non il grado centigrado. L'angolo giro completo (360°) equivale a 2 volte il Pi Greco.
-                val angle = Random.nextDouble(0.0, 2 * Math.PI)
+    // Generazione della FISICA VETTORIALE dei coriandoli.
+    // Il "remember" ci garantisce che generiamo i 60 pallini casuali solo una singola volta all'inizio della scena,
+    // e non 60 volte al secondo per ogni frame video (cosa che distruggerebbe il processore fondendo il telefono)!
+    val particles = remember {
+        List(60) { // Creiamo 60 elementi (coriandoli fisici)
+            // 1. Direzione (Angolo Geometrico): Calcoliamo un angolo casuale da 0 a 360°.
+            // Nella matematica di Kotlin si usa il "Radiante" e non il grado centigrado. L'angolo giro completo (360°) equivale a 2 volte il Pi Greco.
+            val angle = Random.nextDouble(0.0, 2 * Math.PI)
 
-                // 2. Velocità Esplosiva: Una velocità sparata a caso tra 600 e 1800 per dare l'effetto di un'esplosione caotica e irregolare (non circolare perfetta).
-                val speed = Random.nextFloat() * 1200f + 600f
+            // 2. Velocità Esplosiva: Una velocità sparata a caso tra 600 e 1800 per dare l'effetto di un'esplosione caotica e irregolare (non circolare perfetta).
+            val speed = Random.nextFloat() * 1200f + 600f
 
-                // 3. Colore Decorativo: Peschiamo un colore a caso dalla lista che ci hanno passato dai Material Colors poco fa!
-                val color = colors.random()
+            // 3. Colore Decorativo: Peschiamo un colore a caso dalla lista che ci hanno passato dai Material Colors poco fa!
+            val color = colors.random()
 
-                // Restituiamo in modo raggruppato una "Triple", ovvero un super-oggetto contenente queste tre specifiche caratteristiche vitali.
-                Triple(angle, speed, color)
-            }
-        }
-
-        // Canvas: La tela digitale trasparente (nuda e cruda) che occupa tutto l'intero schermo in primo piano, usata per il rendering super-veloce in 2D.
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            // Identifichiamo la coordinata del punto esatto centrale dello schermo, dividendone semplicemente larghezza e altezza a metà.
-            val center = Offset(size.width / 2, size.height / 2)
-
-            // Progress avanzerà continuamente nel tempo, frame dopo frame (0.1, 0.2, ... 1.0)
-            val progress = animationProgress.value
-
-            // Per OGNUNO dei 60 pallini memorizzati (coriandoli), disegniamo e aggiorniamo la sua posizione esatta in questo preciso millisecondo logico.
-            particles.forEach { (angle, speed, color) ->
-                // Distanza viaggiata dal centro = velocità di base moltiplicata per il tempo percentuale trascorso.
-                val distance = speed * progress
-
-                // Gravità Terrestre: Un numero finto che cresce in modo esponenziale per far "cadere" la Y del pallino verso il basso simulando il suo peso!
-                val gravity = progress * progress * 800f
-
-                // Calcolo effettivo della posizione (X e Y cartesiane):
-                // - il Coseno trigonometrico di un angolo calcola la distanza e lo spostamento orizzontale (X)
-                // - il Seno trigonometrico dell'angolo calcola la distanza logica verticale (Y) aggiungendo anche il peso in basso della gravità.
-                val x = center.x + (cos(angle) * distance).toFloat()
-                val y = center.y + (sin(angle) * distance).toFloat() + gravity
-
-                // Trasparenza visiva o sfumatura (Alpha): 1.0 è solido e opaco, 0.0 è invisibile e trasparente come il vetro.
-                // Sottraendo matematicamente 'progress' a 1, i coriandoli svaniranno gradualmente come fumo man mano che il tempo passa alla fine dell'esplosione.
-                val alpha = (1f - progress).coerceIn(0f, 1f)
-
-                // Finiti i calcoli, diciamo fisicamente alla tela in C++ (Canvas) di dipingere un cerchio solido con quelle esatte coordinate appena trovate.
-                drawCircle(
-                    color = color.copy(alpha = alpha),
-                    radius = 18f, // Raggio: La grandezza totale misurata in pixel fisici del nostro coriandolo
-                    center = Offset(x, y)
-                )
-            }
+            // Restituiamo in modo raggruppato una "Triple", ovvero un super-oggetto contenente queste tre specifiche caratteristiche vitali.
+            Triple(angle, speed, color)
         }
     }
 
-    // ====================================================================
-    // COMPONENTE: SELETTORE COLORI (ColorPicker)
-    // ====================================================================
+    // Canvas: La tela digitale trasparente (nuda e cruda) che occupa tutto l'intero schermo in primo piano, usata per il rendering super-veloce in 2D.
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        // Identifichiamo la coordinata del punto esatto centrale dello schermo, dividendone semplicemente larghezza e altezza a metà.
+        val center = Offset(size.width / 2, size.height / 2)
 
-    /**
-     * playerPalette: Una lista fissa di colori vibranti in stile Material 3 Expressive.
-     * Questi colori sono stati scelti per garantire un ottimo contrasto visivo tra i giocatori.
-     */
-    val playerPalette = listOf(
-        Color(0xFFE53935), Color(0xFFD81B60), Color(0xFF8E24AA), Color(0xFF5E35B1),
-        Color(0xFF1E88E5), Color(0xFF039BE5), Color(0xFF00ACC1), Color(0xFF00897B),
-        Color(0xFF43A047), Color(0xFFD5C236), Color(0xFFFB8C00), Color(0xFFF4511E)
-    )
+        // Progress avanzerà continuamente nel tempo, frame dopo frame (0.1, 0.2, ... 1.0)
+        val progress = animationProgress.value
 
-    /**
-     * ColorPickerRow: Crea una riga scorrevole di pulsanti circolari colorati.
-     * @param selectedColor: Il colore che l'utente ha attualmente cliccato (per disegnare il bordo di selezione).
-     * @param onColorSelected: Una funzione (lambda) che avvisa l'app quando l'utente cambia scelta cromatica.
-     */
-    @Composable
-    fun ColorPickerRow(
-        selectedColor: Color,
-        onColorSelected: (Color) -> Unit,
-        modifier: Modifier = Modifier
+        // Per OGNUNO dei 60 pallini memorizzati (coriandoli), disegniamo e aggiorniamo la sua posizione esatta in questo preciso millisecondo logico.
+        particles.forEach { (angle, speed, color) ->
+            // Distanza viaggiata dal centro = velocità di base moltiplicata per il tempo percentuale trascorso.
+            val distance = speed * progress
+
+            // Gravità Terrestre: Un numero finto che cresce in modo esponenziale per far "cadere" la Y del pallino verso il basso simulando il suo peso!
+            val gravity = progress * progress * 800f
+
+            // Calcolo effettivo della posizione (X e Y cartesiane):
+            // - il Coseno trigonometrico di un angolo calcola la distanza e lo spostamento orizzontale (X)
+            // - il Seno trigonometrico dell'angolo calcola la distanza logica verticale (Y) aggiungendo anche il peso in basso della gravità.
+            val x = center.x + (cos(angle) * distance).toFloat()
+            val y = center.y + (sin(angle) * distance).toFloat() + gravity
+
+            // Trasparenza visiva o sfumatura (Alpha): 1.0 è solido e opaco, 0.0 è invisibile e trasparente come il vetro.
+            // Sottraendo matematicamente 'progress' a 1, i coriandoli svaniranno gradualmente come fumo man mano che il tempo passa alla fine dell'esplosione.
+            val alpha = (1f - progress).coerceIn(0f, 1f)
+
+            // Finiti i calcoli, diciamo fisicamente alla tela in C++ (Canvas) di dipingere un cerchio solido con quelle esatte coordinate appena trovate.
+            drawCircle(
+                color = color.copy(alpha = alpha),
+                radius = 18f, // Raggio: La grandezza totale misurata in pixel fisici del nostro coriandolo
+                center = Offset(x, y)
+            )
+        }
+    }
+}
+
+// ====================================================================
+// COMPONENTE: SELETTORE COLORI (ColorPicker)
+// ====================================================================
+
+/**
+ * playerPalette: Una lista fissa di colori vibranti in stile Material 3 Expressive.
+ * Questi colori sono stati scelti per garantire un ottimo contrasto visivo tra i giocatori.
+ */
+val playerPalette = listOf(
+    Color(0xFFE53935), Color(0xFFD81B60), Color(0xFF8E24AA), Color(0xFF5E35B1),
+    Color(0xFF1E88E5), Color(0xFF039BE5), Color(0xFF00ACC1), Color(0xFF00897B),
+    Color(0xFF43A047), Color(0xFFD5C236), Color(0xFFFB8C00), Color(0xFFF4511E)
+)
+
+/**
+ * ColorPickerRow: Crea una riga scorrevole di pulsanti circolari colorati.
+ * @param selectedColor: Il colore che l'utente ha attualmente cliccato (per disegnare il bordo di selezione).
+ * @param onColorSelected: Una funzione (lambda) che avvisa l'app quando l'utente cambia scelta cromatica.
+ */
+@Composable
+fun ColorPickerRow(
+    selectedColor: Color,
+    onColorSelected: (Color) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // ---> 1. LA LISTA UNITA (Il Jolly + I Colori Normali) <---
+    // Creiamo una nuova lista mettendo Color.Unspecified al primo posto,
+    // seguito da tutti gli altri colori della nostra palette.
+    val paletteWithRandom = listOf(Color.Unspecified) + playerPalette
+
+    // LazyRow: Disegna graficamente solo i cerchi visibili
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
     ) {
-        // ---> 1. LA LISTA UNITA (Il Jolly + I Colori Normali) <---
-        // Creiamo una nuova lista mettendo Color.Unspecified al primo posto,
-        // seguito da tutti gli altri colori della nostra palette.
-        val paletteWithRandom = listOf(Color.Unspecified) + playerPalette
+        // ---> FIX LOGICO: Usiamo la nuova lista 'paletteWithRandom'! <---
+        items(paletteWithRandom) { color ->
 
-        // LazyRow: Disegna graficamente solo i cerchi visibili
-        LazyRow(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
-        ) {
-            // ---> FIX LOGICO: Usiamo la nuova lista 'paletteWithRandom'! <---
-            items(paletteWithRandom) { color ->
+            val isSelected = color == selectedColor
 
-                val isSelected = color == selectedColor
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(15.dp))// RoundedCornerShape serve a dare quell'effetto "squadrato ma morbido" perfetto.
-                        // ---> 2. IL DISEGNO INTELLIGENTE (Modifier.then) <---
-                        // .then() ci permette di applicare modifiche grafiche diverse in base a una condizione
-                        .then(
-                            if (color == Color.Unspecified) {
-                                // Se è il Jolly: Disegna un gradiente arcobaleno a ruota
-                                Modifier.background(
-                                    Brush.sweepGradient(//definisce come un'area viene riempita. Invece della classica tinta unita, Jetpack Compose offre i Gradienti.
-                                        listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
-                                    )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(15.dp))// RoundedCornerShape serve a dare quell'effetto "squadrato ma morbido" perfetto.
+                    // ---> 2. IL DISEGNO INTELLIGENTE (Modifier.then) <---
+                    // .then() ci permette di applicare modifiche grafiche diverse in base a una condizione
+                    .then(
+                        if (color == Color.Unspecified) {
+                            // Se è il Jolly: Disegna un gradiente arcobaleno a ruota
+                            Modifier.background(
+                                Brush.sweepGradient(//definisce come un'area viene riempita. Invece della classica tinta unita, Jetpack Compose offre i Gradienti.
+                                    listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
                                 )
-                            } else {
-                                // Se è un colore normale: Disegna la tinta unita
-                                Modifier.background(color)
-                            }
-                        )
-                        // ---> 3. IL BORDO DI SELEZIONE <---
-                        .border(
-                            width = if (isSelected) 3.dp else 0.dp,
-                            // Selezionato = Bordo Blu (Primary). Non selezionato = Bordo invisibile.
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = RoundedCornerShape(15.dp)
+                            )
+                        } else {
+                            // Se è un colore normale: Disegna la tinta unita
+                            Modifier.background(color)
+                        }
+                    )
+                    // ---> 3. IL BORDO DI SELEZIONE <---
+                    .border(
+                        width = if (isSelected) 3.dp else 0.dp,
+                        // Selezionato = Bordo Blu (Primary). Non selezionato = Bordo invisibile.
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        shape = RoundedCornerShape(15.dp)
                         /* * 💡 CURIOSITÀ DI DESIGN: Le Forme e lo "Squircle"
                          * Il raggio di stondatura (es. 12.dp) definisce la forma geometrica finale:
                          * - 0.dp: Quadrato perfetto, spigoloso e netto.
@@ -483,196 +495,204 @@ package com.n380.scorecounter.ui.components
                          * morbidamente arrotondata, standard del Material Design 3 e delle icone smartphone!
                          */
 
-                        )
-                        .clickable { onColorSelected(color) }
-                )
-            }
-        }
-    }
-
-    // ====================================================================
-    // MOTORE DI GENERAZIONE TESTO CONDIVISIONE (BUILDER ASTRATTO)
-    // ====================================================================
-    /**
-     * Questa funzione applica il principio di Astrazione: è completamente agnostica
-     * rispetto allo stato dell'app (non sa se la partita è in corso o finita da mesi).
-     * Accetta solo tipi di dati primitivi e costrutti standard (String, Long, Pair).
-     */
-    fun buildMatchShareText(
-        title: String,
-        durationSeconds: Long,
-        timestamp: Long,
-        // Pair<String, Int> è il nostro "formato universale".
-        // Il campo 'first' sarà sempre il Nome, il campo 'second' sarà il Punteggio.
-        rankedPlayersData: List<Pair<String, Int>>,
-        cecchinoData: Pair<String, Int>?,
-        inarrestabileData: Pair<String, Int>?,
-        gamberoData: Pair<String, Int>?,
-        feniceData: Pair<String, Int>?
-    ): String {
-        return buildString {
-            appendLine("🏆 Risultati: $title")
-
-            // Logica condizionale per l'inclusione del tempo di gioco
-            if (durationSeconds > 0) {
-                appendLine("⏱️ Durata: ${formatTime(durationSeconds)}")
-            }
-
-            // Il timestamp a 0L indica una partita legacy (vecchia) salvata prima
-            // che introducessimo la registrazione delle date. Lo saltiamo per retrocompatibilità.
-            if (timestamp > 0L) {
-                appendLine("📅 Data: ${formatDate(timestamp)}")
-            }
-
-            appendLine() // Separatore visivo dell'intestazione
-
-            // ITERAZIONE CLASSIFICA: Trasforma la lista di Coppie in testo formattato
-            rankedPlayersData.forEachIndexed { index, (name, score) ->
-                val medal = when (index) {
-                    0 -> "🥇 1°"
-                    1 -> "🥈 2°"
-                    2 -> "🥉 3°"
-                    else -> "- ${index + 1}°"
-                }
-                appendLine("$medal $name - $score pt")
-            }
-
-            // GESTIONE PREMI: Operatore logico OR (||) globale.
-            // Il blocco viene renderizzato solo se l'engine rileva almeno un'istanza valida di premio.
-            if (cecchinoData != null || inarrestabileData != null || gamberoData != null || feniceData != null) {
-                appendLine("\n🏅 PREMI SPECIALI:")
-
-                // DESTRUTTURAZIONE SCOPE FUNCTION:
-                // .let estrae il valore dal Nullable. (name, value) destruttura la Pair in due variabili locali.
-                cecchinoData?.let { (name, value) ->
-                    appendLine("  🎯 Cecchino: $name \n        (+$value pt in un colpo)")
-                }
-
-                inarrestabileData?.let { (name, value) ->
-                    appendLine("  🔥 Inarrestabile: $name \n         ($value combo On Fire)")
-                }
-
-                gamberoData?.let { (name, value) ->
-                    appendLine("  🦞 Il Gambero: $name \n        (-$value pt tolti)")
-                }
-
-                feniceData?.let { (name, value) ->
-                    appendLine("  🦅 La Fenice: $name \n         (rimonta da +$value pt)")
-                }
-            }
-
-            appendLine("\nGenerato con ScoreCounter 🎮")
-            append("© 2026 Creato da NicolA380")
-        }
-    }
-
-    // ====================================================================
-    // GESTORE INTENT DI SISTEMA (OS COMMUNICATION)
-    // ====================================================================
-    /**
-     * Isola l'implementazione specifica di Android (Context e Intent).
-     * Mantenere la logica di UI separata dalla logica di Sistema Operativo
-     * è un pilastro della Clean Architecture.
-     */
-    fun launchShareIntent(context: android.content.Context, shareText: String) {
-        val sendIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, shareText)
-            type = "text/plain"
-        }
-        val shareIntent = Intent.createChooser(sendIntent, "Condividi Classifica")
-        context.startActivity(shareIntent)
-    }
-
-    // ====================================================================
-    // COMPONENTE CUSTOM: TESTO AUTO-ADATTIVO (Architettura Reattiva Iterativa)
-    // ====================================================================
-    @Composable
-    fun AutoResizedText(
-        text: String,
-        modifier: Modifier = Modifier,
-        style: TextStyle = MaterialTheme.typography.displaySmall,
-        color: Color = style.color,
-        fontWeight: FontWeight? = style.fontWeight
-    ) {
-
-        /// 1. ALLOCAZIONE DELLO STATO TIPOGRAFICO CON NEUTRALIZZAZIONE LINE-HEIGHT
-        // Inizializza un MutableState (Oggetto per la gestione reattiva della memoria).
-        var resizedStyle by remember(text) {
-            // La funzione .copy() della classe TextStyle permette di sovrascrivere parametri specifici.
-            // Assegnando la Costante 'TextUnit.Unspecified' alla Proprietà 'lineHeight',
-            // annulliamo i vincoli verticali rigidi del Material Design.
-            // In questo modo, l'ingombro sull'asse Y scalerà proporzionalmente alla Proprietà 'fontSize',
-            // scongiurando l'overflow verticale irreversibile.
-            mutableStateOf(
-                style.copy(
-                    lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified
-                )
+                    )
+                    .clickable { onColorSelected(color) }
             )
         }
+    }
+}
 
-        // 2. SEMAFORO DI RENDERING (Deferred Painting)
-        // Variabile di stato booleana che funge da gatekeeper per l'invio dei pixel alla GPU.
-        // Viene inizializzata a 'false' per impedire il rendering del componente
-        // finché l'algoritmo di misurazione non raggiunge la convergenza matematica.
-        var readyToDraw by remember {
-            mutableStateOf(false)
+// ====================================================================
+// MOTORE DI GENERAZIONE TESTO CONDIVISIONE (BUILDER ASTRATTO)
+// ====================================================================
+
+/**
+ * 🧠 LEZIONE TEORICA I18N: Dependency Injection e Funzioni di Business
+ * Questa NON è una funzione @Composable, quindi non possiamo usare il comodo stringResource() qui dentro.
+ * Ma abbiamo bisogno delle frasi tradotte (es. "Risultati", "Durata", ecc.) per inviare il testo corretto!
+ * * SOLUZIONE (Dependency Injection):
+ * Modifichiamo l'intestazione della funzione richiedendo il 'Context' di Android come parametro obbligatorio.
+ * Così, chiunque invocherà questa funzione (es. la ResultsScreen), dovrà passargli il context in modo
+ * che questa funzione possa "aprire il dizionario" dall'esterno usando 'context.getString(R.string...)'.
+ *
+ * (Inoltre, per non impazzire con i segnaposto misti tra stringhe costruite e dizionario,
+ * abbiamo optato per spezzettare le etichette principali).
+ */
+fun buildMatchShareText(
+    context: Context, // 🌍 I18N: Parametro aggiunto per l'accesso ai file di sistema!
+    title: String,
+    durationSeconds: Long,
+    timestamp: Long,
+    rankedPlayersData: List<Pair<String, Int>>,
+    cecchinoData: Pair<String, Int>?,
+    inarrestabileData: Pair<String, Int>?,
+    gamberoData: Pair<String, Int>?,
+    feniceData: Pair<String, Int>?
+): String {
+    return buildString {
+        // Appende il titolo della sfida
+        appendLine("🏆 ${context.getString(R.string.share_title_prefix)} $title")
+
+        // Logica condizionale per l'inclusione del tempo di gioco
+        if (durationSeconds > 0) {
+            appendLine("⏱️ ${context.getString(R.string.share_duration_prefix)} ${formatTime(durationSeconds)}")
         }
 
-        Text(
-            text = text,
+        if (timestamp > 0L) {
+            appendLine("📅 ${context.getString(R.string.share_date_prefix)} ${formatDate(timestamp)}")
+        }
 
-            // 3. INTERCETTAZIONE DELLA DRAW PHASE
-            // Il modificatore drawWithContent si inserisce nell'ultima fase del ciclo
-            // di rendering (Composition -> Layout -> Draw).
-            // Se 'readyToDraw' è false, il componente occupa spazio computazionale
-            // (permettendo i calcoli metrici) ma non esegue 'drawContent()',
-            // evitando il fenomeno del flickering (sfarfallio a schermo).
-            modifier = modifier.drawWithContent {
-                if (readyToDraw) {
-                    drawContent()
-                }
-            },
+        appendLine() // Separatore visivo dell'intestazione
 
-            // Assegnazione dinamica dello stile. Essendo legata a uno State,
-            // ogni sua mutazione forzerà la Ricomposizione (Recomposition) di questo nodo.
-            style = resizedStyle,
-            color = color,
-            fontWeight = fontWeight,
-
-            // 4. VINCOLI SPAZIALI (Constraints)
-            // softWrap = false inibisce la segmentazione automatica delle stringhe (line-wrapping).
-            // maxLines = 1 obbliga l'engine a generare un singolo vettore orizzontale.
-            // Questi due parametri sono necessari per forzare la collisione con il Bounding Box genitore.
-            softWrap = false,
-            maxLines = 1,
-
-            // 5. OBSERVER DELLA LAYOUT PHASE (Motore Iterativo)
-            // Callback asincrona triggerata al termine del calcolo degli ingombri da parte del motore Skia.(motore grafico di Android)
-            onTextLayout = { result ->
-
-                // Valutazione della metrica di collisione spaziale.
-                // Si usa hasVisualOverflow che è una variabile booleana appartenente alla classe TextLayoutResult
-                // Se la dimensione orizzontale calcolata eccede il maxWidth allocato dal parent:
-                if (result.hasVisualOverflow) {
-
-                    // Mutazione di stato.
-                    // Sovrascrive l'oggetto resizedStyle clonandolo tramite .copy() e applicando
-                    // un fattore di degradazione del 5% (0.95) al fontSize corrente.
-                    // Questa assegnazione invalida lo stato e innesca immediatamente una nuova
-                    // Ricomposizione del componente Text, creando un loop ricorsivo invisibile all'utente.
-                    resizedStyle = resizedStyle.copy(
-                        fontSize = resizedStyle.fontSize * 0.95
-                    )
-
-                } else {
-
-                    // Condizione di uscita dal loop (Convergenza dell'Algoritmo).
-                    // Il testo rientra matematicamente nei vincoli imposti.
-                    // La mutazione di 'readyToDraw' innesca l'ultima Ricomposizione,
-                    // aprendo il gatekeeper nel drawWithContent e permettendo il flushing dei pixel a schermo.
-                    readyToDraw = true
-                }
+        // ITERAZIONE CLASSIFICA: Trasforma la lista di Coppie in testo formattato
+        rankedPlayersData.forEachIndexed { index, (name, score) ->
+            val medal = when (index) {
+                0 -> "🥇 1°"
+                1 -> "🥈 2°"
+                2 -> "🥉 3°"
+                else -> "- ${index + 1}°"
             }
+            appendLine("$medal $name - $score ${context.getString(R.string.share_points_suffix)}")
+        }
+
+        // GESTIONE PREMI
+        if (cecchinoData != null || inarrestabileData != null || gamberoData != null || feniceData != null) {
+            appendLine("\n🏅 ${context.getString(R.string.share_awards_title)}")
+
+            cecchinoData?.let { (name, value) ->
+                appendLine("  🎯 ${context.getString(R.string.premio_cecchino)}: $name")
+                appendLine("        (+$value ${context.getString(R.string.share_sniper_detail)})")
+            }
+
+            inarrestabileData?.let { (name, value) ->
+                appendLine("  🔥 ${context.getString(R.string.premio_inarrestabile)}: $name")
+                appendLine("         ($value ${context.getString(R.string.share_fire_detail)})")
+            }
+
+            gamberoData?.let { (name, value) ->
+                appendLine("  🦞 ${context.getString(R.string.premio_gambero)}: $name")
+                appendLine("        (-$value ${context.getString(R.string.share_crab_detail)})")
+            }
+
+            feniceData?.let { (name, value) ->
+                appendLine("  🦅 ${context.getString(R.string.premio_fenice)}: $name")
+                appendLine("         (${context.getString(R.string.share_phoenix_detail_start)} +$value ${context.getString(R.string.share_phoenix_detail_end)})")
+            }
+        }
+
+        appendLine("\n${context.getString(R.string.share_footer_generated)}")
+        append(context.getString(R.string.testo_copyright))
+    }
+}
+
+// ====================================================================
+// GESTORE INTENT DI SISTEMA (OS COMMUNICATION)
+// ====================================================================
+/**
+ * Isola l'implementazione specifica di Android (Context e Intent).
+ * Mantenere la logica di UI separata dalla logica di Sistema Operativo
+ * è un pilastro della Clean Architecture.
+ */
+fun launchShareIntent(context: android.content.Context, shareText: String) {
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        type = "text/plain"
+    }
+    // 🌍 I18N: Usa context.getString invece di un testo fisso come "Condividi Classifica"
+    val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.share_intent_chooser))
+    context.startActivity(shareIntent)
+}
+
+// ====================================================================
+// COMPONENTE CUSTOM: TESTO AUTO-ADATTIVO (Architettura Reattiva Iterativa)
+// ====================================================================
+@Composable
+fun AutoResizedText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.displaySmall,
+    color: Color = style.color,
+    fontWeight: FontWeight? = style.fontWeight
+) {
+
+    /// 1. ALLOCAZIONE DELLO STATO TIPOGRAFICO CON NEUTRALIZZAZIONE LINE-HEIGHT
+    // Inizializza un MutableState (Oggetto per la gestione reattiva della memoria).
+    var resizedStyle by remember(text) {
+        // La funzione .copy() della classe TextStyle permette di sovrascrivere parametri specifici.
+        // Assegnando la Costante 'TextUnit.Unspecified' alla Proprietà 'lineHeight',
+        // annulliamo i vincoli verticali rigidi del Material Design.
+        // In questo modo, l'ingombro sull'asse Y scalerà proporzionalmente alla Proprietà 'fontSize',
+        // scongiurando l'overflow verticale irreversibile.
+        mutableStateOf(
+            style.copy(
+                lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified
+            )
         )
     }
+
+    // 2. SEMAFORO DI RENDERING (Deferred Painting)
+    // Variabile di stato booleana che funge da gatekeeper per l'invio dei pixel alla GPU.
+    // Viene inizializzata a 'false' per impedire il rendering del componente
+    // finché l'algoritmo di misurazione non raggiunge la convergenza matematica.
+    var readyToDraw by remember {
+        mutableStateOf(false)
+    }
+
+    Text(
+        text = text,
+
+        // 3. INTERCETTAZIONE DELLA DRAW PHASE
+        // Il modificatore drawWithContent si inserisce nell'ultima fase del ciclo
+        // di rendering (Composition -> Layout -> Draw).
+        // Se 'readyToDraw' è false, il componente occupa spazio computazionale
+        // (permettendo i calcoli metrici) ma non esegue 'drawContent()',
+        // evitando il fenomeno del flickering (sfarfallio a schermo).
+        modifier = modifier.drawWithContent {
+            if (readyToDraw) {
+                drawContent()
+            }
+        },
+
+        // Assegnazione dinamica dello stile. Essendo legata a uno State,
+        // ogni sua mutazione forzerà la Ricomposizione (Recomposition) di questo nodo.
+        style = resizedStyle,
+        color = color,
+        fontWeight = fontWeight,
+
+        // 4. VINCOLI SPAZIALI (Constraints)
+        // softWrap = false inibisce la segmentazione automatica delle stringhe (line-wrapping).
+        // maxLines = 1 obbliga l'engine a generare un singolo vettore orizzontale.
+        // Questi due parametri sono necessari per forzare la collisione con il Bounding Box genitore.
+        softWrap = false,
+        maxLines = 1,
+
+        // 5. OBSERVER DELLA LAYOUT PHASE (Motore Iterativo)
+        // Callback asincrona triggerata al termine del calcolo degli ingombri da parte del motore Skia.(motore grafico di Android)
+        onTextLayout = { result ->
+
+            // Valutazione della metrica di collisione spaziale.
+            // Si usa hasVisualOverflow che è una variabile booleana appartenente alla classe TextLayoutResult
+            // Se la dimensione orizzontale calcolata eccede il maxWidth allocato dal parent:
+            if (result.hasVisualOverflow) {
+
+                // Mutazione di stato.
+                // Sovrascrive l'oggetto resizedStyle clonandolo tramite .copy() e applicando
+                // un fattore di degradazione del 5% (0.95) al fontSize corrente.
+                // Questa assegnazione invalida lo stato e innesca immediatamente una nuova
+                // Ricomposizione del componente Text, creando un loop ricorsivo invisibile all'utente.
+                resizedStyle = resizedStyle.copy(
+                    fontSize = resizedStyle.fontSize * 0.95
+                )
+
+            } else {
+
+                // Condizione di uscita dal loop (Convergenza dell'Algoritmo).
+                // Il testo rientra matematicamente nei vincoli imposti.
+                // La mutazione di 'readyToDraw' innesca l'ultima Ricomposizione,
+                // aprendo il gatekeeper nel drawWithContent e permettendo il flushing dei pixel a schermo.
+                readyToDraw = true
+            }
+        }
+    )
+}

@@ -212,6 +212,8 @@ fun ResultsScreen(
                                 // DELEGA DELL'ELABORAZIONE
                                 // Invochiamo la nostra utility passando i dati formattati al file ShareUtils.
                                 val shareText = buildMatchShareText(
+                                    // Passiamo il Context per consentire alla funzione non-Composable di accedere alle risorse di sistema e ai file strings.xml
+                                    context = context,
                                     title = finalTitle,
                                     durationSeconds = viewModel.matchDurationSeconds,
                                     timestamp = System.currentTimeMillis(), // Timestamp catturato real-time

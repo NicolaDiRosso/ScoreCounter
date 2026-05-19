@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- TESTO TRADOTTO PER IL FILE HomeScreen-->
     <string name="app_name">ScoreCounter</string>
     <string name="desc_ripristina_salvataggio">Restore backup</string>
     <string name="titolo_partita_in_sospeso">Pending match</string>
@@ -37,7 +38,25 @@
     <string name="btn_annulla_undo">UNDO</string>
     <string name="testo_copyright">© 2026 Created by NicolA380✈️\nAll rights reserved.</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE CreateMatchScreen-->
+    <!-- TESTO TRADOTTO PER IL FILE ShareUtils-->
+    <string name="label_chart_inizio">Start</string>
+    <string name="label_chart_meta">Mid</string>
+    <string name="label_chart_fine">End</string>
+
+    <string name="share_title_prefix">Results:</string>
+    <string name="share_duration_prefix">Duration:</string>
+    <string name="share_date_prefix">Date:</string>
+    <string name="share_points_suffix">pt</string>
+    <string name="share_awards_title">SPECIAL AWARDS:</string>
+    <string name="share_sniper_detail">pt in one turn</string>
+    <string name="share_fire_detail">On Fire combos</string>
+    <string name="share_crab_detail">pt deducted</string>
+    <string name="share_phoenix_detail_start">comeback of</string>
+    <string name="share_phoenix_detail_end">pt</string>
+    <string name="share_footer_generated">Generated with ScoreCounter 🎮</string>
+    <string name="share_intent_chooser">Share Standings</string>
+
+    <!-- TESTO TRADOTTO PER IL FILE CreateMatchScreen-->
     <string name="titolo_nuova_sfida">New Challenge</string>
     <string name="titolo_regole_gioco">Game Rules</string>
     <string name="desc_dado_icon">Dice</string>
@@ -80,7 +99,7 @@
     <string name="desc_elimina_icon">Delete</string>
     <string name="desc_gestisci_rapidi_icon">Manage Quick Players</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE DiceComponents-->
+    <!-- TESTO TRADOTTO PER IL FILE DiceComponents-->
     <string name="titolo_impostazioni_dado">Tie-breaker Dice 🎲</string>
     <string name="desc_impostazioni_dado">Set the die you can roll during the match to decide who starts or to break ties.</string>
     <string name="label_scegli_formato_dado">Choose a quick format or create your own:</string>
@@ -91,7 +110,7 @@
     <string name="titolo_lancio_dado">Dice roll (D%d)</string>
     <string name="btn_rilancia">Roll Again</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE CounterScreen-->
+    <!-- TESTO TRADOTTO PER IL FILE CounterScreen-->
     <string name="btn_azzera">Reset</string>
     <string name="btn_fine_match">End Match</string>
     <string name="titolo_sfida_default">Challenge</string>
@@ -121,13 +140,13 @@
     <string name="msg_info_timer">Use the \'Timer\' button to set a countdown. The app will notify you with a vibration and sound when time is up.</string>
     <string name="btn_ho_capito">Got it</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE TimerComponents-->
+    <!-- TESTO TRADOTTO PER IL FILE TimerComponents-->
     <string name="titolo_timer_sfida">⏱️ Challenge Timer</string>
     <string name="btn_ferma_timer">STOP TIMER</string>
     <string name="btn_avvia_timer">START TIMER</string>
     <string name="btn_chiudi">CLOSE</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE ResultsScreen-->
+    <!-- TESTO TRADOTTO PER IL FILE ResultsScreen-->
     <string name="sfida_senza_nome">Unnamed Challenge</string>
     <string name="desc_condividi">Share</string>
     <string name="btn_condividi_risultati">Share Results</string>
@@ -158,7 +177,7 @@
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">%d Combo</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE MatchAnalysisOverlay-->
+    <!-- TESTO TRADOTTO PER IL FILE MatchAnalysisOverlay-->
     <string name="titolo_analisi_partita">Match Analysis</string>
     <string name="label_vinta_da_con_punti">🏆 Won by %1$s with %2$d pt</string>
     <string name="desc_info_grafico">Chart Info</string>
@@ -174,7 +193,7 @@
     <string name="label_durata_totale"> Total duration: %s</string>
     <string name="btn_chiudi_analisi">Close Analysis</string>
 
-    <!-- TESTO TRADOTTO PER IL  FILE GlobalStatsScreen-->
+    <!-- TESTO TRADOTTO PER IL FILE GlobalStatsScreen-->
     <string name="btn_chiudi_statistiche">Close Stats</string>
     <string name="titolo_statistiche_partite">Match Statistics</string>
     <string name="titolo_campione_assoluto">ABSOLUTE CHAMPION</string>
