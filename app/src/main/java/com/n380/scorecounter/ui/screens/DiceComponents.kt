@@ -10,10 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource // Import per abilitare la lettura dal file strings.xml
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.n380.scorecounter.R // Import per accedere agli ID univoci (es. R.string...)
 
 //animazione dei numeri casuali del dado
 import androidx.compose.animation.AnimatedContent
@@ -23,8 +25,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-
-
 
 /**
  * ====================================================================
@@ -37,9 +37,24 @@ import androidx.compose.animation.togetherWith
  */
 @Composable
 fun DiceSettingsDialog(
-    currentSides: Int, // Riceve il numero di facce attuale (es. 6)
+    // ====================================================================
+    // 🧠 LEZIONE TEORICA: STATE HOISTING (Sollevamento dello Stato)
+    // ====================================================================
+    // In Jetpack Compose, l'architettura perfetta prevede che i componenti "figli" (come questo popup)
+    // non modifichino mai direttamente i dati centrali dell'app. Devono essere componenti "stupidi" e reattivi.
+    // I dati e le decisioni vengono "sollevati" (hoisted) verso il "padre" (CreateMatchScreen).
+    //
+    // 1. DATO IN INGRESSO (Sola Lettura):
+    currentSides: Int, // Riceve il numero di facce attuale (es. 6) dal padre. Non può modificarlo.
+
+    // 2. EVENTO IN USCITA (Callback / Lambda Expression):
+    // La sintassi '(Int) -> Unit' definisce una funzione che accetta un numero intero e non restituisce nulla.
+    // Funge da "walkie-talkie": quando l'utente preme "Applica", questo componente figlio chiama la funzione
+    // per avvisare il padre: "Ehi, l'utente ha scelto questo nuovo numero! Pensaci tu a salvarlo nel database!".
     onSidesChanged: (Int) -> Unit, // Invia indietro il nuovo numero scelto quando si preme "Applica"
-    onDismiss: () -> Unit // Chiude il popup
+
+    // 3. EVENTO DI CHIUSURA:
+    onDismiss: () -> Unit // Chiude il popup (anche questa è una funzione delegata al padre per togliere la visibilità)
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -52,18 +67,28 @@ fun DiceSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Dado Spareggio 🎲", fontWeight = FontWeight.Bold) },
+        title = {
+            // 🧠 LEZIONE I18N: Utilizzo Base
+            // Sostituiamo il testo hardcoded (es. "Dado Spareggio") con stringResource().
+            // Il sistema va nel file strings.xml, cerca la riga 'titolo_impostazioni_dado' e stampa
+            // la stringa associata in base alla lingua del dispositivo, senza bisogno di scrivere logiche if/else.
+            Text(stringResource(R.string.titolo_impostazioni_dado), fontWeight = FontWeight.Bold)
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-
+                // 🧠 LEZIONE I18N: Testi lunghi descrittivi
+                // Anche i testi lunghi e complessi vengono estratti. Questo rende il codice Kotlin
+                // molto più pulito da leggere, delegando i "muri di testo" ai file XML.
                 Text(
-                    text = "Imposta il dado che potrai lanciare durante la partita per decidere chi inizia o per risolvere i pareggi.",
+                    text = stringResource(R.string.desc_impostazioni_dado),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Text("Scegli un formato rapido o creane uno tuo:", style = MaterialTheme.typography.bodyMedium)
+                // 🧠 LEZIONE I18N: Sostituzione singola riga
+                // Qui peschiamo la stringa "Scegli un formato rapido..." in italiano, o "Choose a quick format..." in inglese.
+                Text(stringResource(R.string.label_scegli_formato_dado), style = MaterialTheme.typography.bodyMedium)
 
                 // GRIGLIA DADI STANDARD
                 val diceOptions = listOf(6, 12, 20, 100)
@@ -82,7 +107,26 @@ fun DiceSettingsDialog(
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                        Text("D$sides", fontWeight = FontWeight.Bold, color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                        // ==========================================================
+                                        // 🧠 LEZIONE TEORICA I18N: I SEGNAPOSTO FORMATTATI (Formatted Placeholders)
+                                        // ==========================================================
+                                        // Nel vecchio codice avevi la stringa interpolata: text = "D$sides"
+                                        // Questo approccio hardcoded è il nemico numero uno delle traduzioni. In altre lingue,
+                                        // la lettera 'D' potrebbe andare DOPO il numero, oppure la parola potrebbe essere diversa.
+                                        //
+                                        // LA SOLUZIONE: Nel file strings.xml scriviamo <string name="label_dado">D%d</string>
+                                        // - '%d' (Decimal): È un "buco" che avvisa il sistema che lì in mezzo andrà un numero intero.
+                                        // (Se avessimo dovuto inserirci un testo, avremmo usato '%s' per String).
+                                        //
+                                        // Quando chiamiamo stringResource passandogli 'sides' come parametro aggiuntivo,
+                                        // la funzione inietterà automaticamente il valore esattamente al posto del '%d',
+                                        // rispettando magicamente la sintassi e l'ordine della lingua in uso!
+                                        // ==========================================================
+                                        Text(
+                                            stringResource(R.string.label_dado, sides),
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }
@@ -98,8 +142,9 @@ fun DiceSettingsDialog(
                 // Chiudiamo il titolo e la casella in una "mini-colonna" separata.
                 // Così tra loro ci saranno solo 4 pixel (spacedBy(4.dp)) invece di 16!
                 Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                    // 🧠 LEZIONE I18N: Traduzione dell'intestazione dell'input manuale ("Inserimento manuale")
                     Text(
-                        text = "Inserimento manuale:",
+                        text = stringResource(R.string.label_inserimento_manuale),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -108,8 +153,11 @@ fun DiceSettingsDialog(
                         value = customDiceInput,
                         onValueChange = { if (it.all { char -> char.isDigit() }) customDiceInput = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Es. 380") },
-                        label = { Text("N° Facce") },
+                        // 🧠 LEZIONE I18N: Parametri dinamici di un TextField
+                        // I testi di aiuto all'interno dei campi compilabili (placeholder e label)
+                        // si traducono esattamente come un normale componente Text.
+                        placeholder = { Text(stringResource(R.string.hint_es_facce_dado)) },
+                        label = { Text(stringResource(R.string.hint_n_facce)) },
                         shape = RoundedCornerShape(20.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
@@ -129,7 +177,14 @@ fun DiceSettingsDialog(
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onDismiss()
                     }
-                ) { Text("Annulla", maxLines = 1) }
+                ) {
+                    // 🧠 LEZIONE I18N: Riutilizzo Intelligente (Reusability)
+                    // La chiave R.string.btn_annulla ("Annulla"/"Cancel") è usata in tante schermate.
+                    // Invece di creare un ID nuovo per ogni bottone, usiamo sempre lo stesso riferimento.
+                    // Così, se un domani vorremo cambiare "Annulla" in "Cancella", basterà modificare
+                    // il file XML una volta sola e l'app si aggiornerà ovunque!
+                    Text(stringResource(R.string.btn_annulla), maxLines = 1)
+                }
 
                 Button(
                     modifier = Modifier.weight(1f).height(48.dp),
@@ -139,11 +194,13 @@ fun DiceSettingsDialog(
                         val manualSides = customDiceInput.toIntOrNull()
                         val finalSides = if (manualSides != null && manualSides > 0) manualSides else pendingDiceSides
 
-                        // Comunichiamo il risultato finale alla schermata padre
                         onSidesChanged(finalSides)
                         onDismiss()
                     }
-                ) { Text("Applica") }
+                ) {
+                    // 🧠 LEZIONE I18N: Estrazione etichetta "Applica"
+                    Text(stringResource(R.string.btn_applica))
+                }
             }
         },
         dismissButton = null
@@ -160,21 +217,30 @@ fun DiceSettingsDialog(
  */
 @Composable
 fun DiceRollDialog(
-    result: Int,
-    diceSides: Int,//Riceviamo il numero di facce del dado
+    result: Int, // Il numero casuale generato, in sola lettura
+    diceSides: Int, // Riceviamo il numero di facce del dado (ci serve per l'intestazione testuale)
+
+    // 🧠 GESTIONE DELLO STATO: CHIAVE DI FORZATURA ANIMAZIONE
+    // Se l'utente lancia il dado e ottiene 4, e poi rilancia ottenendo ancora 4,
+    // Compose ignorerebbe il cambiamento perché "result" è identico.
+    // Incrementando 'rollCount' a ogni click dal padre, cambiamo le carte in tavola
+    // e costringiamo Compose a ri-eseguire l'animazione per forza!
     rollCount: Int, // Indice univoco del lancio per forzare la reattività di Compose
-    onRollAgain: () -> Unit,
-    onDismiss: () -> Unit
+
+    onRollAgain: () -> Unit, // Callback per urlare al padre: "L'utente rivuole lanciare!"
+    onDismiss: () -> Unit    // Callback per urlare al padre: "Nascondi questa finestra!"
 ) {
     val haptic = LocalHapticFeedback.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
+            // 🧠 LEZIONE I18N: Segnaposto (Placeholder) Avanzato
+            // Anche qui utilizziamo un parametro aggiuntivo (diceSides).
+            // Nel file strings.xml abbiamo: <string name="titolo_lancio_dado">Lancio del dado (D%d)</string>
+            // La funzione stringResource rimpiazzerà il '%d' con il numero contenuto in 'diceSides'.
             Text(
-                // Aggiungiamo dinamicamente il tipo di dado al titolo
-                // Es. diventerà "Lancio del dado (D6)" o "Lancio del dado (D20)"
-                text = "Lancio del dado (D$diceSides)",//ncon $diceSides facce",
+                text = stringResource(R.string.titolo_lancio_dado, diceSides),
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
@@ -232,6 +298,7 @@ fun DiceRollDialog(
                     label = "DiceRollAnimation"
                 ) { targetPair ->
                     // Mostriamo solo il primo valore della coppia (il risultato del dado)
+                    // (Qui non serve I18N perché è un numero nudo e crudo!)
                     Text(
                         text = "${targetPair.first}",
                         style = MaterialTheme.typography.displayLarge,
@@ -250,7 +317,10 @@ fun DiceRollDialog(
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onDismiss()
                     }
-                ) { Text("Chiudi",fontWeight = FontWeight.Bold,) }
+                ) {
+                    // 🧠 LEZIONE I18N: Riutilizzo chiave di chiusura.
+                    Text(stringResource(R.string.btn_chiudi), fontWeight = FontWeight.Bold)
+                }
 
                 Button(
                     modifier = Modifier.weight(1f).height(55.dp),
@@ -259,7 +329,10 @@ fun DiceRollDialog(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onRollAgain()
                     }
-                ) { Text("Rilancia",fontWeight = FontWeight.Bold,) }
+                ) {
+                    // 🧠 LEZIONE I18N: Lettura dell'etichetta "Rilancia" dal dizionario
+                    Text(stringResource(R.string.btn_rilancia), fontWeight = FontWeight.Bold)
+                }
             }
         },
         dismissButton = null

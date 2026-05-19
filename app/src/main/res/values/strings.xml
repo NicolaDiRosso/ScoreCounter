@@ -80,6 +80,46 @@
     <string name="desc_elimina_icon">Delete</string>
     <string name="desc_gestisci_rapidi_icon">Manage Quick Players</string>
 
+    <!-- TESTO TRADOTTO PER IL  FILE DiceComponents-->
+    <string name="titolo_impostazioni_dado">Tie-breaker Dice 🎲</string>
+    <string name="desc_impostazioni_dado">Set the die you can roll during the match to decide who starts or to break ties.</string>
+    <string name="label_scegli_formato_dado">Choose a quick format or create your own:</string>
+    <string name="label_inserimento_manuale">Manual entry:</string>
+    <string name="hint_es_facce_dado">Ex. 380</string>
+    <string name="hint_n_facce">N° of Faces</string>
+    <string name="btn_applica">Apply</string>
+    <string name="titolo_lancio_dado">Dice roll (D%d)</string>
+    <string name="btn_rilancia">Roll Again</string>
+
+    <!-- TESTO TRADOTTO PER IL  FILE CounterScreen-->
+    <string name="btn_azzera">Reset</string>
+    <string name="btn_fine_match">End Match</string>
+    <string name="titolo_sfida_default">Challenge</string>
+    <string name="desc_info_icon">Info</string>
+    <string name="btn_timer">Timer</string>
+    <string name="btn_dado">Dice</string>
+    <string name="titolo_modifica_punteggio">Edit Score</string>
+    <string name="msg_inserisci_nuovo_punteggio">Enter the new total score for %s:</string>
+    <string name="desc_attenzione_icon">Warning</string>
+    <string name="titolo_conferma_azzeramento">Are you sure you want to reset?</string>
+    <string name="msg_conferma_azzeramento">Are you sure you want to reset everything?\nThis action cannot be undone.</string>
+    <string name="btn_conferma_azzera">Yes, reset</string>
+    <string name="desc_uscita_icon">Exit Warning</string>
+    <string name="titolo_conferma_uscita">Leave the match?</string>
+    <string name="msg_conferma_uscita">If you return to Home, current progress will be lost forever. Are you sure you want to exit?</string>
+    <string name="btn_conferma_uscita">Yes, exit</string>
+    <string name="titolo_info_funzionalita">Feature Info</string>
+    <string name="titolo_info_punteggio">🚀 Quick Score</string>
+    <string name="msg_info_punteggio">Press and hold the \'+\' button to quickly add 10 points or the \'-\' button to subtract 5.</string>
+    <string name="titolo_info_fire">🔥 On Fire Status</string>
+    <string name="msg_info_fire">If a player scores 3 times in a row without interruptions, their score turns orange. \nDoes not apply in card challenges.</string>
+    <string name="titolo_info_manuale">⌨️ Manual Edit</string>
+    <string name="msg_info_manuale">Tap directly on the score number to open the keyboard and enter an exact value.</string>
+    <string name="titolo_info_dado">🎲 Lucky Dice</string>
+    <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes.</string>
+    <string name="titolo_info_timer">⏱️ Custom Timer</string>
+    <string name="msg_info_timer">Use the \'Timer\' button to set a countdown. The app will notify you with a vibration and sound when time is up.</string>
+    <string name="btn_ho_capito">Got it</string>
 
     <!-- TESTO TRADOTTO PER IL  FILE TimerComponents-->
     <string name="titolo_timer_sfida">⏱️ Challenge Timer</string>

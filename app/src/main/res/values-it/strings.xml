@@ -80,6 +80,47 @@
     <string name="desc_elimina_icon">Elimina</string>
     <string name="desc_gestisci_rapidi_icon">Gestisci Giocatori Rapidi</string>
 
+    <!-- TESTO PER IL  FILE DiceComponents-->
+    <string name="titolo_impostazioni_dado">Dado Spareggio 🎲</string>
+    <string name="desc_impostazioni_dado">Imposta il dado che potrai lanciare durante la partita per decidere chi inizia o per risolvere i pareggi.</string>
+    <string name="label_scegli_formato_dado">Scegli un formato rapido o creane uno tuo:</string>
+    <string name="label_inserimento_manuale">Inserimento manuale:</string>
+    <string name="hint_es_facce_dado">Es. 380</string>
+    <string name="hint_n_facce">N° Facce</string>
+    <string name="btn_applica">Applica</string>
+    <string name="titolo_lancio_dado">Lancio del dado (D%d)</string>
+    <string name="btn_rilancia">Rilancia</string>
+
+    <!-- TESTO PER IL  FILE CounterScreen-->
+    <string name="btn_azzera">Azzera</string>
+    <string name="btn_fine_match">Fine Match</string>
+    <string name="titolo_sfida_default">Sfida</string>
+    <string name="desc_info_icon">Info</string>
+    <string name="btn_timer">Timer</string>
+    <string name="btn_dado">Dado</string>
+    <string name="titolo_modifica_punteggio">Modifica Punteggio</string>
+    <string name="msg_inserisci_nuovo_punteggio">Inserisci il nuovo punteggio totale per %s:</string>
+    <string name="desc_attenzione_icon">Attenzione</string>
+    <string name="titolo_conferma_azzeramento">Vuoi proprio azzerare?</string>
+    <string name="msg_conferma_azzeramento">Sei sicuro di voler azzerare tutto?\nQuesta azione non può essere annullata.</string>
+    <string name="btn_conferma_azzera">Sì, azzera</string>
+    <string name="desc_uscita_icon">Attenzione Uscita</string>
+    <string name="titolo_conferma_uscita">Abbandonare la partita?</string>
+    <string name="msg_conferma_uscita">Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?</string>
+    <string name="btn_conferma_uscita">Sì, esci</string>
+    <string name="titolo_info_funzionalita">Info funzionalità</string>
+    <string name="titolo_info_punteggio">🚀 Punteggio Rapido</string>
+    <string name="msg_info_punteggio">Tieni premuto il tasto \'+\' per aggiungere 10 punti o il tasto \'-\' per toglierne 5 in modo rapido.</string>
+    <string name="titolo_info_fire">🔥 Stato On Fire</string>
+    <string name="msg_info_fire">Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione. \nNon si applica nelle sfide a carte.</string>
+    <string name="titolo_info_manuale">⌨️ Modifica Manuale</string>
+    <string name="msg_info_manuale">Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.</string>
+    <string name="titolo_info_dado">🎲 Dado Fortunato</string>
+    <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici.</string>
+    <string name="titolo_info_timer">⏱️ Timer Personalizzato</string>
+    <string name="msg_info_timer">Usa il tasto \'Timer\' per impostare un conto alla rovescia. L\'app ti avviserà con una vibrazione e un suono al termine del tempo.</string>
+    <string name="btn_ho_capito">Ho capito</string>
+
     <!-- TESTO PER IL  FILE TimerComponents-->
     <string name="titolo_timer_sfida">⏱️ Timer Sfida</string>
     <string name="btn_ferma_timer">FERMA TIMER</string>
