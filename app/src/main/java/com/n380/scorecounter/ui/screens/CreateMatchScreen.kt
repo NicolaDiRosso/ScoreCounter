@@ -32,10 +32,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource // Import aggiunto per la traduzione dinamica delle stringhe
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.ColorPickerRow
@@ -114,6 +116,14 @@ fun CreateMatchScreen(
     val keyboardController = LocalSoftwareKeyboardController.current // Controller per la gestione programmatica della tastiera
     val focusManager = LocalFocusManager.current // Gestore del focus per la rimozione del cursore attivo dalle aree di testo
 
+    // ====================================================================
+    // ESTRAZIONE STRINGHE DI ERRORE PRE-ONCLICK (Regola Composable Context)
+    // Estraiamo le stringhe tradotte qui, fuori dal bottone, per poterle usare liberamente in onClick
+    // ====================================================================
+    val errTitoloGiocatori = stringResource(R.string.err_titolo_e_giocatori) // Recupero testo tradotto per errore combinato
+    val errSoloTitolo = stringResource(R.string.err_solo_titolo) // Recupero testo tradotto per errore titolo vuoto
+    val errSoloGiocatori = stringResource(R.string.err_solo_giocatori) // Recupero testo tradotto per errore tavolo vuoto
+
     // ARCHITETTURA PAGINA (Scaffold)
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -161,9 +171,9 @@ fun CreateMatchScreen(
 
                                 // Variabile Locale: Determina il messaggio tramite l'Espressione Condizionale 'when'
                                 val errorMessage = when {
-                                    !isTitleValid && !arePlayersPresent -> "Inserisci un titolo e almeno un giocatore."
-                                    !isTitleValid -> "Inserisci il nome della sfida."
-                                    else -> "Il tavolo è vuoto! Aggiungi un giocatore."
+                                    !isTitleValid && !arePlayersPresent -> errTitoloGiocatori // Sostituzione con la variabile tradotta
+                                    !isTitleValid -> errSoloTitolo // Sostituzione con la variabile tradotta
+                                    else -> errSoloGiocatori // Sostituzione con la variabile tradotta
                                 }
 
                                 // Esecuzione Asincrona: Mostra la notifica a comparsa (Snackbar)
@@ -200,11 +210,11 @@ fun CreateMatchScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = "Inizia",
+                            contentDescription = stringResource(R.string.desc_inizia_icon), // Sostituzione testo icona tradotto
                             modifier = Modifier.padding(end = 8.dp).size(28.dp)
                         )
                         Text(
-                            text = "Inizia Sfida",
+                            text = stringResource(R.string.btn_inizia_sfida), // Sostituzione con testo del bottone tradotto
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -220,9 +230,9 @@ fun CreateMatchScreen(
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
-                    text = "Nuova Sfida",
+                    text = stringResource(R.string.titolo_nuova_sfida), // Sostituzione titolo tradotto
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
@@ -247,7 +257,7 @@ fun CreateMatchScreen(
                                 Icon(Icons.Filled.MenuBook, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                                 Spacer(modifier = Modifier.width(12.dp))
                                 AutoResizedText(
-                                    text = "Regole del Gioco",
+                                    text = stringResource(R.string.titolo_regole_gioco), // Sostituzione titolo sezione tradotto
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
@@ -271,9 +281,9 @@ fun CreateMatchScreen(
                                 modifier = Modifier.height(44.dp), // Aumentata l'altezza per migliore touch target
                                 shape = RoundedCornerShape(16.dp),
                             ) {
-                                Icon(Icons.Filled.Casino, "Dado", modifier = Modifier.size(18.dp).padding(end = 4.dp))
+                                Icon(Icons.Filled.Casino, stringResource(R.string.desc_dado_icon), modifier = Modifier.size(18.dp).padding(end = 4.dp)) // Sostituzione testo descrittivo tradotto
                                 AutoResizedText(
-                                    text = "Dado (D${viewModel.diceSides})",
+                                    text = stringResource(R.string.label_dado, viewModel.diceSides), // Formattazione stringa dinamica in base alle risorse (%d)
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -286,19 +296,19 @@ fun CreateMatchScreen(
                             onValueChange = {
                                 viewModel.matchTitle = it
                                 // Se l'utente scrive qualcosa, rimuoviamo l'eventuale segnale di errore rosso
-                                if (it.isNotBlank()) showError = false 
+                                if (it.isNotBlank()) showError = false
                             },
-                            label = { Text("Nome della sfida") },
+                            label = { Text(stringResource(R.string.hint_nome_sfida)) }, // Sostituzione etichetta campo tradotta
                             modifier = Modifier
                                 .fillMaxWidth()
                                 // MONITORAGGIO FOCUS: Quando l'utente clicca sul campo, attiviamo la visualizzazione dei suggerimenti
-                                .onFocusChanged { isTitleFocused = it.isFocused }, 
+                                .onFocusChanged { isTitleFocused = it.isFocused },
                             shape = RoundedCornerShape(16.dp),
                             isError = showError && viewModel.matchTitle.isBlank(),
-                            // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare" 
+                            // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare"
                             // lo spazio vuoto inferiore e permettere ai titoli recenti di stare più vicini al box.
                             supportingText = if (showError && viewModel.matchTitle.isBlank()) {
-                                { Text("Il nome della sfida è obbligatorio", color = MaterialTheme.colorScheme.error) }
+                                { Text(stringResource(R.string.err_nome_sfida_obbligatorio), color = MaterialTheme.colorScheme.error) } // Sostituzione errore sotto input tradotto
                             } else null,
                             leadingIcon = {
                                 val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -316,7 +326,7 @@ fun CreateMatchScreen(
                             // la scritta "Titoli recenti" al bordo inferiore dell'input.
                             Column(modifier = Modifier.padding(top = 0.dp, bottom = 16.dp).offset(y = (1).dp)) {
                                 Text(
-                                    text = "Titoli recenti:",
+                                    text = stringResource(R.string.label_titoli_recenti), // Sostituzione label tradotta
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
@@ -331,12 +341,12 @@ fun CreateMatchScreen(
                                             onClick = {
                                                 // Feedback tattile al tocco del suggerimento
                                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                
+
                                                 // 1. Inseriamo il titolo scelto nel campo di testo
                                                 viewModel.matchTitle = recentTitle
-                                                
+
                                                 // 2. Chiudiamo tastiera e suggerimenti togliendo il cursore dal campo (clearFocus)
-                                                focusManager.clearFocus() 
+                                                focusManager.clearFocus()
                                             },
                                             shape = RoundedCornerShape(12.dp),
                                             // Design "Pieno con Bordino": garantisce visibilità e coerenza con i tasti "Anime" e "Carte"
@@ -370,7 +380,7 @@ fun CreateMatchScreen(
                                     viewModel.targetScore = newValue
                                 }
                             },
-                            label = { Text("Traguardo (Opzionale)") },
+                            label = { Text(stringResource(R.string.hint_traguardo)) }, // Sostituzione label tradotta
                             modifier = Modifier.fillMaxWidth().offset(y = (-10).dp),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
@@ -387,8 +397,11 @@ fun CreateMatchScreen(
                         Spacer(modifier = Modifier.height(5.dp))
 
                         // TEMI RAPIDI: Configurazione automatica titolo
-                        val isAnimeTheme = viewModel.matchTitle == "Sfida Anime"
-                        val isCarteTheme = viewModel.matchTitle == "Sfida Carte"
+                        val temaAnime = stringResource(R.string.tema_sfida_anime) // Estrazione stringa internazionalizzata per comparazione logica
+                        val temaCarte = stringResource(R.string.tema_sfida_carte) // Estrazione stringa internazionalizzata per comparazione logica
+
+                        val isAnimeTheme = viewModel.matchTitle == temaAnime // Controllo riadattato usando la stringa tradotta
+                        val isCarteTheme = viewModel.matchTitle == temaCarte // Controllo riadattato usando la stringa tradotta
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -397,7 +410,7 @@ fun CreateMatchScreen(
                             FilledTonalButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    viewModel.matchTitle = "Sfida Anime"
+                                    viewModel.matchTitle = temaAnime // Salvataggio del tema usando la stringa tradotta
                                     showError = false
                                 },
                                 modifier = Modifier.weight(1f),
@@ -408,13 +421,13 @@ fun CreateMatchScreen(
                             ) {
                                 Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Anime")
+                                Text(stringResource(R.string.btn_anime)) // Sostituzione testo del bottone
                             }
 
                             FilledTonalButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    viewModel.matchTitle = "Sfida Carte"
+                                    viewModel.matchTitle = temaCarte // Salvataggio del tema usando la stringa tradotta
                                     showError = false
                                 },
                                 modifier = Modifier.weight(1f),
@@ -428,7 +441,7 @@ fun CreateMatchScreen(
                             ) {
                                 Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Carte")
+                                Text(stringResource(R.string.btn_carte)) // Sostituzione testo del bottone
                             }
                         }
                     }
@@ -447,7 +460,7 @@ fun CreateMatchScreen(
                             Icon(Icons.Filled.PersonAddAlt1, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Gestione Partecipanti",
+                                text = stringResource(R.string.titolo_gestione_partecipanti), // Sostituzione titolo sezione
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -461,7 +474,7 @@ fun CreateMatchScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Giocatori Rapidi:",
+                                text = stringResource(R.string.label_giocatori_rapidi), // Sostituzione label
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -469,7 +482,7 @@ fun CreateMatchScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 showFavoritesDialog = true
                             }) {
-                                Icon(Icons.Filled.Settings, "Gestisci Giocatori Rapidi", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(25.dp))
+                                Icon(Icons.Filled.Settings, stringResource(R.string.desc_gestisci_rapidi_icon), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(25.dp)) // Traduzione label accessibilità
                             }
                         }
 
@@ -513,14 +526,14 @@ fun CreateMatchScreen(
                                         border = FilterChipDefaults.filterChipBorder(
                                             enabled = true,
                                             selected = isAlreadyAtTable,
-                                            borderColor = MaterialTheme.colorScheme.primary, 
-                                            selectedBorderColor = Color.Transparent 
+                                            borderColor = MaterialTheme.colorScheme.primary,
+                                            selectedBorderColor = Color.Transparent
                                         )
                                     )
                                 }
                             }
                         } else {
-                            Text("Nessun giocatore rapido salvato.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.msg_nessun_giocatore_rapido), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) // Sostituzione Empty State giocatori
                         }
 
                         Spacer(modifier = Modifier.height(15.dp))
@@ -528,19 +541,19 @@ fun CreateMatchScreen(
                         Spacer(modifier = Modifier.height(7.dp))
 
                         // SEZIONE AGGIUNTA MANUALE E COLORE
-                        Text("Scegli un colore:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.label_scegli_colore), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) // Traduzione istruzione colore
 
                         ColorPickerRow(
                             selectedColor = selectedColor,
-                            onColorSelected = { 
+                            onColorSelected = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                selectedColor = it 
+                                selectedColor = it
                             },
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Aggiungi manualmente:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                        Text(stringResource(R.string.label_aggiungi_manualmente), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) // Traduzione label manuale
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(
@@ -554,7 +567,7 @@ fun CreateMatchScreen(
                                 modifier = Modifier.weight(1f).height(63.dp),
                                 // Sostituiamo 'label' con 'placeholder' per eliminare il padding
                                 // invisibile superiore e far combaciare l'ingombro logico con quello visivo
-                                placeholder = { Text("Nome") },
+                                placeholder = { Text(stringResource(R.string.hint_nome_giocatore)) }, // Traduzione segnaposto input utente
                                 shape = RoundedCornerShape(20.dp),
                                 leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) },
                                 singleLine = true,
@@ -578,7 +591,7 @@ fun CreateMatchScreen(
                                             selectedColor
                                         }
                                         viewModel.addPlayer(newPlayerName, finalColor.toArgb())
-                                        newPlayerName = "" 
+                                        newPlayerName = ""
                                         selectedColor = Color.Unspecified
                                     }
                                 },
@@ -589,7 +602,7 @@ fun CreateMatchScreen(
                                     containerColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                                     contentColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 )
-                            ) { Text("Aggiungi") }
+                            ) { Text(stringResource(R.string.btn_aggiungi)) } // Traduzione bottone aggiunta
                         }
                     }
                 }
@@ -610,7 +623,7 @@ fun CreateMatchScreen(
                             Icon(Icons.Filled.Groups, null, tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
-                                text = "Tavolo Partecipanti",
+                                text = stringResource(R.string.titolo_tavolo_partecipanti), // Traduzione intestazione tabella
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -642,13 +655,18 @@ fun CreateMatchScreen(
                                 ) {
                                     Icon(Icons.Filled.PersonAdd, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(36.dp))
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    AutoResizedText("Il tavolo è vuoto!", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
-                                    AutoResizedText("Aggiungi giocatori per iniziare la sfida.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f))
+                                    AutoResizedText(stringResource(R.string.msg_tavolo_vuoto), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold) // Sostituzione warning
+                                    AutoResizedText(stringResource(R.string.desc_tavolo_vuoto), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f)) // Sostituzione descrizione
                                 }
                             }
                         } else {
                             // Generazione dinamica delle card individuali per i partecipanti
                             viewModel.players.forEachIndexed { index, player ->
+
+                                // ESTRAZIONE STRINGHE SNACKBAR PRIMA DELLA LAMBDA OCLICK
+                                val msgRimozione = stringResource(R.string.msg_giocatore_rimosso, player.name) // Inserimento stringa dinamica tradotta
+                                val btnAnnullaUndo = stringResource(R.string.btn_annulla_undo) // Recupero testo tradotto
+
                                 PlayerAtTableCard(
                                     player = player,
                                     isFirst = index == 0,
@@ -669,8 +687,8 @@ fun CreateMatchScreen(
                                             coroutineScope.launch {
                                                 launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
                                                 val result = snackbarHostState.showSnackbar(
-                                                    "${player.name} rimosso",
-                                                    "ANNULLA",
+                                                    message = msgRimozione, // Utilizzo variabile tradotta
+                                                    actionLabel = btnAnnullaUndo, // Utilizzo variabile tradotta
                                                     duration = SnackbarDuration.Indefinite
                                                 )
                                                 if (result == SnackbarResult.ActionPerformed) {
@@ -700,7 +718,7 @@ fun CreateMatchScreen(
             onDismissRequest = { playerToEdit = null },
             title = {
                 AutoResizedText(
-                    text = "Modifica Giocatore",
+                    text = stringResource(R.string.titolo_modifica_giocatore), // Traduzione intestazione dialogo
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -708,7 +726,7 @@ fun CreateMatchScreen(
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     AutoResizedText(
-                        text = "Scegli un nuovo colore:",
+                        text = stringResource(R.string.label_nuovo_colore), // Traduzione label colore
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -743,7 +761,7 @@ fun CreateMatchScreen(
                         value = editedName,
                         onValueChange = { editedName = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Nuovo nome") },
+                        label = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Traduzione input field
                         shape = RoundedCornerShape(16.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -765,7 +783,7 @@ fun CreateMatchScreen(
                         shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
+                        Text(stringResource(R.string.btn_annulla), color = MaterialTheme.colorScheme.onSurface) // Traduzione bottone annulla
                     }
 
                     Button(
@@ -783,7 +801,7 @@ fun CreateMatchScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     ) {
-                        Text("Salva", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold) // Traduzione bottone salvataggio
                     }
                 }
             },
@@ -857,7 +875,7 @@ fun CreateMatchScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Giocatori Rapidi",
+                                stringResource(R.string.titolo_giocatori_rapidi_sheet), // Sostituzione titolo pannello tradotto
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold,
@@ -888,7 +906,7 @@ fun CreateMatchScreen(
                                 // Questo riporta l'ingombro logico a coincidere con l'ingombro visivo,
                                 // allineando magicamente il componente al bottone adiacente!
                                 // ==========================================================
-                                placeholder = { Text("Nuovo nome") },
+                                placeholder = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Sostituzione con segnaposto tradotto
                                 shape = RoundedCornerShape(20.dp),
                                 leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
                             )
@@ -910,7 +928,7 @@ fun CreateMatchScreen(
                                     containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
                                     contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 )
-                            ) { Text("Aggiungi") }
+                            ) { Text(stringResource(R.string.btn_aggiungi)) } // Traduzione del testo del bottone
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -975,10 +993,14 @@ fun CreateMatchScreen(
                                             }) {
                                                 Icon(
                                                     Icons.Filled.Edit,
-                                                    "Modifica",
+                                                    stringResource(R.string.desc_modifica_icon), // Testo descrittivo dell'azione tradotto
                                                     tint = MaterialTheme.colorScheme.primary
                                                 )
                                             }
+
+                                            // ESTRAZIONE STRINGHE SNACKBAR (Dentro contesto LazyColumn Composable)
+                                            val msgFavRimosso = stringResource(R.string.msg_rapido_rimosso, fav) // Stringa dinamica tradotta
+                                            val btnAnnullaFav = stringResource(R.string.btn_annulla_undo) // Azione tradotta
 
                                             // Gestione eliminazione
                                             IconButton(onClick = {
@@ -1002,8 +1024,8 @@ fun CreateMatchScreen(
                                                     // Invocazione bloccante (suspend): attende input dell'utente o timeout
                                                     val result =
                                                         sheetSnackbarHostState.showSnackbar(
-                                                            message = "$fav rimosso dai rapidi",
-                                                            actionLabel = "ANNULLA",
+                                                            message = msgFavRimosso, // Utilizzo della variabile dinamica
+                                                            actionLabel = btnAnnullaFav, // Utilizzo della label per undo
                                                             duration = SnackbarDuration.Indefinite
                                                         )
                                                     if (result == SnackbarResult.ActionPerformed) {
@@ -1011,7 +1033,7 @@ fun CreateMatchScreen(
                                                     }
                                                 }
                                             }) {
-                                                Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
+                                                Icon(Icons.Filled.Delete, stringResource(R.string.desc_elimina_icon), tint = MaterialTheme.colorScheme.error) // Traduzione label elimina
                                             }
                                         }
                                     }
@@ -1056,8 +1078,8 @@ fun CreateMatchScreen(
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             ) {
-                                Icon(imageVector = Icons.Filled.Close, contentDescription = "Chiudi", modifier = Modifier.padding(end = 8.dp).size(28.dp))
-                                Text(text = "Chiudi Gestione", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.desc_chiudi_icon), modifier = Modifier.padding(end = 8.dp).size(28.dp)) // Sostituzione label chiusura
+                                Text(text = stringResource(R.string.btn_chiudi_gestione), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold) // Sostituzione nome pulsante
                             }
                         }
                     }
@@ -1082,7 +1104,7 @@ fun CreateMatchScreen(
         AlertDialog(
             onDismissRequest = { favToEdit = null },
             title = {
-                Text("Modifica Nome Rapido",
+                Text(stringResource(R.string.titolo_modifica_nome_rapido), // Traduzione intestazione box modale
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 ) },
@@ -1108,7 +1130,7 @@ fun CreateMatchScreen(
                         shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        Text("Annulla", color = MaterialTheme.colorScheme.onSurface)
+                        Text(stringResource(R.string.btn_annulla), color = MaterialTheme.colorScheme.onSurface) // Sostituzione label annulla
                     }
 
                     Button(
@@ -1126,7 +1148,7 @@ fun CreateMatchScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     ) {
-                        Text("Salva", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold) // Sostituzione label salvataggio
                     }
                 }
             },
