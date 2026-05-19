@@ -25,6 +25,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import com.n380.scorecounter.ui.components.AutoResizedText
 
 /**
  * ====================================================================
@@ -331,7 +332,7 @@ fun DiceRollDialog(
                     }
                 ) {
                     // 🧠 LEZIONE I18N: Lettura dell'etichetta "Rilancia" dal dizionario
-                    Text(stringResource(R.string.btn_rilancia), fontWeight = FontWeight.Bold)
+                    AutoResizedText(stringResource(R.string.btn_rilancia), fontWeight = FontWeight.Bold)
                 }
             }
         },
