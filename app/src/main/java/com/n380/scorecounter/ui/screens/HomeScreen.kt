@@ -579,7 +579,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
+                AutoResizedText(
                     text = stringResource(R.string.titolo_storico_sfide), // Titolo principale della schermata Home
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
