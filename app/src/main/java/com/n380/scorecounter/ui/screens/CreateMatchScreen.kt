@@ -13,9 +13,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -128,7 +130,7 @@ fun CreateMatchScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color.Transparent, // Supporto per la visualizzazione del pattern grafico sottostante
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },//prepara lo spazio per le notifiche a comparsa
 
         // BARRA INFERIORE: Pulsante principale di avvio sfida
         bottomBar = {
@@ -224,482 +226,682 @@ fun CreateMatchScreen(
         }
     ) { innerPadding ->
 
-        // AREA SCORREVOLE: Configurazione Sfida
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
+        // ====================================================================
+        // COLUMN STATICA
+        // Con una Column l'architettura base NON scorre.
+        // Il titolo resterà incollato in alto.
+        // ====================================================================
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
         ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = stringResource(R.string.titolo_nuova_sfida), // Sostituzione titolo tradotto
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
+            // 1. IL TITOLO (Ora è fisso e fuori dal tavolo scorrevole)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.titolo_nuova_sfida),
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 16.dp) // Ridotto un po' il margine
+            )
 
-                // SEZIONE 1: REGOLE E DADO
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+            // ====================================================================
+            // 2. IL GRANDE TAVOLO CONTENITIVO (La Card Unica)
+            // ====================================================================
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // IL COMANDO WEIGHT
+                    // 'weight(1f)' dice a questa Card: "Prenditi tutto lo spazio verticale
+                    // che avanza tra il Titolo qui sopra e il Dock dei bottoni in basso".
+                    .weight(1f)
+                    .padding(bottom = 16.dp), // Impedisce che si incolli al dock inferiore
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(24.dp), // Stessa stondatura massiccia delle altre pagine
+            ) {
+                // ====================================================================
+                // 3. L'AREA SCORREVOLE INTERNA
+                // ====================================================================
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // SCORRIMENTO MANUALE
+                        // Invece di usare una LazyColumn, usiamo verticalScroll su una Column.
+                        // Questo è perfetto per moduli di inserimento dati (come questo) dove gli
+                        // elementi sono pochi e non c'è bisogno di riciclarli dinamicamente in memoria.
+                        .verticalScroll(rememberScrollState())
+                        .padding(12.dp), // Padding interno per distaccare le scritte dai bordi della Card
+
+                    // Distanzia automaticamente le 3 sezioni in modo uniforme!
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.MenuBook, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                                Spacer(modifier = Modifier.width(12.dp))
-                                AutoResizedText(
-                                    text = stringResource(R.string.titolo_regole_gioco), // Sostituzione titolo sezione tradotto
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
+                    // SEZIONE 1: REGOLE E DADO
+                    Card(
+                        // 1. La spaziatura è gestita dallo 'spacedBy' della Colonna madre
+                        modifier = Modifier.fillMaxWidth(),
+                        // 2. SMUSSATURA RIDOTTA: Una card interna deve avere angoli leggermente più piccoli
+                        // di quella esterna (20.dp interno vs 24.dp esterno) per essere geometricamente piacevole.
+                        shape = RoundedCornerShape(20.dp),
+                        // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        // 4. BORDO DELICATO: Usiamo 'outline' invece di 'primary' per non rendere l'interfaccia troppo pesante
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
 
-                            // SPAZIATORE DI SICUREZZA:
-                            // Aggiungiamo un gap fisso di 10.dp.
-                            // se il titolo dovesse diventare troppo lungo (es. su schermi piccoli),
-                            // l'AutoResizedText inizierà a rimpicciolirsi PRIMA di toccare il bottone del dado,
-                            // garantendo che ci sia sempre questo spazio minimo tra i due.
-                            Spacer(modifier = Modifier.width(10.dp))
-
-                            // Pulsante per le impostazioni del dado
-                            OutlinedButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    showDiceSettingsDialog = true
-                                },
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                                modifier = Modifier.height(44.dp), // Aumentata l'altezza per migliore touch target
-                                shape = RoundedCornerShape(16.dp),
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Filled.Casino, stringResource(R.string.desc_dado_icon), modifier = Modifier.size(18.dp).padding(end = 4.dp)) // Sostituzione testo descrittivo tradotto
-                                AutoResizedText(
-                                    text = stringResource(R.string.label_dado, viewModel.diceSides), // Formattazione stringa dinamica in base alle risorse (%d)
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Filled.MenuBook,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    AutoResizedText(
+                                        text = stringResource(R.string.titolo_regole_gioco), // Sostituzione titolo sezione tradotto
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
 
-                        // INPUT: TITOLO SFIDA
-                        OutlinedTextField(
-                            value = viewModel.matchTitle,
-                            onValueChange = {
-                                viewModel.matchTitle = it
-                                // Se l'utente scrive qualcosa, rimuoviamo l'eventuale segnale di errore rosso
-                                if (it.isNotBlank()) showError = false
-                            },
-                            label = { Text(stringResource(R.string.hint_nome_sfida)) }, // Sostituzione etichetta campo tradotta
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                // MONITORAGGIO FOCUS: Quando l'utente clicca sul campo, attiviamo la visualizzazione dei suggerimenti
-                                .onFocusChanged { isTitleFocused = it.isFocused },
-                            shape = RoundedCornerShape(16.dp),
-                            isError = showError && viewModel.matchTitle.isBlank(),
-                            // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare"
-                            // lo spazio vuoto inferiore e permettere ai titoli recenti di stare più vicini al box.
-                            supportingText = if (showError && viewModel.matchTitle.isBlank()) {
-                                { Text(stringResource(R.string.err_nome_sfida_obbligatorio), color = MaterialTheme.colorScheme.error) } // Sostituzione errore sotto input tradotto
-                            } else null,
-                            leadingIcon = {
-                                val iconColor = if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                                Icon(Icons.Default.VideogameAsset, null, tint = iconColor)
-                            },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
-                        )
+                                // SPAZIATORE DI SICUREZZA:
+                                // Aggiungiamo un gap fisso di 10.dp.
+                                // se il titolo dovesse diventare troppo lungo (es. su schermi piccoli),
+                                // l'AutoResizedText inizierà a rimpicciolirsi PRIMA di toccare il bottone del dado,
+                                // garantendo che ci sia sempre questo spazio minimo tra i due.
+                                Spacer(modifier = Modifier.width(10.dp))
 
-                        // CRONOLOGIA TITOLI RECENTI (SISTEMA DI SUGGERIMENTO RAPIDO)
-                        // Mostriamo questo blocco solo se il campo è selezionato (focus) e se abbiamo almeno un titolo in memoria.
-                        if (isTitleFocused && viewModel.matchTitleHistory.isNotEmpty()) {
-                            // Usiamo offset(y = -12.dp) per annullare i margini nativi del box di testo e "attaccare" visivamente
-                            // la scritta "Titoli recenti" al bordo inferiore dell'input.
-                            Column(modifier = Modifier.padding(top = 0.dp, bottom = 16.dp).offset(y = (1).dp)) {
-                                Text(
-                                    text = stringResource(R.string.label_titoli_recenti), // Sostituzione label tradotta
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
-                                )
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.fillMaxWidth()
+                                // Pulsante per le impostazioni del dado
+                                OutlinedButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showDiceSettingsDialog = true
+                                    },
+                                    contentPadding = PaddingValues(
+                                        horizontal = 12.dp,
+                                        vertical = 0.dp
+                                    ),
+                                    modifier = Modifier.height(44.dp), // Aumentata l'altezza per migliore touch target
+                                    shape = RoundedCornerShape(16.dp),
                                 ) {
-                                    // Cicliamo i titoli salvati nel ViewModel (massimo 3 nomi diversi dai temi fissi)
-                                    items(viewModel.matchTitleHistory) { recentTitle ->
-                                        Button(
-                                            onClick = {
-                                                // Feedback tattile al tocco del suggerimento
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-
-                                                // 1. Inseriamo il titolo scelto nel campo di testo
-                                                viewModel.matchTitle = recentTitle
-
-                                                // 2. Chiudiamo tastiera e suggerimenti togliendo il cursore dal campo (clearFocus)
-                                                focusManager.clearFocus()
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            // Design "Pieno con Bordino": garantisce visibilità e coerenza con i tasti "Anime" e "Carte"
-                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary
-                                            ),
-                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                            modifier = Modifier.height(36.dp)
-                                        ) {
-                                            // Testo auto-adattante per gestire titoli lunghi senza rompere il layout
-                                            AutoResizedText(
-                                                text = recentTitle,
-                                                style = MaterialTheme.typography.labelLarge
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            // SPAZIATORE DI SICUREZZA: Quando i suggerimenti sono nascosti, inseriamo uno spazio fisso
-                            // per mantenere la distanza corretta tra il Nome della Sfida e il Traguardo.
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                        // INPUT: PUNTEGGIO OBIETTIVO (Filtro numerico)
-                        OutlinedTextField(
-                            value = viewModel.targetScore,
-                            onValueChange = { newValue ->
-                                if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
-                                    viewModel.targetScore = newValue
-                                }
-                            },
-                            label = { Text(stringResource(R.string.hint_traguardo)) }, // Sostituzione label tradotta
-                            modifier = Modifier.fillMaxWidth().offset(y = (-10).dp),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done,
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = { focusManager.clearFocus() }
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            leadingIcon = { Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                        )
-
-                        Spacer(modifier = Modifier.height(5.dp))
-
-                        // TEMI RAPIDI: Configurazione automatica titolo
-                        val temaAnime = stringResource(R.string.tema_sfida_anime) // Estrazione stringa internazionalizzata per comparazione logica
-                        val temaCarte = stringResource(R.string.tema_sfida_carte) // Estrazione stringa internazionalizzata per comparazione logica
-
-                        val isAnimeTheme = viewModel.matchTitle == temaAnime // Controllo riadattato usando la stringa tradotta
-                        val isCarteTheme = viewModel.matchTitle == temaCarte // Controllo riadattato usando la stringa tradotta
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            FilledTonalButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    viewModel.matchTitle = temaAnime // Salvataggio del tema usando la stringa tradotta
-                                    showError = false
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = if (isAnimeTheme) ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
-                                else ButtonDefaults.filledTonalButtonColors(),
-                                border =  BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                            ) {
-                                Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.btn_anime)) // Sostituzione testo del bottone
-                            }
-
-                            FilledTonalButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    viewModel.matchTitle = temaCarte // Salvataggio del tema usando la stringa tradotta
-                                    showError = false
-                                },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = if (isCarteTheme) ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                )
-                                else ButtonDefaults.filledTonalButtonColors(),
-                                border =  BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                            ) {
-                                Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.btn_carte)) // Sostituzione testo del bottone
-                            }
-                        }
-                    }
-                }
-
-                // SEZIONE 2: PARTECIPANTI (Input e Preferiti)
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
-                    shape = RoundedCornerShape(24.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
-                            Icon(Icons.Filled.PersonAddAlt1, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = stringResource(R.string.titolo_gestione_partecipanti), // Sostituzione titolo sezione
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        // GIOCATORI RAPIDI: Selezione da elenco preferiti
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.label_giocatori_rapidi), // Sostituzione label
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            IconButton(onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                showFavoritesDialog = true
-                            }) {
-                                Icon(Icons.Filled.Settings, stringResource(R.string.desc_gestisci_rapidi_icon), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(25.dp)) // Traduzione label accessibilità
-                            }
-                        }
-
-                        if (viewModel.favoriteNames.isNotEmpty()) {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(end = 16.dp)
-                            ) {
-                                items(viewModel.favoriteNames) { fav ->
-                                    val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
-
-                                    FilterChip(
-                                        selected = isAlreadyAtTable,
-                                        onClick = {
-                                            if (!isAlreadyAtTable) {
-                                                val finalColor = if (selectedColor == Color.Unspecified) {
-                                                    val usedColors = viewModel.players.map { it.color }
-                                                    val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
-                                                    if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-                                                } else {
-                                                    selectedColor
-                                                }
-                                                viewModel.addPlayer(fav, finalColor.toArgb())
-                                            } else {
-                                                // Feedback tattile attivato solo in caso di rimozione dell'ultimo giocatore
-                                                if (viewModel.players.size == 1) {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                }
-                                                val playerToRemove = viewModel.players.find { it.name.equals(fav, ignoreCase = true) }
-                                                playerToRemove?.let { viewModel.removePlayer(it) }
-                                            }
-                                        },
-                                        modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-                                        label = { Text(fav, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) },
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                        ),
-                                        border = FilterChipDefaults.filterChipBorder(
-                                            enabled = true,
-                                            selected = isAlreadyAtTable,
-                                            borderColor = MaterialTheme.colorScheme.primary,
-                                            selectedBorderColor = Color.Transparent
-                                        )
+                                    Icon(
+                                        Icons.Filled.Casino,
+                                        stringResource(R.string.desc_dado_icon),
+                                        modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                                    ) // Sostituzione testo descrittivo tradotto
+                                    AutoResizedText(
+                                        text = stringResource(
+                                            R.string.label_dado,
+                                            viewModel.diceSides
+                                        ), // Formattazione stringa dinamica in base alle risorse (%d)
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
-                        } else {
-                            Text(stringResource(R.string.msg_nessun_giocatore_rapido), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) // Sostituzione Empty State giocatori
-                        }
 
-                        Spacer(modifier = Modifier.height(15.dp))
-                        HorizontalDivider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
-                        Spacer(modifier = Modifier.height(7.dp))
-
-                        // SEZIONE AGGIUNTA MANUALE E COLORE
-                        Text(stringResource(R.string.label_scegli_colore), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) // Traduzione istruzione colore
-
-                        ColorPickerRow(
-                            selectedColor = selectedColor,
-                            onColorSelected = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                selectedColor = it
-                            },
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(stringResource(R.string.label_aggiungi_manualmente), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary) // Traduzione label manuale
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                            // INPUT: TITOLO SFIDA
                             OutlinedTextField(
-                                value = newPlayerName,
-                                onValueChange = { newPlayerName = it },
-                                modifier = Modifier.weight(1f).height(63.dp),
-                                // Sostituiamo 'label' con 'placeholder' per eliminare il padding
-                                // invisibile superiore e far combaciare l'ingombro logico con quello visivo
-                                placeholder = { Text(stringResource(R.string.hint_nome_giocatore)) }, // Traduzione segnaposto input utente
-                                shape = RoundedCornerShape(20.dp),
-                                leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) },
+                                value = viewModel.matchTitle,
+                                onValueChange = {
+                                    viewModel.matchTitle = it
+                                    // Se l'utente scrive qualcosa, rimuoviamo l'eventuale segnale di errore rosso
+                                    if (it.isNotBlank()) showError = false
+                                },
+                                label = { Text(stringResource(R.string.hint_nome_sfida)) }, // Sostituzione etichetta campo tradotta
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    // MONITORAGGIO FOCUS: Quando l'utente clicca sul campo, attiviamo la visualizzazione dei suggerimenti
+                                    .onFocusChanged { isTitleFocused = it.isFocused },
+                                shape = RoundedCornerShape(16.dp),
+                                isError = showError && viewModel.matchTitle.isBlank(),
+                                // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare"
+                                // lo spazio vuoto inferiore e permettere ai titoli recenti di stare più vicini al box.
+                                supportingText = if (showError && viewModel.matchTitle.isBlank()) {
+                                    {
+                                        Text(
+                                            stringResource(R.string.err_nome_sfida_obbligatorio),
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    } // Sostituzione errore sotto input tradotto
+                                } else null,
+                                leadingIcon = {
+                                    val iconColor =
+                                        if (showError && viewModel.matchTitle.isBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                    Icon(Icons.Default.VideogameAsset, null, tint = iconColor)
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
+                            )
+
+                            // CRONOLOGIA TITOLI RECENTI (SISTEMA DI SUGGERIMENTO RAPIDO)
+                            // Mostriamo questo blocco solo se il campo è selezionato (focus) e se abbiamo almeno un titolo in memoria.
+                            if (isTitleFocused && viewModel.matchTitleHistory.isNotEmpty()) {
+                                // Usiamo offset(y = -12.dp) per annullare i margini nativi del box di testo e "attaccare" visivamente
+                                // la scritta "Titoli recenti" al bordo inferiore dell'input.
+                                Column(
+                                    modifier = Modifier.padding(top = 0.dp, bottom = 16.dp)
+                                        .offset(y = (1).dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.label_titoli_recenti), // Sostituzione label tradotta
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
+                                    )
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        // Cicliamo i titoli salvati nel ViewModel (massimo 3 nomi diversi dai temi fissi)
+                                        items(viewModel.matchTitleHistory) { recentTitle ->
+                                            Button(
+                                                onClick = {
+                                                    // Feedback tattile al tocco del suggerimento
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+
+                                                    // 1. Inseriamo il titolo scelto nel campo di testo
+                                                    viewModel.matchTitle = recentTitle
+
+                                                    // 2. Chiudiamo tastiera e suggerimenti togliendo il cursore dal campo (clearFocus)
+                                                    focusManager.clearFocus()
+                                                },
+                                                shape = RoundedCornerShape(12.dp),
+                                                // Design "Pieno con Bordino": garantisce visibilità e coerenza con i tasti "Anime" e "Carte"
+                                                border = BorderStroke(
+                                                    1.dp,
+                                                    MaterialTheme.colorScheme.primary
+                                                ),
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                                ),
+                                                contentPadding = PaddingValues(
+                                                    horizontal = 12.dp,
+                                                    vertical = 4.dp
+                                                ),
+                                                modifier = Modifier.height(36.dp)
+                                            ) {
+                                                // Testo auto-adattante per gestire titoli lunghi senza rompere il layout
+                                                AutoResizedText(
+                                                    text = recentTitle,
+                                                    style = MaterialTheme.typography.labelLarge
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                // SPAZIATORE DI SICUREZZA: Quando i suggerimenti sono nascosti, inseriamo uno spazio fisso
+                                // per mantenere la distanza corretta tra il Nome della Sfida e il Traguardo.
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            // INPUT: PUNTEGGIO OBIETTIVO (Filtro numerico)
+                            OutlinedTextField(
+                                value = viewModel.targetScore,
+                                onValueChange = { newValue ->
+                                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                                        viewModel.targetScore = newValue
+                                    }
+                                },
+                                label = { Text(stringResource(R.string.hint_traguardo)) }, // Sostituzione label tradotta
+                                modifier = Modifier.fillMaxWidth().offset(y = (-10).dp),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
+                                    keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Done,
                                 ),
                                 keyboardActions = KeyboardActions(
                                     onDone = { focusManager.clearFocus() }
-                                )
-                            )
-
-                            val isAddPlayerEnabled = newPlayerName.trim().isNotEmpty() && viewModel.players.none { it.name.equals(newPlayerName.trim(), ignoreCase = true) }
-
-                            Button(
-                                onClick = {
-                                    if (isAddPlayerEnabled) {
-                                        val finalColor = if (selectedColor == Color.Unspecified) {
-                                            playerPalette.random()
-                                        } else {
-                                            selectedColor
-                                        }
-                                        viewModel.addPlayer(newPlayerName, finalColor.toArgb())
-                                        newPlayerName = ""
-                                        selectedColor = Color.Unspecified
-                                    }
-                                },
-                                modifier = Modifier.height(63.dp),
-                                shape = RoundedCornerShape(20.dp),
-                                border = if (isAddPlayerEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                                    contentColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            ) { Text(stringResource(R.string.btn_aggiungi)) } // Traduzione bottone aggiunta
-                        }
-                    }
-                }
-
-                // SEZIONE 3: TAVOLO PARTECIPANTI (Elenco Attivo)
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)),
-                    shape = RoundedCornerShape(24.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(Icons.Filled.Groups, null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = stringResource(R.string.titolo_tavolo_partecipanti), // Traduzione intestazione tabella
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                                Text(
-                                    text = "${viewModel.players.size}",
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            }
-                        }
-
-                        // EMPTY STATE: Visualizzazione di cortesia in assenza di partecipanti
-                        if (viewModel.players.isEmpty()) {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth().height(120.dp),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                ),
                                 shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.EmojiEvents,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                            )
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            // TEMI RAPIDI: Configurazione automatica titolo
+                            val temaAnime =
+                                stringResource(R.string.tema_sfida_anime) // Estrazione stringa internazionalizzata per comparazione logica
+                            val temaCarte =
+                                stringResource(R.string.tema_sfida_carte) // Estrazione stringa internazionalizzata per comparazione logica
+
+                            val isAnimeTheme =
+                                viewModel.matchTitle == temaAnime // Controllo riadattato usando la stringa tradotta
+                            val isCarteTheme =
+                                viewModel.matchTitle == temaCarte // Controllo riadattato usando la stringa tradotta
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Column(
-                                    verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                FilledTonalButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        viewModel.matchTitle =
+                                            temaAnime // Salvataggio del tema usando la stringa tradotta
+                                        showError = false
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = if (isAnimeTheme) ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    else ButtonDefaults.filledTonalButtonColors(),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                                 ) {
-                                    Icon(Icons.Filled.PersonAdd, null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(36.dp))
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    AutoResizedText(stringResource(R.string.msg_tavolo_vuoto), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold) // Sostituzione warning
-                                    AutoResizedText(stringResource(R.string.desc_tavolo_vuoto), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f)) // Sostituzione descrizione
+                                    Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(stringResource(R.string.btn_anime)) // Sostituzione testo del bottone
+                                }
+
+                                FilledTonalButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        viewModel.matchTitle =
+                                            temaCarte // Salvataggio del tema usando la stringa tradotta
+                                        showError = false
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = if (isCarteTheme) ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    )
+                                    else ButtonDefaults.filledTonalButtonColors(),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                                ) {
+                                    Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(stringResource(R.string.btn_carte)) // Sostituzione testo del bottone
                                 }
                             }
-                        } else {
-                            // Generazione dinamica delle card individuali per i partecipanti
-                            viewModel.players.forEachIndexed { index, player ->
+                        }
+                    }
 
-                                // ESTRAZIONE STRINGHE SNACKBAR PRIMA DELLA LAMBDA OCLICK
-                                val msgRimozione = stringResource(R.string.msg_giocatore_rimosso, player.name) // Inserimento stringa dinamica tradotta
-                                val btnAnnullaUndo = stringResource(R.string.btn_annulla_undo) // Recupero testo tradotto
+                    // SEZIONE 2: PARTECIPANTI (Input e Preferiti)
+                    Card(
+                        // 1. La spaziatura è gestita dallo 'spacedBy' della Colonna madre
+                        modifier = Modifier.fillMaxWidth(),
+                        // 2. SMUSSATURA RIDOTTA: Una card interna deve avere angoli leggermente più piccoli
+                        // di quella esterna (20.dp interno vs 24.dp esterno) per essere geometricamente piacevole.
+                        shape = RoundedCornerShape(20.dp),
+                        // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        // 4. BORDO DELICATO: Usiamo 'outline' invece di 'primary' per non rendere l'interfaccia troppo pesante
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
 
-                                PlayerAtTableCard(
-                                    player = player,
-                                    isFirst = index == 0,
-                                    isLast = index == viewModel.players.size - 1,
-                                    onMoveUp = { viewModel.movePlayer(index, index - 1) },
-                                    onMoveDown = { viewModel.movePlayer(index, index + 1) },
-                                    onEdit = { playerToEdit = player },
-                                    // Proprietà Lambda (Callback): Eseguita quando l'utente tocca il cestino
-                                    onRemove = {
-                                        // Costrutto Logico (Guard Statement):
-                                        // Blocca l'esecuzione se l'app sta già cambiando pagina
-                                        if (!isNavigating) {
-                                            val removedIndex = index
-                                            val removedPlayer = player
-                                            // Metodo della Classe MatchViewModel: Elimina il dato dalla memoria
-                                            viewModel.removePlayer(player)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            ) {
+                                Icon(
+                                    Icons.Filled.PersonAddAlt1,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = stringResource(R.string.titolo_gestione_partecipanti), // Sostituzione titolo sezione
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
 
-                                            coroutineScope.launch {
-                                                launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
-                                                val result = snackbarHostState.showSnackbar(
-                                                    message = msgRimozione, // Utilizzo variabile tradotta
-                                                    actionLabel = btnAnnullaUndo, // Utilizzo variabile tradotta
-                                                    duration = SnackbarDuration.Indefinite
+                            // GIOCATORI RAPIDI: Selezione da elenco preferiti
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.label_giocatori_rapidi), // Sostituzione label
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                IconButton(onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showFavoritesDialog = true
+                                }) {
+                                    Icon(
+                                        Icons.Filled.Settings,
+                                        stringResource(R.string.desc_gestisci_rapidi_icon),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(25.dp)
+                                    ) // Traduzione label accessibilità
+                                }
+                            }
+
+                            if (viewModel.favoriteNames.isNotEmpty()) {
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentPadding = PaddingValues(end = 16.dp)
+                                ) {
+                                    items(viewModel.favoriteNames) { fav ->
+                                        val isAlreadyAtTable = viewModel.players.any {
+                                            it.name.equals(
+                                                fav,
+                                                ignoreCase = true
+                                            )
+                                        }
+
+                                        FilterChip(
+                                            selected = isAlreadyAtTable,
+                                            onClick = {
+                                                if (!isAlreadyAtTable) {
+                                                    val finalColor =
+                                                        if (selectedColor == Color.Unspecified) {
+                                                            val usedColors =
+                                                                viewModel.players.map { it.color }
+                                                            val availableColors =
+                                                                playerPalette.filter { it.toArgb() !in usedColors }
+                                                            if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+                                                        } else {
+                                                            selectedColor
+                                                        }
+                                                    viewModel.addPlayer(fav, finalColor.toArgb())
+                                                } else {
+                                                    // Feedback tattile attivato solo in caso di rimozione dell'ultimo giocatore
+                                                    if (viewModel.players.size == 1) {
+                                                        haptic.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress
+                                                        )
+                                                    }
+                                                    val playerToRemove = viewModel.players.find {
+                                                        it.name.equals(
+                                                            fav,
+                                                            ignoreCase = true
+                                                        )
+                                                    }
+                                                    playerToRemove?.let { viewModel.removePlayer(it) }
+                                                }
+                                            },
+                                            modifier = Modifier.defaultMinSize(minHeight = 48.dp),
+                                            label = {
+                                                Text(
+                                                    fav,
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.titleMedium
                                                 )
-                                                if (result == SnackbarResult.ActionPerformed) {
-                                                    viewModel.restorePlayer(removedIndex, removedPlayer)
+                                            },
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = FilterChipDefaults.filterChipColors(
+                                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            ),
+                                            border = FilterChipDefaults.filterChipBorder(
+                                                enabled = true,
+                                                selected = isAlreadyAtTable,
+                                                borderColor = MaterialTheme.colorScheme.primary,
+                                                selectedBorderColor = Color.Transparent
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    stringResource(R.string.msg_nessun_giocatore_rapido),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                ) // Sostituzione Empty State giocatori
+                            }
+
+                            Spacer(modifier = Modifier.height(15.dp))
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 0.2f
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(7.dp))
+
+                            // SEZIONE AGGIUNTA MANUALE E COLORE
+                            Text(
+                                stringResource(R.string.label_scegli_colore),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            ) // Traduzione istruzione colore
+
+                            ColorPickerRow(
+                                selectedColor = selectedColor,
+                                onColorSelected = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    selectedColor = it
+                                },
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                stringResource(R.string.label_aggiungi_manualmente),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            ) // Traduzione label manuale
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = newPlayerName,
+                                    onValueChange = { newPlayerName = it },
+                                    modifier = Modifier.weight(1f).height(63.dp),
+                                    // Sostituiamo 'label' con 'placeholder' per eliminare il padding
+                                    // invisibile superiore e far combaciare l'ingombro logico con quello visivo
+                                    placeholder = { Text(stringResource(R.string.hint_nome_giocatore)) }, // Traduzione segnaposto input utente
+                                    shape = RoundedCornerShape(20.dp),
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Filled.Person,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Text,
+                                        imeAction = ImeAction.Done,
+                                    ),
+                                    keyboardActions = KeyboardActions(
+                                        onDone = { focusManager.clearFocus() }
+                                    )
+                                )
+
+                                val isAddPlayerEnabled = newPlayerName.trim()
+                                    .isNotEmpty() && viewModel.players.none {
+                                    it.name.equals(
+                                        newPlayerName.trim(),
+                                        ignoreCase = true
+                                    )
+                                }
+
+                                Button(
+                                    onClick = {
+                                        if (isAddPlayerEnabled) {
+                                            val finalColor =
+                                                if (selectedColor == Color.Unspecified) {
+                                                    playerPalette.random()
+                                                } else {
+                                                    selectedColor
+                                                }
+                                            viewModel.addPlayer(newPlayerName, finalColor.toArgb())
+                                            newPlayerName = ""
+                                            selectedColor = Color.Unspecified
+                                        }
+                                    },
+                                    modifier = Modifier.height(63.dp),
+                                    shape = RoundedCornerShape(20.dp),
+                                    border = if (isAddPlayerEnabled) null else BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                    ),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                                            alpha = 0.12f
+                                        ),
+                                        contentColor = if (isAddPlayerEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(
+                                            alpha = 0.38f
+                                        )
+                                    )
+                                ) { Text(stringResource(R.string.btn_aggiungi)) } // Traduzione bottone aggiunta
+                            }
+                        }
+                    }
+
+                    // SEZIONE 3: TAVOLO PARTECIPANTI (Elenco Attivo)
+                    Card(
+                        // 1. La spaziatura è gestita dallo 'spacedBy' della Colonna madre
+                        modifier = Modifier.fillMaxWidth(),
+                        // 2. SMUSSATURA RIDOTTA: Una card interna deve avere angoli leggermente più piccoli
+                        // di quella esterna (20.dp interno vs 24.dp esterno) per essere geometricamente piacevole.
+                        shape = RoundedCornerShape(20.dp),
+                        // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        // 4. BORDO DELICATO: Usiamo 'outline' invece di 'primary' per non rendere l'interfaccia troppo pesante
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.Groups,
+                                    null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = stringResource(R.string.titolo_tavolo_partecipanti), // Traduzione intestazione tabella
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                                    Text(
+                                        text = "${viewModel.players.size}",
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.padding(
+                                            horizontal = 4.dp,
+                                            vertical = 2.dp
+                                        ),
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+                            }
+
+                            // EMPTY STATE: Visualizzazione di cortesia in assenza di partecipanti
+                            if (viewModel.players.isEmpty()) {
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                    )
+                                ) {
+                                    Column(
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.PersonAdd,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.outline,
+                                            modifier = Modifier.size(36.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        AutoResizedText(
+                                            stringResource(R.string.msg_tavolo_vuoto),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.outline,
+                                            fontWeight = FontWeight.Bold
+                                        ) // Sostituzione warning
+                                        AutoResizedText(
+                                            stringResource(R.string.desc_tavolo_vuoto),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f)
+                                        ) // Sostituzione descrizione
+                                    }
+                                }
+                            } else {
+                                // Generazione dinamica delle card individuali per i partecipanti
+                                viewModel.players.forEachIndexed { index, player ->
+
+                                    // ESTRAZIONE STRINGHE SNACKBAR PRIMA DELLA LAMBDA OCLICK
+                                    val msgRimozione = stringResource(
+                                        R.string.msg_giocatore_rimosso,
+                                        player.name
+                                    ) // Inserimento stringa dinamica tradotta
+                                    val btnAnnullaUndo =
+                                        stringResource(R.string.btn_annulla_undo) // Recupero testo tradotto
+
+                                    PlayerAtTableCard(
+                                        player = player,
+                                        isFirst = index == 0,
+                                        isLast = index == viewModel.players.size - 1,
+                                        onMoveUp = { viewModel.movePlayer(index, index - 1) },
+                                        onMoveDown = { viewModel.movePlayer(index, index + 1) },
+                                        onEdit = { playerToEdit = player },
+                                        // Proprietà Lambda (Callback): Eseguita quando l'utente tocca il cestino
+                                        onRemove = {
+                                            // Costrutto Logico (Guard Statement):
+                                            // Blocca l'esecuzione se l'app sta già cambiando pagina
+                                            if (!isNavigating) {
+                                                val removedIndex = index
+                                                val removedPlayer = player
+                                                // Metodo della Classe MatchViewModel: Elimina il dato dalla memoria
+                                                viewModel.removePlayer(player)
+
+                                                coroutineScope.launch {
+                                                    launch { delay(3000L); snackbarHostState.currentSnackbarData?.dismiss() }
+                                                    val result = snackbarHostState.showSnackbar(
+                                                        message = msgRimozione, // Utilizzo variabile tradotta
+                                                        actionLabel = btnAnnullaUndo, // Utilizzo variabile tradotta
+                                                        duration = SnackbarDuration.Indefinite
+                                                    )
+                                                    if (result == SnackbarResult.ActionPerformed) {
+                                                        viewModel.restorePlayer(
+                                                            removedIndex,
+                                                            removedPlayer
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
+                                    )
+                                    if (index != viewModel.players.size - 1) {
+                                        Spacer(modifier = Modifier.height(4.dp))
                                     }
-                                )
-                                if (index != viewModel.players.size - 1) {
-                                    Spacer(modifier = Modifier.height(4.dp))
                                 }
                             }
                         }

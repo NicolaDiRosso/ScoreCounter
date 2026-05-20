@@ -458,20 +458,23 @@
                     // Scrivendo solo 24.dp (senza specificare top o bottom), Android stonda tutti e 4 gli angoli!
                     shape = RoundedCornerShape(24.dp)
                 ) {
-                    Column(
-                        // Abbiamo ridotto il padding 'top' perché non essendoci più il titolo,
-                        // non serve più tutto quello spazio vuoto in alto.
-                        modifier = Modifier.fillMaxSize().padding(top = 16.dp, start = 12.dp, end = 12.dp)
-                    ) {
+                    // OTTIMIZZAZIONE LAYOUT:
+                    // Se lasciamo il padding sulla Column, la lista viene "tagliata" appena i nomi dei 
+                    // giocatori toccano quel bordo invisibile durante lo scorrimento.
+                    Column(modifier = Modifier.fillMaxSize()) {
 
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
-                            // ---> MODIFICA 3: Cuscinetto ridotto <---
-                            // Siccome la scatola grigia ora finisce PRIMA dei bottoni e non ci scivola più dietro,
-                            // non ci serve più quel trucco del padding a 100.dp. Bastano 16.dp per far
-                            // scorrere bene l'ultima carta senza farla incollare al bordo inferiore.
-                            contentPadding = PaddingValues(bottom = 16.dp)
+                            // ContentPadding:
+                            // Mettiamo i margini (top, horizontal e bottom) dentro la LazyColumn,
+                            // permettiamo alle carte di scivolare fin sotto il bordo arrotondato della Card.
+                            contentPadding = PaddingValues(
+                                top = 16.dp,
+                                start = 12.dp,
+                                end = 12.dp,
+                                bottom = 16.dp
+                            )
                         ) {
                             items(viewModel.players) { p ->
 
