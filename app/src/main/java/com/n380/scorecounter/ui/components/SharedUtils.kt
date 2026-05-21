@@ -705,10 +705,13 @@
     // ====================================================================================
     /**
      * Funzione Composable riutilizzabile che incapsula e personalizza il FilterChip nativo.
+     * Utilizziamo questo componente per garantire che tutti i pulsanti di selezione rapida
+     * abbiano lo stesso stile, altezza e comportamento tipografico in tutta l'applicazione.
+     * 
      * @param text La scritta da mostrare (es. il nome del giocatore o del titolo)
      * @param isSelected Booleana che determina se il chip è colorato (attivo) o vuoto
      * @param onClick La funzione da eseguire quando l'utente tocca il chip
-     * @param leadingIcon (OPZIONALE) Un'icona da mostrare a sinistra. "= null" significa che se non gliela diamo, non crasha, ma semplicemente non la disegna.
+     * @param leadingIcon Un'icona opzionale da mostrare a sinistra del testo
      */
     @Composable
     fun CustomSelectableChip(
@@ -736,6 +739,8 @@
             // se l'utente scrive un nome o un titolo molto lungo, il font scala matematicamente verso il basso
             // impedendo la collisione visiva o la rottura dei confini fisici del chip.
             label = {
+                // Utilizziamo AutoResizedText per gestire nomi o titoli lunghi,
+                // evitando che il testo esca dai confini del pulsante o si sovrapponga.
                 AutoResizedText(
                     text = text,
                     fontWeight = FontWeight.Bold,
@@ -756,15 +761,12 @@
                 { Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp)) }
             } else null,
 
-            // 🧠 PERSONALIZZAZIONE DELLA PALETTE CROMATICA (Override dei colori Material):
-            // Forziamo il comportamento dei colori nativi per adattarli all'identità grafica dell'app.
+            // Configurazione dei colori: abbiamo rimosso l'override del labelColor
+            // per ripristinare il colore predefinito del tema (onSurfaceVariant/onSurface),
+            // mantenendo invece il colore di accento per lo stato selezionato.
             colors = FilterChipDefaults.filterChipColors(
-                // Tonalità di sfondo utilizzata quando il chip si trova in stato attivo (isSelected == true).
                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                // Colore ad alto contrasto applicato al testo sovrastante quando il chip è attivo.
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                // Colore del testo primario applicato quando il chip si trova in stato spento (isSelected == false).
-                labelColor = MaterialTheme.colorScheme.primary
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
             ),
 
             // 🧠 MODULAZIONE DINAMICA DEL CONTORNO (Micro-interazione visiva):

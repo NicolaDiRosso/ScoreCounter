@@ -42,6 +42,7 @@ import com.n380.scorecounter.R // Import del file R (Resources) per accedere all
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.ColorPickerRow
+import com.n380.scorecounter.ui.components.CustomSelectableChip
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.playerPalette
 import com.n380.scorecounter.viewmodel.MatchViewModel
@@ -549,18 +550,15 @@ fun CreateMatchScreen(
                                             it.name.equals(fav, ignoreCase = true)
                                         }
 
-                                        // Riutilizzo dello stesso identico componente dei titoli.
-                                        // Questo garantisce che i comportamenti tattili, le animazioni e gli stati visivi
-                                        // rimangano intrinsecamente coerenti in tutto l'ecosistema dell'app.
+                                        // Utilizzo del componente custom centralizzato per uniformita' estetica.
+                                        // La configurazione cromatica (testo e sfondo) e' ora ereditata dalla funzione unica.
                                         CustomSelectableChip(
                                             text = fav,
                                             isSelected = isAlreadyAtTable,
                                             onClick = {
-                                                // Bivio logico in base alla presenza o meno del giocatore al tavolo
+                                                // Logica di interruttore (toggle) per l'aggiunta o la rimozione del giocatore.
                                                 if (!isAlreadyAtTable) {
-                                                    // CASO A: INSERIMENTO (Il giocatore non è seduto al tavolo)
-
-                                                    // Algoritmo di auto-assegnazione del colore a basso conflitto:
+                                                    // Assegnazione automatica del colore se non selezionato manualmente.
                                                     val finalColor = if (selectedColor == Color.Unspecified) {
                                                         // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
                                                         val usedColors = viewModel.players.map { it.color }
@@ -573,10 +571,8 @@ fun CreateMatchScreen(
                                                         // Bypass dell'algoritmo se l'utente ha esplicitamente selezionato un colore dal ColorPicker.
                                                         selectedColor
                                                     }
-
                                                     // Passaggio della richiesta di istanziazione al ViewModel.
                                                     viewModel.addPlayer(fav, finalColor.toArgb())
-
                                                 } else {
                                                     // CASO B: RIMOZIONE (Il giocatore è già seduto al tavolo -> Toggle Deselezione)
 
