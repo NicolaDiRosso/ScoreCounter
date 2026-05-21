@@ -394,9 +394,10 @@ fun CreateMatchScreen(
                                     modifier = Modifier.padding(top = 0.dp, bottom = 16.dp)
                                         .offset(y = (1).dp)
                                 ) {
-                                    Text(
+                                    AutoResizedText(
                                         text = stringResource(R.string.label_titoli_recenti), // Sostituzione label tradotta
-                                        style = MaterialTheme.typography.labelSmall,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
                                     )
@@ -428,10 +429,10 @@ fun CreateMatchScreen(
                                                     contentColor = MaterialTheme.colorScheme.onPrimary
                                                 ),
                                                 contentPadding = PaddingValues(
-                                                    horizontal = 12.dp,
+                                                    horizontal = 16.dp,
                                                     vertical = 4.dp
                                                 ),
-                                                modifier = Modifier.height(36.dp)
+                                                modifier = Modifier.height(42.dp)
                                             ) {
                                                 // Testo auto-adattante per gestire titoli lunghi senza rompere il layout
                                                 AutoResizedText(

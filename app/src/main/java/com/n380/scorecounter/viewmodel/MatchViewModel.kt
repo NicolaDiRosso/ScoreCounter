@@ -773,8 +773,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         matchTitleHistory.remove(cleanTitle)
         matchTitleHistory.add(0, cleanTitle)
 
-        // Vincolo di capacità: manteniamo solo le ultime 3 voci inserite
-        if (matchTitleHistory.size > 3) {
+        // Vincolo di capacità: manteniamo solo le ultime 5 voci inserite
+        // Quando la lista accumula il sesto elemento,
+        // l'algoritmo cancella automaticamente l'ultimo in fondo (il più vecchio rimasto),
+        // assicurando che l'utente veda sempre e solo le ultime 5 sfide uniche giocate.
+        if (matchTitleHistory.size > 5) {
             matchTitleHistory.removeAt(matchTitleHistory.size - 1)
         }
 
