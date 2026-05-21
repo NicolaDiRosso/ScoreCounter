@@ -476,64 +476,6 @@ fun CreateMatchScreen(
                             )
 
                             Spacer(modifier = Modifier.height(5.dp))
-
-                            // TEMI RAPIDI: Configurazione automatica titolo
-                            val temaAnime =
-                                stringResource(R.string.tema_sfida_anime) // Estrazione stringa internazionalizzata per comparazione logica
-                            val temaCarte =
-                                stringResource(R.string.tema_sfida_carte) // Estrazione stringa internazionalizzata per comparazione logica
-
-                            val isAnimeTheme =
-                                viewModel.matchTitle == temaAnime // Controllo riadattato usando la stringa tradotta
-                            val isCarteTheme =
-                                viewModel.matchTitle == temaCarte // Controllo riadattato usando la stringa tradotta
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                FilledTonalButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        viewModel.matchTitle =
-                                            temaAnime // Salvataggio del tema usando la stringa tradotta
-                                        showError = false
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = if (isAnimeTheme) ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                    else ButtonDefaults.filledTonalButtonColors(),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                                ) {
-                                    Icon(Icons.Default.Tv, null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(stringResource(R.string.btn_anime)) // Sostituzione testo del bottone
-                                }
-
-                                FilledTonalButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        viewModel.matchTitle =
-                                            temaCarte // Salvataggio del tema usando la stringa tradotta
-                                        showError = false
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = if (isCarteTheme) ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                                    )
-                                    else ButtonDefaults.filledTonalButtonColors(),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                                ) {
-                                    Icon(Icons.Default.Style, null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(stringResource(R.string.btn_carte)) // Sostituzione testo del bottone
-                                }
-                            }
                         }
                     }
 

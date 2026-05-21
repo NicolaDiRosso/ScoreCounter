@@ -65,10 +65,6 @@
     <string name="err_nome_sfida_obbligatorio">Challenge name is required</string>
     <string name="label_titoli_recenti">Recent titles:</string>
     <string name="hint_traguardo">Goal (Optional)</string>
-    <string name="tema_sfida_anime">Anime Challenge</string>
-    <string name="tema_sfida_carte">Card Challenge</string>
-    <string name="btn_anime">Anime</string>
-    <string name="btn_carte">Cards</string>
     <string name="titolo_gestione_partecipanti">Participant Management</string>
     <string name="label_giocatori_rapidi">Quick Players:</string>
     <string name="msg_nessun_giocatore_rapido">No quick players saved.</string>

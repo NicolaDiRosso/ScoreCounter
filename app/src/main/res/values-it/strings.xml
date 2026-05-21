@@ -65,10 +65,6 @@
     <string name="err_nome_sfida_obbligatorio">Il nome della sfida è obbligatorio</string>
     <string name="label_titoli_recenti">Titoli recenti:</string>
     <string name="hint_traguardo">Traguardo (Opzionale)</string>
-    <string name="tema_sfida_anime">Sfida Anime</string>
-    <string name="tema_sfida_carte">Sfida Carte</string>
-    <string name="btn_anime">Anime</string>
-    <string name="btn_carte">Carte</string>
     <string name="titolo_gestione_partecipanti">Gestione Partecipanti</string>
     <string name="label_giocatori_rapidi">Giocatori Rapidi:</string>
     <string name="msg_nessun_giocatore_rapido">Nessun giocatore rapido salvato.</string>

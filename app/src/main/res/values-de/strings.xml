@@ -62,10 +62,6 @@
     <string name="err_nome_sfida_obbligatorio">Der Name der Herausforderung ist erforderlich</string>
     <string name="label_titoli_recenti">Letzte Titel:</string>
     <string name="hint_traguardo">Ziel (Optional)</string>
-    <string name="tema_sfida_anime">Anime-Herausforderung</string>
-    <string name="tema_sfida_carte">Karten-Herausforderung</string>
-    <string name="btn_anime">Anime</string>
-    <string name="btn_carte">Karten</string>
     <string name="titolo_gestione_partecipanti">Teilnehmer verwalten</string>
     <string name="label_giocatori_rapidi">Schnelle Spieler:</string>
     <string name="msg_nessun_giocatore_rapido">Keine schnellen Spieler gespeichert.</string>

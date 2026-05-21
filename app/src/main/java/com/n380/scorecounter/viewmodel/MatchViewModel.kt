@@ -767,8 +767,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         val cleanTitle = title.trim()
         
         // Filtro di esclusione: i titoli rapidi predefiniti non devono entrare in cronologia
-        val excluded = listOf("Sfida Anime", "Sfida Carte")
-        if (cleanTitle.isEmpty() || cleanTitle in excluded) return
+        if (cleanTitle.isEmpty()) return
 
         // Gestione unicità: se il titolo esiste già, lo rimuoviamo per riportarlo in cima (posizione 0)
         matchTitleHistory.remove(cleanTitle)

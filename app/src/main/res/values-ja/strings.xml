@@ -62,10 +62,6 @@
     <string name="err_nome_sfida_obbligatorio">チャレンジ名は必須です</string>
     <string name="label_titoli_recenti">最近のタイトル：</string>
     <string name="hint_traguardo">目標スコア（任意）</string>
-    <string name="tema_sfida_anime">アニメチャレンジ</string>
-    <string name="tema_sfida_carte">カードチャレンジ</string>
-    <string name="btn_anime">アニメ</string>
-    <string name="btn_carte">カード</string>
     <string name="titolo_gestione_partecipanti">参加者管理</string>
     <string name="label_giocatori_rapidi">クイックプレイヤー：</string>
     <string name="msg_nessun_giocatore_rapido">クイックプレイヤーが保存されていません。</string>

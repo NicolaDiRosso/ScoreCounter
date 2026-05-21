@@ -62,10 +62,6 @@
     <string name="err_nome_sfida_obbligatorio">चुनौती का नाम आवश्यक है</string>
     <string name="label_titoli_recenti">हाल के शीर्षक:</string>
     <string name="hint_traguardo">लक्ष्य (वैकल्पिक)</string>
-    <string name="tema_sfida_anime">एनीमे चुनौती</string>
-    <string name="tema_sfida_carte">कार्ड चुनौती</string>
-    <string name="btn_anime">एनीमे</string>
-    <string name="btn_carte">कार्ड</string>
     <string name="titolo_gestione_partecipanti">प्रतिभागी प्रबंधन</string>
     <string name="label_giocatori_rapidi">त्वरित खिलाड़ी:</string>
     <string name="msg_nessun_giocatore_rapido">कोई त्वरित खिलाड़ी सहेजा नहीं गया।</string>
