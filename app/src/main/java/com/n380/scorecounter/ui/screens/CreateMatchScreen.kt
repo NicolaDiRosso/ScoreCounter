@@ -46,6 +46,7 @@ import com.n380.scorecounter.ui.components.ColorPickerRow
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.playerPalette
 import com.n380.scorecounter.viewmodel.MatchViewModel
+import com.n380.scorecounter.ui.components.CustomSelectableChip
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -67,9 +68,6 @@ fun CreateMatchScreen(
     // Inizializzazione del selettore cromatico con Color.Unspecified.
     // Questo valore attiva il disegno del selettore "arcobaleno" per l'assegnazione di un colore casuale.
     var selectedColor by remember { mutableStateOf(Color.Unspecified) }
-
-    // STATO FOCUS TITOLO: Monitora se il campo di testo del nome sfida è attivo
-    var isTitleFocused by remember { mutableStateOf(false) }
 
     // Memorizzazione temporanea del giocatore selezionato per la modifica tramite l'icona matita
     var playerToEdit by remember { mutableStateOf<Player?>(null) }
@@ -359,10 +357,7 @@ fun CreateMatchScreen(
                                     if (it.isNotBlank()) showError = false
                                 },
                                 label = { Text(stringResource(R.string.hint_nome_sfida)) }, // Sostituzione etichetta campo tradotta
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    // MONITORAGGIO FOCUS: Quando l'utente clicca sul campo, attiviamo la visualizzazione dei suggerimenti
-                                    .onFocusChanged { isTitleFocused = it.isFocused },
+                                modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 isError = showError && viewModel.matchTitle.isBlank(),
                                 // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare"
@@ -386,68 +381,72 @@ fun CreateMatchScreen(
                             )
 
                             // CRONOLOGIA TITOLI RECENTI (SISTEMA DI SUGGERIMENTO RAPIDO)
-                            // Mostriamo questo blocco solo se il campo è selezionato (focus) e se abbiamo almeno un titolo in memoria.
-                            if (isTitleFocused && viewModel.matchTitleHistory.isNotEmpty()) {
-                                // Usiamo offset(y = -12.dp) per annullare i margini nativi del box di testo e "attaccare" visivamente
-                                // la scritta "Titoli recenti" al bordo inferiore dell'input.
+                            // La sezione viene mantenuta sempre visibile per garantire stabilita' al layout ed evitare spostamenti 
+                            // improvvisi degli elementi (layout shift) durante l'interazione con l'interfaccia utente.
+                            if (viewModel.matchTitleHistory.isNotEmpty()) {
                                 Column(
-                                    modifier = Modifier.padding(top = 0.dp, bottom = 16.dp)
-                                        .offset(y = (1).dp)
+                                    modifier = Modifier.padding(top = 12.dp, bottom = 12.dp)
                                 ) {
                                     AutoResizedText(
-                                        text = stringResource(R.string.label_titoli_recenti), // Sostituzione label tradotta
+                                        text = stringResource(R.string.label_titoli_recenti),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
+                                        modifier = Modifier.padding(bottom = 6.dp, start = 4.dp)
                                     )
                                     LazyRow(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        // Cicliamo i titoli salvati nel ViewModel (massimo 3 nomi diversi dai temi fissi)
+                                        // Cicliamo i titoli salvati nel ViewModel per permettere una selezione immediata da parte dell'utente.
                                         items(viewModel.matchTitleHistory) { recentTitle ->
-                                            Button(
+                                            // Valutazione dello stato derivato:
+                                            // Verifichiamo se il titolo di questo specifico elemento dell'elenco (recentTitle)
+                                            // coincide con la stringa attualmente registrata nel ViewModel (matchTitle).
+                                            // Questo parametro booleano guiderà il rendering del componente (stile pieno vs stile vuoto).
+                                            val isSelected = viewModel.matchTitle == recentTitle
+
+                                            // Richiamo del componente UI custom centralizzato.
+                                            // L'astrazione grafica (colori, bordi, padding) è gestita internamente in SharedUtils.kt,
+                                            // qui passiamo esclusivamente i dati e i comportamenti di business logic (Principio DRY).
+                                            CustomSelectableChip(
+                                                text = recentTitle,
+                                                isSelected = isSelected,
                                                 onClick = {
-                                                    // Feedback tattile al tocco del suggerimento
-                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                    // Gestione dinamica del feedback tattile (Micro-interazione):
+                                                    // - LongPress (vibrazione lunga) se l'utente sta deselezionando un elemento già attivo.
+                                                    // - Confirm (vibrazione breve) se l'utente sta effettuando una nuova selezione.
+                                                    haptic.performHapticFeedback(
+                                                        if (isSelected) HapticFeedbackType.LongPress
+                                                        else HapticFeedbackType.Confirm
+                                                    )
 
-                                                    // 1. Inseriamo il titolo scelto nel campo di testo
-                                                    viewModel.matchTitle = recentTitle
+                                                    // Logica di Toggle (Interruttore):
+                                                    // Il click altera direttamente la "Single Source of Truth" (il ViewModel).
+                                                    // Se l'elemento cliccato era già quello attivo, si svuota il campo (deselezione).
+                                                    // Altrimenti, viene sovrascritto col nuovo valore.
+                                                    // Qualsiasi mutazione di viewModel.matchTitle provocherà l'immediata
+                                                    // Ricomposizione (Recomposition) di tutti i nodi UI che la osservano.
+                                                    if (isSelected) {
+                                                        viewModel.matchTitle = ""
+                                                    } else {
+                                                        viewModel.matchTitle = recentTitle
+                                                        showError = false // Azzera eventuali flag di errore visivo per input mancante
+                                                    }
 
-                                                    // 2. Chiudiamo tastiera e suggerimenti togliendo il cursore dal campo (clearFocus)
+                                                    // Rimuove l'ancoraggio (focus) dal TextField principale e chiude
+                                                    // contestualmente l'eventuale tastiera software aperta.
                                                     focusManager.clearFocus()
-                                                },
-                                                shape = RoundedCornerShape(12.dp),
-                                                // Design "Pieno con Bordino": garantisce visibilità e coerenza con i tasti "Anime" e "Carte"
-                                                border = BorderStroke(
-                                                    1.dp,
-                                                    MaterialTheme.colorScheme.primary
-                                                ),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = MaterialTheme.colorScheme.primary,
-                                                    contentColor = MaterialTheme.colorScheme.onPrimary
-                                                ),
-                                                contentPadding = PaddingValues(
-                                                    horizontal = 16.dp,
-                                                    vertical = 4.dp
-                                                ),
-                                                modifier = Modifier.height(42.dp)
-                                            ) {
-                                                // Testo auto-adattante per gestire titoli lunghi senza rompere il layout
-                                                AutoResizedText(
-                                                    text = recentTitle,
-                                                    style = MaterialTheme.typography.labelLarge
-                                                )
-                                            }
+                                                }
+                                            )
                                         }
                                     }
                                 }
                             } else {
-                                // SPAZIATORE DI SICUREZZA: Quando i suggerimenti sono nascosti, inseriamo uno spazio fisso
-                                // per mantenere la distanza corretta tra il Nome della Sfida e il Traguardo.
+                                // Spaziatore di sicurezza per mantenere le proporzioni verticali costanti nel caso in cui la cronologia sia vuota.
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
+
                             // INPUT: PUNTEGGIO OBIETTIVO (Filtro numerico)
                             OutlinedTextField(
                                 value = viewModel.targetScore,
@@ -457,7 +456,7 @@ fun CreateMatchScreen(
                                     }
                                 },
                                 label = { Text(stringResource(R.string.hint_traguardo)) }, // Sostituzione label tradotta
-                                modifier = Modifier.fillMaxWidth().offset(y = (-10).dp),
+                                modifier = Modifier.fillMaxWidth(), 
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
@@ -475,8 +474,6 @@ fun CreateMatchScreen(
                                     )
                                 },
                             )
-
-                            Spacer(modifier = Modifier.height(5.dp))
                         }
                     }
 
@@ -544,63 +541,63 @@ fun CreateMatchScreen(
                                     contentPadding = PaddingValues(end = 16.dp)
                                 ) {
                                     items(viewModel.favoriteNames) { fav ->
+                                        // Scansione iterativa della lista giocatori attuale:
+                                        // L'operatore '.any {}' attraversa l'array e restituisce true non appena
+                                        // trova ALMENO UN elemento che soddisfa la condizione.
+                                        // Viene utilizzato 'ignoreCase = true' per prevenire duplicati logici
+                                        // (es. "Marco" e "marco" sono considerati lo stesso giocatore).
                                         val isAlreadyAtTable = viewModel.players.any {
-                                            it.name.equals(
-                                                fav,
-                                                ignoreCase = true
-                                            )
+                                            it.name.equals(fav, ignoreCase = true)
                                         }
 
-                                        FilterChip(
-                                            selected = isAlreadyAtTable,
+                                        // Riutilizzo dello stesso identico componente dei titoli.
+                                        // Questo garantisce che i comportamenti tattili, le animazioni e gli stati visivi
+                                        // rimangano intrinsecamente coerenti in tutto l'ecosistema dell'app.
+                                        CustomSelectableChip(
+                                            text = fav,
+                                            isSelected = isAlreadyAtTable,
                                             onClick = {
+                                                // Bivio logico in base alla presenza o meno del giocatore al tavolo
                                                 if (!isAlreadyAtTable) {
-                                                    val finalColor =
-                                                        if (selectedColor == Color.Unspecified) {
-                                                            val usedColors =
-                                                                viewModel.players.map { it.color }
-                                                            val availableColors =
-                                                                playerPalette.filter { it.toArgb() !in usedColors }
-                                                            if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-                                                        } else {
-                                                            selectedColor
-                                                        }
+                                                    // CASO A: INSERIMENTO (Il giocatore non è seduto al tavolo)
+
+                                                    // Algoritmo di auto-assegnazione del colore a basso conflitto:
+                                                    val finalColor = if (selectedColor == Color.Unspecified) {
+                                                        // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
+                                                        val usedColors = viewModel.players.map { it.color }
+                                                        // 2. Filtraggio della palette master: si tengono solo i colori NON presenti in usedColors.
+                                                        val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+                                                        // 3. Fallback: se ci sono colori intonsi se ne pesca uno, altrimenti
+                                                        // la palette è esaurita e si pesca randomicamente accettando il duplicato visivo.
+                                                        if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+                                                    } else {
+                                                        // Bypass dell'algoritmo se l'utente ha esplicitamente selezionato un colore dal ColorPicker.
+                                                        selectedColor
+                                                    }
+
+                                                    // Passaggio della richiesta di istanziazione al ViewModel.
                                                     viewModel.addPlayer(fav, finalColor.toArgb())
+
                                                 } else {
-                                                    // Feedback tattile attivato solo in caso di rimozione dell'ultimo giocatore
+                                                    // CASO B: RIMOZIONE (Il giocatore è già seduto al tavolo -> Toggle Deselezione)
+
+                                                    // Gestione feedback aptico di allerta se si sta tentando di rimuovere
+                                                    // l'ultimo elemento rimasto nella lista dei partecipanti.
                                                     if (viewModel.players.size == 1) {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress
-                                                        )
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                     }
+
+                                                    // Identificazione del target: '.find {}' restituisce il primo oggetto Player
+                                                    // la cui proprietà 'name' corrisponde alla query, restituendo null se non trovato.
                                                     val playerToRemove = viewModel.players.find {
-                                                        it.name.equals(
-                                                            fav,
-                                                            ignoreCase = true
-                                                        )
+                                                        it.name.equals(fav, ignoreCase = true)
                                                     }
+
+                                                    // Esecuzione in Safe-Call (?): la rimozione viene propagata al ViewModel
+                                                    // esclusivamente se l'oggetto playerToRemove non è null.
                                                     playerToRemove?.let { viewModel.removePlayer(it) }
                                                 }
-                                            },
-                                            modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-                                            label = {
-                                                Text(
-                                                    fav,
-                                                    fontWeight = FontWeight.Bold,
-                                                    style = MaterialTheme.typography.titleMedium
-                                                )
-                                            },
-                                            shape = RoundedCornerShape(12.dp),
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                            ),
-                                            border = FilterChipDefaults.filterChipBorder(
-                                                enabled = true,
-                                                selected = isAlreadyAtTable,
-                                                borderColor = MaterialTheme.colorScheme.primary,
-                                                selectedBorderColor = Color.Transparent
-                                            )
+                                            }
                                         )
                                     }
                                 }
