@@ -25,7 +25,6 @@ import androidx.compose.material3.SheetValue // Controllo degli stati del Bottom
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged // Gestore dello stato di focus dei componenti
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Conversione cromatica per persistenza dati
