@@ -9,11 +9,12 @@
     <string name="btn_riprendi">Riprendi</string>
     <!-- TESTO PER IL PULSANTE "Donazione" IN HomeScreen-->
     <string name="desc_donazione_icon">Supporta il progetto</string>
+    <string name="btn_donazione_paypal">Dona con PayPal</string>
     <string name="titolo_donazione">Sostieni ScoreCounter</string>
     <string name="msg_donazione_saluto">Ciao, sono Nicola! 👋</string>
     <string name="msg_donazione_intro">Sono uno studente di Ingegneria Informatica. Ho creato questa app nel tempo libero per contare i punti con i miei amici in modo semplice, bello e pulito. È nata come un piccolo progetto personale, ma ho deciso di pubblicarla per condividerla con tutti.</string>
     <string name="msg_donazione_promessa">L\'app è e resterà per sempre senza pubblicità!</string>
-    <string name="msg_donazione_scopo">Se ti va di fare una piccola donazione (anche solo 0,50€), mi aiuterai a raggiungere i 25€ necessari per pubblicare ScoreCounter ufficialmente sul Play Store e farmi capire che apprezzi il mio lavoro.</string>
+    <string name="msg_donazione_scopo">Se ti va di fare una piccola donazione (anche solo 1€), mi aiuterai a raggiungere i 25€ necessari per pubblicare ScoreCounter ufficialmente sul Play Store e farmi capire che apprezzi il mio lavoro.</string>
     <string name="msg_donazione_grazie">Grazie di cuore anche solo per aver dato un\'occasione alla mia app. Per me significa tanto. ❤️</string>
     <string name="btn_donazione_chiudi">Grazie!</string>
     <!-- TESTO PER IL PULSANTE "Info" IN HomeScreen-->

@@ -1,11 +1,8 @@
     package com.n380.scorecounter.ui.components
 
-    import com.n380.scorecounter.ui.components.AboutAppDialog
-    import com.n380.scorecounter.ui.components.DonationDialog
     import android.content.Intent
     import android.net.Uri
     import androidx.compose.foundation.BorderStroke
-    import androidx.compose.foundation.background
     import androidx.compose.foundation.layout.*
     import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,10 +16,12 @@
     import androidx.compose.runtime.Composable
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.Modifier
+    import androidx.compose.ui.draw.clip
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
     import androidx.compose.ui.platform.LocalContext
     import androidx.compose.ui.platform.LocalHapticFeedback
+    import androidx.compose.ui.res.painterResource
     import androidx.compose.ui.res.stringResource
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.style.TextAlign
@@ -132,7 +131,11 @@
                 // IL CONTENITORE: Impila i bottoni uno sopra l'altro
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    // 🧠 SPAZIATURA VERTICALE: Applichiamo Arrangement.spacedBy(12.dp)
+                    // per distanziare i bottoni in modo armonioso e coerente con il DonationDialog,
+                    // evitando che risultino "attaccati" l'uno all'altro.
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // 1. PRIMO BOTTONE (Azione Secondaria: Email)
 
@@ -198,44 +201,6 @@
         )
     }
 
-    /**
-     * Un componente Text personalizzato che riduce automaticamente la dimensione del font
-     * per adattarsi allo spazio orizzontale disponibile, evitando troncamenti indesiderati.
-     */
-    /*
-    @Composable
-    fun AutoResizedText(
-        text: String,
-        style: TextStyle = MaterialTheme.typography.bodyMedium,
-        modifier: Modifier = Modifier,
-        color: Color = Color.Unspecified,
-        fontWeight: FontWeight? = null,
-        textAlign: TextAlign? = null,
-    ) {
-        var resizedTextStyle by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(style) }
-        var shouldDraw by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
-
-        Text(
-            text = text,
-            color = color,
-            modifier = modifier.androidx.compose.ui.draw.drawWithContent {
-                if (shouldDraw) drawContent()
-            },
-            fontWeight = fontWeight,
-            textAlign = textAlign,
-            softWrap = false,
-            style = resizedTextStyle,
-            onTextLayout = { result ->
-                if (result.didOverflowWidth) {
-                    resizedTextStyle = resizedTextStyle.copy(
-                        fontSize = resizedTextStyle.fontSize * 0.95
-                    )
-                } else {
-                    shouldDraw = true
-                }
-            }
-        )
-    }*/
 
     // ====================================================================================
     // 🧠 COMPONENTE UI: DIALOGO DONAZIONI E SUPPORTO (CUORE)
@@ -329,20 +294,100 @@
                 }
             },
             confirmButton = {
-                // Call to Action (CTA): Il bottone per chiudere o (in futuro) aprire PayPal
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        // IN FUTURO QUI POTREMO INSERIRE L'INTENT AL LINK DELLE DONAZIONI
-                        onDismiss() // Chiudiamo il dialogo comunicandolo al genitore
-                    },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(20.dp)
+                // ACCESSO AL CONTESTO PER INTENT DI RETE
+                // 'LocalContext' ci serve per poter "chiedere" ad Android di lanciare un'app esterna (il browser o l'app PayPal)
+                val context = LocalContext.current
+
+                // STACK VERTICALE DEI BOTTONI (Colonna)
+                // Sostituiamo il singolo bottone con una Column per poterne impilare due:
+                // 1. Bottone primario (colorato) per la donazione.
+                // 2. Bottone secondario (solo contorno o trasparente) per la chiusura cortese.
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp) // Spaziatura elegante tra i due bottoni
                 ) {
-                    AutoResizedText(
-                        text = stringResource(R.string.btn_donazione_chiudi),
-                        fontWeight = FontWeight.Bold
-                    )
+
+                    // 1. BOTTONE PRIMARIO: DONAZIONE PAYPAL
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+
+                            // 🧠 DEFINIZIONE DELL'INTENT (Navigazione Esterna)
+                            // Creiamo un 'Intent.ACTION_VIEW' passandogli un Uri web.
+                            // Questo dice ad Android: "Cerca un'app in grado di aprire questo indirizzo web".
+                            val paypalUrl = "https://www.paypal.com/donate/?hosted_button_id=XJF97D5YQ5SXE"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(paypalUrl))
+
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                // Blocco catch di sicurezza: previene crash rarissimi in cui il telefono
+                                // non possiede nemmeno un browser installato (improbabile, ma best practice).
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(20.dp)),//Forziamo il ritaglio della maschera visiva (clip)
+                        // con la stessa forma geometrica (RoundedCornerShape) passata al parametro 'shape'.
+                        // Questo impedisce a qualsiasi elemento interno (Row o PNG) di sbordare o alterare la curvatura.
+                        shape = RoundedCornerShape(20.dp),
+                        // Usiamo un colore diverso (es. secondario) per dare risalto all'azione di donazione?
+                        // Oppure lasciamo il primary di default rimuovendo 'colors'.
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        // ALLINEAMENTO ORIZZONTALE E VERTICALE BILANCIATO
+                        // Il corpo del bottone in Compose è implicitamente una Row.
+                        // Per far sì che l'icona PNG e il testo AutoResizedText viaggino sulla stessa linea
+                        // baricentrica senza oscillazioni dovute ai margini del file PNG,
+                        // l'icona viene dimensionata con cura e privata di filtri cromatici.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            // 🧠 TEORIA DEL RENDERING DELLE IMMAGINI IN COMPOSE:
+                            // Per evitare che Android colori tutto il logo di bianco o di nero distruggendolo,
+                            // impostiamo il parametro 'tint = Color.Unspecified'.
+                            // Questo dice al motore grafico Skia di Android: "Disegna il file PNG esattamente con i suoi colori originali".
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_paypal_logo), // Nome del tuo file PNG dentro la cartella res/drawable
+                                contentDescription = null,
+                                modifier = Modifier.size(34.dp), // Dimensione standard bilanciata per i touch target delle icone nei bottoni
+                                tint = Color.Unspecified // 👈 FONDAMENTALE: Mantiene i colori blu/azzurro nativi del PNG di PayPal
+                            )
+
+                            // Spaziatore fisso a 12.dp per distaccare l'immagine dal testo dell'ascoltatore,
+                            // evitando che i due elementi collidano visivamente.
+                            Spacer(Modifier.width(6.dp))
+
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_donazione_paypal), // Es. "Dona con PayPal"
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    // 2. BOTTONE SECONDARIO: CHIUSURA CORTESE ("Grazie Nicola!")
+                    OutlinedButton(
+                        onClick = {
+                            // Feedback aptico differenziato (LongPress) per denotare un'azione secondaria/uscita
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onDismiss() // Invoca la lambda per distruggere il dialogo
+                        },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        // Creiamo un bordo sottile per renderlo un bottone secondario meno invasivo
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        AutoResizedText(
+                            text = stringResource(R.string.btn_donazione_chiudi), // Es. "Grazie Nicola!"
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         )
