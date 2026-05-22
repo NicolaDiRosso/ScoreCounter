@@ -151,7 +151,7 @@
                             // DEFINIZIONE DELL'INTENT
                             // Ora passiamo semplicemente la variabile 'emailSubject' che abbiamo pre-calcolato fuori.
                             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:emailditest100@gmail.com")
+                                data = Uri.parse("mailto:scorecounter.feedback@gmail.com")
                                 putExtra(Intent.EXTRA_SUBJECT, emailSubject)
                             }
 

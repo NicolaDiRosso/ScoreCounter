@@ -120,7 +120,7 @@
 
     <!-- TESTO PER IL  FILE CounterScreen-->
     <string name="btn_azzera">Azzera</string>
-    <string name="btn_fine_match">Fine Match</string>
+    <string name="btn_fine_match">Fine Partita</string>
     <string name="titolo_sfida_default">Sfida</string>
     <string name="desc_info_icon">Info</string>
     <string name="btn_timer">Timer</string>
