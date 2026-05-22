@@ -54,7 +54,9 @@ import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.ui.components.AboutAppDialog
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.DonationDialog
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.buildMatchShareText
 import com.n380.scorecounter.ui.components.formatDate
@@ -112,6 +114,13 @@ fun HomeScreen(
 
     // Stato per la visibilità del dialogo "Informazioni App"
     var showAboutDialog by rememberSaveable { mutableStateOf(false) }
+
+    // GESTIONE DI STATO (UI State):
+    // Variabile booleana che governa l'iniezione nel grafo grafico del dialogo "Supporta il progetto".
+    // Utilizziamo 'rememberSaveable' (non un semplice 'remember') affinché il booleano venga
+    // salvato nel 'Bundle' di sistema. Se l'utente ruota lo schermo mentre sta leggendo
+    // il tuo messaggio, il sistema operativo non distruggerà e chiuderà il popup inavvertitamente.
+    var showDonationDialog by rememberSaveable { mutableStateOf(false) }
 
     // Valutazione reattiva: Se l'indice è valido (>= 0), recuperiamo i dati della partita dal ViewModel.
     val expandedMatch =
@@ -266,162 +275,17 @@ fun HomeScreen(
     // --------------------------------------------------------------------
     // DIALOGO MODALE: INFORMAZIONI APP (ABOUT)
     // --------------------------------------------------------------------
+    // Essendo stato estratto in un file dedicato (HomeDialogComponents.kt),
+    // qui applichiamo il principio dello "State Hoisting": passiamo solo la lambda di spegnimento.
     if (showAboutDialog) {
-        AlertDialog(
-            onDismissRequest = { showAboutDialog = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.VideogameAsset,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp) // Leggermente più piccola e raffinata
-                )
-            },
-            title = {
-                Text(
-                    stringResource(R.string.app_name), // Nome dell'applicazione nel titolo del dialogo About
-                    fontWeight = FontWeight.Black, // Più "pesante" per un look da titolo vero
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
-            text = {
-                // ==========================================================
-                // 🧠 FIX TESTO TAGLIATO E FORMATTAZIONE
-                // 1. Usiamo 'verticalScroll' per far scorrere il contenuto se lo schermo è piccolo.
-                // 2. Dividiamo le frasi in componenti 'Text' separati per gestire spazi e stili.
-                // ==========================================================
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        AboutAppDialog(onDismiss = { showAboutDialog = false })
+    }
 
-                    /*Text(
-                        "Il tuo fedele segnapunti digitale! 🎮",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )*/
-
-                    Text(
-                        stringResource(R.string.desc_informazioni_app), // Descrizione lunga dell'applicazione
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    // Sottotitolo colorato
-                    Text(
-                        stringResource(R.string.sottotitolo_cosa_puoi_fare), // Intestazione sezione funzionalità
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    // 🧠 FORMATTAZIONE PRO: Creiamo la lista puntata graficamente
-                    val features = listOf(
-                        stringResource(R.string.feature_registra_partite), // Feature 1: Registrazione partite
-                        stringResource(R.string.feature_analizza_grafici), // Feature 2: Analisi grafici
-                        stringResource(R.string.feature_assegna_titoli) // Feature 3: Assegnazione titoli
-                    )
-                    features.forEach { feature ->
-                        Row(modifier = Modifier.padding(bottom = 4.dp)){
-                            Text("• ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold,textAlign = TextAlign.Justify,)//l'oggetto TextAlign con Justify ci permette di giustificare il testo)
-                            Text(feature, style = MaterialTheme.typography.bodyMedium,fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        stringResource(R.string.msg_vinca_il_migliore), // Messaggio di augurio "Vinca il migliore"
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        stringResource(R.string.msg_segnalazione_bug), // Istruzioni per feedback e bug report
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,//l'oggetto TextAlign con Justify ci permette di giustificare il testo
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    //Spacer(modifier = Modifier.height(20.dp))
-
-
-                }
-            },
-            // ==========================================================
-            // SCOMPARTIMENTO FISSO IN BASSO (confirmButton)
-            // ==========================================================
-            confirmButton = {
-                // IL CONTENITORE: Impila i bottoni uno sopra l'altro
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    // 1. PRIMO BOTTONE (Azione Secondaria: Email)
-                    // COMPONENTE: OutlinedButton per il contatto
-                    OutlinedButton(
-                        onClick = {
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-
-                            // DEFINIZIONE DELL'INTENT
-                            // Creazione di un'istanza della Classe Intent con azione ACTION_SENDTO.
-                            // La Proprietà data viene impostata tramite Uri.parse per forzare il protocollo mailto.
-                            val emailSubject = context.getString(R.string.oggetto_email_feedback) // Recupera l'oggetto dell'email dalle risorse
-                            val emailIntent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                                data = android.net.Uri.parse("mailto:emailditest100@gmail.com")
-                                putExtra(android.content.Intent.EXTRA_SUBJECT, emailSubject)
-                            }
-
-                            // Metodo della Classe Context: Avvia l'applicazione esterna
-                            try {
-                                context.startActivity(emailIntent)
-                            } catch (e: Exception) {
-                                // Gestione dell'eccezione nel caso non esistano app email installate
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        AutoResizedText(stringResource(R.string.btn_invia_segnalazione), style = MaterialTheme.typography.labelLarge) // Testo pulsante invio feedback
-                    }
-
-                    // DISTANZIATORE: 12 pixel di respiro tra i due bottoni
-                    //Spacer(modifier = Modifier.height(5.dp))
-
-                }
-                // 2. SECONDO BOTTONE (Azione Primaria: Gioca)
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
-                        showAboutDialog = false
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(22.dp),
-
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    AutoResizedText(stringResource(R.string.btn_inizia_a_giocare), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge) // Testo pulsante per iniziare a giocare
-                }
-            }
-        )
+    // --------------------------------------------------------------------
+    // DIALOGO MODALE: MESSAGGIO DEL PROGRAMMATORE (DONAZIONI E SUPPORTO)
+    // --------------------------------------------------------------------
+    if (showDonationDialog) {
+        DonationDialog(onDismiss = { showDonationDialog = false })
     }
 
     // --------------------------------------------------------------------
@@ -435,7 +299,7 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
 
 
-    // ====================================================================
+        // ====================================================================
         // NUOVO DOCK INFERIORE (Ancorato ai bordi dello schermo)
         // ====================================================================
         bottomBar = {
@@ -579,14 +443,31 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // -------------------------------------------------
+                // IL MODIFICATORE WEIGHT E IL CONTROLLO SPAZIALE
+                // -------------------------------------------------
+                // In una 'Row', gli elementi senza 'weight' prendono tutto lo spazio di cui hanno bisogno.
+                // Se il titolo è troppo lungo, rischierebbe di finire "sotto" le icone a destra.
+                //
+                // LA SOLUZIONE:
+                // 1. Modifier.weight(1f): Obbliga il titolo a occupare SOLO lo spazio che avanza
+                //    dopo che le icone a destra si sono posizionate. Crea un confine invalicabile.
+                // 2. padding(end = 16.dp): Garantisce una "zona di rispetto" tra la fine del testo
+                //    e l'inizio della prima icona (il cuore), evitando che si tocchino.
+                // 3. AutoResizedText: Avendo ora un confine preciso (il weight), il componente
+                //    può calcolare quanto deve rimpicciolire il font per far stare tutto in una riga.
+                // ====================================================================
                 AutoResizedText(
-                    text = stringResource(R.string.titolo_storico_sfide), // Titolo principale della schermata Home
+                    text = stringResource(R.string.titolo_storico_sfide),//Titolo principale della schermata Home
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 12.dp)
                 )
 
-                // 🧠 UX: Raggruppiamo i pulsanti in alto a destra in una sotto-riga (Row)
+                // UX: Raggruppiamo i pulsanti in alto a destra in una sotto-riga (Row)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     // Impostati a 20.dp il margine tra i bottoni per dare più "aria" ai tasti.
@@ -594,7 +475,37 @@ fun HomeScreen(
                     // evitando che i bordi delle superfici (CircleShape) risultino troppo vicini.
                     horizontalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    // ---> NUOVO PULSANTE INFO <---
+                    // ==========================================================
+                    // PULSANTE SUPPORTO (CUORE)
+                    // ==========================================================
+                    // Posizionato prima del pulsante "Info" per seguire il naturale
+                    // ordine di lettura (da sinistra verso destra).
+                    IconButton(
+                        onClick = {
+                            // Innesco del feedback aptico per confermare l'input a livello sensoriale
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            // La mutazione di stato provoca l'immediata Ricomposizione (Recomposition) del Layer Modale
+                            showDonationDialog = true
+                        },
+                        modifier = Modifier
+                            .size(36.dp)
+                            // Usiamo 'tertiaryContainer' (che in Material 3 è riservato ad accenti
+                            // emotivi o azioni speciali, spesso sui toni del rosa/verde acqua)
+                            // per staccarlo cromaticamente dai normali bottoni blu (primary) o grigi.
+                            .background(MaterialTheme.colorScheme.tertiaryContainer, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = stringResource(R.string.desc_donazione_icon), // Iniezione I18n per Screen Reader
+                            // text contrast garantito dal motore Material 3 ('onTertiaryContainer')
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // ==========================================================
+                    // ---> PULSANTE INFO <---
+                    // ==========================================================
                     IconButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -613,8 +524,9 @@ fun HomeScreen(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-
-                    // ---> VECCHIO PULSANTE STATISTICHE <---
+                    // ==========================================================
+                    // ---> PULSANTE STATISTICHE <---
+                    // ==========================================================
                     if (viewModel.history.isNotEmpty()) {
                         IconButton(
                             onClick = {

@@ -7,6 +7,16 @@
     <string name="msg_riprendi_partita">You left a match in progress.\nDo you want to pick up where you left off?</string>
     <string name="btn_cancella">Cancel</string>
     <string name="btn_riprendi">Resume</string>
+    <!-- TESTO TRADOTTO PER IL PULSANTE "Donazione" IN HomeScreen-->
+    <string name="desc_donazione_icon">Support the project</string>
+    <string name="titolo_donazione">Support ScoreCounter</string>
+    <string name="msg_donazione_saluto">Hi, I\'m Nicola! 👋</string>
+    <string name="msg_donazione_intro">I\'m a Computer Engineering student. I created this app in my spare time to keep track of scores with my friends in a simple, beautiful, and clean way. It started as a small personal project, but I decided to share it with everyone.</string>
+    <string name="msg_donazione_promessa">This app is and will always remain ad-free!</string>
+    <string name="msg_donazione_scopo">If you\'d like to make a small donation (even just €0.50), you\'ll help me reach the €25 fee to officially publish ScoreCounter on the Play Store and let me know you appreciate my work.</string>
+    <string name="msg_donazione_grazie">Thank you from the bottom of my heart just for giving my app a chance. It means the world to me. ❤️</string>
+    <string name="btn_donazione_chiudi">Thanks!</string>
+    <!-- TESTO TRADOTTO PER IL PULSANTE "Info" IN HomeScreen-->
     <string name="desc_informazioni_app">Whether you\'re playing cards, a board game, or seeing who can eat the most pizza slices, this app is here to keep score and avoid arguments (or maybe encourage them 😉).</string>
     <string name="sottotitolo_cosa_puoi_fare">✨ What you can do:</string>
     <string name="feature_registra_partite">Record matches with points and combos.</string>
