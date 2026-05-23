@@ -41,12 +41,10 @@ import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
-import com.n380.scorecounter.ui.components.ColorPickerRow
 import com.n380.scorecounter.ui.components.CustomSelectableChip
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.playerPalette
 import com.n380.scorecounter.viewmodel.MatchViewModel
-import com.n380.scorecounter.ui.components.CustomSelectableChip
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -64,10 +62,6 @@ fun CreateMatchScreen(
 ) {
     // STATI LOCALI: GESTIONE GIOCATORI MANUALE
     var newPlayerName by remember { mutableStateOf("") }
-
-    // Inizializzazione del selettore cromatico con Color.Unspecified.
-    // Questo valore attiva il disegno del selettore "arcobaleno" per l'assegnazione di un colore casuale.
-    var selectedColor by remember { mutableStateOf(Color.Unspecified) }
 
     // Memorizzazione temporanea del giocatore selezionato per la modifica tramite l'icona matita
     var playerToEdit by remember { mutableStateOf<Player?>(null) }
@@ -403,7 +397,7 @@ fun CreateMatchScreen(
                                             // Valutazione dello stato derivato:
                                             // Verifichiamo se il titolo di questo specifico elemento dell'elenco (recentTitle)
                                             // coincide con la stringa attualmente registrata nel ViewModel (matchTitle).
-                                            // Questo parametro booleano guiderà il rendering del componente (stile pieno vs stile vuoto).
+                                            // Questo parametro booleano guiderà le decisioni grafiche.
                                             val isSelected = viewModel.matchTitle == recentTitle
 
                                             // Richiamo del componente UI custom centralizzato.
@@ -425,8 +419,6 @@ fun CreateMatchScreen(
                                                     // Il click altera direttamente la "Single Source of Truth" (il ViewModel).
                                                     // Se l'elemento cliccato era già quello attivo, si svuota il campo (deselezione).
                                                     // Altrimenti, viene sovrascritto col nuovo valore.
-                                                    // Qualsiasi mutazione di viewModel.matchTitle provocherà l'immediata
-                                                    // Ricomposizione (Recomposition) di tutti i nodi UI che la osservano.
                                                     if (isSelected) {
                                                         viewModel.matchTitle = ""
                                                     } else {
@@ -558,19 +550,15 @@ fun CreateMatchScreen(
                                             onClick = {
                                                 // Logica di interruttore (toggle) per l'aggiunta o la rimozione del giocatore.
                                                 if (!isAlreadyAtTable) {
-                                                    // Assegnazione automatica del colore se non selezionato manualmente.
-                                                    val finalColor = if (selectedColor == Color.Unspecified) {
-                                                        // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
-                                                        val usedColors = viewModel.players.map { it.color }
-                                                        // 2. Filtraggio della palette master: si tengono solo i colori NON presenti in usedColors.
-                                                        val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
-                                                        // 3. Fallback: se ci sono colori intonsi se ne pesca uno, altrimenti
-                                                        // la palette è esaurita e si pesca randomicamente accettando il duplicato visivo.
-                                                        if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-                                                    } else {
-                                                        // Bypass dell'algoritmo se l'utente ha esplicitamente selezionato un colore dal ColorPicker.
-                                                        selectedColor
-                                                    }
+                                                    // Assegnazione automatica del colore.
+                                                    // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
+                                                    val usedColors = viewModel.players.map { it.color }
+                                                    // 2. Filtraggio della palette master: si tengono solo i colori NON presenti in usedColors.
+                                                    val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+                                                    // 3. Fallback: se ci sono colori intonsi se ne pesca uno, altrimenti
+                                                    // la palette è esaurita e si pesca randomicamente accettando il duplicato visivo.
+                                                    val finalColor = if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+                                                    
                                                     // Passaggio della richiesta di istanziazione al ViewModel.
                                                     viewModel.addPlayer(fav, finalColor.toArgb())
                                                 } else {
@@ -612,23 +600,7 @@ fun CreateMatchScreen(
                             )
                             Spacer(modifier = Modifier.height(7.dp))
 
-                            // SEZIONE AGGIUNTA MANUALE E COLORE
-                            Text(
-                                stringResource(R.string.label_scegli_colore),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            ) // Traduzione istruzione colore
-
-                            ColorPickerRow(
-                                selectedColor = selectedColor,
-                                onColorSelected = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    selectedColor = it
-                                },
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
+                            // SEZIONE AGGIUNTA MANUALE
                             Text(
                                 stringResource(R.string.label_aggiungi_manualmente),
                                 style = MaterialTheme.typography.labelLarge,
@@ -677,15 +649,13 @@ fun CreateMatchScreen(
                                 Button(
                                     onClick = {
                                         if (isAddPlayerEnabled) {
-                                            val finalColor =
-                                                if (selectedColor == Color.Unspecified) {
-                                                    playerPalette.random()
-                                                } else {
-                                                    selectedColor
-                                                }
+                                            // Assegnazione automatica del colore per l'aggiunta manuale.
+                                            val usedColors = viewModel.players.map { it.color }
+                                            val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+                                            val finalColor = if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+                                            
                                             viewModel.addPlayer(newPlayerName, finalColor.toArgb())
                                             newPlayerName = ""
-                                            selectedColor = Color.Unspecified
                                         }
                                     },
                                     modifier = Modifier.height(63.dp),

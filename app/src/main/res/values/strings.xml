@@ -119,7 +119,7 @@
 
     <!-- TESTO TRADOTTO PER IL FILE CounterScreen-->
     <string name="btn_azzera">Reset</string>
-    <string name="btn_fine_match">End Match</string>
+    <string name="btn_fine_match">End Game</string>
     <string name="titolo_sfida_default">Challenge</string>
     <string name="desc_info_icon">Info</string>
     <string name="btn_timer">Timer</string>
