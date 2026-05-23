@@ -51,7 +51,8 @@
         onRemove: () -> Unit,
         //onColorChange: (Int) -> Unit
     ) {
-        var haptic = LocalHapticFeedback.current //QUESTA VARIABILE DA PROBLEMI, LO DEVO RISOLVERE ALTRIMENTI MI RITROIVO DELLE VIBRAZIONI DOPPIE
+        var haptic =
+            LocalHapticFeedback.current //QUESTA VARIABILE DA PROBLEMI, LO DEVO RISOLVERE ALTRIMENTI MI RITROIVO DELLE VIBRAZIONI DOPPIE
         var showColorPalette by remember { mutableStateOf(false) }
 
         // Trasforma il colore salvato (Int) in un colore grafico (Color)
@@ -61,7 +62,7 @@
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-                 /*combinedClickable gestisce il tocco lungo sulla card per aprire la tavolozza dei colori
+            /*combinedClickable gestisce il tocco lungo sulla card per aprire la tavolozza dei colori
                 .combinedClickable(
                     onClick = {
                         showColorPalette = true
@@ -103,13 +104,29 @@
                 ) {
                     // 1. FRECCE SU/GIU
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        IconButton(onClick = onMoveUp, enabled = !isFirst, modifier = Modifier.size(28.dp)) {
+                        IconButton(
+                            onClick = onMoveUp,
+                            enabled = !isFirst,
+                            modifier = Modifier.size(28.dp)
+                        ) {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                            Icon(
+                                Icons.Filled.KeyboardArrowUp,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
-                        IconButton(onClick = onMoveDown, enabled = !isLast, modifier = Modifier.size(28.dp)) {
+                        IconButton(
+                            onClick = onMoveDown,
+                            enabled = !isLast,
+                            modifier = Modifier.size(28.dp)
+                        ) {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                            Icon(
+                                Icons.Filled.KeyboardArrowDown,
+                                null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
 
@@ -118,26 +135,89 @@
                         text = player.name,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface, // Testo dello stesso colore della barra laterale!
-                        //maxLines = 1,
-                        //overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f).padding(start = 8.dp)
+                        color = MaterialTheme.colorScheme.onSurface,
+                        // ---> MODIFICA 1: Aggiunto 'end = 12.dp' per distanziare il nome dai pulsanti
+                        modifier = Modifier.weight(1f).padding(start = 8.dp, end = 12.dp)
                     )
 
-                    // 3. TASTO MODIFICA (Matita)
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onEdit()
-                    }) {
-                        Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    // ---> MODIFICA 2: Raggruppiamo i 3 pulsanti in una 'Row' dedicata per spaziature uniformi
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        // ==========================================================
+                        // 🧠 FIX UI/UX: LA "PILLOLA" (Minimalismo ed Eleganza)
+                        // ==========================================================
+                        modifier = Modifier
+                            .background(
+                                // Usiamo SOLO l'onSurface, abbassato a un leggerissimo 4% (0.04f).
+                                // Crea un "velo" di raggruppamento quasi invisibile che non sporca i colori.
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            // Bordino da 1.dp <---
+                            // Usiamo lo stesso colore del testo (onSurface) ma al 12% di opacità.
+                            // La forma DEVE corrispondere alla curvatura dello sfondo (12.dp).
+                            .border(
+                                width = 1.dp,
+                                //color = Color.Transparent.copy(alpha = 0.12f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f),
+                                shape = RoundedCornerShape(12.dp)
+                            )
 
-                    // 4. TASTO ELIMINA (Cestino)
-                    IconButton(onClick = {
-                        //haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onRemove()
-                    }) {
-                        Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error)
+                            // Aumentato l'horizontal padding a 8.dp per far respirare le icone ai bordi
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        // ==========================================================
+                        // 3. PALLINO COLORE INTERATTIVO
+                        // ==========================================================
+                        Surface(
+                            modifier = Modifier
+                                // ---> FIX: Fissiamo il contenitore invisibile cliccabile a 36.dp
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    onEdit()
+                                },
+                            color = Color.Transparent
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier
+                                        // Dimensione visiva bilanciata (20.dp contro i 22.dp delle icone)
+                                        .size(18.dp)
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(playerColor)
+                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                                )
+                            }
+                        }
+
+                        // 4. TASTO MODIFICA (Matita)
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                onEdit()
+                            },
+                            // ---> FIX: Schiacciamo l'ingombro del bottone a 36.dp per annullare il padding gigante di Android
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            // Riduciamo la matita di 2dp per un look più moderno e coerente con il pallino
+                            Icon(Icons.Filled.Edit, "Modifica", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+                        }
+
+                        // 5. TASTO ELIMINA (Cestino)
+                        IconButton(
+                            onClick = {
+                                //haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onRemove()
+                            },
+                            // ---> FIX: Stesso ingombro compatto a 36.dp
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            // Stessa dimensione (22.dp) per coerenza geometrica
+                            Icon(Icons.Filled.Delete, "Elimina", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(22.dp))
+                        }
                     }
                 }
             }

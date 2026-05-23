@@ -898,6 +898,7 @@ fun CreateMatchScreen(
                             if (editedName.isNotBlank()) {
                                 playerToEdit!!.name = editedName
                                 viewModel.updatePlayerColor(playerToEdit!!, editedColor)
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 playerToEdit = null
                             }
                         },
