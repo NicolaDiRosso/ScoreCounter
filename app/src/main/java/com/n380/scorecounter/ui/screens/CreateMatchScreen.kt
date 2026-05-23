@@ -107,8 +107,29 @@ fun CreateMatchScreen(
     val sheetSnackbarHostState = remember { SnackbarHostState() }
 
     val coroutineScope = rememberCoroutineScope()
+
     val keyboardController = LocalSoftwareKeyboardController.current // Controller per la gestione programmatica della tastiera
     val focusManager = LocalFocusManager.current // Gestore del focus per la rimozione del cursore attivo dalle aree di testo
+    // ==========================================================
+    // 🧠 FIX UX: GESTIONE DELLO SCORRIMENTO E ANIMAZIONE
+    // ==========================================================
+    // 1. Estraiamo lo stato dello scorrimento per poterlo comandare
+    val scrollState = rememberScrollState()
+
+    // 2. LaunchedEffect osserva la grandezza della lista giocatori.
+    // Ogni volta che il numero cambia, esegue il codice all'interno.
+    LaunchedEffect(viewModel.players.size) {
+        // Se il tavolo è passato esattamente a 1 giocatore (il primo aggiunto)
+        if (viewModel.players.size == 1) {
+            // Aspettiamo 200 millisecondi: questo è FONDAMENTALE.
+            // Dà il tempo a Compose di renderizzare graficamente la Sezione 3 e
+            // calcolare quanto si è allungata la pagina, prima di iniziare a scorrere.
+            delay(100)
+
+            // Animazione fluida verso il fondo assoluto della pagina (maxValue)
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
 
     // ====================================================================
     // ESTRAZIONE STRINGHE DI ERRORE PRE-ONCLICK (Regola Composable Context)
@@ -264,10 +285,12 @@ fun CreateMatchScreen(
                         // Invece di usare una LazyColumn, usiamo verticalScroll su una Column.
                         // Questo è perfetto per moduli di inserimento dati (come questo) dove gli
                         // elementi sono pochi e non c'è bisogno di riciclarli dinamicamente in memoria.
-                        .verticalScroll(rememberScrollState())
-                        .padding(12.dp), // Padding interno per distaccare le scritte dai bordi della Card
 
-                    // Distanzia automaticamente le 3 sezioni in modo uniforme!
+                        // ---> MODIFICA QUI: Colleghiamo lo stato estratto in cima! <---
+                        .verticalScroll(scrollState)
+
+                        .padding(12.dp), // Padding interno per distaccare le scritte dai bordi della Card
+                    // Distanzia automaticamente le 3 sezioni in modo uniforme di 10.dp
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
 
