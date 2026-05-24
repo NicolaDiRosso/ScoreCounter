@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource // Import per abilitare la lettura dal file strings.xml
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.R // Import per accedere agli ID univoci (es. R.string...)
 
