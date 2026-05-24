@@ -71,7 +71,7 @@
     <string name="titolo_nuova_sfida">New Challenge</string>
     <string name="titolo_regole_gioco">Game Rules</string>
     <string name="desc_dado_icon">Dice</string>
-    <string name="label_dado">Dice (D%d)</string>
+    <string name="label_dado">Dice</string>
     <string name="hint_nome_sfida">Challenge name</string>
     <string name="err_nome_sfida_obbligatorio">Challenge name is required</string>
     <string name="label_titoli_recenti">Recent titles:</string>

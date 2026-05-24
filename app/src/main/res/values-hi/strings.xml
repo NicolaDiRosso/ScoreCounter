@@ -109,7 +109,7 @@
     <string name="hint_es_facce_dado">उदा. 380</string>
     <string name="hint_n_facce">चेहरों की संख्या</string>
     <string name="btn_applica">लागू करें</string>
-    <string name="titolo_lancio_dado">पासा फेंका (D%d)</string>
+    <string name="titolo_lancio_dado">पासा फेंका</string>
     <string name="btn_rilancia">फिर से फेंकें</string>
 
     <string name="btn_azzera">रीसेट</string>

@@ -109,7 +109,7 @@
     <string name="hint_es_facce_dado">Ex. 380</string>
     <string name="hint_n_facce">N° de faces</string>
     <string name="btn_applica">Appliquer</string>
-    <string name="titolo_lancio_dado">Lancer de dé (D%d)</string>
+    <string name="titolo_lancio_dado">Lancer de dé</string>
     <string name="btn_rilancia">Relancer</string>
 
     <string name="btn_azzera">Réinitialiser</string>

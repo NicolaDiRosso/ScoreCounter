@@ -116,7 +116,7 @@
     <string name="hint_es_facce_dado">Es. 380</string>
     <string name="hint_n_facce">N° Facce</string>
     <string name="btn_applica">Applica</string>
-    <string name="titolo_lancio_dado">Lancio del dado (D%d)</string>
+    <string name="titolo_lancio_dado">Lancio del dado</string>
     <string name="btn_rilancia">Rilancia</string>
 
     <!-- TESTO PER IL  FILE CounterScreen-->

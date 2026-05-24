@@ -109,7 +109,7 @@
     <string name="hint_es_facce_dado">Bsp. 380</string>
     <string name="hint_n_facce">Anzahl der Seiten</string>
     <string name="btn_applica">Anwenden</string>
-    <string name="titolo_lancio_dado">Würfelwurf (D%d)</string>
+    <string name="titolo_lancio_dado">Würfelwurf</string>
     <string name="btn_rilancia">Nochmal würfeln</string>
 
     <string name="btn_azzera">Zurücksetzen</string>

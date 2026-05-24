@@ -75,6 +75,9 @@
         // ---> STATI PER IL PULSANTE TIMER VIRTUALE <---
         var showTimerDialog by remember { mutableStateOf(false) }
 
+        // Stato per mostrare il popup delle impostazioni del dado
+        var showDiceSettingsDialog by rememberSaveable { mutableStateOf(false) }
+
         var diceResult by remember { mutableIntStateOf(1) }
         // Contatore univoco per forzare l'aggiornamento dell'interfaccia ad ogni click
         var diceRollCount by remember { mutableIntStateOf(0) }
@@ -885,18 +888,41 @@
             )
         }
 
-        // ---> POPUP DEL DADO VIRTUALE (Esternalizzato in DiceComponents.kt) <---
+        // ====================================================================
+        // POPUP IMPOSTAZIONI DADO
+        // ====================================================================
+        if (showDiceSettingsDialog) {
+            DiceSettingsDialog(
+                currentSides = viewModel.diceSides,
+                onSidesChanged = { newSides -> viewModel.diceSides = newSides },
+                onDismiss = {
+                    showDiceSettingsDialog = false
+                    // Quando chiudo le impostazioni, riapro automaticamente il dado per lanciare!
+                    showDiceDialog = true
+                }
+            )
+        }
+
+        // ---> POPUP DEL DADO E SUE IMPOSTAZIONI <---
         if (showDiceDialog) {
             DiceRollDialog(
+                // Parametri obbligatori per l'animazione e il calcolo del numero
                 result = diceResult,
+                rollCount = diceRollCount,
                 diceSides = viewModel.diceSides,
-                rollCount = diceRollCount, // <-- Passiamo il nuovo parametro
+
+                // Logica del rilancio
                 onRollAgain = {
-                    // Genera un nuovo numero casuale e lo salva
                     diceResult = (1..viewModel.diceSides).random()
-                    diceRollCount++ // <-- Incrementiamo ad ogni nuovo lancio
+                    diceRollCount++
                 },
-                onDismiss = { showDiceDialog = false }
+                onDismiss = { showDiceDialog = false },
+
+                // Logica per aprire le impostazioni
+                onOpenSettings = {
+                    showDiceDialog = false
+                    showDiceSettingsDialog = true
+                }
             )
         }
 

@@ -83,10 +83,6 @@ fun CreateMatchScreen(
     // Variabile di Stato Booleana: funge da lucchetto per prevenire le Condizioni di Corsa (Race Conditions).
     var isNavigating by remember { mutableStateOf(false) }
 
-    // STATI: CONFIGURAZIONE DADO
-    var showDiceSettingsDialog by remember { mutableStateOf(false) }
-
-
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -324,56 +320,6 @@ fun CreateMatchScreen(
                                         color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
-
-                                // SPAZIATORE DI SICUREZZA:
-                                // Aggiungiamo un gap fisso di 10.dp.
-                                // se il titolo dovesse diventare troppo lungo (es. su schermi piccoli),
-                                // l'AutoResizedText inizierà a rimpicciolirsi PRIMA di toccare il bottone del dado,
-                                // garantendo che ci sia sempre questo spazio minimo tra i due.
-                                Spacer(modifier = Modifier.width(10.dp))
-
-                                // ====================================================================
-                                // PULSANTE IMPOSTAZIONI DADO (Coerenza con "Gestisci")
-                                // ====================================================================
-                                // Usiamo la stessa estetica "Tonal" che sarà anche nel pulsante "Gestisci" per
-                                // mantenere la consistenza visiva delle azioni ausiliarie.
-                                Surface(
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        showDiceSettingsDialog = true
-                                    },
-                                    shape = RoundedCornerShape(12.dp), // Stessa stondatura del pulsante Gestisci
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), // Stesso sfondo delicato
-                                    border = BorderStroke(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                                    ) // Stesso bordino
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp), // Spazio vitale tra la scritta e l'ingranaggio
-                                        // PADDING (IL SEGRETO): Non usiamo size fisse! Diamo 12dp di spazio ai lati e 6dp sopra/sotto.
-                                        // Così il pulsante si adatterà da solo come un "vestito su misura".
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Filled.Casino,
-                                            contentDescription = stringResource(R.string.desc_dado_icon),
-                                            tint = MaterialTheme.colorScheme.primary, // Stesso colore pieno
-                                            modifier = Modifier.size(16.dp) // Stessa dimensione dell'icona (16dp)
-                                        )
-                                        AutoResizedText(
-                                            text = stringResource(
-                                                R.string.label_dado,
-                                                viewModel.diceSides
-                                            ),
-                                            // Stessa gerarchia visiva (labelMedium)
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary // Stesso colore del testo
-                                        )
-                                    }
-                                }
                             }
 
                             // INPUT: TITOLO SFIDA
@@ -579,7 +525,7 @@ fun CreateMatchScreen(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp), // Spazio vitale tra la scritta e l'ingranaggio
                                         // PADDING (IL SEGRETO): Non usiamo size fisse! Diamo 12dp di spazio ai lati e 6dp sopra/sotto.
                                         // Così il pulsante si adatterà da solo come un "vestito su misura".
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
                                     ) {
                                         // L'icona
                                         Icon(
@@ -1413,15 +1359,6 @@ fun CreateMatchScreen(
                 }
             },
             dismissButton = null
-        )
-    }
-
-    // DIALOG: IMPOSTAZIONI DADO
-    if (showDiceSettingsDialog) {
-        DiceSettingsDialog(
-            currentSides = viewModel.diceSides,
-            onSidesChanged = { newSides -> viewModel.diceSides = newSides },
-            onDismiss = { showDiceSettingsDialog = false }
         )
     }
 }

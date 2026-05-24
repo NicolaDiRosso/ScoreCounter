@@ -109,7 +109,7 @@
     <string name="hint_es_facce_dado">例：380</string>
     <string name="hint_n_facce">面の数</string>
     <string name="btn_applica">適用</string>
-    <string name="titolo_lancio_dado">ダイスロール (D%d)</string>
+    <string name="titolo_lancio_dado">ダイスロール</string>
     <string name="btn_rilancia">もう一度振る</string>
 
     <string name="btn_azzera">リセット</string>

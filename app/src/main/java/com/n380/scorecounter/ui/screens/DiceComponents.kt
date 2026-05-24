@@ -26,6 +26,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import com.n380.scorecounter.ui.components.AutoResizedText
 
 /**
@@ -230,34 +232,90 @@ fun DiceRollDialog(
     // Se l'utente lancia il dado e ottiene 4, e poi rilancia ottenendo ancora 4,
     // Compose ignorerebbe il cambiamento perché "result" è identico.
     // Incrementando 'rollCount' a ogni click dal padre, cambiamo le carte in tavola
-    // e costringiamo Compose a ri-eseguire l'animazione per forza!
+    // e costringiamo Compose a ri-eseguire'animazione per forza!
     rollCount: Int, // Indice univoco del lancio per forzare la reattività di Compose
 
     onRollAgain: () -> Unit, // Callback per urlare al padre: "L'utente rivuole lanciare!"
-    onDismiss: () -> Unit    // Callback per urlare al padre: "Nascondi questa finestra!"
+    onDismiss: () -> Unit,    // Callback per urlare al padre: "Nascondi questa finestra!"
+    onOpenSettings: () -> Unit  // Chiamata callback per aprire le impostazioni
 ) {
     val haptic = LocalHapticFeedback.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            // 🧠 LEZIONE I18N: Segnaposto (Placeholder) Avanzato
-            // Anche qui utilizziamo un parametro aggiuntivo (diceSides).
-            // Nel file strings.xml abbiamo: <string name="titolo_lancio_dado">Lancio del dado (D%d)</string>
-            // La funzione stringResource rimpiazzerà il '%d' con il numero contenuto in 'diceSides'.
-            Text(
-                text = stringResource(R.string.titolo_lancio_dado, diceSides),
+            // ====================================================================
+            // 🧠 FIX UX/UI: INTESTAZIONE PULITA CON "TONAL ICON" (Bordo e Sfondo)
+            // ====================================================================
+            // Usiamo una Row. Il titolo prende lo spazio a sinistra, l'ingranaggio
+            // "nudo" (senza la pillola e la scritta "Gestisci") si posiziona a destra
+            // senza rubare la scena al contenuto principale del Dialog.
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
+                // Aggiungiamo un gap fisso di 10.dp.
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // IL TITOLO DEL DIALOG DEL DADO
+                AutoResizedText(
+                    text = stringResource(R.string.titolo_lancio_dado),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    // Il weight(1f) dice al titolo: "Prenditi tutto lo spazio a sinistra
+                    // spingendo il bottone a destra. Se non c'è spazio, rimpicciolisciti tu!"
+                    modifier = Modifier.weight(1f)
+                )
+
+                // ====================================================================
+                // L'INGRANAGGIO STILIZZATO (Surface, Bordo e Sfondo - No Testo)
+                // ====================================================================
+                Surface(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onOpenSettings()
+                    },
+                    // Stessa geometria e colori dell'icona del file CreateMatchScreen
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                ) {
+                    // Usiamo una Row per affiancare il testo (es. "D6") all'icona
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), // Padding proporzionato
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        // ICONA IMPOSTAZIONI
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            // Label accessibilità mantenuta
+                            contentDescription = stringResource(R.string.desc_gestisci_rapidi_icon),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp) // Icona ben visibile
+                        )
+                        // INDICATORE DEL FORMATO ATTUALE (es. "D20")
+                        AutoResizedText(
+                            text = "D$diceSides", // Costruiamo dinamicamente la scritta "D" + numero
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            // ====================================================================
+                            // PREVENZIONE CRASH VISIVO (Edge Case Management)
+                            // ====================================================================
+                            // Limitiamo la larghezza massima a 60.dp (sufficiente per numeri come D9999).
+                            // Se l'utente inserisce un numero spropositato, interviene maxLines ed ellipsis
+                            // troncando il testo (es. "D999..."), salvando così il titolo principale.
+                            modifier = Modifier.widthIn(max = 50.dp),
+                        )
+                    }
+                }
+            }
         },
         text = {
             // Row per mantenere l'emoji ferma e animare solo il numero al suo fianco
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -315,10 +373,13 @@ fun DiceRollDialog(
             }
         },
         confirmButton = {
+            // ====================================================================
+            // 🧠 FIX UX/UI: BOTTONI PIÙ GRANDI (55.dp) MA STESSA FORMA (20.dp)
+            // ====================================================================
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
-                    modifier = Modifier.weight(1f).height(55.dp),
-                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier.weight(1f).height(55.dp), // Altezza riportata a 55dp (come richiesto)
+                    shape = RoundedCornerShape(20.dp), // Angoli mantenuti a 20dp (Coerenza geometrica)
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onDismiss()
@@ -329,8 +390,13 @@ fun DiceRollDialog(
                 }
 
                 Button(
-                    modifier = Modifier.weight(1f).height(55.dp),
-                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier.weight(1f).height(55.dp), // Altezza riportata a 55dp (come richiesto)
+                    shape = RoundedCornerShape(20.dp), // Angoli mantenuti a 20dp (Coerenza geometrica)
+                    colors = ButtonDefaults.buttonColors(
+                        // Sfondo acceso (primaryContainer) per l'azione principale
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onRollAgain()

@@ -109,7 +109,7 @@
     <string name="hint_es_facce_dado">Ej. 380</string>
     <string name="hint_n_facce">Nº de Caras</string>
     <string name="btn_applica">Aplicar</string>
-    <string name="titolo_lancio_dado">Lanzamiento de dado (D%d)</string>
+    <string name="titolo_lancio_dado">Lanzamiento de dado</string>
     <string name="btn_rilancia">Lanzar de nuevo</string>
 
     <string name="btn_azzera">Restablecer</string>
