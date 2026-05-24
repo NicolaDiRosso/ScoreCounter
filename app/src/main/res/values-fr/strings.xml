@@ -174,7 +174,7 @@
 
     <string name="label_punti_positivi">+%d pt</string>
     <string name="label_punti_negativi">-%d pt</string>
-    <string name="label_combo">%d Combo</string>
+    <string name="label_combo">x%d</string>
 
     <string name="titolo_analisi_partita">Analyse du Match</string>
     <string name="label_vinta_da_con_punti">🏆 Gagné par %1$s avec %2$d pt</string>

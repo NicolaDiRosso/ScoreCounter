@@ -71,7 +71,7 @@
     <string name="titolo_nuova_sfida">New Challenge</string>
     <string name="titolo_regole_gioco">Game Rules</string>
     <string name="desc_dado_icon">Dice</string>
-    <string name="label_dado">Dice</string>
+    <string name="label_dado">Dice (D%d)</string>
     <string name="hint_nome_sfida">Challenge name</string>
     <string name="err_nome_sfida_obbligatorio">Challenge name is required</string>
     <string name="label_titoli_recenti">Recent titles:</string>
@@ -115,7 +115,7 @@
     <string name="hint_es_facce_dado">Ex. 380</string>
     <string name="hint_n_facce">N° of Faces</string>
     <string name="btn_applica">Apply</string>
-    <string name="titolo_lancio_dado">Dice roll (D%d)</string>
+    <string name="titolo_lancio_dado">Dice roll</string>
     <string name="btn_rilancia">Roll Again</string>
 
     <!-- TESTO TRADOTTO PER IL FILE CounterScreen-->
@@ -183,7 +183,7 @@
 
     <string name="label_punti_positivi">+%d pt</string>
     <string name="label_punti_negativi">-%d pt</string>
-    <string name="label_combo">%d Combo</string>
+    <string name="label_combo">x%d</string>
 
     <!-- TESTO TRADOTTO PER IL FILE MatchAnalysisOverlay-->
     <string name="titolo_analisi_partita">Match Analysis</string>

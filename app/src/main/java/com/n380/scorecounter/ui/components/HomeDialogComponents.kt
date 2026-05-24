@@ -174,7 +174,10 @@
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        AutoResizedText(stringResource(R.string.btn_invia_segnalazione), style = MaterialTheme.typography.labelLarge) // Testo pulsante invio feedback
+                        AutoResizedText(stringResource(
+                            R.string.btn_invia_segnalazione),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
                     }
 
                     // 2. SECONDO BOTTONE (Azione Primaria: Gioca)

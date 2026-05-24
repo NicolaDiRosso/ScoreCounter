@@ -174,7 +174,7 @@
 
     <string name="label_punti_positivi">+%d pt</string>
     <string name="label_punti_negativi">-%d pt</string>
-    <string name="label_combo">%d コンボ</string>
+    <string name="label_combo">x%d</string>
 
     <string name="titolo_analisi_partita">試合分析</string>
     <string name="label_vinta_da_con_punti">🏆 %1$s が %2$d pt で勝利</string>

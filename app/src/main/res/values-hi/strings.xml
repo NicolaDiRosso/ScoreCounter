@@ -174,7 +174,7 @@
 
     <string name="label_punti_positivi">+%d अंक</string>
     <string name="label_punti_negativi">-%d अंक</string>
-    <string name="label_combo">%d कॉम्बो</string>
+    <string name="label_combo">x%d</string>
 
     <string name="titolo_analisi_partita">मैच विश्लेषण</string>
     <string name="label_vinta_da_con_punti">🏆 %1$s ने %2$d अंकों के साथ जीता</string>

@@ -184,7 +184,7 @@
 
     <string name="label_punti_positivi">+%d pt</string>
     <string name="label_punti_negativi">-%d pt</string>
-    <string name="label_combo">%d Combo</string>
+    <string name="label_combo">x%d</string>
 
     <!-- TESTO PER IL  FILE MatchAnalysisOverlay-->
     <string name="titolo_analisi_partita">Analisi Partita</string>

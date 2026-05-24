@@ -102,11 +102,14 @@ fun DiceSettingsDialog(
                             rowItems.forEach { sides ->
                                 val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
                                 Card(
-                                    modifier = Modifier.weight(1f).height(60.dp).clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        pendingDiceSides = sides
-                                        customDiceInput = ""
-                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(60.dp)
+                                        .clickable {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            pendingDiceSides = sides
+                                            customDiceInput = ""
+                                        },
                                     colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
                                     shape = RoundedCornerShape(12.dp),
                                     // 🎨 UI DESIGN: Aggiungiamo un bordo per definire meglio la forma delle card.
@@ -130,10 +133,11 @@ fun DiceSettingsDialog(
                                         // la funzione inietterà automaticamente il valore esattamente al posto del '%d',
                                         // rispettando magicamente la sintassi e l'ordine della lingua in uso!
                                         // ==========================================================
-                                        Text(
+                                        AutoResizedText(
                                             stringResource(R.string.label_dado, sides),
                                             fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                                         )
                                     }
                                 }
@@ -179,7 +183,9 @@ fun DiceSettingsDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedButton(
-                    modifier = Modifier.weight(1f).height(48.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -195,7 +201,9 @@ fun DiceSettingsDialog(
                 }
 
                 Button(
-                    modifier = Modifier.weight(1f).height(48.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -315,7 +323,9 @@ fun DiceRollDialog(
         text = {
             // Row per mantenere l'emoji ferma e animare solo il numero al suo fianco
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 1.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -378,7 +388,9 @@ fun DiceRollDialog(
             // ====================================================================
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
-                    modifier = Modifier.weight(1f).height(55.dp), // Altezza riportata a 55dp (come richiesto)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(55.dp), // Altezza riportata a 55dp (come richiesto)
                     shape = RoundedCornerShape(20.dp), // Angoli mantenuti a 20dp (Coerenza geometrica)
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -390,7 +402,9 @@ fun DiceRollDialog(
                 }
 
                 Button(
-                    modifier = Modifier.weight(1f).height(55.dp), // Altezza riportata a 55dp (come richiesto)
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(55.dp), // Altezza riportata a 55dp (come richiesto)
                     shape = RoundedCornerShape(20.dp), // Angoli mantenuti a 20dp (Coerenza geometrica)
                     colors = ButtonDefaults.buttonColors(
                         // Sfondo acceso (primaryContainer) per l'azione principale
