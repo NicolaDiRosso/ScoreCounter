@@ -35,6 +35,7 @@
     import androidx.compose.ui.graphics.StrokeCap
     import androidx.compose.ui.graphics.StrokeJoin
     import androidx.compose.ui.graphics.drawscope.Stroke
+    import androidx.compose.ui.unit.Dp
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
     import androidx.compose.ui.res.stringResource
@@ -127,6 +128,48 @@
             }
         }
     }
+
+    // ====================================================================
+// 🧠 COMPONENTE WRAPPER: SFUMATURA LATERALE (Faded Right Edge)
+// ====================================================================
+// Questo componente agisce come una "cornice magica". Applica il principio DRY (Don't Repeat Yourself).
+// Qualsiasi cosa tu ci metta dentro (il parametro 'content'), riceverà automaticamente
+// un elegante effetto sfumato sul bordo destro, prevenendo il problema del "Falso Fondo" nelle liste scorrevoli.
+    @Composable
+    fun FadedRightEdgeWrapper(
+        modifier: Modifier = Modifier,
+        fadeWidth: Dp = 40.dp, // Larghezza predefinita del velo sfumato
+        fadeColor: Color = MaterialTheme.colorScheme.surface, // Il colore verso cui sfumare
+        content: @Composable () -> Unit // Questo è lo "Slot API": il buco dove infileremo le nostre LazyRow
+    ) {
+        // 1. Il Box principale che tiene insieme tutto
+        Box(modifier = modifier) {
+
+            // 2. Disegniamo prima il contenuto passato da chi usa la funzione (es. la lista dei titoli)
+            content()
+
+            // 3. Disegniamo sopra al contenuto il velo sfumato
+            Box(
+                modifier = Modifier.matchParentSize() // Si adatta alle esatte dimensioni del contenuto
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .width(fadeWidth)
+                        .fillMaxHeight() // Copre tutta l'altezza del contenitore
+                        .align(Alignment.CenterEnd) // Lo blocchiamo a destra
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent, // Parte trasparente che mostra gli elementi sotto
+                                    fadeColor // Colore solido che copre l'ultimo pezzetto
+                                )
+                            )
+                        )
+                )
+            }
+        }
+    }
+
 
     // ====================================================================
     // IL MOTORE DEL GRAFICO A LINEE (ScoreChart / Game Stats)

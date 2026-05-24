@@ -29,6 +29,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Conversione cromatica per persistenza dati
+import androidx.compose.ui.graphics.Brush //sfumatura per caselle che scorrono in orizzontale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -43,6 +44,7 @@ import com.n380.scorecounter.R // Import del file R (Resources) per accedere all
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.CustomSelectableChip
+import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.playerPalette
 import com.n380.scorecounter.viewmodel.MatchViewModel
@@ -366,52 +368,63 @@ fun CreateMatchScreen(
                                         color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(bottom = 6.dp, start = 4.dp)
                                     )
-                                    LazyRow(
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        // Cicliamo i titoli salvati nel ViewModel per permettere una selezione immediata da parte dell'utente.
-                                        items(viewModel.matchTitleHistory) { recentTitle ->
-                                            // Valutazione dello stato derivato:
-                                            // Verifichiamo se il titolo di questo specifico elemento dell'elenco (recentTitle)
-                                            // coincide con la stringa attualmente registrata nel ViewModel (matchTitle).
-                                            // Questo parametro booleano guiderà le decisioni grafiche.
-                                            val isSelected = viewModel.matchTitle == recentTitle
+                                    // ====================================================================
+                                    // FADE OUT GRADIENT (Segnale visivo di scorrimento)
+                                    // ====================================================================
+                                    // Utilizziamo il nostro "Wrapper" personalizzato per aggiungere l'ombra
+                                    // in modo pulito con una sola riga di codice.
+                                    FadedRightEdgeWrapper(modifier = Modifier.fillMaxWidth()){
 
-                                            // Richiamo del componente UI custom centralizzato.
-                                            // L'astrazione grafica (colori, bordi, padding) è gestita internamente in SharedUtils.kt,
-                                            // qui passiamo esclusivamente i dati e i comportamenti di business logic (Principio DRY).
-                                            CustomSelectableChip(
-                                                text = recentTitle,
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    // Gestione dinamica del feedback tattile (Micro-interazione):
-                                                    // - LongPress (vibrazione lunga) se l'utente sta deselezionando un elemento già attivo.
-                                                    // - Confirm (vibrazione breve) se l'utente sta effettuando una nuova selezione.
-                                                    haptic.performHapticFeedback(
-                                                        if (isSelected) HapticFeedbackType.LongPress
-                                                        else HapticFeedbackType.Confirm
-                                                    )
+                                        // LIVELLO INFERIORE: La lista scorrevole
+                                        LazyRow(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            // PADDING FONDAMENTALE: Diamo 40.dp di spazio extra alla fine della corsa,
+                                            // così l'ultimo elemento può essere tirato fuori dall'ombra.
+                                            contentPadding = PaddingValues(end = 35.dp)
+                                        ) {
+                                            // Cicliamo i titoli salvati nel ViewModel per permettere una selezione immediata da parte dell'utente.
+                                            items(viewModel.matchTitleHistory) { recentTitle ->
+                                                // Valutazione dello stato derivato:
+                                                // Verifichiamo se il titolo di questo specifico elemento dell'elenco (recentTitle)
+                                                // coincide con la stringa attualmente registrata nel ViewModel (matchTitle).
+                                                // Questo parametro booleano guiderà le decisioni grafiche.
+                                                val isSelected = viewModel.matchTitle == recentTitle
 
-                                                    // Logica di Toggle (Interruttore):
-                                                    // Il click altera direttamente la "Single Source of Truth" (il ViewModel).
-                                                    // Se l'elemento cliccato era già quello attivo, si svuota il campo (deselezione).
-                                                    // Altrimenti, viene sovrascritto col nuovo valore.
-                                                    if (isSelected) {
-                                                        viewModel.matchTitle = ""
-                                                    } else {
-                                                        viewModel.matchTitle = recentTitle
-                                                        showError =
-                                                            false // Azzera eventuali flag di errore visivo per input mancante
+                                                // Richiamo del componente UI custom centralizzato.
+                                                // L'astrazione grafica (colori, bordi, padding) è gestita internamente in SharedUtils.kt,
+                                                // qui passiamo esclusivamente i dati e i comportamenti di business logic (Principio DRY).
+                                                CustomSelectableChip(
+                                                    text = recentTitle,
+                                                    isSelected = isSelected,
+                                                    onClick = {
+                                                        // Gestione dinamica del feedback tattile (Micro-interazione):
+                                                        // - LongPress (vibrazione lunga) se l'utente sta deselezionando un elemento già attivo.
+                                                        // - Confirm (vibrazione breve) se l'utente sta effettuando una nuova selezione.
+                                                        haptic.performHapticFeedback(
+                                                            if (isSelected) HapticFeedbackType.LongPress
+                                                            else HapticFeedbackType.Confirm
+                                                        )
+
+                                                        // Logica di Toggle (Interruttore):
+                                                        // Il click altera direttamente la "Single Source of Truth" (il ViewModel).
+                                                        // Se l'elemento cliccato era già quello attivo, si svuota il campo (deselezione).
+                                                        // Altrimenti, viene sovrascritto col nuovo valore.
+                                                        if (isSelected) {
+                                                            viewModel.matchTitle = ""
+                                                        } else {
+                                                            viewModel.matchTitle = recentTitle
+                                                            showError = false // Azzera eventuali flag di errore visivo per input mancante
+                                                        }
+
+                                                        // Rimuove l'ancoraggio (focus) dal TextField principale e chiude
+                                                        // contestualmente l'eventuale tastiera software aperta.
+                                                        focusManager.clearFocus()
                                                     }
-
-                                                    // Rimuove l'ancoraggio (focus) dal TextField principale e chiude
-                                                    // contestualmente l'eventuale tastiera software aperta.
-                                                    focusManager.clearFocus()
-                                                }
-                                            )
-                                        }
-                                    }
+                                                )
+                                            }
+                                        } // Fine LazyRow
+                                    } // Fine Box Principale
                                 }
                             } else {
                                 // Spaziatore di sicurezza per mantenere le proporzioni verticali costanti nel caso in cui la cronologia sia vuota.
@@ -546,68 +559,72 @@ fun CreateMatchScreen(
                             }
 
                             if (viewModel.favoriteNames.isNotEmpty()) {
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentPadding = PaddingValues(end = 16.dp)
-                                ) {
-                                    items(viewModel.favoriteNames) { fav ->
-                                        // Scansione iterativa della lista giocatori attuale:
-                                        // L'operatore '.any {}' attraversa l'array e restituisce true non appena
-                                        // trova ALMENO UN elemento che soddisfa la condizione.
-                                        // Viene utilizzato 'ignoreCase = true' per prevenire duplicati logici
-                                        // (es. "Marco" e "marco" sono considerati lo stesso giocatore).
-                                        val isAlreadyAtTable = viewModel.players.any {
-                                            it.name.equals(fav, ignoreCase = true)
-                                        }
+                                // ====================================================================
+                                // FADE OUT GRADIENT SUI GIOCATORI RAPIDI
+                                // ====================================================================
+                                // Riutilizziamo lo stesso Wrapper. Il codice diventa immensamente più leggibile.
+                                FadedRightEdgeWrapper(modifier = Modifier.fillMaxWidth()) {
 
-                                        // Utilizzo del componente custom centralizzato per uniformita' estetica.
-                                        // La configurazione cromatica (testo e sfondo) e' ora ereditata dalla funzione unica.
-                                        CustomSelectableChip(
-                                            text = fav,
-                                            isSelected = isAlreadyAtTable,
-                                            onClick = {
-                                                // Logica di interruttore (toggle) per l'aggiunta o la rimozione del giocatore.
-                                                if (!isAlreadyAtTable) {
-                                                    // Assegnazione automatica del colore.
-                                                    // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
-                                                    val usedColors =
-                                                        viewModel.players.map { it.color }
-                                                    // 2. Filtraggio della palette master: si tengono solo i colori NON presenti in usedColors.
-                                                    val availableColors =
-                                                        playerPalette.filter { it.toArgb() !in usedColors }
-                                                    // 3. Fallback: se ci sono colori intonsi se ne pesca uno, altrimenti
-                                                    // la palette è esaurita e si pesca randomicamente accettando il duplicato visivo.
-                                                    val finalColor =
-                                                        if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-
-                                                    // Passaggio della richiesta di istanziazione al ViewModel.
-                                                    viewModel.addPlayer(fav, finalColor.toArgb())
-                                                } else {
-                                                    // CASO B: RIMOZIONE (Il giocatore è già seduto al tavolo -> Toggle Deselezione)
-
-                                                    // Gestione feedback aptico di allerta se si sta tentando di rimuovere
-                                                    // l'ultimo elemento rimasto nella lista dei partecipanti.
-                                                    if (viewModel.players.size == 1) {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress
-                                                        )
-                                                    }
-
-                                                    // Identificazione del target: '.find {}' restituisce il primo oggetto Player
-                                                    // la cui proprietà 'name' corrisponde alla query, restituendo null se non trovato.
-                                                    val playerToRemove = viewModel.players.find {
-                                                        it.name.equals(fav, ignoreCase = true)
-                                                    }
-
-                                                    // Esecuzione in Safe-Call (?): la rimozione viene propagata al ViewModel
-                                                    // esclusivamente se l'oggetto playerToRemove non è null.
-                                                    playerToRemove?.let { viewModel.removePlayer(it) }
-                                                }
+                                    // LIVELLO INFERIORE
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        // PADDING: Aumentato da 16 a 40.dp per superare comodamente l'ombra
+                                        contentPadding = PaddingValues(end = 40.dp)
+                                    ) {
+                                        items(viewModel.favoriteNames) { fav ->
+                                            // Scansione iterativa della lista giocatori attuale:
+                                            // L'operatore '.any {}' attraversa l'array e restituisce true non appena
+                                            // trova ALMENO UN elemento che soddisfa la condizione.
+                                            // Viene utilizzato 'ignoreCase = true' per prevenire duplicati logici
+                                            // (es. "Marco" e "marco" sono considerati lo stesso giocatore).
+                                            val isAlreadyAtTable = viewModel.players.any {
+                                                it.name.equals(fav, ignoreCase = true)
                                             }
-                                        )
-                                    }
-                                }
+
+                                            // Utilizzo del componente custom centralizzato per uniformita' estetica.
+                                            // La configurazione cromatica (testo e sfondo) e' ora ereditata dalla funzione unica.
+                                            CustomSelectableChip(
+                                                text = fav,
+                                                isSelected = isAlreadyAtTable,
+                                                onClick = {
+                                                    // Logica di interruttore (toggle) per l'aggiunta o la rimozione del giocatore.
+                                                    if (!isAlreadyAtTable) {
+                                                        // Assegnazione automatica del colore.
+                                                        // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
+                                                        val usedColors = viewModel.players.map { it.color }
+                                                        // 2. Filtraggio della palette master: si tengono solo i colori NON presenti in usedColors.
+                                                        val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+                                                        // 3. Fallback: se ci sono colori intonsi se ne pesca uno, altrimenti
+                                                        // la palette è esaurita e si pesca randomicamente accettando il duplicato visivo.
+                                                        val finalColor = if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+
+                                                        // Passaggio della richiesta di istanziazione al ViewModel.
+                                                        viewModel.addPlayer(fav, finalColor.toArgb())
+                                                    } else {
+                                                        // CASO B: RIMOZIONE (Il giocatore è già seduto al tavolo -> Toggle Deselezione)
+
+                                                        // Gestione feedback aptico di allerta se si sta tentando di rimuovere
+                                                        // l'ultimo elemento rimasto nella lista dei partecipanti.
+                                                        if (viewModel.players.size == 1) {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        }
+
+                                                        // Identificazione del target: '.find {}' restituisce il primo oggetto Player
+                                                        // la cui proprietà 'name' corrisponde alla query, restituendo null se non trovato.
+                                                        val playerToRemove = viewModel.players.find {
+                                                            it.name.equals(fav, ignoreCase = true)
+                                                        }
+
+                                                        // Esecuzione in Safe-Call (?): la rimozione viene propagata al ViewModel
+                                                        // esclusivamente se l'oggetto playerToRemove non è null.
+                                                        playerToRemove?.let { viewModel.removePlayer(it) }
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    } // Fine LazyRow
+                                } // Fine Box Principale
                             } else {
                                 Text(
                                     stringResource(R.string.msg_nessun_giocatore_rapido),
