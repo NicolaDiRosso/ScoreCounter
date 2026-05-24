@@ -438,12 +438,6 @@
                     }
                 }
 
-                // ---> CONTROLLO ANTI-CARTE <---
-                // Trasformiamo il titolo in minuscolo e cerchiamo la parola "carte".
-                // Se trovata, 'isFireEnabled' sarà false e il colore arancione della combo non apparirà mai.
-                val isFireEnabled = !viewModel.matchTitle.lowercase()
-                    .contains("carte")//Questa variabile è VERA se il titolo NON contiene la parola "carte".
-
                 // ---> IL NUOVO CONTENITORE DEL TAVOLO (Box di Sfondo) <---
                 Card(
                     modifier = Modifier
@@ -483,7 +477,6 @@
                                 PlayerScoreCard(
                                     player = p,
                                     isLeader = isLeader,
-                                    isFireEnabled = isFireEnabled,
                                     onScoreChange = { amount ->
                                         viewModel.updatePlayerScore(p, amount)
                                     },

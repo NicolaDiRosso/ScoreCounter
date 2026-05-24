@@ -132,7 +132,7 @@
     <string name="titolo_info_punteggio">🚀 クイックスコア</string>
     <string name="msg_info_punteggio">\\\'+\\\' ボタンを長押しするとすぐに10ポイントが追加され、\\\'-\\\' ボタンで5ポイントが減点されます。</string>
     <string name="titolo_info_fire">🔥 On Fire 状態</string>
-    <string name="msg_info_fire">中断せずに3回連続で得点すると、スコアがオレンジ色になります。\nカードゲームには適用されません。</string>
+    <string name="msg_info_fire">中断せずに3回連続で得点すると、スコアがオレンジ色になります。</string>
     <string name="titolo_info_manuale">⌨️ 手動編集</string>
     <string name="msg_info_manuale">スコアの数字を直接タップするとキーボードが開き、正確な値を入力できます。</string>
     <string name="titolo_info_dado">🎲 ラッキーダイス</string>

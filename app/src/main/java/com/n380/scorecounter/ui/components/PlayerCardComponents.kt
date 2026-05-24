@@ -239,7 +239,6 @@
     fun PlayerScoreCard(
         player: Player,
         isLeader: Boolean = false,
-        isFireEnabled: Boolean = true,
         onScoreChange: (Int) -> Unit,
         onScoreClick: () -> Unit
     ) {
@@ -268,7 +267,7 @@
                         .background(playerColor)
                 )
 
-                // ---> CONTENUTO DELLA CARD <---
+                // ---> CONTRENETO DELLA CARD <---
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -357,7 +356,7 @@
                                 text = scoreText,
                                 style = scoreStyle, // Applichiamo lo stile che cambia da solo!
                                 fontWeight = FontWeight.Black,
-                                color = if (player.isOnFire && isFireEnabled) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
+                                color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1
                             )
                         }

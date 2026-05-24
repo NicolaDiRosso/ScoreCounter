@@ -139,7 +139,7 @@
     <string name="titolo_info_punteggio">🚀 Quick Score</string>
     <string name="msg_info_punteggio">Press and hold the \'+\' button to quickly add 10 points or the \'-\' button to subtract 5.</string>
     <string name="titolo_info_fire">🔥 On Fire Status</string>
-    <string name="msg_info_fire">If a player scores 3 times in a row without interruptions, their score turns orange. \nDoes not apply in card challenges.</string>
+    <string name="msg_info_fire">If a player scores 3 times in a row without interruptions, their score turns orange.</string>
     <string name="titolo_info_manuale">⌨️ Manual Edit</string>
     <string name="msg_info_manuale">Tap directly on the score number to open the keyboard and enter an exact value.</string>
     <string name="titolo_info_dado">🎲 Lucky Dice</string>

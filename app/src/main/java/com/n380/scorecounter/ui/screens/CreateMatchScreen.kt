@@ -107,8 +107,8 @@ fun CreateMatchScreen(
     // Ogni volta che il numero cambia, esegue il codice all'interno.
     LaunchedEffect(viewModel.players.size) {
         // Se il tavolo è passato esattamente a 1 giocatore (il primo aggiunto)
-        if (viewModel.players.size == 1) {
-            // Aspettiamo 200 millisecondi: questo è FONDAMENTALE.
+        if (viewModel.players.size in 1..3) {
+            // Aspettiamo 100 millisecondi: questo è FONDAMENTALE.
             // Dà il tempo a Compose di renderizzare graficamente la Sezione 3 e
             // calcolare quanto si è allungata la pagina, prima di iniziare a scorrere.
             delay(100)
@@ -579,7 +579,7 @@ fun CreateMatchScreen(
                                         horizontalArrangement = Arrangement.spacedBy(6.dp), // Spazio vitale tra la scritta e l'ingranaggio
                                         // PADDING (IL SEGRETO): Non usiamo size fisse! Diamo 12dp di spazio ai lati e 6dp sopra/sotto.
                                         // Così il pulsante si adatterà da solo come un "vestito su misura".
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)
                                     ) {
                                         // L'icona
                                         Icon(

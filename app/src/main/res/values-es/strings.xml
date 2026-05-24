@@ -132,7 +132,7 @@
     <string name="titolo_info_punteggio">🚀 Puntuación rápida</string>
     <string name="msg_info_punteggio">Mantén presionado el botón \'+\' para añadir 10 puntos rápidamente o el botón \'-\' para restar 5.</string>
     <string name="titolo_info_fire">🔥 Estado On Fire</string>
-    <string name="msg_info_fire">Si un jugador anota 3 veces seguidas sin interrupciones, su puntuación se vuelve naranja.\nNo aplica en desafíos de cartas.</string>
+    <string name="msg_info_fire">Si un jugador anota 3 veces seguidas sin interrupciones, su puntuación se vuelve naranja.</string>
     <string name="titolo_info_manuale">⌨️ Edición Manual</string>
     <string name="msg_info_manuale">Toca directamente el número del puntaje para abrir el teclado e ingresar un valor exacto.</string>
     <string name="titolo_info_dado">🎲 Dado de la Suerte</string>

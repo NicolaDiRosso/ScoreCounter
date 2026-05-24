@@ -132,7 +132,7 @@
     <string name="titolo_info_punteggio">🚀 Score Rapide</string>
     <string name="msg_info_punteggio">Maintenez le bouton \'+\' appuyé pour ajouter rapidement 10 points ou le bouton \'-\' pour en soustraire 5.</string>
     <string name="titolo_info_fire">🔥 Statut On Fire</string>
-    <string name="msg_info_fire">Si un joueur marque 3 fois de suite sans interruption, son score devient orange.\nNe s\'applique pas aux défis de cartes.</string>
+    <string name="msg_info_fire">Si un joueur marque 3 fois de suite sans interruption, son score devient orange.</string>
     <string name="titolo_info_manuale">⌨️ Édition Manuelle</string>
     <string name="msg_info_manuale">Appuyez directement sur le chiffre du score pour ouvrir le clavier et entrer une valeur exacte.</string>
     <string name="titolo_info_dado">🎲 Dé de la Chance</string>

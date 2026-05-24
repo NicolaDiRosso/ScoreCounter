@@ -132,7 +132,7 @@
     <string name="titolo_info_punteggio">🚀 Schnelle Punktzahl</string>
     <string name="msg_info_punteggio">Halte die \\\'+\\\'-Taste gedrückt, um schnell 10 Punkte hinzuzufügen, oder die \\\'-\\\'-Taste, um 5 abzuziehen.</string>
     <string name="titolo_info_fire">🔥 On-Fire Status</string>
-    <string name="msg_info_fire">Wenn ein Spieler 3 Mal hintereinander ohne Unterbrechung punktet, wird seine Punktzahl orange.\nGilt nicht für Kartenherausforderungen.</string>
+    <string name="msg_info_fire">Wenn ein Spieler 3 Mal hintereinander ohne Unterbrechung punktet, wird seine Punktzahl orange.</string>
     <string name="titolo_info_manuale">⌨️ Manuelle Bearbeitung</string>
     <string name="msg_info_manuale">Tippe direkt auf die Punktzahl, um die Tastatur zu öffnen und einen genauen Wert einzugeben.</string>
     <string name="titolo_info_dado">🎲 Glückswürfel</string>

@@ -140,7 +140,7 @@
     <string name="titolo_info_punteggio">🚀 Punteggio Rapido</string>
     <string name="msg_info_punteggio">Tieni premuto il tasto \'+\' per aggiungere 10 punti o il tasto \'-\' per toglierne 5 in modo rapido.</string>
     <string name="titolo_info_fire">🔥 Stato On Fire</string>
-    <string name="msg_info_fire">Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione. \nNon si applica nelle sfide a carte.</string>
+    <string name="msg_info_fire">Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione.</string>
     <string name="titolo_info_manuale">⌨️ Modifica Manuale</string>
     <string name="msg_info_manuale">Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.</string>
     <string name="titolo_info_dado">🎲 Dado Fortunato</string>

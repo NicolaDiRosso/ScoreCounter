@@ -132,7 +132,7 @@
     <string name="titolo_info_punteggio">🚀 त्वरित स्कोर</string>
     <string name="msg_info_punteggio">जल्दी से 10 अंक जोड़ने के लिए \\\'+\\\' बटन या 5 घटाने के लिए \\\'-\\\' बटन को दबाकर रखें।</string>
     <string name="titolo_info_fire">🔥 ऑन-फायर स्थिति</string>
-    <string name="msg_info_fire">यदि कोई खिलाड़ी बिना किसी रुकावट के लगातार 3 बार स्कोर करता है, तो उसका स्कोर नारंगी हो जाता है।\nकार्ड की चुनौतियों में लागू नहीं होता।</string>
+    <string name="msg_info_fire">यदि कोई खिलाड़ी बिना किसी रुकावट के लगातार 3 बार स्कोर करता है, तो उसका स्कोर नारंगी हो जाता है।</string>
     <string name="titolo_info_manuale">⌨️ मैन्युअल संपादन</string>
     <string name="msg_info_manuale">सटीक मान दर्ज करने के लिए कीबोर्ड खोलने के लिए सीधे स्कोर नंबर पर टैप करें।</string>
     <string name="titolo_info_dado">🎲 भाग्यशाली पासा</string>
