@@ -100,6 +100,7 @@
     <string name="desc_modifica_icon">Editar</string>
     <string name="desc_elimina_icon">Eliminar</string>
     <string name="desc_gestisci_rapidi_icon">Gestionar Jugadores Rápidos</string>
+    <string name="btn_gestisci">Gestionar</string>
 
     <string name="titolo_impostazioni_dado">Dado de desempate 🎲</string>
     <string name="desc_impostazioni_dado">Configura el dado que puedes lanzar durante la partida para decidir quién empieza o para desempatar.</string>

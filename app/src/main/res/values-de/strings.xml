@@ -100,6 +100,7 @@
     <string name="desc_modifica_icon">Bearbeiten</string>
     <string name="desc_elimina_icon">Löschen</string>
     <string name="desc_gestisci_rapidi_icon">Schnelle Spieler verwalten</string>
+    <string name="btn_gestisci">Verwalten</string>
 
     <string name="titolo_impostazioni_dado">Entscheidungswürfel 🎲</string>
     <string name="desc_impostazioni_dado">Stelle den Würfel ein, den du während des Spiels werfen kannst, um zu entscheiden, wer beginnt oder um ein Unentschieden zu brechen.</string>

@@ -105,6 +105,7 @@
     <string name="desc_modifica_icon">Edit</string>
     <string name="desc_elimina_icon">Delete</string>
     <string name="desc_gestisci_rapidi_icon">Manage Quick Players</string>
+    <string name="btn_gestisci">Manage</string>
 
     <!-- TESTO TRADOTTO PER IL FILE DiceComponents-->
     <string name="titolo_impostazioni_dado">Tie-breaker Dice 🎲</string>

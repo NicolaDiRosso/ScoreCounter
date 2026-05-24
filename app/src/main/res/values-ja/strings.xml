@@ -100,6 +100,7 @@
     <string name="desc_modifica_icon">編集</string>
     <string name="desc_elimina_icon">削除</string>
     <string name="desc_gestisci_rapidi_icon">クイックプレイヤーを管理</string>
+    <string name="btn_gestisci">管理</string>
 
     <string name="titolo_impostazioni_dado">タイブレーカー・ダイス 🎲</string>
     <string name="desc_impostazioni_dado">誰から始めるか決めたり、同点を解決するために試合中に振るダイスを設定します。</string>

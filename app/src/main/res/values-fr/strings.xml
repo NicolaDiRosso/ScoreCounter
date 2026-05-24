@@ -100,6 +100,7 @@
     <string name="desc_modifica_icon">Modifier</string>
     <string name="desc_elimina_icon">Supprimer</string>
     <string name="desc_gestisci_rapidi_icon">Gérer Joueurs Rapides</string>
+    <string name="btn_gestisci">Gérer</string>
 
     <string name="titolo_impostazioni_dado">Dé de départ 🎲</string>
     <string name="desc_impostazioni_dado">Réglez le dé que vous pourrez lancer pendant la partie pour décider qui commence ou pour départager.</string>

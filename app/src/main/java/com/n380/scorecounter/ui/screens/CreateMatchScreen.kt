@@ -25,6 +25,8 @@ import androidx.compose.material3.SheetValue // Controllo degli stati del Bottom
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Conversione cromatica per persistenza dati
@@ -37,6 +39,7 @@ import androidx.compose.ui.res.stringResource // Import aggiunto per la traduzio
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
@@ -83,33 +86,17 @@ fun CreateMatchScreen(
     // STATI: CONFIGURAZIONE DADO
     var showDiceSettingsDialog by remember { mutableStateOf(false) }
 
-    // FLAG DI AUTORIZZAZIONE CHIUSURA
-    // Stato di controllo per la transizione verso 'Hidden'. Impedisce la chiusura tramite swipe native.
-    var canDismissSheet by remember { mutableStateOf(false) }
-
-    // GESTORE STATO BOTTOM SHEET
-    // skipPartiallyExpanded = true: Inibisce lo stato di espansione intermedia.
-    // confirmValueChange: Restituendo 'false' per 'Hidden' si blocca il gesto di chiusura verso il basso (swipe-to-dismiss).
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { newValue ->
-            newValue != SheetValue.Hidden || canDismissSheet
-        }
-    )
 
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // GESTIONE STATI MULTI-LAYER:
-    // Creiamo un host indipendente per le notifiche del Bottom Sheet.
-    // Essendo il Bottom Sheet renderizzato su una "finestra" (Window) di livello
-    // superiore (Z-Index maggiore), le notifiche dello Scaffold base verrebbero coperte.
-    val sheetSnackbarHostState = remember { SnackbarHostState() }
 
     val coroutineScope = rememberCoroutineScope()
 
-    val keyboardController = LocalSoftwareKeyboardController.current // Controller per la gestione programmatica della tastiera
-    val focusManager = LocalFocusManager.current // Gestore del focus per la rimozione del cursore attivo dalle aree di testo
+    val keyboardController =
+        LocalSoftwareKeyboardController.current // Controller per la gestione programmatica della tastiera
+    val focusManager =
+        LocalFocusManager.current // Gestore del focus per la rimozione del cursore attivo dalle aree di testo
     // ==========================================================
     // 🧠 FIX UX: GESTIONE DELLO SCORRIMENTO E ANIMAZIONE
     // ==========================================================
@@ -135,9 +122,12 @@ fun CreateMatchScreen(
     // ESTRAZIONE STRINGHE DI ERRORE PRE-ONCLICK (Regola Composable Context)
     // Estraiamo le stringhe tradotte qui, fuori dal bottone, per poterle usare liberamente in onClick
     // ====================================================================
-    val errTitoloGiocatori = stringResource(R.string.err_titolo_e_giocatori) // Recupero testo tradotto per errore combinato
-    val errSoloTitolo = stringResource(R.string.err_solo_titolo) // Recupero testo tradotto per errore titolo vuoto
-    val errSoloGiocatori = stringResource(R.string.err_solo_giocatori) // Recupero testo tradotto per errore tavolo vuoto
+    val errTitoloGiocatori =
+        stringResource(R.string.err_titolo_e_giocatori) // Recupero testo tradotto per errore combinato
+    val errSoloTitolo =
+        stringResource(R.string.err_solo_titolo) // Recupero testo tradotto per errore titolo vuoto
+    val errSoloGiocatori =
+        stringResource(R.string.err_solo_giocatori) // Recupero testo tradotto per errore tavolo vuoto
 
     // ARCHITETTURA PAGINA (Scaffold)
     Scaffold(
@@ -151,7 +141,10 @@ fun CreateMatchScreen(
                 color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
                 // Arrotondamento dei soli bordi superiori per un look integrato alla base
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                )
             ) {
                 Column(
                     modifier = Modifier
@@ -304,7 +297,10 @@ fun CreateMatchScreen(
                         // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         // 4. BORDO DELICATO: Usiamo 'outline' invece di 'primary' per non rendere l'interfaccia troppo pesante
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        )
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
 
@@ -336,32 +332,47 @@ fun CreateMatchScreen(
                                 // garantendo che ci sia sempre questo spazio minimo tra i due.
                                 Spacer(modifier = Modifier.width(10.dp))
 
-                                // Pulsante per le impostazioni del dado
-                                OutlinedButton(
+                                // ====================================================================
+                                // PULSANTE IMPOSTAZIONI DADO (Coerenza con "Gestisci")
+                                // ====================================================================
+                                // Usiamo la stessa estetica "Tonal" che sarà anche nel pulsante "Gestisci" per
+                                // mantenere la consistenza visiva delle azioni ausiliarie.
+                                Surface(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                         showDiceSettingsDialog = true
                                     },
-                                    contentPadding = PaddingValues(
-                                        horizontal = 12.dp,
-                                        vertical = 0.dp
-                                    ),
-                                    modifier = Modifier.height(44.dp), // Aumentata l'altezza per migliore touch target
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = RoundedCornerShape(12.dp), // Stessa stondatura del pulsante Gestisci
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), // Stesso sfondo delicato
+                                    border = BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                    ) // Stesso bordino
                                 ) {
-                                    Icon(
-                                        Icons.Filled.Casino,
-                                        stringResource(R.string.desc_dado_icon),
-                                        modifier = Modifier.size(18.dp).padding(end = 4.dp)
-                                    ) // Sostituzione testo descrittivo tradotto
-                                    AutoResizedText(
-                                        text = stringResource(
-                                            R.string.label_dado,
-                                            viewModel.diceSides
-                                        ), // Formattazione stringa dinamica in base alle risorse (%d)
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp), // Spazio vitale tra la scritta e l'ingranaggio
+                                        // PADDING (IL SEGRETO): Non usiamo size fisse! Diamo 12dp di spazio ai lati e 6dp sopra/sotto.
+                                        // Così il pulsante si adatterà da solo come un "vestito su misura".
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Casino,
+                                            contentDescription = stringResource(R.string.desc_dado_icon),
+                                            tint = MaterialTheme.colorScheme.primary, // Stesso colore pieno
+                                            modifier = Modifier.size(16.dp) // Stessa dimensione dell'icona (16dp)
+                                        )
+                                        AutoResizedText(
+                                            text = stringResource(
+                                                R.string.label_dado,
+                                                viewModel.diceSides
+                                            ),
+                                            // Stessa gerarchia visiva (labelMedium)
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary // Stesso colore del testo
+                                        )
+                                    }
                                 }
                             }
 
@@ -398,7 +409,7 @@ fun CreateMatchScreen(
                             )
 
                             // CRONOLOGIA TITOLI RECENTI (SISTEMA DI SUGGERIMENTO RAPIDO)
-                            // La sezione viene mantenuta sempre visibile per garantire stabilita' al layout ed evitare spostamenti 
+                            // La sezione viene mantenuta sempre visibile per garantire stabilita' al layout ed evitare spostamenti
                             // improvvisi degli elementi (layout shift) durante l'interazione con l'interfaccia utente.
                             if (viewModel.matchTitleHistory.isNotEmpty()) {
                                 Column(
@@ -446,7 +457,8 @@ fun CreateMatchScreen(
                                                         viewModel.matchTitle = ""
                                                     } else {
                                                         viewModel.matchTitle = recentTitle
-                                                        showError = false // Azzera eventuali flag di errore visivo per input mancante
+                                                        showError =
+                                                            false // Azzera eventuali flag di errore visivo per input mancante
                                                     }
 
                                                     // Rimuove l'ancoraggio (focus) dal TextField principale e chiude
@@ -470,8 +482,13 @@ fun CreateMatchScreen(
                                         viewModel.targetScore = newValue
                                     }
                                 },
-                                label = { Text(stringResource(R.string.hint_traguardo)) }, // Sostituzione label tradotta
-                                modifier = Modifier.fillMaxWidth(), 
+                                label = {
+                                    Text(
+                                        stringResource(R.string.hint_traguardo),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis)
+                                        }, // Sostituzione label tradotta
+                                modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
@@ -502,7 +519,10 @@ fun CreateMatchScreen(
                         // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         // 4. BORDO DELICATO: Usiamo 'outline' invece di 'primary' per non rendere l'interfaccia troppo pesante
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        )
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
 
@@ -536,16 +556,48 @@ fun CreateMatchScreen(
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.primary
                                 )
-                                IconButton(onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    showFavoritesDialog = true
-                                }) {
-                                    Icon(
-                                        Icons.Filled.Settings,
-                                        stringResource(R.string.desc_gestisci_rapidi_icon),
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(25.dp)
-                                    ) // Traduzione label accessibilità
+                                // ====================================================================
+                                // PULSANTE "GESTISCI" CON TESTO E ICONA (Affordance chiara)
+                                // ====================================================================
+                                // Usiamo una Surface con onClick. È il modo più pulito in Compose per
+                                // creare componenti personalizzati cliccabili con sfondi e forme specifiche.
+                                Surface(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showFavoritesDialog = true
+                                    },
+                                    // STONDATURA: Ripristiniamo la tua stondatura corretta a 12.dp
+                                    shape = RoundedCornerShape(12.dp),
+                                    // COLORE: Usiamo il tuo colore primario al 12% per un look delicato
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                    // IL BORDO: Aggiungiamo un bordo sottile col colore primario opacizzato (come il dado)
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                ) {
+                                    // Usiamo una Row per disporre testo e icona in orizzontale
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp), // Spazio vitale tra la scritta e l'ingranaggio
+                                        // PADDING (IL SEGRETO): Non usiamo size fisse! Diamo 12dp di spazio ai lati e 6dp sopra/sotto.
+                                        // Così il pulsante si adatterà da solo come un "vestito su misura".
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        // L'icona
+                                        Icon(
+                                            imageVector = Icons.Filled.Settings,
+                                            contentDescription = stringResource(R.string.desc_gestisci_rapidi_icon),
+                                            tint = MaterialTheme.colorScheme.primary, // Icona in risalto col colore pieno
+                                            modifier = Modifier.size(16.dp) // LA dimensione dell'icona è messa più piccola per non sovrastare l'altezza del testo
+                                        )
+                                        // Il testo descrittivo
+                                        AutoResizedText(
+                                            // I18N: Usiamo la stringa tradotta appena creata
+                                            text = stringResource(R.string.btn_gestisci),
+                                            // GERARCHIA VISIVA:
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
 
@@ -575,13 +627,16 @@ fun CreateMatchScreen(
                                                 if (!isAlreadyAtTable) {
                                                     // Assegnazione automatica del colore.
                                                     // 1. Estrazione in un nuovo array di tutti i codici colore attualmente in uso.
-                                                    val usedColors = viewModel.players.map { it.color }
+                                                    val usedColors =
+                                                        viewModel.players.map { it.color }
                                                     // 2. Filtraggio della palette master: si tengono solo i colori NON presenti in usedColors.
-                                                    val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+                                                    val availableColors =
+                                                        playerPalette.filter { it.toArgb() !in usedColors }
                                                     // 3. Fallback: se ci sono colori intonsi se ne pesca uno, altrimenti
                                                     // la palette è esaurita e si pesca randomicamente accettando il duplicato visivo.
-                                                    val finalColor = if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-                                                    
+                                                    val finalColor =
+                                                        if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+
                                                     // Passaggio della richiesta di istanziazione al ViewModel.
                                                     viewModel.addPlayer(fav, finalColor.toArgb())
                                                 } else {
@@ -590,7 +645,9 @@ fun CreateMatchScreen(
                                                     // Gestione feedback aptico di allerta se si sta tentando di rimuovere
                                                     // l'ultimo elemento rimasto nella lista dei partecipanti.
                                                     if (viewModel.players.size == 1) {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        haptic.performHapticFeedback(
+                                                            HapticFeedbackType.LongPress
+                                                        )
                                                     }
 
                                                     // Identificazione del target: '.find {}' restituisce il primo oggetto Player
@@ -632,17 +689,29 @@ fun CreateMatchScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    // 🧠 FIX UI: Usiamo IntrinsicSize.Min per mantenere il bottone e il campo
+                                    // di testo allineati in altezza anche con font di sistema ingranditi.
+                                    .height(IntrinsicSize.Min),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 OutlinedTextField(
                                     value = newPlayerName,
                                     onValueChange = { newPlayerName = it },
-                                    modifier = Modifier.weight(1f).height(63.dp),
+                                    modifier = Modifier.weight(1f),
                                     // Sostituiamo 'label' con 'placeholder' per eliminare il padding
-                                    // invisibile superiore e far combaciare l'ingombro logico con quello visivo
-                                    placeholder = { Text(stringResource(R.string.hint_nome_giocatore)) }, // Traduzione segnaposto input utente
+                                    // invisibile superiore e far combaciare l'ingombro logico con quello visivo.
+                                    // 🧠 FIX UX: Forziamo il testo a rimanere su una riga sola per evitare
+                                    // che spinga in alto i bordi del componente.
+                                    placeholder = {
+                                        Text(
+                                            text = stringResource(R.string.hint_nome_giocatore),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
                                     shape = RoundedCornerShape(20.dp),
                                     leadingIcon = {
                                         Icon(
@@ -674,14 +743,18 @@ fun CreateMatchScreen(
                                         if (isAddPlayerEnabled) {
                                             // Assegnazione automatica del colore per l'aggiunta manuale.
                                             val usedColors = viewModel.players.map { it.color }
-                                            val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
-                                            val finalColor = if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-                                            
+                                            val availableColors =
+                                                playerPalette.filter { it.toArgb() !in usedColors }
+                                            val finalColor =
+                                                if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
+
                                             viewModel.addPlayer(newPlayerName, finalColor.toArgb())
                                             newPlayerName = ""
                                         }
                                     },
-                                    modifier = Modifier.height(63.dp),
+                                    // 🧠 FIX GEOMETRIA: fillMaxHeight() permette al bottone di seguire
+                                    // l'altezza del campo di testo, garantendo simmetria visiva.
+                                    modifier = Modifier.fillMaxHeight(),
                                     shape = RoundedCornerShape(20.dp),
                                     border = if (isAddPlayerEnabled) null else BorderStroke(
                                         1.dp,
@@ -710,7 +783,10 @@ fun CreateMatchScreen(
                         // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         // 4. BORDO DELICATO: Usiamo 'outline' invece di 'primary' per non rendere l'interfaccia troppo pesante
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        )
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
 
@@ -733,16 +809,26 @@ fun CreateMatchScreen(
 
                                 Spacer(modifier = Modifier.weight(1f))
 
-                                Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                                    Text(
-                                        text = "${viewModel.players.size}",
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.padding(
-                                            horizontal = 4.dp,
-                                            vertical = 2.dp
-                                        ),
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
+                                // ====================================================================
+                                // CONTATORE PARTECIPANTI SQUADRATO
+                                // ====================================================================
+                                // Usiamo una Surface per fare in icona "squadrata" e coerente a cui applichiamo una stondatura fissa.
+                                Surface(
+                                    modifier = Modifier.size(28.dp), // Forza larghezza e altezza uguali (Quadrato)
+                                    shape = RoundedCornerShape(8.dp), // Smussatura per coerenza geometrica col design
+                                    color = MaterialTheme.colorScheme.primary, // Sfondo primario pieno
+                                    // Aggiungiamo un'elevazione minima per far risaltare il contatore sulla card
+                                    //shadowElevation = 2.dp
+                                ) {
+                                    // Avvolgiamo il testo in un Box per imporgli di stare perfettamente al centro del quadrato
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = "${viewModel.players.size}",
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold // Grassetto per dare importanza al numero
+                                        )
+                                    }
                                 }
                             }
 
@@ -913,7 +999,10 @@ fun CreateMatchScreen(
                         shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        Text(stringResource(R.string.btn_annulla), color = MaterialTheme.colorScheme.onSurface) // Traduzione bottone annulla
+                        Text(
+                            stringResource(R.string.btn_annulla),
+                            color = MaterialTheme.colorScheme.onSurface
+                        ) // Traduzione bottone annulla
                     }
 
                     Button(
@@ -932,7 +1021,10 @@ fun CreateMatchScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     ) {
-                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold) // Traduzione bottone salvataggio
+                        Text(
+                            stringResource(R.string.btn_salva),
+                            fontWeight = FontWeight.Bold
+                        ) // Traduzione bottone salvataggio
                     }
                 }
             },
@@ -941,108 +1033,118 @@ fun CreateMatchScreen(
         )
     }
 
-    // MODAL BOTTOM SHEET: GESTIONE PREFERITI
+    // ====================================================================
+    // DIALOG: GESTIONE PREFERITI (Sostituisce il ModalBottomSheet)
+    // ====================================================================
+    // 1. Componente Dialog Nativo: Apre una finestra centrale e oscura lo sfondo
     if (showFavoritesDialog) {
         var newFavName by remember { mutableStateOf("") }
 
-        // ====================================================================
-        // Invece di far calcolare al BottomSheet la sua altezza in base al contenuto,
-        // calcoliamo un'altezza statica e assoluta basata sull'hardware del dispositivo.
-        // ====================================================================
-
-        // 1. Otteniamo l'oggetto Configuration che contiene le specifiche fisiche dello schermo
-        val configuration = LocalConfiguration.current
-        // 2. Estraiamo l'altezza totale dello schermo in Dp (Density-independent Pixels)
-        val screenHeight = configuration.screenHeightDp.dp
-        // 3. Calcoliamo il nostro 85% in modo matematico e lo salviamo in una costante.
-        // Questo numero ora è fisso (es. 720.dp) e non dipende più dai ricalcoli grafici.
-        val maxSheetHeight = screenHeight * 0.80f
-
-        ModalBottomSheet(
+        // ---> 🧠 FIX UX: STATO NOTIFICHE LOCALE <---
+        // Creiamo un gestore di notifiche ESCLUSIVO per questo Dialog.
+        // Essendo il Dialog una finestra a sé stante (Z-Index superiore),
+        // non possiamo usare le notifiche dello Scaffold base.
+        val dialogSnackbarHostState = remember { SnackbarHostState() }
+        Dialog(
             onDismissRequest = { showFavoritesDialog = false },
-            sheetState = sheetState,
-
             // ====================================================================
-            // EDGE-TO-EDGE: Override delle Window Insets di Sistema
+            // ESPANDERE IL DIALOG IN ORIZZONTALE ROMPENDO I CONFINI NATIVI
             // ====================================================================
-            // Il ModalBottomSheet di Material 3 inietta automaticamente uno spazio vuoto
-            // sul fondo (WindowInsets.navigationBars) per evitare sovrapposizioni.
-            // Questo spazio esterno sollevava la nostra Surface, mostrando il colore
-            // del container (surfaceVariant) nel "buco" rimasto sotto, creando il taglio netto.
-            // Passando WindowInsets(0, 0, 0, 0), annulliamo questo cuscino forzato.
-            // Il pannello si estenderà fino all'ultimo pixel in basso, e il colore del nostro
-            // Dock riempirà tutto lo spazio. L'ingombro di sicurezza è gestito internamente
-            // dal '.navigationBarsPadding()' applicato alla Column del pulsante.
-            contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
+            // 'usePlatformDefaultWidth = false' disabilita il padding laterale gigante che
+            // Android applica di default a tutti i Dialog, permettendoci di allargarlo a piacimento.
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            // ====================================================================
-            // IL CONTENITORE BOX (Z-Index e Allineamento 2D)
-            // ====================================================================
-            // ERRORE SPIEGATO: Il ModalBottomSheet crea implicitamente una 'Column'.
-            // Avvolgendo tutto il nostro layout in un 'Box', creiamo un "piano di appoggio" 2D.
-            // Solo operando all'interno di un 'BoxScope', il modificatore '.align()'
-            // sblocca la capacità di accettare direzioni verticali come 'BottomCenter',
-            // permettendoci di sovrapporre la Snackbar in basso.
-            Box(
+            // 2. Surface: Agisce come "sfondo fisico" della nostra finestra popup.
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.80f) // Vincolo di altezza costante
-            ) {
-                // 🧠 GERARCHIA VERTICALE: Struttura a Layout Frazionato
-                // Dividiamo lo spazio del BottomSheet in due layer non sovrapposti.
-                Column(modifier = Modifier.fillMaxSize()) {
+                    // ====================================================================
+                    // LARGHEZZA PROPORZIONATA
+                    // ====================================================================
+                    // Ora che siamo liberi dai vincoli, chiediamo al dialog di occupare
+                    // esattamente il 95% della larghezza dello schermo (0.95f).
+                    // Questo lascia un margine simmetrico del 2.5% a destra e a sinistra,
+                    // risultando premium ed evitando che tocchi i bordi fisici del telefono.
+                    .fillMaxWidth(0.95f)
 
-                    // LAYER 1: CONTENUTO SCORREVOLE (Area Dinamica)
+                    // Limitiamo l'altezza all'85% dello schermo per non farlo sbordare mai e renderlo proporzionato
+                    .fillMaxHeight(0.85f),
+                shape = RoundedCornerShape(24.dp), // Angoli molto arrotondati, coerenti con la tua UI
+                // Usiamo il 'background' puro per staccarci dai grigi impastati
+                color = MaterialTheme.colorScheme.background,
+                // 1. Ripristiniamo l'ombra fisica nera classica per staccare il popup
+                shadowElevation = 12.dp,
+                tonalElevation = 2.dp,
+                // 2. Aggiungiamo un bordino perimetrale per definire nettamente la finestra
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                // ---> IL BOX COME PIANO 2D <---
+                // Usiamo un Box come genitore assoluto del Dialog per poter sovrapporre
+                // la Snackbar (le notifiche) sopra la Column principale, in basso al centro.
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // 3. Struttura verticale del Dialog
                     Column(
                         modifier = Modifier
-                            .weight(1f) // Espansione per occupare lo spazio sovrapposto al dock
-                            .padding(horizontal = 24.dp)
-                            .padding(top = 8.dp) // Piccolo respiro dall'alto
+                            .fillMaxSize()
+                            .padding(20.dp)
                     ) {
+                        // INTESTAZIONE: ICONA + TITOLO
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                            // L'allineamento a sinistra distribuisce il peso visivo verso il titolo
-                            horizontalArrangement = Arrangement.Absolute.Left,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                stringResource(R.string.titolo_giocatori_rapidi_sheet), // Sostituzione titolo pannello tradotto
+                            // Icona esplicativa per indicare la "Gestione"
+                            Icon(
+                                imageVector = Icons.Filled.ManageAccounts,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            AutoResizedText(
+                                stringResource(R.string.desc_gestisci_rapidi_icon),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold,
                             )
                         }
 
-                        // INSERIMENTO RAPIDO
+                        // INPUT: NUOVO PREFERITO
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            // Allineamento verticale dei centri logici dei componenti "fratelli"
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
+                                // 🧠 FIX UI: Usiamo IntrinsicSize.Min per "agganciare" l'altezza del bottone
+                                // a quella del campo di testo, indipendentemente da quanto ingrandisce il font.
+                                .height(IntrinsicSize.Min),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             OutlinedTextField(
                                 value = newFavName,
                                 onValueChange = { newFavName = it },
-                                // GEOMETRIA INTERNA (Risoluzione Disallineamento)
-                                // Abbiamo rimosso '.height(64.dp)'.
-                                // L'OutlinedTextField utilizza una complessa gerarchia di padding interni
-                                // per gestire l'etichetta fluttuante e l'icona. Lasciandolo libero di
-                                // calcolare la propria altezza, assume lo standard Material di 56.dp,
-                                // ripristinando il perfetto allineamento tra Icona e Label.
                                 modifier = Modifier.weight(1f),
-                                // ==========================================================
-                                // Placeholder invece di label = { Text("Nuovo nome") },
-                                // Il 'placeholder' rimane confinato all'interno dei bordi visibili
-                                // e non richiede a Compose di generare "spazio invisibile" in cima.
-                                // Questo riporta l'ingombro logico a coincidere con l'ingombro visivo,
-                                // allineando magicamente il componente al bottone adiacente!
-                                // ==========================================================
-                                placeholder = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Sostituzione con segnaposto tradotto
+                                placeholder = { Text(stringResource(R.string.hint_nuovo_nome)) },
                                 shape = RoundedCornerShape(20.dp),
-                                leadingIcon = { Icon(Icons.Filled.Person, null, tint = MaterialTheme.colorScheme.primary) }
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Filled.Person,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
                             )
 
-                            val isAddFavEnabled = newFavName.trim().isNotEmpty() && viewModel.favoriteNames.none { it.equals(newFavName.trim(), ignoreCase = true) }
+                            val isAddFavEnabled = newFavName.trim()
+                                .isNotEmpty() && viewModel.favoriteNames.none {
+                                it.equals(
+                                    newFavName.trim(),
+                                    ignoreCase = true
+                                )
+                            }
 
                             Button(
                                 onClick = {
@@ -1052,182 +1154,209 @@ fun CreateMatchScreen(
                                         newFavName = ""
                                     }
                                 },
-                                modifier = Modifier.height(63.dp),//altezza del bottone "Aggiungi" coerente con l'OutlinedTextField
+                                // 🧠 FIX GEOMETRIA: fillMaxHeight() assicura che il bottone sia alto
+                                // esattamente quanto l'OutlinedTextField adiacente.
+                                modifier = Modifier.fillMaxHeight(),
                                 shape = RoundedCornerShape(20.dp),
-                                border = if (isAddFavEnabled) null else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
+                                border = if (isAddFavEnabled) null else BorderStroke(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                ),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                                    contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.12f
+                                    ),
+                                    contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.38f
+                                    )
                                 )
-                            ) { Text(stringResource(R.string.btn_aggiungi)) } // Traduzione del testo del bottone
+                            ) { Text(stringResource(R.string.btn_aggiungi)) }
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // AREA ELENCO PREFERITI: Struttura a "Tavolo" coerente con il design system dell'app
+                        // LISTA DEI PREFERITI (Scorrevole)
                         Card(
-                            modifier = Modifier.fillMaxWidth().weight(1f).padding(bottom = 16.dp),
+                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            // 3. EFFETTO INCAVO: Sfondo opacizzato e bordo interno
+                            // per far capire che questa è un'area separata in cui si scorre.
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            shape = RoundedCornerShape(24.dp)
+                            shape = RoundedCornerShape(24.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                         ) {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize().padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 itemsIndexed(viewModel.favoriteNames) { index, fav ->
+
+                                    // ====================================================================
+                                    // ESTRAZIONE STRINGHE FUORI DALL'ONCLICK
+                                    // Estraiamo le traduzioni qui, nel contesto Composable visivo.
+                                    // ====================================================================
+                                    val msgFavRimosso = stringResource(R.string.msg_rapido_rimosso, fav)
+                                    val btnAnnullaFav = stringResource(R.string.btn_annulla_undo)
+
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
+                                        // 4. ELEMENTI IN RILIEVO: Colore puro, bordo e ombra
+                                        // per far sembrare ogni riga un "tassello" fisico premibile.
                                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                        shape = RoundedCornerShape(16.dp)
+                                        shape = RoundedCornerShape(16.dp),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.30f))
                                     ) {
                                         Row(
-                                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(horizontal = 16.dp, vertical = 8.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            // CONTROLLI DI RIORDINO
+                                            // CONTROLLI ORDINAMENTO
                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                 IconButton(
                                                     onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                        haptic.performHapticFeedback(
+                                                            HapticFeedbackType.TextHandleMove
+                                                        )
                                                         viewModel.moveFavorite(index, index - 1)
                                                     },
                                                     enabled = index > 0,
                                                     modifier = Modifier.size(28.dp)
                                                 ) {
-                                                    Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                                                    Icon(
+                                                        Icons.Filled.KeyboardArrowUp,
+                                                        null,
+                                                        tint = MaterialTheme.colorScheme.onSurface
+                                                    )
                                                 }
 
                                                 IconButton(
                                                     onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                        haptic.performHapticFeedback(
+                                                            HapticFeedbackType.TextHandleMove
+                                                        )
                                                         viewModel.moveFavorite(index, index + 1)
                                                     },
                                                     enabled = index < viewModel.favoriteNames.size - 1,
                                                     modifier = Modifier.size(28.dp)
                                                 ) {
-                                                    Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                                    Icon(
+                                                        Icons.Filled.KeyboardArrowDown,
+                                                        null,
+                                                        tint = MaterialTheme.colorScheme.onSurface
+                                                    )
                                                 }
                                             }
 
-                                            // Identificativo testuale in grassetto per risalto visivo
+                                            // NOME GIOCATORE
                                             Text(
                                                 text = fav,
                                                 style = MaterialTheme.typography.bodyLarge,
                                                 fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.weight(1f).padding(start = 12.dp)
+                                                modifier = Modifier.weight(1f)
+                                                    .padding(start = 12.dp)
                                             )
 
-                                            // GESTIONE RECORD
+                                            // AZIONE: MODIFICA
                                             IconButton(onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                                 favToEdit = fav
                                             }) {
                                                 Icon(
                                                     Icons.Filled.Edit,
-                                                    stringResource(R.string.desc_modifica_icon), // Testo descrittivo dell'azione tradotto
+                                                    stringResource(R.string.desc_modifica_icon),
                                                     tint = MaterialTheme.colorScheme.primary
                                                 )
                                             }
 
-                                            // ESTRAZIONE STRINGHE SNACKBAR (Dentro contesto LazyColumn Composable)
-                                            val msgFavRimosso = stringResource(R.string.msg_rapido_rimosso, fav) // Stringa dinamica tradotta
-                                            val btnAnnullaFav = stringResource(R.string.btn_annulla_undo) // Azione tradotta
-
-                                            // Gestione eliminazione
+                                            // ====================================================================
+                                            // ELIMINAZIONE CON NOTIFICA DI ANNULLAMENTO (UNDO)
+                                            // ====================================================================
+                                            // Le Snackbar ("Annulla eliminazione") renderizzate DENTRO i Dialog spesso
+                                            // finiscono coperte o impallano la UI (problema dello Z-Index nativo).
+                                            // In un popup come questo, la prassi migliore è l'eliminazione diretta
+                                            // accompagnata da un forte feedback aptico (LongPress) per confermare l'azione.
                                             IconButton(onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
 
-                                                // Salvataggio dei riferimenti puntuali per la closure
+                                                // Salvataggio dei riferimenti per eventuale ripristino
                                                 val removedIndex = index
                                                 val removedFav = fav
-                                                // Mutazione dello stato (viene riflessa istantaneamente dalla UI)
+
+                                                // Eliminazione effettiva
                                                 viewModel.removeFavorite(fav)
 
-                                                // Avvio dell'orchestrazione della notifica modale
+                                                // Mostriamo la notifica sfruttando lo stato LOCALE del Dialog
                                                 coroutineScope.launch {
-                                                    // Chiusura auto-temporizzata di sicurezza
-                                                    launch {
-                                                        delay(3000L)
-                                                        // Utilizziamo lo stato dedicato al Bottom Sheet!
-                                                        sheetSnackbarHostState.currentSnackbarData?.dismiss()
-                                                    }
+                                                    // Rimuove eventuali notifiche precedenti rimaste a schermo
+                                                    dialogSnackbarHostState.currentSnackbarData?.dismiss()
 
-                                                    // Invocazione bloccante (suspend): attende input dell'utente o timeout
                                                     val result =
-                                                        sheetSnackbarHostState.showSnackbar(
-                                                            message = msgFavRimosso, // Utilizzo della variabile dinamica
-                                                            actionLabel = btnAnnullaFav, // Utilizzo della label per undo
-                                                            duration = SnackbarDuration.Indefinite
+                                                        dialogSnackbarHostState.showSnackbar(
+                                                            message = msgFavRimosso,
+                                                            actionLabel = btnAnnullaFav,
+                                                            duration = SnackbarDuration.Short
                                                         )
+                                                    // Se l'utente preme "Annulla", ripristiniamo il giocatore
                                                     if (result == SnackbarResult.ActionPerformed) {
-                                                        viewModel.restoreFavorite(removedIndex, removedFav)
+                                                        viewModel.restoreFavorite(
+                                                            removedIndex,
+                                                            removedFav
+                                                        )
                                                     }
                                                 }
                                             }) {
-                                                Icon(Icons.Filled.Delete, stringResource(R.string.desc_elimina_icon), tint = MaterialTheme.colorScheme.error) // Traduzione label elimina
+                                                Icon(
+                                                    Icons.Filled.Delete,
+                                                    stringResource(R.string.desc_elimina_icon),
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
 
+                        Spacer(modifier = Modifier.height(20.dp))
 
-
-                    // LAYER 2: DOCK DI CHIUSURA (Area Statica Ancorata)
-                    Surface(
-                        color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                        // Geometria smussata solo in alto per integrare il componente al flusso sovrastante
-                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .navigationBarsPadding() // Prevenzione occlusioni da barra di sistema
-                                .padding(horizontal = 16.dp, vertical = 16.dp)
+                        // PULSANTE CHIUSURA DIALOG
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                showFavoritesDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
                         ) {
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    // Sequenza di chiusura orchestrata per preservare l'integrità delle animazioni
-                                    coroutineScope.launch {
-                                        canDismissSheet = true
-                                        sheetState.hide()
-                                        showFavoritesDialog = false
-                                        canDismissSheet = false
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp), // Altezza imposta a standard Expressive
-                                shape = RoundedCornerShape(20.dp),
-                                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            ) {
-                                Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.desc_chiudi_icon), modifier = Modifier.padding(end = 8.dp).size(28.dp)) // Sostituzione label chiusura
-                                Text(text = stringResource(R.string.btn_chiudi_gestione), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold) // Sostituzione nome pulsante
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.desc_chiudi_icon),
+                                modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.btn_chiudi_gestione),
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
-                }
-
-                // LAYER 3: HOST NOTIFICHE (Z-Index 1)
-                SnackbarHost(
-                    hostState = sheetSnackbarHostState,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        // Offset Y Positivo: Solleviamo la snackbar di 100 pixel per impedire
-                        // che venga oscurata e resa inaccessibile dal volume del Dock sottostante.
-                        .padding(bottom = 100.dp)
-                )
+                    // ==========================================================
+                    // 🧠 HOST DELLE NOTIFICHE (Ancorato in basso al Box)
+                    // ==========================================================
+                    SnackbarHost(
+                        hostState = dialogSnackbarHostState,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter) // Poggia sul fondo del Dialog
+                            .padding(bottom = 16.dp) // Leggero rialzo di sicurezza per non toccare i bordi
+                    )
+                } // Fine Box
             }
         }
     }
+
 
     // MODALE: MODIFICA NOME PREFERITO
     if (favToEdit != null) {

@@ -100,6 +100,7 @@
     <string name="desc_modifica_icon">संपादित करें</string>
     <string name="desc_elimina_icon">हटाएं</string>
     <string name="desc_gestisci_rapidi_icon">त्वरित खिलाड़ियों को प्रबंधित करें</string>
+    <string name="btn_gestisci">प्रबंधित करें</string>
 
     <string name="titolo_impostazioni_dado">टाई-ब्रेकर पासा 🎲</string>
     <string name="desc_impostazioni_dado">वह पासा सेट करें जिसे आप यह तय करने के लिए या टाई तोड़ने के लिए फेंक सकते हैं कि कौन शुरुआत करेगा।</string>
