@@ -38,6 +38,7 @@
     import androidx.compose.ui.unit.Dp
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
+    import androidx.compose.ui.graphics.toArgb
     import androidx.compose.ui.res.stringResource
     import androidx.compose.ui.text.TextStyle
     import androidx.compose.ui.text.font.FontWeight
@@ -196,6 +197,7 @@
      * e l'asse Y il punteggio. Il sistema calcola dinamicamente i rapporti di scala
      * per far rientrare i dati all'interno della dimensione del Canvas.
      */
+
     @Composable
     fun ScoreChart(
         players: List<PlayerRecord>,
@@ -219,6 +221,23 @@
         val maxScore = validPlayers.maxOf { (it.scoreHistory ?: emptyList()).maxOrNull() ?: 0 }
         val minScore = validPlayers.minOf { (it.scoreHistory ?: emptyList()).minOrNull() ?: 0 }
 
+        // ====================================================================
+        // TEMA CHIARO/SCURO: ESTRAZIONE COLORI ADATTIVI
+        // ====================================================================
+        // Estraiamo i colori dal MaterialTheme PRIMA di entrare nel Canvas.
+        // In questo modo, che l'app sia in Light o Dark mode, questi colori
+        // assicureranno sempre il contrasto perfetto.
+
+        // Colore per i testi dei numeri. Usiamo onSurfaceVariant e lo tradiamo in ARGB per il pennello nativo
+        val nativeAdaptiveTextColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
+
+        // Colore per le linee orizzontali di sfondo (griglia). Opacità al 20%
+        val adaptiveGridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+
+        // Colore per le "tacche" fisiche del tempo. Opacità al 50%
+        val adaptiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+
+
         Column(modifier = modifier) {
             Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
@@ -239,11 +258,12 @@
 
                 if (isDetailed) {
                     // Configurazione del "Pennello" nativo per il rendering del testo.
-                    val textPaint = Paint().apply {
-                        color = android.graphics.Color.LTGRAY
+                    val textPaint = android.graphics.Paint().apply {
+                        // 🧠 FIX: Usiamo il colore adattivo estratto dal tema, invece del "LTGRAY" scolpito nella pietra!
+                        color = nativeAdaptiveTextColor
                         textSize = 32f
-                        textAlign = Paint.Align.RIGHT
-                        typeface = Typeface.DEFAULT_BOLD
+                        textAlign = android.graphics.Paint.Align.RIGHT
+                        typeface = android.graphics.Typeface.DEFAULT_BOLD
                     }
 
                     // --------------------------------------------------------------------
@@ -256,7 +276,7 @@
 
                         // Griglia di sfondo: aiuta a leggere il valore della linea in quel punto.
                         drawLine(
-                            color = Color.Gray.copy(alpha = 0.2f),
+                            color = adaptiveGridColor, // 🧠 FIX: Colore adattivo
                             start = Offset(padX, y),
                             end = Offset(padX + drawW, y),
                             strokeWidth = 2f
@@ -275,7 +295,7 @@
                     // --------------------------------------------------------------------
                     // DISEGNO ASSE X E TIMELINE CRONOLOGICA
                     // --------------------------------------------------------------------
-                    textPaint.textAlign = Paint.Align.CENTER
+                    textPaint.textAlign = android.graphics.Paint.Align.CENTER
                     val xSteps = 4 // Suddividiamo il tempo in 4 segmenti (0%, 25%, 50%, 75%, 100%).
 
                     for (i in 0..xSteps) {
@@ -284,7 +304,7 @@
 
                         // Griglia di sfondo verticale: aiuta a leggere il tempo in corrispondenza dei punti.
                         drawLine(
-                            color = Color.Gray.copy(alpha = 0.2f),
+                            color = adaptiveGridColor, // 🧠 FIX: Colore adattivo
                             start = Offset(xPos, padYTop),
                             end = Offset(xPos, padYTop + drawH),
                             strokeWidth = 2f
@@ -292,7 +312,7 @@
 
                         // Disegno della tacca fisica (piccola linea/riga verticale sull'asse).
                         drawLine(
-                            color = Color.LightGray.copy(alpha = 0.5f),
+                            color = adaptiveTickColor, // 🧠 FIX: Colore adattivo per la marcatura
                             start = Offset(xPos, size.height - padYBottom),
                             end = Offset(xPos, size.height - padYBottom + 12f),
                             strokeWidth = 3f
@@ -330,7 +350,7 @@
                 // --------------------------------------------------------------------
                 validPlayers.forEach { player ->
                     val color = Color(player.color)
-                    val path = Path()
+                    val path = androidx.compose.ui.graphics.Path()
                     val history = player.scoreHistory ?: emptyList()
 
                     if (history.size >= 1) {
@@ -360,10 +380,10 @@
                     drawPath(
                         path = path,
                         color = color,
-                        style = Stroke(
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
                             width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(),
-                            cap = StrokeCap.Round,
-                            join = StrokeJoin.Round
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                            join = androidx.compose.ui.graphics.StrokeJoin.Round
                         )
                     )
                 }
@@ -382,7 +402,7 @@
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)
                     ) {
-                        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(Color(player.color)))
+                        Box(modifier = Modifier.size(10.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(player.color)))
                         Text(text = player.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp))
                     }
                 }
