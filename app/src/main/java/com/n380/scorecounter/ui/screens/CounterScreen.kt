@@ -27,7 +27,6 @@
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
     import androidx.compose.ui.platform.LocalContext
-    import androidx.compose.ui.platform.LocalFocusManager
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.compose.ui.res.stringResource // 🌍 I18N: Import fondamentale per le traduzioni UI
     import androidx.compose.ui.text.font.FontWeight
@@ -95,8 +94,6 @@
         // SISTEMA SNACKBAR (Tasto Annulla Azzeramento)
         val snackbarHostState = remember { SnackbarHostState() }
         val coroutineScope = rememberCoroutineScope()
-
-        val focusManager = LocalFocusManager.current // Recuperiamo il gestore del focus, ci serve altrimenti anche se chiudiamo la tastiera la text area rimane sempre su OnFocus (quindi attiva)
 
         val haptic = LocalHapticFeedback.current
         val context = LocalContext.current
@@ -264,7 +261,10 @@
                         // ========================================================
                         // TASTO PRIMARIO: FINE MATCH (CALL TO ACTION)
                         // ========================================================
+                        // Usiamo 'enabled' collegandolo alla logica del ViewModel.
+                        // Il pulsante sarà grigio e non cliccabile se nessuno ha ancora giocato.
                         Button(
+                            enabled = viewModel.canEndMatch,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.pauseTimer()
@@ -274,10 +274,16 @@
                                 .weight(1f)
                                 .height(60.dp), // Altezza Expressive massiccia
                             shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
+                            // L'elevazione (ombra) sparisce se il tasto è disattivato per non sembrare "premibile"
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = if (viewModel.canEndMatch) 8.dp else 0.dp
+                            ),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                // Colori per lo stato disattivato (Material 3 Standard: 12% sfondo, 38% testo)
+                                disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             )
                         ) {
                             AutoResizedText(

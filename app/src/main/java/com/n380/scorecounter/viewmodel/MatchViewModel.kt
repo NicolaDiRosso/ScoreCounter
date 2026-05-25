@@ -533,7 +533,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             it.score = 0
             it.scoreHistory.clear()
             it.scoreHistory.add(0) // Registra l'azzeramento nel grafico come se fosse un tuffo verticale verso il basso!
+            it.isOnFire = false // Spegne visivamente il cerchio infuocato
+            it.fireComboCount = 0 // Cancella la memoria per il premio "Inarrestabile"
         }
+        //  AZZERAMENTO SERIE
+        // Dobbiamo far dimenticare al motore chi stava segnando prima dell'azzeramento,
+        // altrimenti il prossimo punto si aggancerà alla vecchia serie fantasma!
+        comboCount = 0
+        lastScorer = null
         saveBackup() // Aggiorniamo il salva-vita con i punti a zero
         return oldData // Restituisce i vecchi punti alla grafica in caso l'utente premesse Annulla!
     }
