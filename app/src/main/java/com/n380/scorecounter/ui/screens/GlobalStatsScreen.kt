@@ -252,7 +252,7 @@ fun GlobalStatsScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp), // FIX ALTEZZA: 56.dp come richiesto dall'utente
+                            .height(72.dp), // FIX ALTEZZA: 56.dp come richiesto dall'utente
                         shape = RoundedCornerShape(20.dp), // Stessa stondatura coerente dell'app
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
                         colors = ButtonDefaults.buttonColors(

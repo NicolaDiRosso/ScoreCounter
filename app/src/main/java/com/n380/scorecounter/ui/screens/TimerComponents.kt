@@ -127,6 +127,12 @@ fun TimerSettingsDialog(
         // Se il timer è attivo...
         if (isRunning) {
             delay(1000L) // Pausa di 1 secondo esatto
+            
+            // Controllo di sicurezza post-delay.
+            // Se durante il secondo di attesa l'utente ha premuto "Ferma Timer",
+            // non dobbiamo procedere col decremento o l'attivazione dell'allarme.
+            if (!isRunning) return@LaunchedEffect
+
             timeLeft -= 1 // Togliamo 1 secondo
 
             // Con "&& activeRingtone == null", creiamo un cancello.
@@ -241,7 +247,7 @@ fun TimerSettingsDialog(
                         Text(
                             text = "$sign%02d:%02d".format(m, s),
                             style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = 54.sp,
+                                fontSize = 60.sp,
                                 fontWeight = FontWeight.Black,
                                 color = displayColor
                             )
@@ -427,7 +433,7 @@ fun TimerSettingsDialog(
                         stopAllAlarms() // Spegne musica e vibrazioni
                         onDismiss()     // Chiude il popup chiamando la funzione dal file padre
                     },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(20.dp)
                 )
                 {
