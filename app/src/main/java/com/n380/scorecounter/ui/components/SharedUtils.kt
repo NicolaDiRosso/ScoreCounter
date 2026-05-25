@@ -2,8 +2,6 @@
 
     import android.content.Context
     import android.content.Intent
-    import android.graphics.Paint
-    import android.graphics.Typeface
     import androidx.compose.animation.core.*
     import androidx.compose.ui.graphics.vector.ImageVector
     import androidx.compose.foundation.Canvas
@@ -15,7 +13,6 @@
     import androidx.compose.foundation.lazy.LazyRow // <-- IMPORTANTE: Serve per la riga dei colori scorrevole
     import androidx.compose.foundation.lazy.items // <-- IMPORTANTE: Serve per ciclare la lista dei colori
     import androidx.compose.foundation.rememberScrollState
-    import androidx.compose.foundation.shape.CircleShape
     import androidx.compose.foundation.shape.RoundedCornerShape
     import androidx.compose.material.icons.Icons
     import androidx.compose.material.icons.filled.*
@@ -23,6 +20,7 @@
     import androidx.compose.material3.FilterChipDefaults
     import androidx.compose.material3.Icon
     import androidx.compose.material3.MaterialTheme
+    import androidx.compose.material3.Surface
     import androidx.compose.material3.Text
     import androidx.compose.runtime.*
     import androidx.compose.ui.Alignment
@@ -31,10 +29,6 @@
     import androidx.compose.ui.draw.drawWithContent
     import androidx.compose.ui.geometry.Offset
     import androidx.compose.ui.graphics.Color
-    import androidx.compose.ui.graphics.Path
-    import androidx.compose.ui.graphics.StrokeCap
-    import androidx.compose.ui.graphics.StrokeJoin
-    import androidx.compose.ui.graphics.drawscope.Stroke
     import androidx.compose.ui.unit.Dp
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
@@ -783,64 +777,83 @@
         onClick: () -> Unit,
         leadingIcon: ImageVector? = null
     ) {
-        // IL COMPONENTE NATIVO FILTERCHIP (Material 3):
-        // È un costrutto standard di Google nato specificamente per gestire selezioni binarie (on/off).
-        // Riceve il parametro 'selected' e gestisce in autonomia le transizioni cromatiche e le animazioni
-        // di riempimento, sollevando lo sviluppatore dal dover calcolare manualmente i cambi di layout visivi.
-        FilterChip(
-            // Sincronizziamo lo stato visivo interno del chip con la variabile booleana passata come argomento.
-            selected = isSelected,
-
-            // Colleghiamo l'evento di pressione fisica dello schermo alla Lambda ricevuta dall'esterno.
-            onClick = onClick,
-
-            // Specifichiamo una dimensione minima verticale di 48.dp. Questa misura rispetta le regole
-            // globali di accessibilità Android (Touch Target) per garantire una pressione comoda con il pollice.
-            modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-
-            // Slot dedicato al contenuto testuale. Iniettiamo l'AutoResizedText custom del progetto:
-            // se l'utente scrive un nome o un titolo molto lungo, il font scala matematicamente verso il basso
-            // impedendo la collisione visiva o la rottura dei confini fisici del chip.
-            label = {
-                // Utilizziamo AutoResizedText per gestire nomi o titoli lunghi,
-                // evitando che il testo esca dai confini del pulsante o si sovrapponga.
-                AutoResizedText(
-                    text = text,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            },
-
-            // Definiamo una smussatura degli angoli fissa a 12.dp per mantenere coerenza geometrica
+        // ====================================================================================
+        // 🧠 FIX UI: SURFACE WRAPPER PER L'EFFETTO "SOLLEVATO"
+        // ====================================================================
+        // Avvolgiamo il FilterChip in una Surface. In Jetpack Compose, la Surface è il modo
+        // migliore per dare "corpo fisico" a un componente e proiettare un'ombra reale
+        // (Elevation) sul bordo esterno, proprio come abbiamo fatto per le card di gestione.
+        Surface(
+            // Usiamo il colore 'surface' pulito per far risaltare il pulsante sopra
+            // lo sfondo 'surfaceVariant' più scuro del tavolo.
+            color = MaterialTheme.colorScheme.surface,
+            // Definiamo una smussatura degli angoli a 12.dp per mantenere coerenza geometrica
             // con la griglia dei componenti e delle tessere (Card) della schermata principale.
             shape = RoundedCornerShape(12.dp),
-
-            // 🧠 RENDERING CONDIZIONALE DELL'ELEMENTO ICONA:
-            // Eseguiamo una valutazione logica 'if' direttamente all'interno dello slot della proprietà.
-            // - Se leadingIcon contiene dati (not null), Compose alloca la struttura grafica 'Icon' a 18.dp.
-            // - Se leadingIcon è null, la proprietà riceve il valore null e Compose salta completamente
-            //   il disegno dell'oggetto, ottimizzando l'uso della memoria e lo spazio a schermo.
-            leadingIcon = if (leadingIcon != null) {
-                { Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp)) }
-            } else null,
-
-            // Configurazione dei colori: abbiamo rimosso l'override del labelColor
-            // per ripristinare il colore predefinito del tema (onSurfaceVariant/onSurface),
-            // mantenendo invece il colore di accento per lo stato selezionato.
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ),
-
-            // 🧠 MODULAZIONE DINAMICA DEL CONTORNO (Micro-interazione visiva):
-            border = FilterChipDefaults.filterChipBorder(
-                enabled = true,
+            // 🎨 EFFETTO OMBRA: Impostiamo un'elevazione di 4.dp per creare un distacco
+            // visibile e premium dallo sfondo, dando l'effetto che la card sia "sollevata".
+            shadowElevation = 4.dp,
+            // tonalElevation aggiunge una leggera tinta del colore primario allo sfondo (Material 3)
+            tonalElevation = 2.dp
+        ) {
+            // IL COMPONENTE NATIVO FILTERCHIP (Material 3):
+            // È un costrutto standard di Google nato specificamente per gestire selezioni binarie (on/off).
+            // Riceve il parametro 'selected' e gestisce in autonomia le transizioni cromatiche e le animazioni
+            // di riempimento, sollevando lo sviluppatore dal dover calcolare manualmente i cambi di layout visivi.
+            FilterChip(
+                // Sincronizziamo lo stato visivo interno del chip con la variabile booleana passata come argomento.
                 selected = isSelected,
-                // Se il chip è disattivato, disegna una linea perimetrale sottile del colore primario dell'app.
-                borderColor = MaterialTheme.colorScheme.primary,
-                // Se il chip viene selezionato, il bordo diventa totalmente trasparente, poiché il corpo
-                // del pulsante si riempie visivamente in modalità solida (Color.Transparent evita sovrapposizioni).
-                selectedBorderColor = Color.Transparent
+
+                // Colleghiamo l'evento di pressione fisica dello schermo alla Lambda ricevuta dall'esterno.
+                onClick = onClick,
+
+                // Specifichiamo una dimensione minima verticale di 48.dp. Questa misura rispetta le regole
+                // globali di accessibilità Android (Touch Target) per garantire una pressione comoda con il pollice.
+                modifier = Modifier.defaultMinSize(minHeight = 48.dp),
+
+                // Slot dedicato al contenuto testuale. Iniettiamo l'AutoResizedText custom del progetto:
+                // se l'utente scrive un nome o un titolo molto lungo, il font scala matematicamente verso il basso
+                // impedendo la collisione visiva o la rottura dei confini fisici del chip.
+                label = {
+                    // Utilizziamo AutoResizedText per gestire nomi o titoli lunghi,
+                    // evitando che il testo esca dai confini del pulsante o si sovrapponga.
+                    AutoResizedText(
+                        text = text,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
+
+                // Ripetiamo la forma anche qui per far combaciare perfettamente il chip alla Surface.
+                shape = RoundedCornerShape(12.dp),
+
+                // 🧠 RENDERING CONDIZIONALE DELL'ELEMENTO ICONA:
+                // Eseguiamo una valutazione logica 'if' direttamente all'interno dello slot della proprietà.
+                // - Se leadingIcon contiene dati (not null), Compose alloca la struttura grafica 'Icon' a 18.dp.
+                // - Se leadingIcon è null, la proprietà riceve il valore null e Compose salta completamente
+                //   il disegno dell'oggetto, ottimizzando l'uso della memoria e lo spazio a schermo.
+                leadingIcon = if (leadingIcon != null) {
+                    { Icon(imageVector = leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                } else null,
+
+                // Configurazione dei colori: abbiamo rimosso l'override del labelColor
+                // per ripristinare il colore predefinito del tema (onSurfaceVariant/onSurface),
+                // mantenendo invece il colore di accento per lo stato selezionato.
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+
+                // 🧠 MODULAZIONE DINAMICA DEL CONTORNO (Micro-interazione visiva):
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = isSelected,
+                    // Se il chip è disattivato, disegna una linea perimetrale sottile del colore primario dell'app.
+                    borderColor = MaterialTheme.colorScheme.primary,
+                    // Se il chip viene selezionato, il bordo diventa totalmente trasparente, poiché il corpo
+                    // del pulsante si riempie visivamente in modalità solida (Color.Transparent evita sovrapposizioni).
+                    selectedBorderColor = Color.Transparent
+                )
             )
-        )
+        }
     }
