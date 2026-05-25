@@ -667,7 +667,7 @@ fun HomeScreen(
                                 }
                             ),
 
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(20.dp),
                             singleLine = true, // Impedisce di andare a capo premendo "Invio"
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -799,7 +799,7 @@ fun HomeScreen(
                                         expanded = !expanded
                                     },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                    shape = RoundedCornerShape(20.dp) // Forziamo una stondatura morbida ed evidente
+                                    shape = RoundedCornerShape(20.dp) // ARMONIA: Livello Moduli
                                 ) {
                                     Column(modifier = Modifier.padding(20.dp)) {
 

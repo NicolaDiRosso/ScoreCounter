@@ -325,7 +325,7 @@
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp, bottom = 12.dp),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = RoundedCornerShape(20.dp),
                     // Usiamo surfaceVariant con un tocco di trasparenza per non appesantire troppo la parte alta
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.80f)
@@ -614,7 +614,7 @@
                                 .fillMaxWidth()
                                 .focusRequester(focusRequester),
 
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(20.dp),
 
                             // singleLine disabilita il comportamento "multiline" (non crea a capo "\n")
                             // ed è propedeutico affinché imeAction venga rispettata dalla tastiera (IME).

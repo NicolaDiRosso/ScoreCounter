@@ -287,8 +287,7 @@ fun CreateMatchScreen(
                     Card(
                         // 1. La spaziatura è gestita dallo 'spacedBy' della Colonna madre
                         modifier = Modifier.fillMaxWidth(),
-                        // 2. SMUSSATURA RIDOTTA: Una card interna deve avere angoli leggermente più piccoli
-                        // di quella esterna (20.dp interno vs 24.dp esterno) per essere geometricamente piacevole.
+                        // 2. SMUSSATURA MORBIDA: Livello 2 (Moduli)
                         shape = RoundedCornerShape(20.dp),
                         // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -332,7 +331,7 @@ fun CreateMatchScreen(
                                 },
                                 label = { Text(stringResource(R.string.hint_nome_sfida)) }, // Sostituzione etichetta campo tradotta
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(20.dp),
                                 isError = showError && viewModel.matchTitle.isBlank(),
                                 // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare"
                                 // lo spazio vuoto inferiore e permettere ai titoli recenti di stare più vicini al box.
@@ -463,7 +462,7 @@ fun CreateMatchScreen(
                                 keyboardActions = KeyboardActions(
                                     onDone = { focusManager.clearFocus() }
                                 ),
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(20.dp),
                                 leadingIcon = {
                                     Icon(
                                         Icons.Default.EmojiEvents,
@@ -479,8 +478,7 @@ fun CreateMatchScreen(
                     Card(
                         // 1. La spaziatura è gestita dallo 'spacedBy' della Colonna madre
                         modifier = Modifier.fillMaxWidth(),
-                        // 2. SMUSSATURA RIDOTTA: Una card interna deve avere angoli leggermente più piccoli
-                        // di quella esterna (20.dp interno vs 24.dp esterno) per essere geometricamente piacevole.
+                        // 2. SMUSSATURA MORBIDA: Livello 2 (Moduli)
                         shape = RoundedCornerShape(20.dp),
                         // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -747,8 +745,7 @@ fun CreateMatchScreen(
                     Card(
                         // 1. La spaziatura è gestita dallo 'spacedBy' della Colonna madre
                         modifier = Modifier.fillMaxWidth(),
-                        // 2. SMUSSATURA RIDOTTA: Una card interna deve avere angoli leggermente più piccoli
-                        // di quella esterna (20.dp interno vs 24.dp esterno) per essere geometricamente piacevole.
+                        // 2. SMUSSATURA MORBIDA: Livello 2 (Moduli)
                         shape = RoundedCornerShape(20.dp),
                         // 3. CONTRASTO COLORI: Usiamo 'surface' (colore pulito) per staccare dal 'surfaceVariant' del tavolo.
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),

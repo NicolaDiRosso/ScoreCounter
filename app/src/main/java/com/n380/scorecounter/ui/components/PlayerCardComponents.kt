@@ -249,7 +249,7 @@
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
             colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.30f)),
             border = BorderStroke(1.dp, playerColor.copy(alpha = 0.5f)),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(20.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -263,7 +263,7 @@
                     modifier = Modifier
                         .width(12.dp)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+                        .clip(RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp))
                         .background(playerColor)
                 )
 
@@ -308,12 +308,12 @@
                         Box(
                             modifier = Modifier
                                 .size(56.dp)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.errorContainer)
                                 .border(
                                     1.dp,
                                     MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
-                                    RoundedCornerShape(16.dp)
+                                    RoundedCornerShape(12.dp)
                                 )
                                 .combinedClickable(
                                     onClick = {
@@ -365,12 +365,12 @@
                         Box(
                             modifier = Modifier
                                 .size(56.dp)
-                                .clip(RoundedCornerShape(16.dp))
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.primaryContainer)
                                 .border(
                                     1.dp,
                                     MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
-                                    RoundedCornerShape(16.dp)
+                                    RoundedCornerShape(12.dp)
                                 )
                                 .combinedClickable(
                                     onClick = {
@@ -469,8 +469,8 @@
             // Il vincitore non ha bordo (è pieno), gli altri hanno il bordo al 50%
             border = if (isWinner) null else BorderStroke(1.dp, playerColor.copy(alpha = 0.5f)),
 
-            // RISALTO STRUTTURALE: Forma più grande per il vincitore (24.dp vs 16.dp)
-            shape = RoundedCornerShape(if (isWinner) 24.dp else 16.dp),
+            // RISALTO STRUTTURALE: Forma più grande per il vincitore (24.dp vs 20.dp)
+            shape = RoundedCornerShape(if (isWinner) 24.dp else 20.dp),
 
             // RISALTO STRUTTURALE (Elevation): Il vincitore è "alzato" (ombra). Gli altri sono "piatti".
             elevation = if (isWinner) CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -493,7 +493,7 @@
                             modifier = Modifier
                                 .width(12.dp)
                                 .fillMaxHeight()
-                                .clip(RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+                                .clip(RoundedCornerShape(topStart = 20.dp, bottomStart = 20.dp))
                                 .background(playerColor)
                         )
                     }

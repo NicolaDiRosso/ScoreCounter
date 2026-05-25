@@ -202,7 +202,7 @@ fun TimerSettingsDialog(
                     // I modificatori (Modifier) in Compose si leggono a cascata (dall'alto in basso):
                     modifier = Modifier
                         .fillMaxWidth() // 1. Prima prendi tutta la larghezza
-                        .clip(RoundedCornerShape(16.dp)) // 2. Poi arrotonda i tuoi angoli
+                        .clip(RoundedCornerShape(20.dp)) // 2. Poi arrotonda i tuoi angoli
                         .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)) // 3. Poi colorati lo sfondo (con trasparenza al 20%)
 
                         // 🛠️ PRATICA: Il Bordo Dinamico
@@ -213,7 +213,7 @@ fun TimerSettingsDialog(
                                 BorderStroke(2.dp, displayColor)
                             else
                                 BorderStroke(0.dp, Color.Transparent),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(20.dp)
                         )
                         .padding(vertical = 24.dp), // 4. Infine, allargati dall'interno creando molto spazio sopra e sotto il testo.
                     contentAlignment = Alignment.Center
