@@ -391,7 +391,7 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(72.dp),
-                                    shape = RoundedCornerShape(20.dp),
+                                    shape = RoundedCornerShape(24.dp),
                                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primaryContainer,

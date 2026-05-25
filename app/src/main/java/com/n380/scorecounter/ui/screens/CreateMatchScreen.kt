@@ -431,6 +431,15 @@ fun CreateMatchScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
 
+                            //liena orizzontale semi trasparente che funge sa separatore
+                            Spacer(modifier = Modifier.height(7.dp))
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                    alpha = 0.2f
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(7.dp))
+
                             // INPUT: PUNTEGGIO OBIETTIVO (Filtro numerico)
                             OutlinedTextField(
                                 value = viewModel.targetScore,
@@ -887,9 +896,12 @@ fun CreateMatchScreen(
     }
 
     // MODALE UNIFICATO: MODIFICA GIOCATORE (Nome e Colore)
-    if (playerToEdit != null) {
-        var editedName by remember { mutableStateOf(playerToEdit!!.name) }
-        var editedColor by remember { mutableIntStateOf(playerToEdit!!.color) }
+    // mettiamo il '.let'. In questo modo la variabile 'player'
+    // nasce già sicura e non-nullabile per tutto l'ambito interno al Dialog.
+    playerToEdit?.let { player ->
+        // Ora possiamo usare 'player.name' senza il doppio punto esclamativo!
+        var editedName by remember { mutableStateOf(player.name) }
+        var editedColor by remember { mutableIntStateOf(player.color) }
 
         AlertDialog(
             onDismissRequest = { playerToEdit = null },
@@ -969,9 +981,18 @@ fun CreateMatchScreen(
                     Button(
                         onClick = {
                             if (editedName.isNotBlank()) {
-                                playerToEdit!!.name = editedName
-                                viewModel.updatePlayerColor(playerToEdit!!, editedColor)
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                // ------------------------------
+                                // Regola 2: Safe Call con .let
+                                // ------------------------------
+                                // Se l'utente ha premuto contemporaneamente "Annulla", playerToEdit sarà 'null'.
+                                // Di conseguenza, questo intero blocco '{...}' verrà elegantemente ignorato.
+                                playerToEdit?.let { playerSicuro ->
+                                    playerSicuro.name = editedName
+                                    viewModel.updatePlayerColor(playerSicuro, editedColor)
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                }
+
+                                // Finito tutto, chiudiamo il dialog svuotando la variabile
                                 playerToEdit = null
                             }
                         },
@@ -1320,8 +1341,22 @@ fun CreateMatchScreen(
 
 
     // MODALE: MODIFICA NOME PREFERITO
-    if (favToEdit != null) {
-        var editedFavName by remember { mutableStateOf(favToEdit!!) }
+    /**
+     * Usare favToEdit?.let  è il modo "Elegante e Sicuro" per lavorare con scatole che potrebbero essere vuote.
+     * È diviso in due parti che lavorano in squadra:
+     *
+     * Parte A: Il Safe Call ?. (La Chiamata Sicura)
+     * Il punto interrogativo seguito dal punto ?. significa:
+     * "Bussa alla scatola. Se è vuota (null), fermati immediatamente e ignora tutto quello che c'è scritto dopo. Se c'è qualcosa, procedi."
+     *
+     * Parte B: La Scope Function let (Lascia Fare)
+     * La parola let in inglese significa "lascia", "permetti".
+     * In Kotlin è una funzione speciale che crea una Stanza di Sicurezza (le parentesi graffe { }).
+     */
+    favToEdit?.let { favName ->
+        // Usiamo favName pulito!
+        var editedFavName by remember { mutableStateOf(favName) }
+
         AlertDialog(
             onDismissRequest = { favToEdit = null },
             title = {
