@@ -38,6 +38,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // Di default è un classico dado a 6 facce (D6).
     var diceSides by mutableIntStateOf(6)
 
+    // 🧠 LOGICA DI VALIDAZIONE: FINE PARTITA
+    // Questa proprietà calcolata controlla se il pulsante "Fine Partita" deve essere attivo.
+    // Restituisce true se ALMENO UN giocatore ha una cronologia punteggi superiore a 1.
+    // Nota: 'scoreHistory' nasce con un solo valore (lo zero iniziale). Se la dimensione è > 1,
+    // significa che qualcuno ha segnato un punto (positivo o negativo) o che la partita non è vergine.
+    val canEndMatch: Boolean
+        get() = players.any { it.scoreHistory.size > 1 }
+
     val players = mutableStateListOf<Player>()
     val history = mutableStateListOf<MatchRecord>()
     val favoriteNames = mutableStateListOf<String>()
@@ -423,6 +431,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * Implementa il "Global Tick" per la sincronizzazione dei grafici a linee.
      */
     fun updatePlayerScore(player: Player, amount: Int) {
+        // FILTRO MOVIMENTO: Se amount è 0, non è un vero cambiamento.
+        // Interrompiamo subito la funzione per non sporcare la cronologia con dati inutili
+        // e per non attivare il pulsante "Fine Partita" se non c'è stato spostamento reale.
+        if (amount == 0) return
+
         // ============================================================================
         // MACCHINA A STATI: SISTEMA COMBO E STATUS "ON FIRE"
         // ============================================================================

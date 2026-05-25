@@ -86,6 +86,9 @@
         // Se è "null", il popup per l'inserimento manuale è nascosto.
         var playerForManualEdit by remember { mutableStateOf<Player?>(null) }
 
+
+
+
         // STATO TUTORIAL: Controlla l'apertura del popup centrale con le regole nascoste (Manuale)
         var showInfoDialog by remember { mutableStateOf(false) }
 
