@@ -1,6 +1,5 @@
     package com.n380.scorecounter.ui.components
 
-    import android.R.attr.alpha
     import android.content.Context
     import android.content.Intent
     import androidx.compose.animation.core.*
@@ -12,8 +11,6 @@
     import androidx.compose.foundation.clickable
     import androidx.compose.foundation.horizontalScroll
     import androidx.compose.foundation.layout.*
-    import androidx.compose.foundation.lazy.LazyRow // <-- IMPORTANTE: Serve per la riga dei colori scorrevole
-    import androidx.compose.foundation.lazy.items // <-- IMPORTANTE: Serve per ciclare la lista dei colori
     import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.shape.RoundedCornerShape
     import androidx.compose.material.icons.Icons
@@ -695,80 +692,9 @@
         Color(0xFF43A047), Color(0xFFC0AC29), Color(0xFFFB8C00), Color(0xFFF4511E)
     )
 
-    /*
-    /**
-     * ColorPickerRow: Crea una riga scorrevole di pulsanti circolari colorati.
-     * @param selectedColor: Il colore che l'utente ha attualmente cliccato (per disegnare il bordo di selezione).
-     * @param onColorSelected: Una funzione (lambda) che avvisa l'app quando l'utente cambia scelta cromatica.
-     */
-    @Composable
-    fun ColorPickerRow(
-        selectedColor: Color,
-        onColorSelected: (Color) -> Unit,
-        modifier: Modifier = Modifier
-    ) {
-        // ---> 1. LA LISTA UNITA (Il Jolly + I Colori Normali) <---
-        // Creiamo una nuova lista mettendo Color.Unspecified al primo posto,
-        // seguito da tutti gli altri colori della nostra palette.
-        val paletteWithRandom = listOf(Color.Unspecified) + playerPalette
-
-        // LazyRow: Disegna graficamente solo i cerchi visibili
-        LazyRow(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
-        ) {
-            // ---> FIX LOGICO: Usiamo la nuova lista 'paletteWithRandom'! <---
-            items(paletteWithRandom) { color ->
-
-                val isSelected = color == selectedColor
-
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(15.dp))// RoundedCornerShape serve a dare quell'effetto "squadrato ma morbido" perfetto.
-                        // ---> 2. IL DISEGNO INTELLIGENTE (Modifier.then) <---
-                        // .then() ci permette di applicare modifiche grafiche diverse in base a una condizione
-                        .then(
-                            if (color == Color.Unspecified) {
-                                // Se è il Jolly: Disegna un gradiente arcobaleno a ruota
-                                Modifier.background(
-                                    Brush.sweepGradient(//definisce come un'area viene riempita. Invece della classica tinta unita, Jetpack Compose offre i Gradienti.
-                                        listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
-                                    )
-                                )
-                            } else {
-                                // Se è un colore normale: Disegna la tinta unita
-                                Modifier.background(color)
-                            }
-                        )
-                        // ---> 3. IL BORDO DI SELEZIONE <---
-                        .border(
-                            width = if (isSelected) 3.dp else 0.dp,
-                            // Selezionato = Bordo Blu (Primary). Non selezionato = Bordo invisibile.
-                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = RoundedCornerShape(15.dp)
-                            /* * 💡 CURIOSITÀ DI DESIGN: Le Forme e lo "Squircle"
-                             * Il raggio di stondatura (es. 12.dp) definisce la forma geometrica finale:
-                             * - 0.dp: Quadrato perfetto, spigoloso e netto.
-                             * - 20.dp: Cerchio perfetto (la metà esatta della grandezza totale, che qui è 40.dp).
-                             * - 8.dp ~ 16.dp: "Squircle" (Square + Circle). È la moderna forma a "mattonella"
-                             * morbidamente arrotondata, standard del Material Design 3 e delle icone smartphone!
-                             */
-
-                        )
-                        .clickable { onColorSelected(color) }
-                )
-            }
-        }
-    }*/
-
-
-
     // ====================================================================
     // MOTORE DI GENERAZIONE TESTO CONDIVISIONE (BUILDER ASTRATTO)
     // ====================================================================
-
     /**
      * 🧠 LEZIONE TEORICA I18N: Dependency Injection e Funzioni di Business
      * Questa NON è una funzione @Composable, quindi non possiamo usare il comodo stringResource() qui dentro.

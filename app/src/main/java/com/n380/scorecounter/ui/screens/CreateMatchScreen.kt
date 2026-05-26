@@ -30,7 +30,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Conversione cromatica per persistenza dati
-import androidx.compose.ui.graphics.Brush //sfumatura per caselle che scorrono in orizzontale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
