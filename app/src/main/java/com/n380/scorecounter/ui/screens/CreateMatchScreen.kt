@@ -1218,59 +1218,67 @@ fun CreateMatchScreen(
                                                     .padding(start = 12.dp)
                                             )
 
+                                            // ==========================================================
                                             // AZIONE: MODIFICA
-                                            IconButton(onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                favToEdit = fav
-                                            }) {
+                                            // Non specifichiamo "baseColor", quindi in automatico diventerà Blu!
+                                            // ==========================================================
+                                            TonalActionPill(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                    favToEdit = fav
+                                                },
+                                                //modifier = Modifier.padding(end = 8.dp) // 🧠 FIX UI: Leggero margine per non farlo incollare al cestino
+                                            ) {
                                                 Icon(
-                                                    Icons.Filled.Edit,
-                                                    stringResource(R.string.desc_modifica_icon),
-                                                    tint = MaterialTheme.colorScheme.primary
+                                                    imageVector = Icons.Filled.Edit,
+                                                    contentDescription = stringResource(R.string.desc_modifica_icon),
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(20.dp) // 🧠 FIX UI: Ridotto a 18dp per farlo calzare nella pillola
                                                 )
                                             }
 
-                                            // ====================================================================
-                                            // ELIMINAZIONE CON NOTIFICA DI ANNULLAMENTO (UNDO)
-                                            // ====================================================================
-                                            // Le Snackbar ("Annulla eliminazione") renderizzate DENTRO i Dialog spesso
-                                            // finiscono coperte o impallano la UI (problema dello Z-Index nativo).
-                                            // In un popup come questo, la prassi migliore è l'eliminazione diretta
-                                            // accompagnata da un forte feedback aptico (LongPress) per confermare l'azione.
-                                            IconButton(onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            // ==========================================================
+                                            // AZIONE: ELIMINAZIONE (CON SOVRASCRITTURA DEL COLORE)
+                                            // ==========================================================
+                                            TonalActionPill(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
 
-                                                // Salvataggio dei riferimenti per eventuale ripristino
-                                                val removedIndex = index
-                                                val removedFav = fav
+                                                    // Salvataggio dei riferimenti per eventuale ripristino
+                                                    val removedIndex = index
+                                                    val removedFav = fav
 
-                                                // Eliminazione effettiva
-                                                viewModel.removeFavorite(fav)
+                                                    // Eliminazione effettiva: Rimuove immediatamente l'elemento visivo
+                                                    viewModel.removeFavorite(fav)
 
-                                                // Mostriamo la notifica sfruttando lo stato LOCALE del Dialog
-                                                coroutineScope.launch {
-                                                    // Rimuove eventuali notifiche precedenti rimaste a schermo
-                                                    dialogSnackbarHostState.currentSnackbarData?.dismiss()
+                                                    // Lancia una Coroutine per gestire il timing della Snackbar
+                                                    coroutineScope.launch {
+                                                        // Disabilita la vecchia snackbar se l'utente clicca velocemente
+                                                        dialogSnackbarHostState.currentSnackbarData?.dismiss()
 
-                                                    val result =
-                                                        dialogSnackbarHostState.showSnackbar(
-                                                            message = msgFavRimosso,
-                                                            actionLabel = btnAnnullaFav,
-                                                            duration = SnackbarDuration.Short
-                                                        )
-                                                    // Se l'utente preme "Annulla", ripristiniamo il giocatore
-                                                    if (result == SnackbarResult.ActionPerformed) {
-                                                        viewModel.restoreFavorite(
-                                                            removedIndex,
-                                                            removedFav
-                                                        )
+                                                        val result =
+                                                            dialogSnackbarHostState.showSnackbar(
+                                                                message = msgFavRimosso,
+                                                                actionLabel = btnAnnullaFav,
+                                                                duration = SnackbarDuration.Short
+                                                            )
+                                                        // Se l'utente preme "Annulla", ripristiniamo il giocatore
+                                                        if (result == SnackbarResult.ActionPerformed) {
+                                                            viewModel.restoreFavorite(
+                                                                removedIndex,
+                                                                removedFav
+                                                            )
+                                                        }
                                                     }
-                                                }
-                                            }) {
+                                                },
+                                                // 🎨 LA MAGIA: Forziamo il bottone a usare il Rosso (Error) invece dell'azzurro!
+                                                baseColor = MaterialTheme.colorScheme.error
+                                            ) {
                                                 Icon(
-                                                    Icons.Filled.Delete,
-                                                    stringResource(R.string.desc_elimina_icon),
-                                                    tint = MaterialTheme.colorScheme.error
+                                                    imageVector = Icons.Filled.Delete,
+                                                    contentDescription = stringResource(R.string.desc_elimina_icon),
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                    modifier = Modifier.size(20.dp)
                                                 )
                                             }
                                         }

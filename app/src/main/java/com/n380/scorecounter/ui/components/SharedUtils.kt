@@ -497,6 +497,11 @@
     fun TonalActionPill(
         onClick: () -> Unit,//funzione onClick che non richiede dati in ingresso, ed esegue un'azione senza restituire un risultato matematico
         modifier: Modifier = Modifier,
+        // PARAMETRO CON VALORE DI DEFAULT:
+        // La sintassi "= MaterialTheme..." significa: "Questo è il colore base.
+        // Se lo sviluppatore che mi usa non inserisce nulla, io sarò (Primary).
+        // Ma se mi passa un colore diverso, io obbedirò e cambierò!"
+        baseColor: Color = MaterialTheme.colorScheme.primary,
         // SLOT API E LAMBDA:
         // 1. "@Composable": Dichiara che questo parametro accetta codice che disegna UI (es. Icon, Text).
         // 2. "RowScope.()": Dona al codice che verrà inserito i "superpoteri" di una Row
