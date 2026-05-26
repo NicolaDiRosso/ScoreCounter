@@ -1227,13 +1227,13 @@ fun CreateMatchScreen(
                                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                                     favToEdit = fav
                                                 },
-                                                //modifier = Modifier.padding(end = 8.dp) // 🧠 FIX UI: Leggero margine per non farlo incollare al cestino
+                                                modifier = Modifier.padding(end = 5.dp) // 🧠 FIX UI: Leggero margine per non farlo incollare al cestino
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Filled.Edit,
                                                     contentDescription = stringResource(R.string.desc_modifica_icon),
                                                     tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(20.dp) // 🧠 FIX UI: Ridotto a 18dp per farlo calzare nella pillola
+                                                    modifier = Modifier.size(22.dp) // 🧠 FIX UI: Ridotto a 20dp per farlo calzare nella pillola
                                                 )
                                             }
 
@@ -1278,7 +1278,7 @@ fun CreateMatchScreen(
                                                     imageVector = Icons.Filled.Delete,
                                                     contentDescription = stringResource(R.string.desc_elimina_icon),
                                                     tint = MaterialTheme.colorScheme.error,
-                                                    modifier = Modifier.size(20.dp)
+                                                    modifier = Modifier.size(22.dp)
                                                 )
                                             }
                                         }

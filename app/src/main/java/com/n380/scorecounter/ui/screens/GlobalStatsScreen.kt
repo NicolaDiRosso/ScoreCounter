@@ -390,7 +390,7 @@ fun GlobalStatsScreen(
                                     Icon(
                                         imageVector = Icons.Filled.WorkspacePremium,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 1f),
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 1f),
                                         modifier = Modifier
                                             .size(120.dp)
                                             .align(Alignment.CenterEnd)

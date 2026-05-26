@@ -536,6 +536,35 @@
         }
     }
 
+    // ====================================================================
+    // COMPONENTE RIUSABILE: FilledActionPill (Bottone Solido e Pieno)
+    // ====================================================================
+    @Composable
+    fun FilledActionPill(
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+        // Di default usa il colore Primario solido
+        containerColor: Color = MaterialTheme.colorScheme.primary,
+        content: @Composable RowScope.() -> Unit
+    ) {
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(12.dp),
+            // 🎨 Niente '.copy(alpha = ...)'! Il colore qui è pieno al 100%
+            color = containerColor,
+            // Niente bordino, non serve su un pulsante pieno
+            modifier = modifier
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                content = content
+            )
+        }
+    }
+
+
 
     // ====================================================================
     // COMPONENTE: SELETTORE COLORI (ColorPicker)
@@ -617,6 +646,8 @@
             }
         }
     }
+
+
 
     // ====================================================================
     // MOTORE DI GENERAZIONE TESTO CONDIVISIONE (BUILDER ASTRATTO)
