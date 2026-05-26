@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WorkspacePremium
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.ui.components.formatDate // Per mostrare la data nelle card espanse
 import com.n380.scorecounter.ui.components.formatTime
+import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.viewmodel.MatchViewModel
 //per misurare un solo tocco alla volta per il pulsante chiudi
 import androidx.compose.runtime.mutableStateOf
@@ -373,7 +375,9 @@ fun GlobalStatsScreen(
                                         drawContent() // 1. Disegna normalmente
                                         drawRect(brush = shimmerBrush) // 2. Ci passa sopra la luce
                                     },
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
                                 shape = RoundedCornerShape(24.dp)
                             ) {
                                 // TEORIA COMPOSE (Il Layout Box):
@@ -385,16 +389,17 @@ fun GlobalStatsScreen(
                                         .padding(vertical = 20.dp, horizontal = 24.dp)
                                 ) {
                                     // ----------------------------------------------------------------
-                                    // STRATO 1 (Sfondo): Medaglia Gigante in Filigrana
+                                    // STRATO 1 (Sfondo): Medaglia Gigante in Filigrana (Watermark)
                                     // ----------------------------------------------------------------
                                     Icon(
                                         imageVector = Icons.Filled.WorkspacePremium,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 1f),
                                         modifier = Modifier
-                                            .size(120.dp)
+                                            .size(140.dp)
                                             .align(Alignment.CenterEnd)
                                             .offset(x = 24.dp) // La spingiamo fuori dal bordo per tagliarla
+                                        //.offset(x = 30.dp, y = 10.dp) // Leggero sfalsamento dinamico
                                     )
 
                                     // ----------------------------------------------------------------
@@ -404,38 +409,51 @@ fun GlobalStatsScreen(
                                         Text(
                                             // Traduce l'intestazione della carta del giocatore che ha vinto di più
                                             text = stringResource(R.string.titolo_campione_assoluto),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            // Regola d'oro: su 'primaryContainer' usiamo 'onPrimaryContainer'
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                                            fontWeight = FontWeight.Bold
+                                            style = MaterialTheme.typography.titleSmall,
+                                            // Garantiamo massima leggibilità con opacità piena per il titolo
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            letterSpacing = 1.sp // Un tocco di spaziatura per un look "Pro"
                                         )
 
                                         // LEZIONE TEORICA KOTLIN: Elvis Operator (?:)
                                         // Questa riga tenta di leggere il nome del giocatore migliore. Se il database
                                         // è vuoto, bestPlayer sarà nullo. L'operatore '?:' dice: "Se la variabile di
                                         // sinistra è nulla, usa la stringa che ti passo a destra come paracadute".
-                                        Text(
+                                        AutoResizedText(
                                             // Utilizza la stringa "Nessuno" dal dizionario se il giocatore è nullo
                                             text = bestPlayer?.key ?: stringResource(R.string.nessuno),
                                             style = MaterialTheme.typography.displayMedium,
                                             fontWeight = FontWeight.Black,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.padding(vertical = 4.dp)
                                         )
 
                                         // BADGE (La "Pillola" col numero di vittorie)
-                                        Card(
-                                            modifier = Modifier.padding(top = 8.dp),
+                                        Surface(
+                                            modifier = Modifier.padding(top = 12.dp),
                                             shape = RoundedCornerShape(12.dp),
-                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shadowElevation = 4.dp // Elevazione per farlo risaltare come un premio fisico
                                         ) {
-                                            Text(
-                                                // Utilizza un segnaposto numerico (%d) per formattare il badge "X VITTORIE"
-                                                text = stringResource(R.string.label_vittorie, bestPlayer?.value ?: 0),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                            )
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.EmojiEvents,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(25.dp).padding(end = 6.dp)
+                                                )
+                                                Text(
+                                                    // Utilizza un segnaposto numerico (%d) per formattare il badge "X VITTORIE"
+                                                    text = stringResource(R.string.label_vittorie, bestPlayer?.value ?: 0),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            }
                                         }
                                     }
                                 }

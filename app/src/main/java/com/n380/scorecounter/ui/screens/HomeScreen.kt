@@ -484,6 +484,9 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
+
+
                     // ==========================================================
                     // 1. PULSANTE SUPPORTO (CUORE) - Terziario Pieno (Rosa)
                     // ==========================================================
