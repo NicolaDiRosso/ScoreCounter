@@ -406,7 +406,12 @@
                                 },
                                 modifier = Modifier.height(48.dp), // Altezza portata a 48dp per standard touch target
                                 shape = RoundedCornerShape(16.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp)
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                // Coloriamo il pulsante con il PrimaryContainer pastello!
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             ) {
                                 Icon(Icons.Filled.Timer, null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
                                 Text(stringResource(R.string.btn_timer), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold) // 🌍 I18N
@@ -421,7 +426,13 @@
                                 },
                                 modifier = Modifier.height(48.dp), // Altezza portata a 48dp per standard touch target
                                 shape = RoundedCornerShape(16.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp)
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                // Coloriamo il pulsante con il PrimaryContainer pastello!
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+
                             ) {
                                 Icon(Icons.Filled.Casino, null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
                                 AutoResizedText(stringResource(R.string.btn_dado), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold) // 🌍 I18N

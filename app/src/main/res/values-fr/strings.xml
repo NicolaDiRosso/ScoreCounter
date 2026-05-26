@@ -123,11 +123,11 @@
     <string name="desc_attenzione_icon">Avertissement</string>
     <string name="titolo_conferma_azzeramento">Voulez-vous vraiment réinitialiser ?</string>
     <string name="msg_conferma_azzeramento">Voulez-vous vraiment tout réinitialiser ?\nCette action ne peut pas être annulée.</string>
-    <string name="btn_conferma_azzera">Oui, réinitialiser</string>
+    <string name="btn_conferma_azzera">Réinitialiser</string>
     <string name="desc_uscita_icon">Avertissement de sortie</string>
     <string name="titolo_conferma_uscita">Quitter la partie ?</string>
     <string name="msg_conferma_uscita">Si vous retournez à l\'Accueil, la progression actuelle sera perdue à jamais. Voulez-vous vraiment quitter ?</string>
-    <string name="btn_conferma_uscita">Oui, quitter</string>
+    <string name="btn_conferma_uscita">Quitter</string>
     <string name="titolo_info_funzionalita">Infos sur les fonctionnalités</string>
     <string name="titolo_info_punteggio">🚀 Score Rapide</string>
     <string name="msg_info_punteggio">Maintenez le bouton \'+\' appuyé pour ajouter rapidement 10 points ou le bouton \'-\' pour en soustraire 5.</string>

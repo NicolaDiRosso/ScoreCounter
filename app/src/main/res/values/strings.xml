@@ -130,11 +130,11 @@
     <string name="desc_attenzione_icon">Warning</string>
     <string name="titolo_conferma_azzeramento">Are you sure you want to reset?</string>
     <string name="msg_conferma_azzeramento">Are you sure you want to reset everything?\nThis action cannot be undone.</string>
-    <string name="btn_conferma_azzera">Yes, reset</string>
+    <string name="btn_conferma_azzera">Reset</string>
     <string name="desc_uscita_icon">Exit Warning</string>
     <string name="titolo_conferma_uscita">Leave the match?</string>
     <string name="msg_conferma_uscita">If you return to Home, current progress will be lost forever. Are you sure you want to exit?</string>
-    <string name="btn_conferma_uscita">Yes, exit</string>
+    <string name="btn_conferma_uscita">Exit</string>
     <string name="titolo_info_funzionalita">Feature Info</string>
     <string name="titolo_info_punteggio">🚀 Quick Score</string>
     <string name="msg_info_punteggio">Press and hold the \'+\' button to quickly add 10 points or the \'-\' button to subtract 5.</string>

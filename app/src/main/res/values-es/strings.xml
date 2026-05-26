@@ -123,11 +123,11 @@
     <string name="desc_attenzione_icon">Advertencia</string>
     <string name="titolo_conferma_azzeramento">¿Seguro que quieres restablecer?</string>
     <string name="msg_conferma_azzeramento">¿Estás seguro de que deseas restablecer todo?\nEsta acción no se puede deshacer.</string>
-    <string name="btn_conferma_azzera">Sí, restablecer</string>
+    <string name="btn_conferma_azzera">Restablecer</string>
     <string name="desc_uscita_icon">Advertencia de salida</string>
     <string name="titolo_conferma_uscita">¿Salir de la partida?</string>
     <string name="msg_conferma_uscita">Si regresas al Inicio, el progreso actual se perderá para siempre. ¿Estás seguro de que deseas salir?</string>
-    <string name="btn_conferma_uscita">Sí, salir</string>
+    <string name="btn_conferma_uscita">Salir</string>
     <string name="titolo_info_funzionalita">Info de Funciones</string>
     <string name="titolo_info_punteggio">🚀 Puntuación rápida</string>
     <string name="msg_info_punteggio">Mantén presionado el botón \'+\' para añadir 10 puntos rápidamente o el botón \'-\' para restar 5.</string>

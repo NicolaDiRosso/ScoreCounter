@@ -131,11 +131,11 @@
     <string name="desc_attenzione_icon">Attenzione</string>
     <string name="titolo_conferma_azzeramento">Vuoi proprio azzerare?</string>
     <string name="msg_conferma_azzeramento">Sei sicuro di voler azzerare tutto?\nQuesta azione non può essere annullata.</string>
-    <string name="btn_conferma_azzera">Sì, azzera</string>
+    <string name="btn_conferma_azzera">Azzera</string>
     <string name="desc_uscita_icon">Attenzione Uscita</string>
     <string name="titolo_conferma_uscita">Abbandonare la partita?</string>
     <string name="msg_conferma_uscita">Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?</string>
-    <string name="btn_conferma_uscita">Sì, esci</string>
+    <string name="btn_conferma_uscita">Esci</string>
     <string name="titolo_info_funzionalita">Info funzionalità</string>
     <string name="titolo_info_punteggio">🚀 Punteggio Rapido</string>
     <string name="msg_info_punteggio">Tieni premuto il tasto \'+\' per aggiungere 10 punti o il tasto \'-\' per toglierne 5 in modo rapido.</string>

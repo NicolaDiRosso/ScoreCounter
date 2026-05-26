@@ -123,11 +123,11 @@
     <string name="desc_attenzione_icon">警告</string>
     <string name="titolo_conferma_azzeramento">本当にリセットしますか？</string>
     <string name="msg_conferma_azzeramento">すべてをリセットしてもよろしいですか？\nこの操作は元に戻せません。</string>
-    <string name="btn_conferma_azzera">はい、リセットします</string>
+    <string name="btn_conferma_azzera">リセット</string>
     <string name="desc_uscita_icon">終了の警告</string>
     <string name="titolo_conferma_uscita">試合から退出しますか？</string>
     <string name="msg_conferma_uscita">ホームに戻ると、現在の進行状況は永久に失われます。本当に退出しますか？</string>
-    <string name="btn_conferma_uscita">はい、退出します</string>
+    <string name="btn_conferma_uscita">退出</string>
     <string name="titolo_info_funzionalita">機能情報</string>
     <string name="titolo_info_punteggio">🚀 クイックスコア</string>
     <string name="msg_info_punteggio">\\\'+\\\' ボタンを長押しするとすぐに10ポイントが追加され、\\\'-\\\' ボタンで5ポイントが減点されます。</string>

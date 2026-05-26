@@ -123,11 +123,11 @@
     <string name="desc_attenzione_icon">Warnung</string>
     <string name="titolo_conferma_azzeramento">Bist du sicher, dass du zurücksetzen möchtest?</string>
     <string name="msg_conferma_azzeramento">Bist du sicher, dass du alles zurücksetzen möchtest?\nDiese Aktion kann nicht rückgängig gemacht werden.</string>
-    <string name="btn_conferma_azzera">Ja, zurücksetzen</string>
+    <string name="btn_conferma_azzera">Zurücksetzen</string>
     <string name="desc_uscita_icon">Ausgangswarnung</string>
     <string name="titolo_conferma_uscita">Das Spiel verlassen?</string>
     <string name="msg_conferma_uscita">Wenn du zum Hauptmenü zurückkehrst, geht der aktuelle Fortschritt für immer verloren. Bist du sicher, dass du beenden möchtest?</string>
-    <string name="btn_conferma_uscita">Ja, beenden</string>
+    <string name="btn_conferma_uscita">Beenden</string>
     <string name="titolo_info_funzionalita">Funktionsinfo</string>
     <string name="titolo_info_punteggio">🚀 Schnelle Punktzahl</string>
     <string name="msg_info_punteggio">Halte die \\\'+\\\'-Taste gedrückt, um schnell 10 Punkte hinzuzufügen, oder die \\\'-\\\'-Taste, um 5 abzuziehen.</string>

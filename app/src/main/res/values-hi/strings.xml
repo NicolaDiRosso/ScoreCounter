@@ -123,11 +123,11 @@
     <string name="desc_attenzione_icon">चेतावनी</string>
     <string name="titolo_conferma_azzeramento">क्या आप वाकई रीसेट करना चाहते हैं?</string>
     <string name="msg_conferma_azzeramento">क्या आप वाकई सब कुछ रीसेट करना चाहते हैं?\nइस क्रिया को पूर्ववत नहीं किया जा सकता है।</string>
-    <string name="btn_conferma_azzera">हाँ, रीसेट करें</string>
+    <string name="btn_conferma_azzera">रीसेट करें</string>
     <string name="desc_uscita_icon">बाहर निकलने की चेतावनी</string>
     <string name="titolo_conferma_uscita">मैच छोड़ें?</string>
     <string name="msg_conferma_uscita">यदि आप होम पर लौटते हैं, तो वर्तमान प्रगति हमेशा के लिए नष्ट हो जाएगी। क्या आप वाकई बाहर निकलना चाहते हैं?</string>
-    <string name="btn_conferma_uscita">हाँ, बाहर निकलें</string>
+    <string name="btn_conferma_uscita">बाहर निकलें</string>
     <string name="titolo_info_funzionalita">सुविधा जानकारी</string>
     <string name="titolo_info_punteggio">🚀 त्वरित स्कोर</string>
     <string name="msg_info_punteggio">जल्दी से 10 अंक जोड़ने के लिए \\\'+\\\' बटन या 5 घटाने के लिए \\\'-\\\' बटन को दबाकर रखें।</string>
