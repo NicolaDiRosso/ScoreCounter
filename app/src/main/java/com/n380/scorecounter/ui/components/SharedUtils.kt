@@ -1,5 +1,6 @@
     package com.n380.scorecounter.ui.components
 
+    import android.R.attr.alpha
     import android.content.Context
     import android.content.Intent
     import androidx.compose.animation.core.*
@@ -26,6 +27,7 @@
     import androidx.compose.runtime.*
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.Modifier
+    import androidx.compose.ui.draw.alpha
     import androidx.compose.ui.draw.clip
     import androidx.compose.ui.draw.drawWithContent
     import androidx.compose.ui.geometry.Offset
@@ -196,10 +198,10 @@
      */
 
     // ====================================================================
-    // 📊 COMPONENTE: GRAFICO INTERATTIVO (ScoreChart)
-    // ====================================================================
-    // Questa è una funzione "Composable", ovvero disegna UI.
-    // Riceve la lista dei giocatori, la grandezza (isDetailed) e la durata.
+// 📊 COMPONENTE: GRAFICO INTERATTIVO (ScoreChart)
+// ====================================================================
+// Questa è una funzione "Composable", ovvero disegna UI.
+// Riceve la lista dei giocatori, la grandezza (isDetailed) e la durata.
     @Composable
     fun ScoreChart(
         players: List<PlayerRecord>,
@@ -415,13 +417,13 @@
             } // <-- Fine Canvas
 
             // ====================================================================
-            // 🧠 6. LA LEGENDA INTERATTIVA (Design Pulito con Nomi in Grassetto)
+            // 🧠 6. LA LEGENDA INTERATTIVA (Evoluzione in Badge / Tonal Chips)
             // ====================================================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if(isDetailed) 12.dp else 4.dp)
-                    // Permette di scorrere i nomi lateralmente se ci sono molti giocatori
+                    // Permette di scorrere i bottoni lateralmente se ci sono molti giocatori
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -430,35 +432,66 @@
                     // Controlliamo la memoria: questo specifico giocatore è spento?
                     val isHidden = hiddenPlayers.contains(player.name)
 
-                    // 🧠 LA HITBOX (Area Cliccabile)
-                    // Il '.clickable' è sull'intera riga, quindi l'utente può premere comodamente
-                    // sia sul nome che sul quadratino per attivare l'interruttore.
+                    // 🧠 IL BADGE COERENTE (La riga diventa un pulsante a pillola)
+                    // Usiamo i modificatori per ricreare lo stile Tonal ad onde con bordo dell'app.
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .padding(end = 12.dp, bottom = 4.dp)
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)) // Smussa gli angoli dell'onda tattile al click
-                            // INTERRUTTORE DI CLICK:
+                            // Spazio esterno tra una pillola e l'altra
+                            .padding(end = 10.dp, bottom = 4.dp)
+
+                            // 1. STONDATURA: Taglia l'effetto onda del click a raggio 8.dp (stilo chip)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+
+                            // 2. SFUMATURA DI SFONDO (BACKGROUND):
+                            // - Se attivo: Colore Primario molto sfumato (12% opacità), stile TonalButton.
+                            // - Se spento: Sfondo trasparente per far "svuotare" la casella.
+                            .background(
+                                if (isHidden) Color.Transparent
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            )
+
+                            // 3. IL BORDO COERENTE (BORDER):
+                            // - Se attivo: Bordino sottile azzurro/blu primario (30% opacità).
+                            // - Se spento: Bordino grigio neutro sbiadito (20% opacità).
+                            .border(
+                                width = 1.dp,
+                                color = if (isHidden) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                            )
+
+                            // 🧠 LA HITBOX (Area Cliccabile): Abilitata su tutto il riquadro
                             .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Vibrazione
-                                // Accende o spegne il giocatore aggiungendolo/togliendolo dai nascosti
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Innesca micro-vibrazione
+
+                                // Logica degli insiemi: accende o spegne inserendo/rimuovendo dal Set
                                 hiddenPlayers = if (isHidden) {
                                     hiddenPlayers - player.name
                                 } else {
                                     hiddenPlayers + player.name
                                 }
                             }
-                            .padding(horizontal = 6.dp, vertical = 6.dp)
+
+                            // Padding interno: fa respirare quadratino e testo dentro la scatola
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
                     ) {
                         // --------------------------------------------------------
-                        // 🎨 IL QUADRATINO DELLA LEGENDA (Fisso e Immutabile)
+                        // 🎨 IL QUADRATINO DELLA LEGENDA (Chiave di lettura fissa)
                         // --------------------------------------------------------
                         Box(
                             modifier = Modifier
-                                .size(if(isDetailed) 14.dp else 10.dp)
-                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
-                                // Il colore rimane SEMPRE pieno, a prescindere dallo stato 'isHidden'
+                                .size(if(isDetailed) 14.dp else 10.dp) // Più piccolo nel widget della Home
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp)) // Quadratino smussato dolce
+
+                                // 🧠 LA TUA RICHIESTA: Il colore di sfondo resta fisso al 100%!
                                 .background(Color(player.color))
+
+                                // Sfumiamo leggermente l'opacità complessiva del quadratino solo se spento (alpha 40%)
+                                // per accordarsi elegantemente con il testo cancellato, ma senza nascondere il colore.
+                                .let { modificatore ->
+                                    if (isHidden) modificatore.alpha(0.4f) else modificatore
+                                }
                         )
 
                         // --------------------------------------------------------
@@ -468,15 +501,18 @@
                             text = player.name,
                             style = if(isDetailed) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
 
-                            // 🧠 LA TUA RICHIESTA: Forza il testo ad essere in GRASSETTO
+                            // Forza il testo ad essere in GRASSETTO per massima leggibilità
                             fontWeight = FontWeight.Bold,
 
                             modifier = Modifier.padding(start = 6.dp),
 
                             // GESTIONE DINAMICA DEL COLORE E DELLA LINEA:
-                            // Se il giocatore è SPENTO (isHidden) -> Testo sbiadito (alpha 0.4) e linea sopra (LineThrough).
-                            // Se ACCESO -> Testo normale e nessuna linea (null).
-                            color = if (isHidden) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurface,
+                            // - Se attivo: Prende il colore Primario (Blu/Azzurro del tema) per staccare dallo sfondo.
+                            // - Se spento: Sbiadisce in un grigio neutro al 40% di opacità.
+                            color = if (isHidden) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            else MaterialTheme.colorScheme.primary,
+
+                            // Applica la cancellatura (LineThrough) orizzontale solo quando escluso dal grafico
                             textDecoration = if (isHidden) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
                         )
                     }
@@ -654,11 +690,12 @@
      * Questi colori sono stati scelti per garantire un ottimo contrasto visivo tra i giocatori.
      */
     val playerPalette = listOf(
-        Color(0xFFE53935), Color(0xFFD81B60), Color(0xFF8E24AA), Color(0xFF5E35B1),
+        Color(0xFFE53935), Color(0xFFD81B60), Color(0xFFC972F5), Color(0xFF8349EF),
         Color(0xFF1E88E5), Color(0xFF039BE5), Color(0xFF00ACC1), Color(0xFF00897B),
-        Color(0xFF43A047), Color(0xFFD5C236), Color(0xFFFB8C00), Color(0xFFF4511E)
+        Color(0xFF43A047), Color(0xFFC0AC29), Color(0xFFFB8C00), Color(0xFFF4511E)
     )
 
+    /*
     /**
      * ColorPickerRow: Crea una riga scorrevole di pulsanti circolari colorati.
      * @param selectedColor: Il colore che l'utente ha attualmente cliccato (per disegnare il bordo di selezione).
@@ -724,7 +761,7 @@
                 )
             }
         }
-    }
+    }*/
 
 
 
