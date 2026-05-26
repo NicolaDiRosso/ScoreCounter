@@ -3,6 +3,7 @@
     import android.content.Context
     import android.content.Intent
     import androidx.compose.animation.core.*
+    import androidx.compose.foundation.BorderStroke
     import androidx.compose.ui.graphics.vector.ImageVector
     import androidx.compose.foundation.Canvas
     import androidx.compose.foundation.background
@@ -480,6 +481,56 @@
             }
         }
     }
+
+    // ======================================================================================
+    //  TonalActionPill (Bottone per micro-azioni come quello "GESTISCI" di gestisci giocatori rapidi)
+    // ======================================================================================
+    /**
+     * Crea un pulsante "Tonal" (sfondo semi-trasparente e bordo leggero).
+     * È lo standard del nostro Design System per le azioni secondarie o le impostazioni.
+     * * @param text Il testo da mostrare dentro il bottone.
+     * @param onClick L'azione da eseguire quando viene premuto.
+     * @param modifier Permette di aggiungere padding o allineamenti dall'esterno.
+     * @param icon L'icona opzionale da mostrare a sinistra del testo.
+     */
+    @Composable
+    fun TonalActionPill(
+        onClick: () -> Unit,//funzione onClick che non richiede dati in ingresso, ed esegue un'azione senza restituire un risultato matematico
+        modifier: Modifier = Modifier,
+        // SLOT API E LAMBDA:
+        // 1. "@Composable": Dichiara che questo parametro accetta codice che disegna UI (es. Icon, Text).
+        // 2. "RowScope.()": Dona al codice che verrà inserito i "superpoteri" di una Row
+        //    (permettendo a chi usa il bottone di usare ad esempio Modifier.weight).
+        // 3. "-> Unit": È una funzione Lambda. Significa "Esegui un blocco di istruzioni senza restituire dati matematici".
+        content: @Composable RowScope.() -> Unit
+    ) {
+        // 1. LA SCATOLA ESTERNA (Il comportamento fisico e i colori)
+        Surface(
+            onClick = onClick,
+            // GEOMETRIA: Stondatura a 12dp (Pillola/Azione Ausiliaria) come deciso dal Design System
+            shape = RoundedCornerShape(12.dp),
+            // COLORE: Azzurrino pastello (Colore primario con 12% di opacità)
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+            // BORDO: Sottile e semi-trasparente
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+            modifier = modifier
+        ) {
+            // 2. L'IMPALCATURA INTERNA (Come vengono disposti gli elementi)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                // PADDING INTERNO: Il "vestito su misura" del bottone
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                // Qui dentro viene "iniettato" il contenuto personalizzato
+                // - Il "content" a SINISTRA è il parametro ufficiale richiesto dal componente Row di Jetpack Compose.
+                // - Il "content" a DESTRA è la variabile che abbiamo definito noi qui sopra,
+                //   che contiene la grafica (es. Icona e Testo) passata dalla schermata che usa questo bottone.
+                // Stiamo dicendo: "Prendi la grafica che ci hanno fornito e stampala esattamente in questo punto".
+                content = content
+            )
+        }
+    }
+
 
     // ====================================================================
     // COMPONENTE: SELETTORE COLORI (ColorPicker)

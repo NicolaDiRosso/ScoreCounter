@@ -1,5 +1,6 @@
 package com.n380.scorecounter.ui.screens
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,6 +47,7 @@ import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.CustomSelectableChip
 import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
+import com.n380.scorecounter.ui.components.TonalActionPill
 import com.n380.scorecounter.ui.components.playerPalette
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
@@ -523,45 +525,27 @@ fun CreateMatchScreen(
                                 // ====================================================================
                                 // PULSANTE "GESTISCI" CON TESTO E ICONA (Affordance chiara)
                                 // ====================================================================
-                                // Usiamo una Surface con onClick. È il modo più pulito in Compose per
-                                // creare componenti personalizzati cliccabili con sfondi e forme specifiche.
-                                Surface(
+                                TonalActionPill(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                         showFavoritesDialog = true
-                                    },
-                                    // STONDATURA: Ripristiniamo la tua stondatura corretta a 12.dp
-                                    shape = RoundedCornerShape(12.dp),
-                                    // COLORE: Usiamo il tuo colore primario al 12% per un look delicato
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                                    // IL BORDO: Aggiungiamo un bordo sottile col colore primario opacizzato (come il dado)
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                                ) {
-                                    // Usiamo una Row per disporre testo e icona in orizzontale
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp), // Spazio vitale tra la scritta e l'ingranaggio
-                                        // PADDING (IL SEGRETO): Non usiamo size fisse! Diamo 12dp di spazio ai lati e 6dp sopra/sotto.
-                                        // Così il pulsante si adatterà da solo come un "vestito su misura".
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
-                                    ) {
-                                        // L'icona
-                                        Icon(
-                                            imageVector = Icons.Filled.Settings,
-                                            contentDescription = stringResource(R.string.desc_gestisci_rapidi_icon),
-                                            tint = MaterialTheme.colorScheme.primary, // Icona in risalto col colore pieno
-                                            modifier = Modifier.size(16.dp) // LA dimensione dell'icona è messa più piccola per non sovrastare l'altezza del testo
-                                        )
-                                        // Il testo descrittivo
-                                        AutoResizedText(
-                                            // I18N: Usiamo la stringa tradotta appena creata
-                                            text = stringResource(R.string.btn_gestisci),
-                                            // GERARCHIA VISIVA:
-                                            style = MaterialTheme.typography.labelMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
                                     }
+                                ) {
+                                    // Usiamo lo Slot API: passiamo l'icona...
+                                    Icon(
+                                        imageVector = Icons.Filled.Settings,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+
+                                    // testo "Gestisci" formattato su misura
+                                    AutoResizedText(
+                                        text = stringResource(R.string.btn_gestisci),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             }
 
@@ -1019,7 +1003,7 @@ fun CreateMatchScreen(
     if (showFavoritesDialog) {
         var newFavName by remember { mutableStateOf("") }
 
-        // ---> 🧠 FIX UX: STATO NOTIFICHE LOCALE <---
+        // ---> STATO NOTIFICHE LOCALE <---
         // Creiamo un gestore di notifiche ESCLUSIVO per questo Dialog.
         // Essendo il Dialog una finestra a sé stante (Z-Index superiore),
         // non possiamo usare le notifiche dello Scaffold base.
