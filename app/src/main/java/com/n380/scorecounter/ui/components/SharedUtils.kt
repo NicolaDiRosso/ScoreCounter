@@ -34,6 +34,8 @@
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
     import androidx.compose.ui.graphics.toArgb
+    import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+    import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.compose.ui.res.stringResource
     import androidx.compose.ui.text.TextStyle
     import androidx.compose.ui.text.font.FontWeight
@@ -193,134 +195,162 @@
      * per far rientrare i dati all'interno della dimensione del Canvas.
      */
 
+    // ====================================================================
+    // 📊 COMPONENTE: GRAFICO INTERATTIVO (ScoreChart)
+    // ====================================================================
+    // Questa è una funzione "Composable", ovvero disegna UI.
+    // Riceve la lista dei giocatori, la grandezza (isDetailed) e la durata.
     @Composable
     fun ScoreChart(
         players: List<PlayerRecord>,
         modifier: Modifier = Modifier,
-        isDetailed: Boolean = false,
-        durationSeconds: Long = 0L // Input fondamentale per mappare i pixel sui minuti reali
+        isDetailed: Boolean = false, // 🧠 L'INTERRUTTORE: Se è false, disegna in piccolo. Se è true, in grande.
+        durationSeconds: Long = 0L
     ) {
-        // 🌍 I18N: Non potendo usare @Composable qui dentro il blocco del Canvas nativo in modo fluido,
-        // catturiamo tutte le stringhe di base (Inizio, Fine, ecc.) in anticipo.
+        // Estraiamo il motore di vibrazione del telefono (Serve per far vibrare i quadratini)
+        val haptic = LocalHapticFeedback.current
+
+        // Traduzioni base
         val labelInizio = stringResource(R.string.label_chart_inizio)
         val labelMeta = stringResource(R.string.label_chart_meta)
         val labelFine = stringResource(R.string.label_chart_fine)
 
-        // VALIDAZIONE DATI: Evita tentativi di calcolo su liste nulle che causerebbero crash per divisione per zero.
+        // ====================================================================
+        // 🧠 1. GESTIONE DELLO STATO (La Memoria)
+        // ====================================================================
+        // 'hiddenPlayers' è una scatola magica che ricorda i nomi dei giocatori spenti.
+        // Usiamo 'Set' (Insieme matematico) e non 'List' perché in un Set ogni nome
+        // può esserci una volta sola (non possono esserci due "Marco" nascosti).
+        var hiddenPlayers by remember { mutableStateOf(setOf<String>()) }
+
+        // PROTEZIONE ANTI-CRASH: Se non ci sono giocatori, fermati e non disegnare nulla.
         if (players.isEmpty()) return
+
+        // Filtriamo via i giocatori che hanno 0 round giocati (evita calcoli su grafici vuoti)
         val validPlayers = players.filter { (it.scoreHistory ?: emptyList()).isNotEmpty() }
         if (validPlayers.isEmpty()) return
 
-        // ESTREMI MATEMATICI: Determiniamo il range di valori dell'asse Y.
-        // maxScore e minScore definiscono il "tetto" e il "pavimento" del grafico.
-        val maxScore = validPlayers.maxOf { (it.scoreHistory ?: emptyList()).maxOrNull() ?: 0 }
-        val minScore = validPlayers.minOf { (it.scoreHistory ?: emptyList()).minOrNull() ?: 0 }
+        // 🧠 IL FILTRAGGIO REATTIVO
+        // Creiamo una lista 'visiblePlayers' prendendo i validPlayers, MA escludendo (!)
+        // quelli il cui nome è finito dentro la nostra scatola 'hiddenPlayers'.
+        val visiblePlayers = validPlayers.filter { !hiddenPlayers.contains(it.name) }
 
         // ====================================================================
-        // TEMA CHIARO/SCURO: ESTRAZIONE COLORI ADATTIVI
+        // 🧠 2. LA MATEMATICA DELL'AUTO-ZOOM
         // ====================================================================
-        // Estraiamo i colori dal MaterialTheme PRIMA di entrare nel Canvas.
-        // In questo modo, che l'app sia in Light o Dark mode, questi colori
-        // assicureranno sempre il contrasto perfetto.
+        // Per far sì che il grafico faccia "Zoom", deve sapere qual è il tetto massimo e minimo.
+        // Invece di guardare TUTTI i giocatori, gli diciamo di guardare SOLO 'visiblePlayers'.
+        // In questo modo, se spegni il giocatore primo in classifica, il 'maxScore' si abbassa
+        // istantaneamente, e il grafico per magia si adatta ai giocatori rimanenti!
+        val maxScore = visiblePlayers.mapNotNull { it.scoreHistory?.maxOrNull() }.maxOrNull() ?: 0
+        val minScore = visiblePlayers.mapNotNull { it.scoreHistory?.minOrNull() }.minOrNull() ?: 0
 
-        // Colore per i testi dei numeri. Usiamo onSurfaceVariant e lo tradiamo in ARGB per il pennello nativo
+        // ====================================================================
+        // 3. I COLORI ADATTIVI (Chiaro/Scuro)
+        // ====================================================================
         val nativeAdaptiveTextColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
-
-        // Colore per le linee orizzontali di sfondo (griglia). Opacità al 20%
-        val adaptiveGridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-
-        // Colore per le "tacche" fisiche del tempo. Opacità al 50%
+        // Se il grafico è piccolo (isDetailed = false), facciamo la griglia più invisibile (alpha 0.1f)
+        // per non confondere l'occhio. Se è grande, la calchiamo un po' di più (alpha 0.2f).
+        val adaptiveGridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDetailed) 0.2f else 0.1f)
         val adaptiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
 
-
+        // Colonna principale che conterrà il Canvas (sopra) e la Legenda (sotto)
         Column(modifier = modifier) {
+
+            // ====================================================================
+            // 🎨 4. LA TELA DA DISEGNO (CANVAS)
+            // ====================================================================
             Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
-                // --------------------------------------------------------------------
-                // DEFINIZIONE AREA DI DISEGNO (BOUNDS)
-                // --------------------------------------------------------------------
-                // Calcoliamo i margini (Padding) per non far toccare le linee ai bordi dello schermo.
-                val padYTop = 10.dp.toPx()
-                val padYBottom = if (isDetailed) 50.dp.toPx() else 16.dp.toPx()
-                val padX = if (isDetailed) 20.dp.toPx() else 16.dp.toPx()
+                // 🧠 I MARGINI DI SICUREZZA (Padding)
+                // Usiamo ".toPx()" per convertire i "dp" (unità di misura dello schermo) in "Pixel" matematici.
+                // Se il grafico è piccolo, diamo margini stretti (es. padYTop = 4). Se è grande, margini larghi.
+                val padYTop = if (isDetailed) 10.dp.toPx() else 4.dp.toPx()
+                val padYBottom = if (isDetailed) 50.dp.toPx() else 24.dp.toPx()
+                val padX = if (isDetailed) 20.dp.toPx() else 12.dp.toPx()
 
-                // drawW e drawH rappresentano l'area netta calpestabile per il disegno delle linee.
+                // 'drawW' (Larghezza) e 'drawH' (Altezza) sono la misura effettiva in pixel
+                // dove possiamo disegnare le linee senza sbattere sui bordi.
                 val drawW = (size.width - padX * 2).coerceAtLeast(1f)
                 val drawH = (size.height - padYTop - padYBottom).coerceAtLeast(1f)
 
-                // yRange serve come denominatore per normalizzare i punteggi (da 0 a 1).
+                // L'escursione termica dei punti (es. massimo 50, minimo 0 = range di 50).
                 val yRange = (maxScore - minScore).coerceAtLeast(1).toFloat()
 
-                if (isDetailed) {
-                    // Configurazione del "Pennello" nativo per il rendering del testo.
-                    val textPaint = android.graphics.Paint().apply {
-                        // 🧠 FIX: Usiamo il colore adattivo estratto dal tema, invece del "LTGRAY" scolpito nella pietra!
-                        color = nativeAdaptiveTextColor
-                        textSize = 32f
-                        textAlign = android.graphics.Paint.Align.RIGHT
-                        typeface = android.graphics.Typeface.DEFAULT_BOLD
-                    }
+                // 🧠 IL PENNELLO DEL TESTO
+                val textPaint = android.graphics.Paint().apply {
+                    color = nativeAdaptiveTextColor
+                    // Se grafico grande -> font 32f. Se piccolo -> font 22f.
+                    textSize = if (isDetailed) 32f else 22f
+                    textAlign = android.graphics.Paint.Align.RIGHT // Allineato a destra (verso l'asse)
+                    typeface = android.graphics.Typeface.DEFAULT_BOLD
+                }
 
-                    // --------------------------------------------------------------------
-                    // DISEGNO ASSE Y E GRIGLIA ORIZZONTALE
-                    // --------------------------------------------------------------------
-                    val steps = 4 // Dividiamo l'altezza in 4 fasce di punteggio.
-                    for (i in 0..steps) {
-                        // y: Calcolo della posizione verticale invertita (in Android lo 0 e' in alto).
-                        val y = padYTop + drawH - (i * (drawH / steps))
+                // --------------------------------------------------------------------
+                // ASSE Y (Le fasce orizzontali dei Punteggi)
+                // --------------------------------------------------------------------
+                // Quante righe vogliamo? 4 se grande, 2 se piccolo (altrimenti sarebbero tutte accavallate).
+                val ySteps = if (isDetailed) 4 else 2
+                for (i in 0..ySteps) {
+                    // Calcolo della posizione Y (Dall'alto verso il basso)
+                    val y = padYTop + drawH - (i * (drawH / ySteps))
 
-                        // Griglia di sfondo: aiuta a leggere il valore della linea in quel punto.
-                        drawLine(
-                            color = adaptiveGridColor, // 🧠 FIX: Colore adattivo
-                            start = Offset(padX, y),
-                            end = Offset(padX + drawW, y),
-                            strokeWidth = 2f
-                        )
+                    // Disegna la linea grigia da sinistra (start) a destra (end)
+                    drawLine(
+                        color = adaptiveGridColor,
+                        start = Offset(padX, y),
+                        end = Offset(padX + drawW, y),
+                        strokeWidth = if (isDetailed) 2f else 1f // Linea sottile se grafico piccolo
+                    )
 
-                        // Etichette numeriche: Calcoliamo il valore testuale proporzionale allo step.
-                        val value = minScore + (yRange / steps) * i
-                        drawContext.canvas.nativeCanvas.drawText(
-                            value.toInt().toString(),
-                            padX - 24f,
-                            y + 10f,
-                            textPaint
-                        )
-                    }
+                    // Calcola il numero da scrivere (Es. riga 1 = 10 punti, riga 2 = 20 punti)
+                    val value = minScore + (yRange / ySteps) * i
 
-                    // --------------------------------------------------------------------
-                    // DISEGNO ASSE X E TIMELINE CRONOLOGICA
-                    // --------------------------------------------------------------------
-                    textPaint.textAlign = android.graphics.Paint.Align.CENTER
-                    val xSteps = 4 // Suddividiamo il tempo in 4 segmenti (0%, 25%, 50%, 75%, 100%).
+                    // Sposta il testo un po' a sinistra e un po' in basso per non coprire la linea
+                    val textOffsetX = if (isDetailed) 24f else 16f
+                    val textOffsetY = if (isDetailed) 10f else 8f
 
-                    for (i in 0..xSteps) {
-                        // xPos: Calcola dove cade la "tacca" temporale sulla larghezza del Canvas.
-                        val xPos = padX + i * (drawW / xSteps)
+                    // Disegna fisicamente il numero (es. "20") sulla tela!
+                    drawContext.canvas.nativeCanvas.drawText(
+                        value.toInt().toString(),
+                        padX - textOffsetX,
+                        y + textOffsetY,
+                        textPaint
+                    )
+                }
 
-                        // Griglia di sfondo verticale: aiuta a leggere il tempo in corrispondenza dei punti.
-                        drawLine(
-                            color = adaptiveGridColor, // 🧠 FIX: Colore adattivo
-                            start = Offset(xPos, padYTop),
-                            end = Offset(xPos, padYTop + drawH),
-                            strokeWidth = 2f
-                        )
+                // --------------------------------------------------------------------
+                // ASSE X (Le fasce verticali del Tempo)
+                // --------------------------------------------------------------------
+                textPaint.textAlign = android.graphics.Paint.Align.CENTER
+                // Quante colonne? 4 se grande, 2 se piccolo (Inizio e Fine).
+                val xSteps = if (isDetailed) 4 else 2
+                for (i in 0..xSteps) {
+                    val xPos = padX + i * (drawW / xSteps) // Posizione orizzontale
 
-                        // Disegno della tacca fisica (piccola linea/riga verticale sull'asse).
-                        drawLine(
-                            color = adaptiveTickColor, // 🧠 FIX: Colore adattivo per la marcatura
-                            start = Offset(xPos, size.height - padYBottom),
-                            end = Offset(xPos, size.height - padYBottom + 12f),
-                            strokeWidth = 3f
-                        )
+                    // Linea grigia verticale di sfondo
+                    drawLine(
+                        color = adaptiveGridColor,
+                        start = Offset(xPos, padYTop),
+                        end = Offset(xPos, padYTop + drawH),
+                        strokeWidth = if (isDetailed) 2f else 1f
+                    )
+                    // Piccola tacchetta scura che sporge sotto il grafico
+                    drawLine(
+                        color = adaptiveTickColor,
+                        start = Offset(xPos, size.height - padYBottom),
+                        end = Offset(xPos, size.height - padYBottom + (if(isDetailed) 12f else 6f)),
+                        strokeWidth = if (isDetailed) 3f else 2f
+                    )
 
-                        // LOGICA TEMPORALE: Trasformazione degli indici in formati temporali leggibili.
-                        val label = if (durationSeconds > 0) {
-                            // 1. Calcoliamo i secondi relativi a questo step (es. 25% di 600 secondi = 150 secondi).
-                            val fractionSeconds = (durationSeconds.toFloat() / xSteps) * i
-                            // 2. Usiamo la funzione di utilita' formatTime per avere il formato "MM:SS".
-                            formatTime(fractionSeconds.toLong())
-                        } else {
-                            // 🌍 I18N: Fallback testuale per vecchie partite senza dato temporale, ora internazionale!
+                    // 🧠 LOGICA DELLE ETICHETTE DEL TEMPO
+                    val label = if (durationSeconds > 0) {
+                        // Se c'è un timer vero, calcola il tempo esatto di quel segmento
+                        val fractionSeconds = (durationSeconds.toFloat() / xSteps) * i
+                        formatTime(fractionSeconds.toLong())
+                    } else {
+                        // Se NON c'è timer, mette le scritte manuali (Inizio, 1/4, Metà...)
+                        if (isDetailed) {
                             when(i) {
                                 0 -> labelInizio
                                 1 -> "1/4"
@@ -328,77 +358,127 @@
                                 3 -> "3/4"
                                 else -> labelFine
                             }
+                        } else {
+                            // Se il grafico è piccolo ha solo 3 tacche (0, 1, 2)
+                            when(i) {
+                                0 -> labelInizio
+                                1 -> labelMeta
+                                else -> labelFine
+                            }
                         }
-
-                        // Rendering finale dell'etichetta del tempo sotto l'asse.
-                        drawContext.canvas.nativeCanvas.drawText(
-                            label,
-                            xPos,
-                            size.height - padYBottom + 45f,
-                            textPaint
-                        )
                     }
+                    val textBottomOffset = if (isDetailed) 45f else 30f
+                    // Scrive la parola sul fondo
+                    drawContext.canvas.nativeCanvas.drawText(label, xPos, size.height - padYBottom + textBottomOffset, textPaint)
                 }
 
                 // --------------------------------------------------------------------
-                // RENDERING DELLE TRAIETTORIE (LINEE PUNTEGGIO)
+                // 🧠 5. DISEGNO DEI SENTIERI (Le linee dei giocatori)
                 // --------------------------------------------------------------------
-                validPlayers.forEach { player ->
-                    val color = Color(player.color)
-                    val path = androidx.compose.ui.graphics.Path()
+                // NOTA BENE: Questo ciclo analizza SOLO 'visiblePlayers'.
+                // I giocatori spenti sono ignorati, quindi non vengono disegnati!
+                visiblePlayers.forEach { player ->
+                    val color = Color(player.color) // Prende il colore del giocatore
+                    val path = androidx.compose.ui.graphics.Path() // Crea un "sentiero" vuoto
                     val history = player.scoreHistory ?: emptyList()
 
                     if (history.size >= 1) {
-                        // localXStep: Determina la distanza tra un punto e l'altro.
-                        // Poiche' abbiamo sincronizzato le liste nel ViewModel, localXStep sara'
-                        // identico per tutti i giocatori, garantendo la coerenza temporale.
+                        // Distanza orizzontale esatta tra ogni round
                         val localXStep = drawW / (history.size - 1).coerceAtLeast(1).toFloat()
 
                         history.forEachIndexed { turn, score ->
-                            // Calcolo coordinata X: basata sulla posizione nella lista (il turno).
+                            // Matematica cartesiana: X (avanza col tempo), Y (sale coi punti)
                             val x = padX + (turn * localXStep)
-
-                            // Calcolo coordinata Y: Normalizziamo il punteggio rispetto al range
-                            // e lo scaliamo sull'altezza disponibile (drawH).
                             val y = padYTop + drawH - ((score - minScore) / yRange * drawH)
 
-                            if (turn == 0) path.moveTo(x, y) // Punto di partenza.
-                            else path.lineTo(x, y) // Connessione lineare al punto successivo.
+                            // moveTo posiziona la penna all'inizio, lineTo traccia la linea fino al punto successivo
+                            if (turn == 0) path.moveTo(x, y)
+                            else path.lineTo(x, y)
 
-                            // Disegno dei nodi (pallini) per evidenziare i momenti di cambio punteggio.
+                            // Disegna un pallino su ogni round
                             val radius = if (isDetailed) 2.dp.toPx() else 1.dp.toPx()
                             drawCircle(color, radius, Offset(x, y))
                         }
                     }
 
-                    // Disegno del tracciato completo (Path).
+                    // Stampa l'intero "sentiero" (Path) sulla tela, con angoli arrotondati (StrokeCap.Round)
                     drawPath(
                         path = path,
                         color = color,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(
-                            width = if (isDetailed) 3.dp.toPx() else 2.dp.toPx(),
+                            width = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx(), // Linea spessa o sottile
                             cap = androidx.compose.ui.graphics.StrokeCap.Round,
                             join = androidx.compose.ui.graphics.StrokeJoin.Round
                         )
                     )
                 }
-            }
+            } // <-- Fine Canvas
 
-            // LEGENDA: Mostra i nomi dei giocatori con i relativi colori sotto il grafico.
+            // ====================================================================
+            // 🧠 6. LA LEGENDA INTERATTIVA (Design Pulito con Nomi in Grassetto)
+            // ====================================================================
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp)
+                    .padding(top = if(isDetailed) 12.dp else 4.dp)
+                    // Permette di scorrere i nomi lateralmente se ci sono molti giocatori
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.Center
             ) {
+                // Iteriamo su TUTTI i giocatori validi per mostrarli in fondo al grafico
                 validPlayers.forEach { player ->
+                    // Controlliamo la memoria: questo specifico giocatore è spento?
+                    val isHidden = hiddenPlayers.contains(player.name)
+
+                    // 🧠 LA HITBOX (Area Cliccabile)
+                    // Il '.clickable' è sull'intera riga, quindi l'utente può premere comodamente
+                    // sia sul nome che sul quadratino per attivare l'interruttore.
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 12.dp, bottom = 4.dp)
+                        modifier = Modifier
+                            .padding(end = 12.dp, bottom = 4.dp)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp)) // Smussa gli angoli dell'onda tattile al click
+                            // INTERRUTTORE DI CLICK:
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Vibrazione
+                                // Accende o spegne il giocatore aggiungendolo/togliendolo dai nascosti
+                                hiddenPlayers = if (isHidden) {
+                                    hiddenPlayers - player.name
+                                } else {
+                                    hiddenPlayers + player.name
+                                }
+                            }
+                            .padding(horizontal = 6.dp, vertical = 6.dp)
                     ) {
-                        Box(modifier = Modifier.size(10.dp).clip(androidx.compose.foundation.shape.CircleShape).background(Color(player.color)))
-                        Text(text = player.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 4.dp))
+                        // --------------------------------------------------------
+                        // 🎨 IL QUADRATINO DELLA LEGENDA (Fisso e Immutabile)
+                        // --------------------------------------------------------
+                        Box(
+                            modifier = Modifier
+                                .size(if(isDetailed) 14.dp else 10.dp)
+                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
+                                // Il colore rimane SEMPRE pieno, a prescindere dallo stato 'isHidden'
+                                .background(Color(player.color))
+                        )
+
+                        // --------------------------------------------------------
+                        // 📝 IL NOME DEL GIOCATORE (Grassetto!)
+                        // --------------------------------------------------------
+                        Text(
+                            text = player.name,
+                            style = if(isDetailed) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
+
+                            // 🧠 LA TUA RICHIESTA: Forza il testo ad essere in GRASSETTO
+                            fontWeight = FontWeight.Bold,
+
+                            modifier = Modifier.padding(start = 6.dp),
+
+                            // GESTIONE DINAMICA DEL COLORE E DELLA LINEA:
+                            // Se il giocatore è SPENTO (isHidden) -> Testo sbiadito (alpha 0.4) e linea sopra (LineThrough).
+                            // Se ACCESO -> Testo normale e nessuna linea (null).
+                            color = if (isHidden) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurface,
+                            textDecoration = if (isHidden) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+                        )
                     }
                 }
             }
@@ -408,7 +488,6 @@
     // ====================================================================
     // IL MOTORE GRAFICO DEI CORIANDOLI
     // ====================================================================
-
     @Composable
     fun ConfettiExplosion(colors: List<Color>, onAnimationFinished: () -> Unit) {
         // Animatable: Il "timer/percentuale" dell'animazione. Parte da 0.0f (0%) e arriverà a 1.0f (100%).
