@@ -62,6 +62,9 @@
         // Stato per decidere se mostrare il popup di conferma azzeramento
         var showResetDialog by remember { mutableStateOf(false) }
 
+        // IL SEMAFORO: Ricorda se abbiamo già premuto "Fine Partita" per bloccare altri click simultanei
+        var isNavigating by remember { mutableStateOf(false) }
+
         // Variabile che indica se mostrare l'avviso di uscita "Salva-Vita" (se si preme Indietro per sbaglio)
         var showExitWarning by remember { mutableStateOf(false) }
 
@@ -239,9 +242,13 @@
                         // ========================================================
                         OutlinedButton(
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
-                                showResetDialog = true
+                                // IL BLOCCO CONDIZIONALE
+                                // Usiamo il '!' (NOT). Diciamo: "Se NON stiamo chiudendo la partita..."
+                                if (!isNavigating) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
+                                    showResetDialog = true// ...allora puoi aprire il popup!
+                                }
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -266,9 +273,18 @@
                         Button(
                             enabled = viewModel.canEndMatch,
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                viewModel.pauseTimer()
-                                onNavigateToResults()
+                                // L'OPERATORE OR (||)
+                                // Se il popup del reset è APERTO, OPPURE stiamo GIÀ navigando via...
+                                if (showResetDialog || isNavigating) {
+                                    // Lasciamo le parentesi graffe VUOTE.
+                                    // Il Main Thread  entra qui e non fa assolutamente niente. Il click muore.
+                                } else {
+                                    // Se le condizioni non si verificano, eseguiamo l'azione:
+                                    isNavigating = true // 1. Accendiamo il Semaforo! Nessun altro bottone funzionerà.
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.pauseTimer()
+                                    onNavigateToResults()
+                                }
                             },
                             modifier = Modifier
                                 .weight(1f)

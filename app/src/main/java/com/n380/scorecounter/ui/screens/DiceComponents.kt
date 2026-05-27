@@ -94,7 +94,7 @@ fun DiceSettingsDialog(
                 Text(stringResource(R.string.label_scegli_formato_dado), style = MaterialTheme.typography.bodyMedium)
 
                 // GRIGLIA DADI STANDARD
-                val diceOptions = listOf(6, 12, 20, 100)
+                val diceOptions = listOf(6, 10, 20, 100)
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     diceOptions.chunked(2).forEach { rowItems ->
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

@@ -242,13 +242,32 @@
         onScoreChange: (Int) -> Unit,
         onScoreClick: () -> Unit
     ) {
+        // Estraiamo i motori di vibrazione e il colore originale del giocatore
         val haptic = LocalHapticFeedback.current
         val playerColor = Color(player.color)
 
         Card(
+            // Il Modifier gestisce lo spazio fisico: occupa tutta la larghezza e metti un margine di 4dp sopra e sotto
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+
+            // Lo sfondo della card prende il colore del giocatore sbiadito al 30% (Effetto Vetro/Pastello)
             colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.30f)),
-            border = BorderStroke(1.dp, playerColor.copy(alpha = 0.5f)),
+
+            // ----------------------------------------
+            // Assegnazione Dinamica con "Inline If"
+            // ----------------------------------------
+            // Diciamo al parametro 'border' di prendere il risultato di questa scelta logica:
+            border = if (isLeader) {
+                // CASO VERO: Se il giocatore è in testa, crea un bordo spesso (3.dp)
+                // e usa 'playerColor' puro al 100% di saturazione. Contrasto perfetto!
+                BorderStroke(3.dp, playerColor)
+            } else {
+                // CASO FALSO: Se non è in testa, mantieni il design originale dell'app:
+                // un bordo sottile (1.dp) e semi-trasparente (50%) per dare sobrietà.
+                BorderStroke(1.dp, playerColor.copy(alpha = 0.5f))
+            },
+
+            // Arrotondiamo gli angoli della card a 20 pixel di densità
             shape = RoundedCornerShape(20.dp)
         ) {
             Row(
@@ -291,14 +310,7 @@
                             modifier = Modifier.weight(1f, fill = false)
                         )
 
-                        if (isLeader) {
-                            Icon(
-                                imageVector = Icons.Filled.WorkspacePremium,
-                                contentDescription = "In Vantaggio",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(start = 8.dp).size(28.dp)
-                            )
-                        }
+
                     }
 
                     // 2. BLOCCO PULSANTI E PUNTEGGIO
