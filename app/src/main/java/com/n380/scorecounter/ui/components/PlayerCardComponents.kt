@@ -260,7 +260,7 @@
             border = if (isLeader) {
                 // CASO VERO: Se il giocatore è in testa, crea un bordo spesso (3.dp)
                 // e usa 'playerColor' puro al 100% di saturazione. Contrasto perfetto!
-                BorderStroke(3.dp, playerColor)
+                BorderStroke(4.dp, playerColor)
             } else {
                 // CASO FALSO: Se non è in testa, mantieni il design originale dell'app:
                 // un bordo sottile (1.dp) e semi-trasparente (50%) per dare sobrietà.
