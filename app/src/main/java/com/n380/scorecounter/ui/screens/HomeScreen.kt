@@ -678,7 +678,8 @@ fun HomeScreen(
                                     }
                                 ),
 
-                                shape = RoundedCornerShape(20.dp),
+                                // 🧠 DESIGN CHANGE: Stondatura ridotta a 12.dp per coerenza con i nuovi campi di testo (Module style)
+                                shape = RoundedCornerShape(12.dp),
                                 singleLine = true, // Impedisce di andare a capo premendo "Invio"
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedContainerColor = MaterialTheme.colorScheme.surface,

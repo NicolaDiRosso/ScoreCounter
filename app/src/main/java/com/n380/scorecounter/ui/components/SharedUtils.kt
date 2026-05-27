@@ -437,8 +437,8 @@
                             // Spazio esterno tra una pillola e l'altra
                             .padding(end = 10.dp, bottom = 4.dp)
 
-                            // 1. STONDATURA: Taglia l'effetto onda del click a raggio 8.dp (stilo chip)
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                            // 1. STONDATURA: Taglia l'effetto onda del click a raggio 20.dp (stilo Soft Pill)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(20.dp))
 
                             // 2. SFUMATURA DI SFONDO (BACKGROUND):
                             // - Se attivo: Colore Primario molto sfumato (12% opacità), stile TonalButton.
@@ -455,7 +455,7 @@
                                 width = 1.dp,
                                 color = if (isHidden) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
                                 else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
                             )
 
                             // 🧠 LA HITBOX (Area Cliccabile): Abilitata su tutto il riquadro
@@ -624,8 +624,8 @@
         // 1. LA SCATOLA ESTERNA (Il comportamento fisico e i colori)
         Surface(
             onClick = onClick,
-            // GEOMETRIA: Stondatura a 12dp (Pillola/Azione Ausiliaria) come deciso dal Design System
-            shape = RoundedCornerShape(12.dp),
+            // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp per coerenza con i pulsanti d'azione (Soft Pill)
+            shape = RoundedCornerShape(20.dp),
             // COLORE: Azzurrino pastello (Colore primario con 12% di opacità)
             color = baseColor.copy(alpha = 0.12f),
             // BORDO: Sottile e semi-trasparente
@@ -661,7 +661,8 @@
     ) {
         Surface(
             onClick = onClick,
-            shape = RoundedCornerShape(12.dp),
+            // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp per coerenza
+            shape = RoundedCornerShape(20.dp),
             // 🎨 Niente '.copy(alpha = ...)'! Il colore qui è pieno al 100%
             color = containerColor,
             // Niente bordino, non serve su un pulsante pieno

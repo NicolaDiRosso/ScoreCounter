@@ -634,7 +634,8 @@
                                 .fillMaxWidth()
                                 .focusRequester(focusRequester),
 
-                            shape = RoundedCornerShape(20.dp),
+                            // 🧠 DESIGN CHANGE: Stondatura ridotta a 12.dp per coerenza con i nuovi campi di testo (Module style)
+                            shape = RoundedCornerShape(12.dp),
 
                             // singleLine disabilita il comportamento "multiline" (non crea a capo "\n")
                             // ed è propedeutico affinché imeAction venga rispettata dalla tastiera (IME).

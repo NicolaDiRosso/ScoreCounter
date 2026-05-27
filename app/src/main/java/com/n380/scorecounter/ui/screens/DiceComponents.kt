@@ -110,7 +110,8 @@ fun DiceSettingsDialog(
                                             customDiceInput = ""
                                         },
                                     colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
-                                    shape = RoundedCornerShape(12.dp),
+                                    // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp per coerenza con i chip di selezione (Soft Pill)
+                                    shape = RoundedCornerShape(20.dp),
                                     // 🎨 UI DESIGN: Aggiungiamo un bordo per definire meglio la forma delle card.
                                     // Utilizzare un BorderStroke aiuta a far risaltare il componente e a dare coerenza
                                     // con il resto del design system (es. campi di testo e pulsanti secondari).
@@ -169,7 +170,8 @@ fun DiceSettingsDialog(
                         // si traducono esattamente come un normale componente Text.
                         placeholder = { Text(stringResource(R.string.hint_es_facce_dado)) },
                         label = { Text(stringResource(R.string.hint_n_facce)) },
-                        shape = RoundedCornerShape(20.dp),
+                        // 🧠 DESIGN CHANGE: Stondatura ridotta a 12.dp per coerenza con i nuovi campi di testo (Module style)
+                        shape = RoundedCornerShape(12.dp),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
@@ -282,8 +284,8 @@ fun DiceRollDialog(
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onOpenSettings()
                     },
-                    // Stessa geometria e colori dell'icona del file CreateMatchScreen
-                    shape = RoundedCornerShape(12.dp),
+                    // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp per coerenza con i pulsanti d'azione
+                    shape = RoundedCornerShape(20.dp),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                 ) {
