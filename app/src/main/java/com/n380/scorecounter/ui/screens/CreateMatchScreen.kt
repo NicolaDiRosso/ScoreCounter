@@ -332,7 +332,8 @@ fun CreateMatchScreen(
                                 },
                                 label = { Text(stringResource(R.string.hint_nome_sfida)) }, // Sostituzione etichetta campo tradotta
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(20.dp),
+                                // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp (stile Chip precedente)
+                                shape = RoundedCornerShape(12.dp),
                                 isError = showError && viewModel.matchTitle.isBlank(),
                                 // GESTIONE SPAZIO DINAMICO: Se non c'è errore, impostiamo supportingText a null per far "collassare"
                                 // lo spazio vuoto inferiore e permettere ai titoli recenti di stare più vicini al box.
@@ -463,7 +464,8 @@ fun CreateMatchScreen(
                                 keyboardActions = KeyboardActions(
                                     onDone = { focusManager.clearFocus() }
                                 ),
-                                shape = RoundedCornerShape(20.dp),
+                                // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
+                                shape = RoundedCornerShape(12.dp),
                                 leadingIcon = {
                                     Icon(
                                         Icons.Default.EmojiEvents,
@@ -663,7 +665,8 @@ fun CreateMatchScreen(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                     },
-                                    shape = RoundedCornerShape(20.dp),
+                                    // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp
+                                    shape = RoundedCornerShape(12.dp),
                                     leadingIcon = {
                                         Icon(
                                             Icons.Filled.Person,
@@ -931,7 +934,8 @@ fun CreateMatchScreen(
                         onValueChange = { editedName = it },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Traduzione input field
-                        shape = RoundedCornerShape(16.dp),
+                        // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
+                        shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
@@ -1087,7 +1091,8 @@ fun CreateMatchScreen(
                                 onValueChange = { newFavName = it },
                                 modifier = Modifier.weight(1f),
                                 placeholder = { Text(stringResource(R.string.hint_nuovo_nome)) },
-                                shape = RoundedCornerShape(20.dp),
+                                // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
+                                shape = RoundedCornerShape(12.dp),
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.Person,
@@ -1357,7 +1362,8 @@ fun CreateMatchScreen(
                     value = editedFavName,
                     onValueChange = { editedFavName = it },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+                    // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
+                    shape = RoundedCornerShape(12.dp)
                 )
             },
             confirmButton = {

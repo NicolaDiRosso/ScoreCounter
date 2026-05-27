@@ -627,9 +627,9 @@
             // GEOMETRIA: Stondatura a 12dp (Pillola/Azione Ausiliaria) come deciso dal Design System
             shape = RoundedCornerShape(12.dp),
             // COLORE: Azzurrino pastello (Colore primario con 12% di opacità)
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+            color = baseColor.copy(alpha = 0.12f),
             // BORDO: Sottile e semi-trasparente
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
+            border = BorderStroke(1.dp, baseColor.copy(alpha = 0.3f)),
             modifier = modifier
         ) {
             // 2. L'IMPALCATURA INTERNA (Come vengono disposti gli elementi)
@@ -916,9 +916,8 @@
             // Usiamo il colore 'surface' pulito per far risaltare il pulsante sopra
             // lo sfondo 'surfaceVariant' più scuro del tavolo.
             color = MaterialTheme.colorScheme.surface,
-            // Definiamo una smussatura degli angoli a 12.dp per mantenere coerenza geometrica
-            // con la griglia dei componenti e delle tessere (Card) della schermata principale.
-            shape = RoundedCornerShape(12.dp),
+            // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp (stile Input precedente) per un look più tondo.
+            shape = RoundedCornerShape(20.dp),
             // 🎨 EFFETTO OMBRA: Impostiamo un'elevazione di 4.dp per creare un distacco
             // visibile e premium dallo sfondo, dando l'effetto che la card sia "sollevata".
             shadowElevation = 4.dp,
@@ -953,8 +952,8 @@
                     )
                 },
 
-                // Ripetiamo la forma anche qui per far combaciare perfettamente il chip alla Surface.
-                shape = RoundedCornerShape(12.dp),
+                // 🧠 DESIGN CHANGE: Ripetiamo la forma a 20.dp per far combaciare perfettamente il chip alla Surface.
+                shape = RoundedCornerShape(20.dp),
 
                 // 🧠 RENDERING CONDIZIONALE DELL'ELEMENTO ICONA:
                 // Eseguiamo una valutazione logica 'if' direttamente all'interno dello slot della proprietà.
