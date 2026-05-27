@@ -1231,7 +1231,7 @@ fun CreateMatchScreen(
                                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                                     favToEdit = fav
                                                 },
-                                                modifier = Modifier.padding(end = 5.dp) // 🧠 FIX UI: Leggero margine per non farlo incollare al cestino
+                                                modifier = Modifier.padding(end = 6.dp) // 🧠 FIX UI: Aumentato margine per tasti più larghi
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Filled.Edit,

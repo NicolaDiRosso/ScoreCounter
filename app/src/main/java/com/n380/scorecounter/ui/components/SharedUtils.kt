@@ -637,7 +637,7 @@
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 // PADDING INTERNO: Il "vestito su misura" del bottone
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                 // Qui dentro viene "iniettato" il contenuto personalizzato
                 // - Il "content" a SINISTRA è il parametro ufficiale richiesto dal componente Row di Jetpack Compose.
                 // - Il "content" a DESTRA è la variabile che abbiamo definito noi qui sopra,
