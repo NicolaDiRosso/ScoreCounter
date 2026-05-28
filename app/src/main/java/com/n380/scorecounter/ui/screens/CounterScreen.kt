@@ -62,6 +62,9 @@
         // Stato per decidere se mostrare il popup di conferma azzeramento
         var showResetDialog by remember { mutableStateOf(false) }
 
+        // ---> Stato per decidere se mostrare il popup di Fine Partita
+        var showEndMatchDialog by remember { mutableStateOf(false) }
+
         // IL SEMAFORO: Ricorda se abbiamo già premuto "Fine Partita" per bloccare altri click simultanei
         var isNavigating by remember { mutableStateOf(false) }
 
@@ -242,13 +245,12 @@
                         // ========================================================
                         OutlinedButton(
                             onClick = {
-                                // IL BLOCCO CONDIZIONALE
-                                // Usiamo il '!' (NOT). Diciamo: "Se NON stiamo chiudendo la partita..."
-                                if (!isNavigating) {
+                                // PROTEZIONE LUCCHETTO: Se la navigazione è bloccata dall'autopilota,
+                                // o c'è già il popup di chiusura aperto, ignora il click!
+                                if (viewModel.isNavigationLocked || showEndMatchDialog) return@OutlinedButton
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
                                     showResetDialog = true// ...allora puoi aprire il popup!
-                                }
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -273,18 +275,12 @@
                         Button(
                             enabled = viewModel.canEndMatch,
                             onClick = {
-                                // L'OPERATORE OR (||)
-                                // Se il popup del reset è APERTO, OPPURE stiamo GIÀ navigando via...
-                                if (showResetDialog || isNavigating) {
-                                    // Lasciamo le parentesi graffe VUOTE.
-                                    // Il Main Thread  entra qui e non fa assolutamente niente. Il click muore.
-                                } else {
-                                    // Se le condizioni non si verificano, eseguiamo l'azione:
-                                    isNavigating = true // 1. Accendiamo il Semaforo! Nessun altro bottone funzionerà.
+                                // PROTEZIONE LUCCHETTO: Ignora se stiamo azzerando
+                                if (viewModel.isNavigationLocked || showResetDialog) return@Button
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     viewModel.pauseTimer()
-                                    onNavigateToResults()
-                                }
+                                // INVECE DI NAVIGARE DIRETTAMENTE, APRIAMO IL POPUP DI CONFERMA!
+                                showEndMatchDialog = true
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -471,9 +467,16 @@
 
                     // Regola della Vittoria: Se l'obiettivo esiste, è maggiore di 0, e il leader ha raggiunto o superato l'obiettivo...
                     if (target != null && target > 0 && maxScore >= target) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress) // Vibrazione della vittoria!
-                        viewModel.pauseTimer() // Fermiamo l'orologio
-                        onNavigateToResults() // Passiamo automaticamente alla schermata finale dei coriandoli!
+                        // Usiamo il lucchetto del ViewModel per l'autopilota!
+                        // In questo modo se l'utente preme "Azzera" lo stesso istante, non esplode nulla.
+                        if (viewModel.lockNavigation()) {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // Vibrazione della vittoria!
+                            viewModel.pauseTimer() // Fermiamo l'orologio
+                            // 💾 SALVATAGGIO AUTOMATICO (AUTO-SAVE)
+                            // Nel momento esatto in cui l'autopilota dichiara la fine,
+                            viewModel.saveCurrentMatch()// sigilliamo i dati nel database prima di cambiare pagina!
+                            onNavigateToResults() // Passiamo automaticamente alla schermata finale dei coriandoli!
+                        }
                     }
                 }
 
@@ -839,6 +842,89 @@
                         ) {
                             AutoResizedText(
                                 text = stringResource(R.string.btn_conferma_azzera), // 🌍 I18N
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            )
+        }
+
+        // --------------------------------------------------------------------
+        // DIALOGO DI CONFERMA: FINE PARTITA E SALVATAGGIO AUTOMATICO
+        // --------------------------------------------------------------------
+        if (showEndMatchDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Se l'utente tocca fuori dal popup, consideriamolo come un "Annulla"
+                    showEndMatchDialog = false
+                    viewModel.startTimer() // 🕒 FIX: Facciamo ripartire il tempo!
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.EmojiEvents,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(36.dp),
+                    )
+                },
+                title = {
+                    Text(
+                        text = stringResource(R.string.titolo_conferma_fine), // 🌍 I18N
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.msg_conferma_fine), // 🌍 I18N
+                        textAlign = TextAlign.Justify,
+                    )
+                },
+                confirmButton = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // TASTO DI SINISTRA: ANNULLA E RIPRENDI
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showEndMatchDialog = false
+                                // 🕒 FIX: L'utente ha cambiato idea. La partita continua, il tempo riparte!
+                                viewModel.startTimer()
+                            },
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            AutoResizedText(text = stringResource(R.string.btn_annulla), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                        }
+
+                        // TASTO DI DESTRA: CONCLUDI E SALVA
+                        Button(
+                            onClick = {
+                                // IL MOMENTO DELLA VERITÀ: Tentiamo di chiudere il lucchetto!
+                                if (viewModel.lockNavigation()) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showEndMatchDialog = false
+                                    viewModel.pauseTimer()
+
+                                    // 💾 LA LEZIONE: SALVATAGGIO AUTOMATICO (AUTO-SAVE)
+                                    // Salviamo silenziosamente e istantaneamente i dati.
+                                    viewModel.saveCurrentMatch()
+
+                                    onNavigateToResults()
+                                }
+                            },
+                            modifier = Modifier.weight(1f).height(48.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_concludi), // 🌍 I18N
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold
                             )

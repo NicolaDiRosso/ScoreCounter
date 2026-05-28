@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -191,7 +192,8 @@ fun ResultsScreen(
 
                                 // 🧠 LEZIONE I18N: Fallback testuale
                                 // Se la sfida non ha nome usiamo una stringa base estratta dal dizionario
-                                val finalTitle = if (viewModel.matchTitle.isEmpty()) context.getString(R.string.sfida_senza_nome) else viewModel.matchTitle
+                                // FIX: Usiamo context.getString() perché stringResource() è un @Composable e non può essere usato in un onClick
+                                val finalTitle = viewModel.matchTitle.ifEmpty { context.getString(R.string.sfida_senza_nome) }
 
                                 // ====================================================================
                                 // DATA MAPPING (Mappatura dei Dati)
@@ -264,7 +266,6 @@ fun ResultsScreen(
                                     isClosing = true
                                     // Feedback tattile premium come nella Home
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    viewModel.saveCurrentMatch()
                                     onNavigateHome() // Ritorno alla schermata precedente
                                 }
                                 //questo codice non impedisce di effettuare più durnate l'animazione di chiusura
@@ -284,7 +285,7 @@ fun ResultsScreen(
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         ) {
-                            // ---> COME RICHIESTO: Aggiunta un'icona coerente per il rientro alla Home <---
+                            // ---> icona coerente per il rientro alla Home <---
                             Icon(
                                 imageVector = Icons.Filled.Home, // L'icona della casetta
                                 contentDescription = stringResource(R.string.desc_home_icon), // 🌍 I18N
@@ -294,7 +295,7 @@ fun ResultsScreen(
                             AutoResizedText(
                                 // Ho abbreviato leggermente il testo per non farlo sbordare
                                 // ora che c'è l'icona, mantenendo però il significato intatto
-                                text = stringResource(R.string.btn_salva_chiudi), // 🌍 I18N
+                                text = stringResource(R.string.btn_torna_home), // 🌍 I18N
                                 style = MaterialTheme.typography.titleLarge, // Aumentato a titleLarge
                                 fontWeight = FontWeight.Bold
                             )
@@ -405,7 +406,7 @@ fun ResultsScreen(
                                 ) {
                                     // Inserimento icona tematica per il grafico a linee
                                     Icon(
-                                        imageVector = Icons.Filled.ShowChart,
+                                        imageVector = Icons.AutoMirrored.Filled.ShowChart,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(22.dp)
@@ -590,7 +591,7 @@ fun ResultsScreen(
                                             // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
                                             Button(
                                                 onClick = {
-                                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                                     showAwardsInfoDialog =
                                                         false// Chiude il popup quando si preme il bottone
                                                 },

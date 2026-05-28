@@ -61,6 +61,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // Mostra o nasconde il popup all'apertura dell'app
     var showResumeMatchDialog by mutableStateOf(false)
 
+    // Previene la collisione tra fine partita manuale e fine partita automatica.
+    var isNavigationLocked = false
+        private set // Visibile all'esterno, ma modificabile solo dal ViewModel
+
     // Variabile che conserva la partita "fantasma" trovata nella memoria
     private var pendingBackup: MatchBackup? = null
 
@@ -557,6 +561,13 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         saveBackup() // Ri-aggiorna il salva-vita
     }
 
+    //funzione per bloccare la navigazione dopo aver premuto la fine della partita
+    fun lockNavigation(): Boolean {
+        if (isNavigationLocked) return false
+        isNavigationLocked = true
+        return true
+    }
+
     /**
      * ====================================================================
      * RESET INTEGRALE DELLA SESSIONE
@@ -566,6 +577,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * l'avvio di una nuova sfida.
      */
     fun clearMatch() {
+        isNavigationLocked = false // Sblocchiamo il lucchetto per le nuove partite!
         diceSides = 6 //impostiamo come dado di default quello a 6 facce
         matchTitle = ""
         targetScore = "" // Puliamo anche l'obiettivo di vittoria precedente per non portarcelo nelle sfide future

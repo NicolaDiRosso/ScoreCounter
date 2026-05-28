@@ -121,6 +121,9 @@
     <!-- TESTO TRADOTTO PER IL FILE CounterScreen-->
     <string name="btn_azzera">Reset</string>
     <string name="btn_fine_match">End Game</string>
+    <string name="titolo_conferma_fine">End Game?</string>
+    <string name="msg_conferma_fine">Are you sure you want to end the match?\nThis action is irreversible and the results will be automatically saved to the history.</string>
+    <string name="btn_concludi">End</string>
     <string name="titolo_sfida_default">Challenge</string>
     <string name="desc_info_icon">Info</string>
     <string name="btn_timer">Timer</string>
@@ -159,7 +162,8 @@
     <string name="desc_condividi">Share</string>
     <string name="btn_condividi_risultati">Share Results</string>
     <string name="desc_home_icon">Home</string>
-    <string name="btn_salva_chiudi">Save &amp; Close</string>
+    <!--<string name="btn_salva_chiudi">Save &amp; Close</string>-->
+    <string name="btn_torna_home">Back to Home</string>
     <string name="label_tempo_gioco">⏱️ Playtime: %s</string>
     <string name="btn_premi_partita">Match Awards</string>
     <string name="desc_info_premi">Awards Info</string>

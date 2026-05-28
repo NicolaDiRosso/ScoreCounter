@@ -148,6 +148,9 @@
     <string name="titolo_info_timer">⏱️ Timer Personalizzato</string>
     <string name="msg_info_timer">Usa il tasto \'Timer\' per impostare un conto alla rovescia. L\'app ti avviserà con una vibrazione e un suono al termine del tempo.</string>
     <string name="btn_ho_capito">Ho capito</string>
+    <string name="titolo_conferma_fine">Concludere Partita?</string>
+    <string name="msg_conferma_fine">Sei sicuro di voler terminare la sfida?\nL\'azione è irreversibile e i risultati verranno salvati automaticamente nel registro.</string>
+    <string name="btn_concludi">Concludi</string>
 
     <!-- TESTO PER IL  FILE TimerComponents-->
     <string name="titolo_timer_sfida">⏱️ Timer Sfida</string>
@@ -160,7 +163,8 @@
     <string name="desc_condividi">Condividi</string>
     <string name="btn_condividi_risultati">Condividi Risultati</string>
     <string name="desc_home_icon">Home</string>
-    <string name="btn_salva_chiudi">Salva e chiudi</string>
+    <!-- <string name="btn_salva_chiudi">Salva e chiudi</string>-->
+    <string name="btn_torna_home">Torna alla Home</string>
     <string name="label_tempo_gioco">⏱️ Tempo di gioco: %s</string>
     <string name="btn_premi_partita">Premi Partita</string>
     <string name="desc_info_premi">Info Premi</string>

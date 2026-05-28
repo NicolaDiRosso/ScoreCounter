@@ -6,6 +6,7 @@ package com.n380.scorecounter
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -26,7 +27,6 @@ import com.n380.scorecounter.ui.screens.HomeScreen
 import com.n380.scorecounter.ui.screens.ResultsScreen
 import com.n380.scorecounter.ui.theme.ScoreCounterTheme
 import com.n380.scorecounter.viewmodel.MatchViewModel
-
 
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
@@ -121,11 +121,19 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // ROTTA 3: Il Contatore (Campo di battaglia)
+                        // ROTTA 3: Il Contatore della Partita
                         composable("counter") {
                             CounterScreen(
                                 viewModel = matchViewModel,
-                                onNavigateToResults = { navController.navigate("results") },
+                                onNavigateToResults = {
+                                    // IRREVERSIBILITÀ DELLA NAVIGAZIONE:
+                                    // Navighiamo verso i risultati, ma diciamo al NavController di
+                                    // distruggere tutte le schermate intermedie fino alla Home.
+                                    // In questo modo la gesture "Indietro" salterà il Counter!
+                                    navController.navigate("results") {
+                                        popUpTo("home") { inclusive = false }
+                                    }
+                                },
                                 onNavigateHome = {
                                     matchViewModel.clearMatch()
                                     navController.popBackStack("home", inclusive = false)
@@ -133,17 +141,30 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // ROTTA 4: I Risultati (Podio)
+                        // ROTTA 4: I Risultati (Podio Read-Only)
                         composable("results") {
                             ResultsScreen(
                                 viewModel = matchViewModel,
                                 onNavigateHome = {
+                                    // 🧹 PULIZIA MEMORIA
+                                    // Dato che la partita è già salvata, quando l'utente lascia
+                                    // i risultati per tornare alla Home, ripuliamo il ViewModel
+                                    // in modo che sia vergine e pronto per la prossima sfida!
+                                    matchViewModel.clearMatch()
+
                                     navController.popBackStack(
                                         "home",
                                         inclusive = false
                                     )
                                 }
                             )
+                            // 🛡️ DATA LOSS PREVENTION (Hardware Back Button)
+                            // Se l'utente nei Risultati fa lo "swipe" per tornare indietro,
+                            // intercettiamo il gesto per eseguire la pulizia della RAM prima di uscire.
+                            BackHandler {
+                                matchViewModel.clearMatch()
+                                navController.popBackStack("home", inclusive = false)
+                            }
                         }
 
                         // ROTTA 5: Statistiche Globali
