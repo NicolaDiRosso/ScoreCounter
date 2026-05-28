@@ -26,7 +26,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ShowChart
 import com.n380.scorecounter.R // 🌍 I18N: Import per l'accesso agli ID
 import com.n380.scorecounter.model.PlayerRecord
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -103,6 +102,10 @@ fun ResultsScreen(
     // Variabile di Stato per controllare la visibilità del popup informativo sui premi
     // Parte su 'false' così il popup è nascosto di default.
     var showAwardsInfoDialog by remember { mutableStateOf(false) }
+
+    // 🧠 FIX WARNING: Estraiamo la stringa di fallback qui, nel contesto Composable corretto.
+    // In questo modo evitiamo di usare context.getString() dentro l'onClick, risolvendo l'avviso dell'IDE.
+    val fallbackTitle = stringResource(R.string.sfida_senza_nome)
 
     // ---> CALCOLO STATISTICHE <---
     //-----> CECCHINO <-----
@@ -191,9 +194,8 @@ fun ResultsScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
                                 // 🧠 LEZIONE I18N: Fallback testuale
-                                // Se la sfida non ha nome usiamo una stringa base estratta dal dizionario
-                                // FIX: Usiamo context.getString() perché stringResource() è un @Composable e non può essere usato in un onClick
-                                val finalTitle = viewModel.matchTitle.ifEmpty { context.getString(R.string.sfida_senza_nome) }
+                                // Se la sfida non ha nome usiamo la stringa estratta sopra tramite stringResource
+                                val finalTitle = viewModel.matchTitle.ifEmpty { fallbackTitle }
 
                                 // ====================================================================
                                 // DATA MAPPING (Mappatura dei Dati)
@@ -321,7 +323,7 @@ fun ResultsScreen(
                 ) {
                     // 🧠 UI REFINEMENT: Titolo pagina adattivo
                     AutoResizedText(
-                        text = if (viewModel.matchTitle.isEmpty()) stringResource(R.string.titolo_sfida_default) else viewModel.matchTitle, // 🌍 I18N
+                        text = viewModel.matchTitle.ifEmpty { stringResource(R.string.titolo_sfida_default) }, // 🌍 I18N
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
