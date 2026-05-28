@@ -405,15 +405,19 @@ fun GlobalStatsScreen(
                                     // ----------------------------------------------------------------
                                     // STRATO 2 (Primo Piano): Testi e Badge
                                     // ----------------------------------------------------------------
-                                    Column(modifier = Modifier.fillMaxWidth()) {
-                                        Text(
+                                    // Limitiamo la larghezza della colonna di testo
+                                    // al 65% dello spazio totale (fillMaxWidth(0.65f)). In questo modo creiamo
+                                    // un "muro invisibile". Anche con il font gigante, il testo non scriverà
+                                    // MAI sopra la medaglia a destra, ma andrà elegantemente a capo.
+                                    Column(modifier = Modifier.fillMaxWidth(0.65f)) {
+                                        AutoResizedText(
                                             // Traduce l'intestazione della carta del giocatore che ha vinto di più
                                             text = stringResource(R.string.titolo_campione_assoluto),
                                             style = MaterialTheme.typography.titleSmall,
                                             // Garantiamo massima leggibilità con opacità piena per il titolo
                                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                                             fontWeight = FontWeight.ExtraBold,
-                                            letterSpacing = 1.sp // Un tocco di spaziatura per un look "Pro"
+                                            //letterSpacing = 1.sp // Un tocco di spaziatura per un look "Pro"
                                         )
 
                                         // LEZIONE TEORICA KOTLIN: Elvis Operator (?:)
@@ -487,13 +491,19 @@ fun GlobalStatsScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Aggiungiamo anche un weight(1f) a questa riga interna e un
+                                        // padding a destra. Così diamo l'ordine a Compose: "Prenditi lo spazio,
+                                        // ma NON bullizzare il numero a destra, piuttosto vai a capo!"
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.weight(1f).padding(end = 8.dp)
+                                        ){
                                             Icon(
                                                 Icons.Filled.Style,
                                                 null,
                                                 tint = MaterialTheme.colorScheme.onSurface
                                             )
-                                            Text(
+                                            AutoResizedText(
                                                 // Etichetta "Partite Giocate:" che affianca l'icona
                                                 text = stringResource(R.string.label_partite_giocate),
                                                 style = MaterialTheme.typography.bodyLarge,
@@ -520,13 +530,16 @@ fun GlobalStatsScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.weight(1f).padding(end = 8.dp)
+                                        ) {
                                             Icon(
                                                 Icons.Filled.Timer,
                                                 null,
                                                 tint = MaterialTheme.colorScheme.onSurface
                                             )
-                                            Text(
+                                            AutoResizedText(
                                                 // Etichetta "Tempo sul campo:" che affianca il timer
                                                 text = stringResource(R.string.label_tempo_giocato),
                                                 style = MaterialTheme.typography.bodyLarge,
