@@ -47,7 +47,7 @@
         isLast: Boolean,  // Serve per disabilitare la freccia "Giù" se è l'ultimo
         onMoveUp: () -> Unit,
         onMoveDown: () -> Unit,
-        onEdit: () -> Unit,
+        onEdit: (Boolean) -> Unit,
         onRemove: () -> Unit,
         //onColorChange: (Int) -> Unit
     ) {
@@ -177,7 +177,7 @@
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    onEdit()
+                                    onEdit(false)// false = Niente tastiera, apro per i colori
                                 },
                             color = Color.Transparent
                         ) {
@@ -197,7 +197,7 @@
                         IconButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                onEdit()
+                                onEdit(true)//true = Scatena il FocusRequester e apri la tastiera!
                             },
                             // ---> FIX: Schiacciamo l'ingombro del bottone a 36.dp per annullare il padding gigante di Android
                             modifier = Modifier.size(36.dp)

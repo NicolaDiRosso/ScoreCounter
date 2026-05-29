@@ -1,6 +1,5 @@
 package com.n380.scorecounter.ui.screens
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +34,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource // Import aggiunto per la traduzione dinamica delle stringhe
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,11 +65,14 @@ fun CreateMatchScreen(
     viewModel: MatchViewModel, // Riferimento al ViewModel per la gestione persistente dello stato
     onNavigateToCounter: () -> Unit // Funzione di callback per la navigazione alla schermata successiva
 ) {
-    // STATI LOCALI: GESTIONE GIOCATORI MANUALE
+    // VARIABILI DI STATI LOCALI: GESTIONE GIOCATORI MANUALE
     var newPlayerName by remember { mutableStateOf("") }
 
     // Memorizzazione temporanea del giocatore selezionato per la modifica tramite l'icona matita
     var playerToEdit by remember { mutableStateOf<Player?>(null) }
+
+    // Ricorda se dobbiamo "sparare" il laser della tastiera
+    var autoFocusName by remember { mutableStateOf(false) }
 
     // STATI PER LA GESTIONE DEI GIOCATORI RAPIDI (PREFERITI)
     var showFavoritesDialog by remember { mutableStateOf(false) } // Controllo visibilità del pannello inferiore
@@ -276,7 +280,7 @@ fun CreateMatchScreen(
                         // Questo è perfetto per moduli di inserimento dati (come questo) dove gli
                         // elementi sono pochi e non c'è bisogno di riciclarli dinamicamente in memoria.
 
-                        // ---> MODIFICA QUI: Colleghiamo lo stato estratto in cima! <---
+                        // ---> Colleghiamo lo stato estratto in cima! <---
                         .verticalScroll(scrollState)
 
                         .padding(12.dp), // Padding interno per distaccare le scritte dai bordi della Card
@@ -838,7 +842,14 @@ fun CreateMatchScreen(
                                         isLast = index == viewModel.players.size - 1,
                                         onMoveUp = { viewModel.movePlayer(index, index - 1) },
                                         onMoveDown = { viewModel.movePlayer(index, index + 1) },
-                                        onEdit = { playerToEdit = player },
+
+                                        // Catturiamo il booleano 'focusOnName' (true se matita, false se colore)
+                                        // e lo salviamo nella nostra variabile di stato prima di aprire il modale!
+                                        onEdit = { focusOnName ->
+                                            playerToEdit = player
+                                            autoFocusName = focusOnName
+                                        },
+
                                         // Proprietà Lambda (Callback): Eseguita quando l'utente tocca il cestino
                                         onRemove = {
                                             // Costrutto Logico (Guard Statement):
@@ -882,9 +893,23 @@ fun CreateMatchScreen(
     // mettiamo il '.let'. In questo modo la variabile 'player'
     // nasce già sicura e non-nullabile per tutto l'ambito interno al Dialog.
     playerToEdit?.let { player ->
-        // Ora possiamo usare 'player.name' senza il doppio punto esclamativo!
         var editedName by remember { mutableStateOf(player.name) }
         var editedColor by remember { mutableIntStateOf(player.color) }
+
+        // ISTANZIAMO IL LASER (FocusRequester)
+        val focusRequester = remember { FocusRequester() }
+
+        // GESTIONE TIMING DEL FOCUS
+        // Lanciamo questa Coroutine nell'esatto istante in cui si crea il popup.
+        LaunchedEffect(Unit) {
+            if (autoFocusName) {
+                // Aspettiamo 200 millisecondi per dare il tempo ad Android di disegnare la grafica
+                // del popup, dopodiché facciamo scattare il focus. Se non aspettassimo,
+                // il laser punterebbe nel vuoto prima ancora che il campo di testo esista!
+                delay(200)
+                focusRequester.requestFocus()
+            }
+        }
 
         AlertDialog(
             onDismissRequest = { playerToEdit = null },
@@ -932,9 +957,13 @@ fun CreateMatchScreen(
                     OutlinedTextField(
                         value = editedName,
                         onValueChange = { editedName = it },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // AGGANCIO DEL BERSAGLIO
+                            // Diciamo a questo campo di testo di farsi "colpire" dalla richiesta di focus
+                            .focusRequester(focusRequester),
                         label = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Traduzione input field
-                        // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
+                        // DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
