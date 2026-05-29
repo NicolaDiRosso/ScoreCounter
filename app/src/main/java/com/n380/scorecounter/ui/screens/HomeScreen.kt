@@ -55,6 +55,7 @@ import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.DonationDialog
 import com.n380.scorecounter.ui.components.FilledActionPill
 import com.n380.scorecounter.ui.components.ScoreChart
+import com.n380.scorecounter.ui.components.SlideUpAnimatedVisibility
 import com.n380.scorecounter.ui.components.TonalActionPill
 import com.n380.scorecounter.ui.components.buildMatchShareText
 import com.n380.scorecounter.ui.components.formatDate
@@ -350,47 +351,14 @@ fun HomeScreen(
                         contentAlignment = Alignment.TopCenter // Posizionamento del contenuto al vertice centrale
                     ) {
                         // ====================================================================
-                        // IL BOTTONE ANIMATO
+                        // IL BOTTONE ANIMATO (Ora usa il componente globale DRY)
                         // ====================================================================
-                        this@Column.AnimatedVisibility(
-                            // 1. IL TRIGGER:
-                            // Questa variabile Booleana (true/false) decide se il contenuto deve esistere.
-                            // Quando passa da false a true, l'animazione di 'enter' si avvia.
-                            visible = showNewMatchButton,
-
-                            // 2. ANIMAZIONE DI ENTRATA:
-                            enter = slideInVertically(
-                                // A. SLIDE (Scorrimento):
-                                // Definiamo da dove deve iniziare il movimento.
-                                // '{ it }' è una funzione lambda dove 'it' rappresenta l'altezza del componente.
-                                // Impostandolo a 'it', diciamo: "Inizia a disegnare il bottone esattamente
-                                // un'altezza intera più in basso rispetto alla sua posizione finale".
-                                initialOffsetY = { it },
-
-                                // B. SPECIFICHE:
-                                // tween (da 'between') definisce come muoversi tra l'inizio e la fine.
-                                animationSpec = tween(
-                                    durationMillis = 200,            // Durata: 0.2 secondi
-                                    easing = FastOutSlowInEasing     // Curva: accelera subito e rallenta alla fine (molto naturale)
-                                )
-                            ) + fadeIn(// Usiamo l'operatore '+' per combinare due effetti diversi contemporaneamente.
-                                // C. DISSOLVENZA:
-                                // Contemporaneamente allo scorrimento, il bottone passa da trasparente a opaco.
-                                animationSpec = tween(durationMillis = 200)
-                            ),
-
-                            // 3. ANIMAZIONE DI USCITA (ExitTransition):
-                            // Definiamo cosa succede quando il bottone scompare (es. quando entri nella partita).
-                            exit = slideOutVertically(//slideOutVertically è una funzione nativa di Compose che ordina al componente di "scivolare via" lungo l'asse Y (su o giù).
-                                targetOffsetY = { it },// Torna giù verso il fondo con { it } che rappresenta l'altezza totale del tuo bottone.
-                                animationSpec = tween(
-                                    durationMillis = 200,
-                                    easing = FastOutLinearInEasing
-                                )
-                            ) + fadeOut(//È l'animazione che riduce gradualmente l'opacità (Alpha)
-                                animationSpec = tween(durationMillis = 200)
-                            )
+                        // Invochiamo il nostro guscio riutilizzabile. Tutta la logica di scorrimento,
+                        // tempistiche e trasparenze è nascosta e sicura nel file AnimationComponents.kt
+                        SlideUpAnimatedVisibility(
+                            visible = showNewMatchButton
                         ) {
+                            // Questo è il "content" che viene iniettato nello slot!
                             Button(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
