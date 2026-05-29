@@ -38,6 +38,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -893,7 +895,17 @@ fun CreateMatchScreen(
     // mettiamo il '.let'. In questo modo la variabile 'player'
     // nasce già sicura e non-nullabile per tutto l'ambito interno al Dialog.
     playerToEdit?.let { player ->
-        var editedName by remember { mutableStateOf(player.name) }
+        // 🧠 LA LEZIONE: TextFieldValue
+        // Usiamo TextFieldValue invece di una semplice Stringa.
+        // Passando TextRange(player.name.length), piazziamo il cursore esattamente alla fine della parola!
+        var editedName by remember {
+            mutableStateOf(
+                TextFieldValue(
+                    text = player.name,
+                    selection = TextRange(player.name.length)
+                )
+            )
+        }
         var editedColor by remember { mutableIntStateOf(player.color) }
 
         // ISTANZIAMO IL LASER (FocusRequester)
@@ -993,14 +1005,15 @@ fun CreateMatchScreen(
 
                     Button(
                         onClick = {
-                            if (editedName.isNotBlank()) {
+                            // Aggiunto .text per estrarre la stringa pura dal TextFieldValue
+                            if (editedName.text.isNotBlank()) {
                                 // ------------------------------
                                 // Regola 2: Safe Call con .let
                                 // ------------------------------
                                 // Se l'utente ha premuto contemporaneamente "Annulla", playerToEdit sarà 'null'.
                                 // Di conseguenza, questo intero blocco '{...}' verrà elegantemente ignorato.
                                 playerToEdit?.let { playerSicuro ->
-                                    playerSicuro.name = editedName
+                                    playerSicuro.name = editedName.text // Aggiunto .text
                                     viewModel.updatePlayerColor(playerSicuro, editedColor)
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 }
@@ -1377,7 +1390,23 @@ fun CreateMatchScreen(
      */
     favToEdit?.let { favName ->
         // Usiamo favName pulito!
-        var editedFavName by remember { mutableStateOf(favName) }
+        // 1. USO DI TextFieldValue per spostare il cursore alla fine
+        var editedFavName by remember {
+            mutableStateOf(
+                TextFieldValue(
+                    text = favName,
+                    selection = TextRange(favName.length)
+                )
+            )
+        }
+        // 2. ISTANZIAMO IL LASER (FocusRequester) anche per i preferiti!
+        val focusRequesterFav = remember { FocusRequester() }
+
+        // Lanciamo il focus in automatico appena si apre il popup
+        LaunchedEffect(Unit) {
+            delay(200) // Diamo ad Android il tempo di dipingere il popup
+            focusRequesterFav.requestFocus() // Spara il focus!
+        }
 
         AlertDialog(
             onDismissRequest = { favToEdit = null },
@@ -1390,7 +1419,9 @@ fun CreateMatchScreen(
                 OutlinedTextField(
                     value = editedFavName,
                     onValueChange = { editedFavName = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequesterFav), // 🎯 Agganciamo il bersaglio del laser!
                     // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -1409,14 +1440,15 @@ fun CreateMatchScreen(
                         shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        Text(stringResource(R.string.btn_annulla), color = MaterialTheme.colorScheme.onSurface) // Sostituzione label annulla
+                        Text(stringResource(R.string.btn_annulla), color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            if (editedFavName.isNotBlank()) {
-                                viewModel.editFavorite(favToEdit!!, editedFavName.trim())
+                            // Aggiunto .text per estrarre la stringa!
+                            if (editedFavName.text.isNotBlank()) {
+                                viewModel.editFavorite(favToEdit!!, editedFavName.text.trim()) // Aggiunto .text
                                 favToEdit = null
                             }
                         },
@@ -1427,7 +1459,7 @@ fun CreateMatchScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     ) {
-                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold) // Sostituzione label salvataggio
+                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold)
                     }
                 }
             },
