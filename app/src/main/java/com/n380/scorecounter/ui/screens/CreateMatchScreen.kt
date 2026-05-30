@@ -34,12 +34,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource // Import aggiunto per la traduzione dinamica delle stringhe
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -72,9 +68,6 @@ fun CreateMatchScreen(
 
     // Memorizzazione temporanea del giocatore selezionato per la modifica tramite l'icona matita
     var playerToEdit by remember { mutableStateOf<Player?>(null) }
-
-    // Ricorda se dobbiamo "sparare" il laser della tastiera
-    var autoFocusName by remember { mutableStateOf(false) }
 
     // STATI PER LA GESTIONE DEI GIOCATORI RAPIDI (PREFERITI)
     var showFavoritesDialog by remember { mutableStateOf(false) } // Controllo visibilità del pannello inferiore
@@ -845,12 +838,8 @@ fun CreateMatchScreen(
                                         onMoveUp = { viewModel.movePlayer(index, index - 1) },
                                         onMoveDown = { viewModel.movePlayer(index, index + 1) },
 
-                                        // Catturiamo il booleano 'focusOnName' (true se matita, false se colore)
-                                        // e lo salviamo nella nostra variabile di stato prima di aprire il modale!
-                                        onEdit = { focusOnName ->
-                                            playerToEdit = player
-                                            autoFocusName = focusOnName
-                                        },
+                                        //con onEdit  apriamo solo il dialog senza automatismi
+                                        onEdit = { playerToEdit = player },
 
                                         // Proprietà Lambda (Callback): Eseguita quando l'utente tocca il cestino
                                         onRemove = {
@@ -895,33 +884,9 @@ fun CreateMatchScreen(
     // mettiamo il '.let'. In questo modo la variabile 'player'
     // nasce già sicura e non-nullabile per tutto l'ambito interno al Dialog.
     playerToEdit?.let { player ->
-        // 🧠 LA LEZIONE: TextFieldValue
-        // Usiamo TextFieldValue invece di una semplice Stringa.
-        // Passando TextRange(player.name.length), piazziamo il cursore esattamente alla fine della parola!
-        var editedName by remember {
-            mutableStateOf(
-                TextFieldValue(
-                    text = player.name,
-                    selection = TextRange(player.name.length)
-                )
-            )
-        }
+        // 🧠 RIPRISTINO: Torniamo alla semplicità di una Stringa base.
+        var editedName by remember { mutableStateOf(player.name) }
         var editedColor by remember { mutableIntStateOf(player.color) }
-
-        // ISTANZIAMO IL LASER (FocusRequester)
-        val focusRequester = remember { FocusRequester() }
-
-        // GESTIONE TIMING DEL FOCUS
-        // Lanciamo questa Coroutine nell'esatto istante in cui si crea il popup.
-        LaunchedEffect(Unit) {
-            if (autoFocusName) {
-                // Aspettiamo 200 millisecondi per dare il tempo ad Android di disegnare la grafica
-                // del popup, dopodiché facciamo scattare il focus. Se non aspettassimo,
-                // il laser punterebbe nel vuoto prima ancora che il campo di testo esista!
-                delay(200)
-                focusRequester.requestFocus()
-            }
-        }
 
         AlertDialog(
             onDismissRequest = { playerToEdit = null },
@@ -969,11 +934,7 @@ fun CreateMatchScreen(
                     OutlinedTextField(
                         value = editedName,
                         onValueChange = { editedName = it },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            // AGGANCIO DEL BERSAGLIO
-                            // Diciamo a questo campo di testo di farsi "colpire" dalla richiesta di focus
-                            .focusRequester(focusRequester),
+                        modifier = Modifier.fillMaxWidth(),
                         label = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Traduzione input field
                         // DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
                         shape = RoundedCornerShape(12.dp),
@@ -1006,14 +967,14 @@ fun CreateMatchScreen(
                     Button(
                         onClick = {
                             // Aggiunto .text per estrarre la stringa pura dal TextFieldValue
-                            if (editedName.text.isNotBlank()) {
+                            if (editedName.isNotBlank()) {
                                 // ------------------------------
                                 // Regola 2: Safe Call con .let
                                 // ------------------------------
                                 // Se l'utente ha premuto contemporaneamente "Annulla", playerToEdit sarà 'null'.
                                 // Di conseguenza, questo intero blocco '{...}' verrà elegantemente ignorato.
                                 playerToEdit?.let { playerSicuro ->
-                                    playerSicuro.name = editedName.text // Aggiunto .text
+                                    playerSicuro.name = editedName.trim()
                                     viewModel.updatePlayerColor(playerSicuro, editedColor)
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 }
@@ -1389,24 +1350,8 @@ fun CreateMatchScreen(
      * In Kotlin è una funzione speciale che crea una Stanza di Sicurezza (le parentesi graffe { }).
      */
     favToEdit?.let { favName ->
-        // Usiamo favName pulito!
-        // 1. USO DI TextFieldValue per spostare il cursore alla fine
-        var editedFavName by remember {
-            mutableStateOf(
-                TextFieldValue(
-                    text = favName,
-                    selection = TextRange(favName.length)
-                )
-            )
-        }
-        // 2. ISTANZIAMO IL LASER (FocusRequester) anche per i preferiti!
-        val focusRequesterFav = remember { FocusRequester() }
-
-        // Lanciamo il focus in automatico appena si apre il popup
-        LaunchedEffect(Unit) {
-            delay(200) // Diamo ad Android il tempo di dipingere il popup
-            focusRequesterFav.requestFocus() // Spara il focus!
-        }
+        // 🧠 RIPRISTINO: Torniamo alla semplicità di una Stringa base.
+        var editedFavName by remember { mutableStateOf(favName) }
 
         AlertDialog(
             onDismissRequest = { favToEdit = null },
@@ -1419,9 +1364,7 @@ fun CreateMatchScreen(
                 OutlinedTextField(
                     value = editedFavName,
                     onValueChange = { editedFavName = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequesterFav), // 🎯 Agganciamo il bersaglio del laser!
+                    modifier = Modifier.fillMaxWidth(),
                     // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -1447,8 +1390,8 @@ fun CreateMatchScreen(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             // Aggiunto .text per estrarre la stringa!
-                            if (editedFavName.text.isNotBlank()) {
-                                viewModel.editFavorite(favToEdit!!, editedFavName.text.trim()) // Aggiunto .text
+                            if (editedFavName.isNotBlank()) {
+                                viewModel.editFavorite(favToEdit!!, editedFavName.trim())
                                 favToEdit = null
                             }
                         },
