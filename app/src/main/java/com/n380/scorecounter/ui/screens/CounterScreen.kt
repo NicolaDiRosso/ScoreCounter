@@ -258,6 +258,15 @@
                             shape = RoundedCornerShape(20.dp), // Angoli coerenti col Design System
                             border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
                         ) {
+                            // 🧠 LEZIONE UI: Aggiunta dell'Ancora Visiva (Icona)
+                            Icon(
+                                imageVector = Icons.Filled.Refresh, // L'icona universale di ripristino
+                                contentDescription = null, // Già spiegato dal testo a fianco, non serve per i non vedenti
+                                modifier = Modifier
+                                    .padding(end = 8.dp) // Spaziatura aurea di Material Design
+                                    .size(28.dp) // Dimensione decisa e massiccia in linea con il testo
+                            )
+
                             AutoResizedText(
                                 // 🌍 I18N: Lettura nativa.
                                 text = stringResource(R.string.btn_azzera),
@@ -298,6 +307,16 @@
                                 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             )
                         ) {
+                            // 🧠 LEZIONE UI: L'icona erediterà dinamicamente il colore 'onPrimaryContainer'
+                            // o 'disabledContentColor' in automatico da ButtonDefaults!
+                            Icon(
+                                imageVector = Icons.Filled.Flag, // La bandiera del traguardo per indicare la fine
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .padding(end = 8.dp) // Spaziatura aurea
+                                    .size(28.dp)
+                            )
+
                             AutoResizedText(
                                 // 🌍 I18N: Testo estratto.
                                 text = stringResource(R.string.btn_fine_match),
