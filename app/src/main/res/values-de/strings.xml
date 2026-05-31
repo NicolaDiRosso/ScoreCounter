@@ -114,7 +114,7 @@
     <string name="btn_rilancia">Nochmal würfeln</string>
 
     <string name="btn_azzera">Zurücksetzen</string>
-    <string name="btn_fine_match">Spiel beenden</string>
+    <string name="btn_fine_match">Abschließen</string>
     <string name="titolo_sfida_default">Herausforderung</string>
     <string name="desc_info_icon">Info</string>
     <string name="btn_timer">Timer</string>

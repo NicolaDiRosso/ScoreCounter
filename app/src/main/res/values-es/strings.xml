@@ -49,7 +49,7 @@
 
     <string name="label_chart_inizio">Inicio</string>
     <string name="label_chart_meta">Mitad</string>
-    <string name="label_chart_fine">Fin</string>
+    <string name="label_chart_fine">Concluir</string>
 
     <string name="share_title_prefix">Resultados:</string>
     <string name="share_duration_prefix">Duración:</string>

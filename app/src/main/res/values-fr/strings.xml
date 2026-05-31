@@ -114,7 +114,7 @@
     <string name="btn_rilancia">Relancer</string>
 
     <string name="btn_azzera">Réinitialiser</string>
-    <string name="btn_fine_match">Fin de Partie</string>
+    <string name="btn_fine_match">Conclure</string>
     <string name="titolo_sfida_default">Défi</string>
     <string name="desc_info_icon">Infos</string>
     <string name="btn_timer">Minuteur</string>
@@ -143,7 +143,7 @@
     <string name="btn_ho_capito">J\'ai compris</string>
     <string name="titolo_conferma_fine">Terminer la Partie ?</string>
     <string name="msg_conferma_fine">Êtes-vous sûr de vouloir terminer le défi ?\nCette action est irréversible et les résultats seront automatiquement sauvegardés dans l\'historique.</string>
-    <string name="btn_concludi">Terminer</string>
+    <string name="btn_concludi">Conclure</string>
 
     <string name="titolo_timer_sfida">⏱️ Minuteur du Défi</string>
     <string name="btn_ferma_timer">ARRÊTER LE MINUTEUR</string>
