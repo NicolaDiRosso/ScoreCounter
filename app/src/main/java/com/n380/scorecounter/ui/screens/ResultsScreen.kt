@@ -176,24 +176,26 @@ fun ResultsScreen(
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                     )
                 ) {
-                    Column(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .navigationBarsPadding() // Protezione dalla barra bianca di sistema Android
                             // Il padding INTERNO a 16.dp garantisce che i bottoni non tocchino
                             // i bordi dello schermo, rimanendo larghi esattamente quanto le card sopra!
-                            .padding(horizontal = 16.dp, vertical = 16.dp)
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        // Distanziatore orizzontale tra i due bottoni
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
 
                         // ========================================================
-                        // TASTO SECONDARIO: CONDIVIDI RISULTATI (GHOST BUTTON)
+                        // TASTO SECONDARIO: CONDIVIDI RISULTATI (GHOST BUTTON ASIMMETRICO)
                         // ========================================================
                         OutlinedButton(
                             onClick = {
                                 // Trigger aptico per la risposta fisica al tocco
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                // 🧠 LEZIONE I18N: Fallback testuale
+                                // LEZIONE I18N: Fallback testuale
                                 // Se la sfida non ha nome usiamo la stringa estratta sopra tramite stringResource
                                 val finalTitle = viewModel.matchTitle.ifEmpty { fallbackTitle }
 
@@ -232,31 +234,28 @@ fun ResultsScreen(
                                 launchShareIntent(context, shareText)
                             },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp), // Altezza Expressive massiccia (52.dp)
-                            shape = RoundedCornerShape(20.dp), // Angoli coerenti per i bottoni (20.dp)
-                            // Bordo rinforzato a 2.dp come fatto per il tasto "Azzera"
+                                // LEZIONE UI: Asimmetria 25/75.
+                                // Assegnando un weight di 0.25f, questo bottone occupera' esattamente il 25%
+                                // dello spazio orizzontale disponibile nella Row.
+                                .weight(0.20f)
+                                // Allineamento dell'altezza massiccia coerente con il resto dell'app
+                                .height(72.dp),
+                            // Stondatura coerente con l'altezza 72.dp
+                            shape = RoundedCornerShape(24.dp),
                             border = BorderStroke(
                                 2.dp,
                                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                            )
+                            ),
+                            // Rimuoviamo il padding interno standard per permettere all'icona di centrarsi perfettamente
+                            // in un bottone quadrato o stretto, evitando schiacciamenti visivi.
+                            contentPadding = PaddingValues(0.dp)
                         ) {
                             Icon(
                                 Icons.Filled.Share,
-                                contentDescription = stringResource(R.string.desc_condividi), // 🌍 I18N
-                                modifier = Modifier.padding(end = 8.dp)
-                                    .size(28.dp) // Icona leggermente ingrandita
-                            )
-                            // 🧠 UI REFINEMENT: Testo pulsante adattivo
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_condividi_risultati), // 🌍 I18N
-                                style = MaterialTheme.typography.titleLarge, // Aumentato a titleLarge
-                                fontWeight = FontWeight.Bold
+                                contentDescription = stringResource(R.string.desc_condividi), // I18N
+                                modifier = Modifier.size(28.dp)
                             )
                         }
-
-                        // Distanziatore tra i due bottoni impilati
-                        Spacer(modifier = Modifier.height(12.dp))
 
                         // ========================================================
                         // TASTO PRIMARIO: SALVA E TORNA ALLA HOME (CALL TO ACTION)
@@ -270,35 +269,37 @@ fun ResultsScreen(
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     onNavigateHome() // Ritorno alla schermata precedente
                                 }
-                                //questo codice non impedisce di effettuare più durnate l'animazione di chiusura
+                                // questo codice non impedisce di effettuare più durnate l'animazione di chiusura
                                 /*haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.saveCurrentMatch()
                                 onNavigateHome()*/
                             },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp), // Altezza Expressive massiccia (72.dp)
-                            shape = RoundedCornerShape(20.dp),
-                            // Diamo un'ombra forte per farlo "emergere" come tasto principale
+                                // LEZIONE UI: Asimmetria 25/75.
+                                // Assegnando un weight di 0.75f, questo bottone occupera' il restante 75%.
+                                .weight(0.80f)
+                                .height(72.dp),
+                            shape = RoundedCornerShape(24.dp),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-                            // Colori 'Container' per massima leggibilità
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                            ),
+                            // Applichiamo lo spostamento ottico per bilanciare l'icona con il testo
+                            contentPadding = ButtonDefaults.ButtonWithIconContentPadding
                         ) {
-                            // ---> icona coerente per il rientro alla Home <---
+                            // icona coerente per il rientro alla Home
                             Icon(
                                 imageVector = Icons.Filled.Home, // L'icona della casetta
-                                contentDescription = stringResource(R.string.desc_home_icon), // 🌍 I18N
+                                contentDescription = stringResource(R.string.desc_home_icon), // I18N
                                 modifier = Modifier.padding(end = 8.dp).size(28.dp)
                             )
-                            // 🧠 UI REFINEMENT: Testo pulsante adattivo
+                            // UI REFINEMENT: Testo pulsante adattivo
                             AutoResizedText(
                                 // Ho abbreviato leggermente il testo per non farlo sbordare
                                 // ora che c'è l'icona, mantenendo però il significato intatto
-                                text = stringResource(R.string.btn_torna_home), // 🌍 I18N
-                                style = MaterialTheme.typography.titleLarge, // Aumentato a titleLarge
+                                text = stringResource(R.string.btn_torna_home), // I18N
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                         }
