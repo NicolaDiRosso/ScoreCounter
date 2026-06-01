@@ -481,7 +481,7 @@ fun HomeScreen(
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Info,
+                            imageVector = Icons.Filled.Help,
                             contentDescription = stringResource(R.string.desc_informazioni_app_icon),
                             // 🧠 FONDAMENTALE: onPrimary garantisce la leggibilità dell'icona!
                             tint = MaterialTheme.colorScheme.onPrimary,
