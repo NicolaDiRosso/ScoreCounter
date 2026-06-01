@@ -39,6 +39,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+//import per far sollevare in automatico la testiera e impostare il cursore alle fine
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+//-------------------------------------------------
 import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -1350,8 +1356,31 @@ fun CreateMatchScreen(
      * In Kotlin è una funzione speciale che crea una Stanza di Sicurezza (le parentesi graffe { }).
      */
     favToEdit?.let { favName ->
-        // 🧠 RIPRISTINO: Torniamo alla semplicità di una Stringa base.
-        var editedFavName by remember { mutableStateOf(favName) }
+
+        // TextFieldValue e TextRange
+        // Sostituiamo la semplice Stringa con un oggetto TextFieldValue.
+        // Questo ci permette di memorizzare il testo E di controllare la posizione del cursore.
+        // Passando TextRange(favName.length), posizioniamo il cursore matematicamente alla fine della parola.
+        var editedFavName by remember {
+            mutableStateOf(
+                TextFieldValue(
+                    text = favName,
+                    selection = TextRange(favName.length)
+                )
+            )
+        }
+
+        // FocusRequester
+        // Creiamo il "puntatore laser" che useremo per comandare alla tastiera di alzarsi in automatico.
+        val focusRequesterFav = remember { FocusRequester() }
+
+        // Lanciamo un effetto collaterale (Coroutine) appena il modale viene aperto.
+        LaunchedEffect(Unit) {
+            // Diamo ad Android 200 millisecondi di respiro. Se non lo facessimo, il FocusRequester
+            // punterebbe nel vuoto perché l'OutlinedTextField non è ancora stato dipinto sullo schermo!
+            delay(100)
+            focusRequesterFav.requestFocus() // Spara il focus e alza la tastiera!
+        }
 
         AlertDialog(
             onDismissRequest = { favToEdit = null },
@@ -1359,12 +1388,16 @@ fun CreateMatchScreen(
                 Text(stringResource(R.string.titolo_modifica_nome_rapido), // Traduzione intestazione box modale
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
-                ) },
+                )
+            },
             text = {
                 OutlinedTextField(
                     value = editedFavName,
                     onValueChange = { editedFavName = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // 🎯 Agganciamo il campo di testo al nostro puntatore laser!
+                        .focusRequester(focusRequesterFav),
                     // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -1389,9 +1422,13 @@ fun CreateMatchScreen(
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            // Aggiunto .text per estrarre la stringa!
-                            if (editedFavName.isNotBlank()) {
-                                viewModel.editFavorite(favToEdit!!, editedFavName.trim())
+
+                            // 🧠 ATTENZIONE: Poiché abbiamo convertito il dato in un TextFieldValue,
+                            // la variabile 'editedFavName' non è più una stringa pura.
+                            // Per leggere il testo scritto, Dobbiamo estrarlo usando la sintassi ".text"
+                            // prima di controllare se è vuoto (isNotBlank) o di tagliare gli spazi (trim).
+                            if (editedFavName.text.isNotBlank()) {
+                                viewModel.editFavorite(favToEdit!!, editedFavName.text.trim())
                                 favToEdit = null
                             }
                         },
@@ -1402,7 +1439,7 @@ fun CreateMatchScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     ) {
-                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold) // Sostituzione label salvataggio
                     }
                 }
             },

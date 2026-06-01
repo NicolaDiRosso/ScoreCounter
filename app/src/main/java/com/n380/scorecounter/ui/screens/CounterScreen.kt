@@ -28,6 +28,7 @@
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
     import androidx.compose.ui.platform.LocalContext
     import androidx.compose.ui.platform.LocalHapticFeedback
+    import androidx.lifecycle.compose.LocalLifecycleOwner
     import androidx.compose.ui.res.stringResource // 🌍 I18N: Import fondamentale per le traduzioni UI
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.input.KeyboardType
@@ -35,7 +36,6 @@
     //Importiamo la classe Lifecycle per gestire il ciclo di vita della schermata.
     import androidx.lifecycle.Lifecycle
     import androidx.lifecycle.LifecycleEventObserver
-    import androidx.compose.ui.platform.LocalLifecycleOwner
     import androidx.compose.ui.text.TextRange
     import androidx.compose.ui.text.input.ImeAction
     import androidx.compose.ui.text.input.TextFieldValue
@@ -64,9 +64,6 @@
 
         // ---> Stato per decidere se mostrare il popup di Fine Partita
         var showEndMatchDialog by remember { mutableStateOf(false) }
-
-        // IL SEMAFORO: Ricorda se abbiamo già premuto "Fine Partita" per bloccare altri click simultanei
-        var isNavigating by remember { mutableStateOf(false) }
 
         // Variabile che indica se mostrare l'avviso di uscita "Salva-Vita" (se si preme Indietro per sbaglio)
         var showExitWarning by remember { mutableStateOf(false) }
@@ -99,7 +96,6 @@
 
         // SISTEMA SNACKBAR (Tasto Annulla Azzeramento)
         val snackbarHostState = remember { SnackbarHostState() }
-        val coroutineScope = rememberCoroutineScope()
 
         val haptic = LocalHapticFeedback.current
         val context = LocalContext.current
@@ -245,12 +241,13 @@
                         // ========================================================
                         OutlinedButton(
                             onClick = {
-                                // PROTEZIONE LUCCHETTO: Se la navigazione è bloccata dall'autopilota,
-                                // o c'è già il popup di chiusura aperto, ignora il click!
+                                // 🧠 FIX UI: Sistemata indentazione sospetta e logica di protezione.
+                                // Se la navigazione è bloccata o c'è un dialogo aperto, ignoriamo il tocco.
                                 if (viewModel.isNavigationLocked || showEndMatchDialog) return@OutlinedButton
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
-                                    showResetDialog = true// ...allora puoi aprire il popup!
+
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
+                                showResetDialog = true// ...allora puoi aprire il popup!
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -721,7 +718,13 @@
                             shape = RoundedCornerShape(20.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                         ) {
-                            AutoResizedText(stringResource(R.string.btn_annulla), style = MaterialTheme.typography.labelLarge,color = MaterialTheme.colorScheme.onSurface,fontWeight = FontWeight.Bold,) // 🌍 I18N: Riutilizzo chiave Annulla
+                            // 🧠 FIX UI: Rimossa virgola finale ridondante che sporcava il codice.
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_annulla),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
+                            ) // 🌍 I18N: Riutilizzo chiave Annulla
                         }
 
                         // Filled Button è usato per l'azione primaria e affermativa (Confirm/Salva).
@@ -958,6 +961,8 @@
         // --------------------------------------------------------------------
         if (showExitWarning) {
             AlertDialog(
+                // 🧠 FIX UI: Sistemata la lambda onDismissRequest. 
+                // Se l'utente clicca fuori dal popup, resettiamo correttamente lo stato.
                 onDismissRequest = { showExitWarning = false },
 
                 // L'icona in alto al centro cattura l'attenzione e contestualizza l'azione.
@@ -1146,7 +1151,8 @@
                     // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
                     Button(
                         onClick = {
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
+                            // 🧠 FIX UI: Pulito il riferimento a HapticFeedbackType rimuovendo il percorso ridondante.
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             showInfoDialog = false// Chiude il popup quando si preme il bottone
                         },
                         modifier = Modifier
