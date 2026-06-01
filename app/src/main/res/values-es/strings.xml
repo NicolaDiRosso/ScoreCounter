@@ -90,7 +90,7 @@
     <string name="btn_annulla">Cancelar</string>
     <string name="titolo_giocatori_rapidi_sheet">Jugadores Rápidos</string>
     <string name="msg_rapido_rimosso">%s eliminado de jugadores rápidos</string>
-    <string name="btn_chiudi_gestione">Cerrar Gestión</string>
+    <string name="btn_chiudi_gestione">Cerrar</string>
     <string name="desc_chiudi_icon">Cerrar</string>
     <string name="titolo_modifica_nome_rapido">Editar Nombre Rápido</string>
     <string name="btn_inizia_sfida">Comenzar Desafío</string>

@@ -95,7 +95,7 @@
     <string name="btn_annulla">Annulla</string>
     <string name="titolo_giocatori_rapidi_sheet">Giocatori Rapidi</string>
     <string name="msg_rapido_rimosso">%s rimosso dai rapidi</string>
-    <string name="btn_chiudi_gestione">Chiudi Gestione</string>
+    <string name="btn_chiudi_gestione">Chiudi</string>
     <string name="desc_chiudi_icon">Chiudi</string>
     <string name="titolo_modifica_nome_rapido">Modifica Nome Rapido</string>
     <string name="btn_inizia_sfida">Inizia Sfida</string>

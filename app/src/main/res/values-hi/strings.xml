@@ -90,7 +90,7 @@
     <string name="btn_annulla">रद्द करें</string>
     <string name="titolo_giocatori_rapidi_sheet">त्वरित खिलाड़ी</string>
     <string name="msg_rapido_rimosso">%s को त्वरित खिलाड़ियों से हटा दिया गया</string>
-    <string name="btn_chiudi_gestione">प्रबंधन बंद करें</string>
+    <string name="btn_chiudi_gestione">बंद करेंं</string>
     <string name="desc_chiudi_icon">बंद करें</string>
     <string name="titolo_modifica_nome_rapido">त्वरित नाम संपादित करें</string>
     <string name="btn_inizia_sfida">चुनौती शुरू करें</string>

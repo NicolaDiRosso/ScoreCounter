@@ -90,7 +90,7 @@
     <string name="btn_annulla">Abbrechen</string>
     <string name="titolo_giocatori_rapidi_sheet">Schnelle Spieler</string>
     <string name="msg_rapido_rimosso">%s aus schnellen Spielern entfernt</string>
-    <string name="btn_chiudi_gestione">Verwaltung schließen</string>
+    <string name="btn_chiudi_gestione">Schließen</string>
     <string name="desc_chiudi_icon">Schließen</string>
     <string name="titolo_modifica_nome_rapido">Schnellen Namen bearbeiten</string>
     <string name="btn_inizia_sfida">Herausforderung starten</string>

@@ -157,7 +157,7 @@
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(42.dp)
+                                .size(48.dp) // 🧠 DESIGN CHANGE: Aumentata dimensione da 42 a 48 per facilità di tocco
                                 .clip(RoundedCornerShape(12.dp)) // Forma del bottone interno
                                 // ---> IL SEGRETO DEL COLORE UNIVERSALE <---
                                 // Usiamo il colore di superficie (Bianco/Nero a seconda del tema)
@@ -186,7 +186,7 @@
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(42.dp)
+                                .size(48.dp) // 🧠 DESIGN CHANGE: Aumentata dimensione da 42 a 48 per facilità di tocco
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f))
                                 .border(

@@ -94,7 +94,7 @@
     <string name="btn_annulla">Cancel</string>
     <string name="titolo_giocatori_rapidi_sheet">Quick Players</string>
     <string name="msg_rapido_rimosso">%s removed from quick players</string>
-    <string name="btn_chiudi_gestione">Close Management</string>
+    <string name="btn_chiudi_gestione">Close</string>
     <string name="desc_chiudi_icon">Close</string>
     <string name="titolo_modifica_nome_rapido">Edit Quick Name</string>
     <string name="btn_inizia_sfida">Start Challenge</string>

@@ -90,7 +90,7 @@
     <string name="btn_annulla">キャンセル</string>
     <string name="titolo_giocatori_rapidi_sheet">クイックプレイヤー</string>
     <string name="msg_rapido_rimosso">クイックプレイヤーから %s を削除しました</string>
-    <string name="btn_chiudi_gestione">管理を閉じる</string>
+    <string name="btn_chiudi_gestione">閉じる</string>
     <string name="desc_chiudi_icon">閉じる</string>
     <string name="titolo_modifica_nome_rapido">クイック名を編集</string>
     <string name="btn_inizia_sfida">チャレンジ開始</string>
