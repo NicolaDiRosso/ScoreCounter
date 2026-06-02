@@ -1,5 +1,6 @@
     package com.n380.scorecounter.ui.components
 
+    import androidx.compose.animation.AnimatedContent
     import androidx.compose.foundation.BorderStroke
     import androidx.compose.foundation.ExperimentalFoundationApi
     import androidx.compose.foundation.background
@@ -24,6 +25,11 @@
 
     // ---> IMPORT PER ANIMAZIONI E SHIMMER <---
     import androidx.compose.animation.core.*
+    import androidx.compose.animation.fadeIn
+    import androidx.compose.animation.fadeOut
+    import androidx.compose.animation.slideInVertically
+    import androidx.compose.animation.slideOutVertically
+    import androidx.compose.animation.togetherWith
     import androidx.compose.ui.geometry.Offset
     import androidx.compose.ui.graphics.Brush
     import androidx.compose.ui.graphics.graphicsLayer
@@ -335,7 +341,7 @@
                             )
                         }
 
-                        // ---> MODIFICA 2: PUNTEGGIO DINAMICO <---
+                        // ---> MODIFICA 2: PUNTEGGIO DINAMICO ANIMATO <---
                         val scoreText = player.score.toString()
                         val scoreStyle = when {
                             scoreText.length <= 2 -> MaterialTheme.typography.displayMedium // Fino a 99: Gigante
@@ -352,13 +358,50 @@
                                 .padding(horizontal = 8.dp) // Ridotto padding da 16 a 8
                                 .clickable { onScoreClick() }
                         ) {
-                            Text(
-                                text = scoreText,
-                                style = scoreStyle, // Applichiamo lo stile che cambia da solo!
-                                fontWeight = FontWeight.Black,
-                                color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
-                            )
+                            // Implementazione del Ticker Direzionale (Animazione Fluida del Punteggio)
+                            // AnimatedContent ascolta i cambiamenti della variabile passata a targetState
+                            AnimatedContent(
+                                targetState = player.score,
+                                transitionSpec = {
+                                    // Paragone tra stato target (nuovo punteggio) e stato iniziale (vecchio punteggio)
+                                    if (targetState > initialState) {
+                                        // Punteggio Aumenta: Il numero entrante arriva dal basso (height), l'uscente sale (-height)
+                                        (slideInVertically(animationSpec = tween(300)) { height -> height } + fadeIn(
+                                            animationSpec = tween(300)
+                                        )) togetherWith
+                                                (slideOutVertically(animationSpec = tween(300)) { height -> -height } + fadeOut(
+                                                    animationSpec = tween(300)
+                                                ))
+                                    } else {
+                                        // Punteggio Diminuisce: Il numero entrante arriva dall'alto (-height), l'uscente scende (height)
+                                        (slideInVertically(animationSpec = tween(300)) { height -> -height } + fadeIn(
+                                            animationSpec = tween(300)
+                                        )) togetherWith
+                                                (slideOutVertically(animationSpec = tween(300)) { height -> height } + fadeOut(
+                                                    animationSpec = tween(300)
+                                                ))
+                                    }
+                                },
+                                label = "ScoreAnimation"
+                            ) { animatedScore ->
+                                // ---> MODIFICA 2: PUNTEGGIO DINAMICO <---
+                                // Usiamo animatedScore fornito da Compose (che rappresenta il fotogramma corrente dell'animazione)
+                                // anziche player.score direttamente, in modo da evitare sfarfallii visivi durante il cambio.
+                                val scoreText = animatedScore.toString()
+                                val scoreStyle = when {
+                                    scoreText.length <= 2 -> MaterialTheme.typography.displayMedium // Fino a 99: Gigante
+                                    scoreText.length == 3 -> MaterialTheme.typography.headlineMedium // Fino a 999: Medio
+                                    else -> MaterialTheme.typography.titleLarge // Oltre 1000: Piccolo
+                                }
+
+                                Text(
+                                    text = scoreText,
+                                    style = scoreStyle, // Applichiamo lo stile che cambia da solo!
+                                    fontWeight = FontWeight.Black,
+                                    color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
+                                )
+                            }
                         }
 
                         // PULSANTE PIÙ

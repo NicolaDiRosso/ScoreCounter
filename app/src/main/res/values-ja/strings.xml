@@ -121,6 +121,7 @@
     <string name="btn_dado">サイコロ</string>
     <string name="titolo_modifica_punteggio">スコアを編集</string>
     <string name="msg_inserisci_nuovo_punteggio">%s の新しい合計スコアを入力してください：</string>
+    <string name="desc_obbiettivo">目標: %s</string>
     <string name="desc_attenzione_icon">注意</string>
     <string name="titolo_conferma_azzeramento">本当にリセットしますか？</string>
     <string name="msg_conferma_azzeramento">すべてをリセットしてもよろしいですか？\nこの操作は取り消せません。</string>

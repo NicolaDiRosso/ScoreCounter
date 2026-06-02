@@ -121,6 +121,7 @@
     <string name="btn_dado">Dado</string>
     <string name="titolo_modifica_punteggio">Editar Puntuación</string>
     <string name="msg_inserisci_nuovo_punteggio">Introduce la nueva puntuación total para %s:</string>
+    <string name="desc_obbiettivo">Meta: %s</string>
     <string name="desc_attenzione_icon">Atención</string>
     <string name="titolo_conferma_azzeramento">¿De verdad quieres restablecer?</string>
     <string name="msg_conferma_azzeramento">¿Estás seguro de que quieres restablecer todo?\nEsta acción no se puede deshacer.</string>

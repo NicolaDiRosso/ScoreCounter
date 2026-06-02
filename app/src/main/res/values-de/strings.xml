@@ -121,6 +121,7 @@
     <string name="btn_dado">Würfel</string>
     <string name="titolo_modifica_punteggio">Punktestand bearbeiten</string>
     <string name="msg_inserisci_nuovo_punteggio">Gib den neuen Gesamtpunktestand für %s ein:</string>
+    <string name="desc_obbiettivo">Ziel: %s</string>
     <string name="desc_attenzione_icon">Achtung</string>
     <string name="titolo_conferma_azzeramento">Möchtest du wirklich zurücksetzen?</string>
     <string name="msg_conferma_azzeramento">Bist du sicher, dass du alles zurücksetzen möchtest?\nDiese Aktion kann nicht rückgängig gemacht werden.</string>

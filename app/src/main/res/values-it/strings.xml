@@ -128,6 +128,7 @@
     <string name="btn_dado">Dado</string>
     <string name="titolo_modifica_punteggio">Modifica Punteggio</string>
     <string name="msg_inserisci_nuovo_punteggio">Inserisci il nuovo punteggio totale per %s:</string>
+    <string name="desc_obbiettivo">Traguardo: %s</string>
     <string name="desc_attenzione_icon">Attenzione</string>
     <string name="titolo_conferma_azzeramento">Vuoi proprio azzerare?</string>
     <string name="msg_conferma_azzeramento">Sei sicuro di voler azzerare tutto?\nQuesta azione non può essere annullata.</string>
