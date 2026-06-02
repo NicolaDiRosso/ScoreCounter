@@ -380,7 +380,10 @@
                         // --- BLOCCO SINISTRO: Informazioni e Tempo di Gioco ---
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            // 🧠 UX FIX: Usiamo weight(1.1f) per dare priorità a quest'area (Info + Tempo)
+                            // ma permettendo al blocco dei bottoni a destra di non venire schiacciato.
+                            modifier = Modifier.weight(1.1f)
                         ) {
                             // ICONA INFO: Pulsante compatto per le regole
                             FilledIconButton(
@@ -403,28 +406,43 @@
                             }
 
                             // DISPLAY CRONOMETRO: Tempo trascorso dall'inizio (Durata Match)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    // Abbiamo sostituito Icons.Filled.Timer con Icons.Filled.Schedule (un orologio classico)
-                                    // per distinguere visivamente il tempo trascorso dal pulsante "Timer" (conto alla rovescia).
-                                    imageVector = Icons.Filled.Schedule,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp).padding(end = 4.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = formatTime(viewModel.matchDurationSeconds),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            Column(verticalArrangement = Arrangement.Center) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        // Abbiamo sostituito Icons.Filled.Timer con Icons.Filled.Schedule (un orologio classico)
+                                        // per distinguere visivamente il tempo trascorso dal pulsante "Timer" (conto alla rovescia).
+                                        imageVector = Icons.Filled.Schedule,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp).padding(end = 4.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = formatTime(viewModel.matchDurationSeconds),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                
+                                // RIGA OBIETTIVO: Traguardo (se impostato)
+                                if (viewModel.targetScore.isNotBlank()) {
+                                    AutoResizedText(
+                                        text = stringResource(R.string.desc_obbiettivo, viewModel.targetScore),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                    )
+                                }
                             }
                         }
 
                         // --- BLOCCO DESTRO: Azioni Rapide (Timer e Dado) ---
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            // 🧠 UX FIX: Diamo weight(1f) così il blocco bottoni occupa una porzione 
+                            // garantita e non sparisce se i testi a sinistra diventano enormi.
+                            modifier = Modifier.weight(1f)
                         ) {
                             // PULSANTE TIMER: Per impostare conti alla rovescia
                             FilledTonalButton(
@@ -432,17 +450,27 @@
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     showTimerDialog = true
                                 },
-                                modifier = Modifier.height(48.dp), // Altezza portata a 48dp per standard touch target
+                                modifier = Modifier
+                                    .height(48.dp) // Altezza portata a 48dp per standard touch target
+                                    // 🧠 UX FIX: Entrambi i bottoni avranno weight(1f).
+                                    // Risultato: avranno SEMPRE la stessa larghezza dividendo lo spazio del blocco!
+                                    .weight(1f),
                                 shape = RoundedCornerShape(16.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp), // Ridotto per font grandi
                                 // Coloriamo il pulsante con il PrimaryContainer pastello!
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             ) {
-                                Icon(Icons.Filled.Timer, null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
-                                Text(stringResource(R.string.btn_timer), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold) // 🌍 I18N
+                                Icon(Icons.Filled.Timer, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
+                                // 🧠 UX FIX: Usiamo AutoResizedText così anche la parola "Timer" 
+                                // rimpicciolisce se il font di sistema è gigante, evitando di schiacciare il vicino.
+                                AutoResizedText(
+                                    text = stringResource(R.string.btn_timer), 
+                                    style = MaterialTheme.typography.labelLarge, 
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
 
                             // PULSANTE DADO: Per estrazioni casuali
@@ -452,9 +480,12 @@
                                     diceResult = (1..viewModel.diceSides).random()
                                     showDiceDialog = true
                                 },
-                                modifier = Modifier.height(48.dp), // Altezza portata a 48dp per standard touch target
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    // 🧠 UX FIX: Stesso peso del compagno Timer per garantire simmetria
+                                    .weight(1f),
                                 shape = RoundedCornerShape(16.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp),
                                 // Coloriamo il pulsante con il PrimaryContainer pastello!
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
@@ -462,7 +493,7 @@
                                 )
 
                             ) {
-                                Icon(Icons.Filled.Casino, null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
+                                Icon(Icons.Filled.Casino, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
                                 AutoResizedText(stringResource(R.string.btn_dado), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold) // 🌍 I18N
                             }
                         }

@@ -130,6 +130,7 @@
     <string name="btn_dado">Dice</string>
     <string name="titolo_modifica_punteggio">Edit Score</string>
     <string name="msg_inserisci_nuovo_punteggio">Enter the new total score for %s:</string>
+    <string name="desc_obbiettivo">Goal: %s</string>
     <string name="desc_attenzione_icon">Warning</string>
     <string name="titolo_conferma_azzeramento">Are you sure you want to reset?</string>
     <string name="msg_conferma_azzeramento">Are you sure you want to reset everything?\nThis action cannot be undone.</string>

@@ -121,6 +121,7 @@
     <string name="btn_dado">पासा</string>
     <string name="titolo_modifica_punteggio">स्कोर संपादित करें</string>
     <string name="msg_inserisci_nuovo_punteggio">%s के लिए नया कुल स्कोर दर्ज करें:</string>
+    <string name="desc_obbiettivo">लक्ष्य: %s</string>
     <string name="desc_attenzione_icon">ध्यान दें</string>
     <string name="titolo_conferma_azzeramento">क्या आप वाकई रिसेट करना चाहते हैं?</string>
     <string name="msg_conferma_azzeramento">क्या आप वाकई सब कुछ रिसेट करना चाहते हैं?\nइस कार्रवाई को पूर्ववत नहीं किया जा सकता।</string>

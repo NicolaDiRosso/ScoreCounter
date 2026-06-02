@@ -121,6 +121,7 @@
     <string name="btn_dado">Dé</string>
     <string name="titolo_modifica_punteggio">Modifier le Score</string>
     <string name="msg_inserisci_nuovo_punteggio">Entrez le nouveau score total pour %s :</string>
+    <string name="desc_obbiettivo">Objectif: %s</string>
     <string name="desc_attenzione_icon">Attention</string>
     <string name="titolo_conferma_azzeramento">Voulez-vous vraiment réinitialiser ?</string>
     <string name="msg_conferma_azzeramento">Êtes-vous sûr de vouloir tout réinitialiser ?\nCette action est irréversible.</string>
