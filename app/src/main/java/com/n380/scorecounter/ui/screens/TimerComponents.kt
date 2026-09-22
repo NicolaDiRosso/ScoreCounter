@@ -4,8 +4,14 @@ import android.content.Context
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -387,39 +394,50 @@ fun TimerSettingsDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 if (isRunning || isPaused) {
-                    // RIGA CON PULSANTI PAUSA / RIPRENDI E FERMA TIMER (Solo Icone adattive)
+                    // RIGA CON PULSANTI PAUSA / RIPRENDI E FERMA TIMER (Animata e Adattiva)
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateContentSize(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // TASTO PAUSA / RIPRENDI
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                stopAllAlarms() // Spegne eventuali allarmi attivi
-
-                                if (isRunning) {
-                                    isRunning = false
-                                    isPaused = true
-                                } else {
-                                    isRunning = true
-                                    isPaused = false
-                                }
-                            },
-                            modifier = Modifier.weight(1f).height(56.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
-                            )
+                        // TASTO PAUSA / RIPRENDI (Visibile SOLO quando il tempo non è scaduto, cioè timeLeft > 0)
+                        AnimatedVisibility(
+                            visible = timeLeft > 0,
+                            enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
+                            exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300)),
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Icon(
-                                imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp)
-                            )
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    stopAllAlarms() // Spegne eventuali allarmi attivi
+
+                                    if (isRunning) {
+                                        isRunning = false
+                                        isPaused = true
+                                    } else {
+                                        isRunning = true
+                                        isPaused = false
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
                         }
 
-                        // TASTO FERMA TIMER
+                        // TASTO FERMA TIMER (Sempre presente, si espande a 100% se il tempo è scaduto <= 0)
                         Button(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -427,7 +445,9 @@ fun TimerSettingsDialog(
                                 isPaused = false
                                 stopAllAlarms()
                             },
-                            modifier = Modifier.weight(1f).height(56.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error
@@ -436,8 +456,24 @@ fun TimerSettingsDialog(
                             Icon(
                                 imageVector = Icons.Filled.Stop,
                                 contentDescription = null,
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(if (timeLeft > 0) 32.dp else 24.dp)
                             )
+                            // Se il tempo è scaduto (timeLeft <= 0), mostra anche la scritta "FERMA TIMER" affianco all'icona
+                            AnimatedVisibility(
+                                visible = timeLeft <= 0,
+                                enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
+                                exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300))
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.btn_ferma_timer),
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
                         }
                     }
                 } else {
