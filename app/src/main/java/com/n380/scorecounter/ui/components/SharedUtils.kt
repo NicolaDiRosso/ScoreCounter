@@ -39,6 +39,11 @@
     import androidx.compose.ui.text.TextStyle
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.unit.dp
+    import android.graphics.Bitmap
+    import java.io.File
+    import java.io.FileOutputStream
+    import androidx.core.content.FileProvider
+    import android.net.Uri
     import com.n380.scorecounter.R // 🌍 I18N: Import fondamentale per accedere agli ID del dizionario
     import com.n380.scorecounter.model.PlayerRecord
     import java.text.SimpleDateFormat
@@ -792,6 +797,53 @@
         // 🌍 I18N: Usa context.getString invece di un testo fisso come "Condividi Classifica"
         val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.share_intent_chooser))
         context.startActivity(shareIntent)
+    }
+
+    /**
+     * Esegue la condivisione combinata di Testo + Immagine (Bitmap).
+     * 1. Salva il Bitmap nella cache temporanea.
+     * 2. Ottiene un Uri sicuro tramite FileProvider.
+     * 3. Lancia l'Intent ACTION_SEND.
+     */
+    fun launchShareIntentWithImage(context: Context, shareText: String, bitmap: Bitmap) {
+        try {
+            // A. PREPARAZIONE CARTELLA CACHE
+            // Creiamo una sottocartella "images" nella cache dell'app
+            val cachePath = File(context.cacheDir, "images")
+            cachePath.mkdirs() // Crea la cartella se non esiste
+
+            // B. SALVATAGGIO FISICO DEL FILE
+            // Usiamo un nome fisso "chart_share.png" che verrà sovrascritto ad ogni invio per non occupare spazio
+            val file = File(cachePath, "chart_share.png")
+            val stream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.close()
+
+            // C. GENERAZIONE URI SICURO (L'AUTORIZZAZIONE)
+            // Utilizziamo l'authority definita nel Manifest (com.n380.scorecounter.fileprovider)
+            val contentUri: Uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            // D. CREAZIONE E LANCIO INTENT
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
+                putExtra(Intent.EXTRA_TEXT, shareText) // Il testo del report
+                putExtra(Intent.EXTRA_STREAM, contentUri) // L'immagine del grafico
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Permette all'app ricevente di leggere l'Uri
+            }
+
+            // Lancio del selettore di sistema
+            val chooser = Intent.createChooser(shareIntent, context.getString(R.string.share_intent_chooser))
+            context.startActivity(chooser)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Fallback: se il salvataggio immagine fallisce, invia almeno il testo
+            launchShareIntent(context, shareText)
+        }
     }
 
     // ====================================================================

@@ -26,6 +26,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.drawToBitmap
 import com.n380.scorecounter.R // 🌍 I18N: Import per l'accesso agli ID
 import com.n380.scorecounter.model.PlayerRecord
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -36,7 +39,10 @@ import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.buildMatchShareText
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.launchShareIntent
+import com.n380.scorecounter.ui.components.launchShareIntentWithImage
 import com.n380.scorecounter.viewmodel.MatchViewModel
+import kotlinx.coroutines.launch
+import android.view.View
 
 // ====================================================================
 // LA SCHERMATA DELLA CLASSIFICA (RISULTATI) - VERSIONE ANIMATA
@@ -80,6 +86,11 @@ fun ResultsScreen(
     // Appena entriamo in questa schermata, l'esplosione è VERA di default!
     // In questo modo, l'animazione partirà all'istante in cui compare la grafica.
     var showConfetti by remember { mutableStateOf(true) }
+
+    val coroutineScope = rememberCoroutineScope()
+    // 📸 RIFERIMENTO ALLA VISTA: Salviamo un riferimento alla View di sistema
+    // per poter "fotografare" il grafico quando premiamo condividi.
+    var chartView by remember { mutableStateOf<View?>(null) }
 
     // ====================================================================
     // PREVENZIONE DOPPIO CLICK (Debounce)
@@ -230,8 +241,23 @@ fun ResultsScreen(
                                     feniceData = mappedFenice
                                 )
 
-                                // Invocazione del bridge verso il Sistema Operativo
-                                launchShareIntent(context, shareText)
+                                // 📸 CATTURA E CONDIVISIONE COMBINATA
+                                // Lanciamo una Coroutine perché la conversione in Bitmap richiede un attimo di elaborazione
+                                coroutineScope.launch {
+                                    try {
+                                        // Fotografiamo il grafico catturato dalla View
+                                        val bitmap = chartView?.drawToBitmap()
+                                        if (bitmap != null) {
+                                            // Inviamo sia il testo che l'immagine
+                                            launchShareIntentWithImage(context, shareText, bitmap)
+                                        } else {
+                                            launchShareIntent(context, shareText)
+                                        }
+                                    } catch (e: Exception) {
+                                        // Se la cattura fallisce (es. dispositivo non supportato), invia solo il testo
+                                        launchShareIntent(context, shareText)
+                                    }
+                                }
                             },
                             modifier = Modifier
                                 // LEZIONE UI: Asimmetria 25/75.
@@ -441,9 +467,32 @@ fun ResultsScreen(
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(16.dp)
                                 ) {
-                                    ScoreChart(
-                                        players = recordsForChart,
-                                        modifier = Modifier.fillMaxSize().padding(12.dp)
+                                    // 📸 ANDROID VIEW WRAPPER: Usiamo un ponte tra Compose e il sistema View classico.
+                                    // Questo ci permette di ottenere un riferimento fisico (chartView) che Android 
+                                    // sa come fotografare (drawToBitmap).
+                                    AndroidView(
+                                        factory = { ctx ->
+                                            ComposeView(ctx).apply {
+                                                // Salviamo il riferimento alla vista appena creata
+                                                chartView = this
+                                                setContent {
+                                                    ScoreChart(
+                                                        players = recordsForChart,
+                                                        modifier = Modifier.fillMaxSize().padding(12.dp)
+                                                    )
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxSize(),
+                                        update = { view ->
+                                            // Se i dati cambiano, aggiorniamo il contenuto interno della vista
+                                            (view as ComposeView).setContent {
+                                                ScoreChart(
+                                                    players = recordsForChart,
+                                                    modifier = Modifier.fillMaxSize().padding(12.dp)
+                                                )
+                                            }
+                                        }
                                     )
                                 }
                             }

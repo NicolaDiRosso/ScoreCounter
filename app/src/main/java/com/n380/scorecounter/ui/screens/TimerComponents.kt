@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
@@ -87,6 +88,9 @@ fun TimerSettingsDialog(
     // 'isRunning': Booleana. Ci dice se il cronometro sta andando (true) o è fermo (false).
     var isRunning by remember { mutableStateOf(false) }
 
+    // 'isPaused': Booleana. Ci dice se il cronometro è in pausa (true) o no (false).
+    var isPaused by remember { mutableStateOf(false) }
+
     // 'timeLeft': Usa 'mutableLongStateOf' perché è ottimizzato per i numeri grandi (Long).
     var timeLeft by remember { mutableLongStateOf(0L) }
 
@@ -157,8 +161,8 @@ fun TimerSettingsDialog(
         targetValue = when {
             // L'istruzione 'when' è come una cascata. Scende dall'alto e si ferma alla PRIMA condizione vera.
 
-            // 1. Se il timer è FERMO (!isRunning), l'utente sta digitando. Colore Blu standard.
-            !isRunning -> MaterialTheme.colorScheme.primary
+            // 1. Se il timer è FERMO e NON in pausa (!isRunning && !isPaused), l'utente sta digitando. Colore Blu standard.
+            !isRunning && !isPaused -> MaterialTheme.colorScheme.primary
 
             // 2. Se il tempo è <= 0. La L (0L) indica che è un numero di tipo Long (più capiente di un Int normale).
             // Usiamo il rosso per indicare il pericolo/overtime.
@@ -212,10 +216,10 @@ fun TimerSettingsDialog(
                         .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)) // 3. Poi colorati lo sfondo (con trasparenza al 20%)
 
                         // 🛠️ PRATICA: Il Bordo Dinamico
-                        // Se l'utente sta scrivendo (Focus = true) E il timer è fermo, disegna un bordo di 2dp col colore sfumato!
+                        // Se l'utente sta scrivendo (Focus = true) E il timer è fermo/non in pausa, disegna un bordo di 2dp col colore sfumato!
                         // Altrimenti, disegna un bordo invisibile (Color.Transparent).
                         .border(
-                            border = if (isTextFieldFocused && !isRunning)
+                            border = if (isTextFieldFocused && !isRunning && !isPaused)
                                 BorderStroke(2.dp, displayColor)
                             else
                                 BorderStroke(0.dp, Color.Transparent),
@@ -227,9 +231,9 @@ fun TimerSettingsDialog(
                     // 🧠 TEORIA DEL RENDERING CONDIZIONALE:
                     // In Compose, un 'if' non nasconde semplicemente un pezzo di grafica... decide letteralmente
                     // se COSTRUIRLO nella memoria del telefono o no.
-                    if (isRunning) {
+                    if (isRunning || isPaused) {
                         // ==========================================================
-                        // MODO 1: IL TIMER STA ANDANDO (Sola lettura)
+                        // MODO 1: IL TIMER STA ANDANDO O E' IN PAUSA (Sola lettura)
                         // ==========================================================
 
                         // 🛠️ MATEMATICA DEL TEMPO:
@@ -319,12 +323,9 @@ fun TimerSettingsDialog(
                 }
 
                 // ====================================================================
-                // 🔘 I PULSANTI RAPIDI PREDEFINITI
-                // ====================================================================
-                // ====================================================================
                 // 🔘 I PULSANTI RAPIDI PREDEFINITI (Versione Flessibile)
                 // ====================================================================
-                if (!isRunning) {
+                if (!isRunning && !isPaused) {
                     // 🧠 TEORIA DEI PAIR (Coppie):
                     // Pair("Testo Visivo", "Dato Grezzo")
                     // In questo modo svincoliamo la grafica (ciò che legge l'utente)
@@ -385,66 +386,110 @@ fun TimerSettingsDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // TASTO START / STOP
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress) // Feedback tattile prolungato
+                if (isRunning || isPaused) {
+                    // RIGA CON PULSANTI PAUSA / RIPRENDI E FERMA TIMER (Solo Icone adattive)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // TASTO PAUSA / RIPRENDI
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                stopAllAlarms() // Spegne eventuali allarmi attivi
 
-                        if (isRunning) {
-                            // Se andava, ora lo SPEGNI.
-                            isRunning = false
-                            stopAllAlarms() // Spegne subito vibrazione e musica!
-                        } else {
-                            // Se era fermo, ora lo ACCENDI.
-                            focusManager.clearFocus() // Nasconde la tastiera per fare pulizia a schermo
+                                if (isRunning) {
+                                    isRunning = false
+                                    isPaused = true
+                                } else {
+                                    isRunning = true
+                                    isPaused = false
+                                }
+                            },
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
 
-                            // Convertiamo il testo (es. "0130") in matematica vera per il countdown.
-                            val padded = rawInput.padStart(4, '0') // Assicura 4 caratteri
-                            val m = padded.substring(0, 2).toLongOrNull() ?: 0L // I primi due sono Minuti
-                            val s = padded.substring(2, 4).toLongOrNull() ?: 0L // Gli ultimi due sono Secondi
-                            val totalSeconds = (m * 60) + s // Formula: (Minuti * 60) + Secondi
+                        // TASTO FERMA TIMER
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                isRunning = false
+                                isPaused = false
+                                stopAllAlarms()
+                            },
+                            modifier = Modifier.weight(1f).height(56.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Stop,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                } else {
+                    // TASTO AVVIA TIMER (A LARGHEZZA INTERA)
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            focusManager.clearFocus()
 
-                            // Avvia il motore SOLO se l'utente ha messo un tempo maggiore di zero.
+                            val padded = rawInput.padStart(4, '0')
+                            val m = padded.substring(0, 2).toLongOrNull() ?: 0L
+                            val s = padded.substring(2, 4).toLongOrNull() ?: 0L
+                            val totalSeconds = (m * 60) + s
+
                             if (totalSeconds > 0) {
                                 timeLeft = totalSeconds
                                 isRunning = true
+                                isPaused = false
                             }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRunning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Icon(imageVector = if (isRunning) Icons.Filled.Stop else Icons.Filled.PlayArrow, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        // 🌍 I18N: Costrutto logico che sceglie dinamicamente dal dizionario la voce "Ferma" o "Avvia" in base allo stato
-                        text = if (isRunning) stringResource(R.string.btn_ferma_timer) else stringResource(R.string.btn_avvia_timer),
-                        fontWeight = FontWeight.Bold
-                    )
+                        },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.btn_avvia_timer),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 // TASTO CHIUDI E ANNULLA
                 OutlinedButton(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        stopAllAlarms() // Spegne musica e vibrazioni
-                        onDismiss()     // Chiude il popup chiamando la funzione dal file padre
+                        stopAllAlarms()
+                        onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(20.dp)
-                )
-                {
-                    // Icona Close (X) dimensionata a 28.dp per impatto visivo
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.desc_chiudi_icon), // 🌍 I18N: Riutilizzo della stringa "Chiudi/Close" già tradotta precedentemente per la screen di creazione
-                        modifier = Modifier.padding(end = 8.dp)//.size(28.dp)
+                        contentDescription = stringResource(R.string.desc_chiudi_icon),
+                        modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(
-                        text = stringResource(R.string.btn_chiudi), // 🌍 I18N: Sostituzione con testo del bottone tradotto
+                        text = stringResource(R.string.btn_chiudi),
                         fontWeight = FontWeight.Bold
                     )
                 }

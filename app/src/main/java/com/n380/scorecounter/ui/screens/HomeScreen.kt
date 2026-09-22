@@ -45,6 +45,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.drawToBitmap
+import android.view.View
 import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
@@ -61,6 +65,7 @@ import com.n380.scorecounter.ui.components.buildMatchShareText
 import com.n380.scorecounter.ui.components.formatDate
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.launchShareIntent
+import com.n380.scorecounter.ui.components.launchShareIntentWithImage
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -784,6 +789,10 @@ fun HomeScreen(
                                     // Variabile di stato locale per gestire l'apertura/chiusura della singola card
                                     var expanded by remember { mutableStateOf(false) }
 
+                                    // 📸 RIFERIMENTO ALLA VISTA: Salviamo un riferimento alla View di sistema
+                                    // per poter "fotografare" il grafico di questa specifica card.
+                                    var chartViewByCard by remember { mutableStateOf<View?>(null) }
+
                                     Card(
                                         modifier = Modifier.fillMaxWidth().clickable {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -988,12 +997,35 @@ fun HomeScreen(
                                                             }
 
                                                             // 2. IL MINI-GRAFICO (Ora privato del clickable, che è gestito dal Padre)
-                                                            ScoreChart(
-                                                                players = record.allPlayers,
-                                                                modifier = Modifier
-                                                                    .height(120.dp)
-                                                                    .fillMaxWidth()
-                                                                    .padding(top = 8.dp)
+                                                            // 📸 ANDROID VIEW WRAPPER: Usiamo lo stesso approccio della ResultsScreen
+                                                            // per catturare il grafico di questa specifica partita.
+                                                            AndroidView(
+                                                                factory = { ctx ->
+                                                                    ComposeView(ctx).apply {
+                                                                        chartViewByCard = this
+                                                                        setContent {
+                                                                            ScoreChart(
+                                                                                players = record.allPlayers,
+                                                                                modifier = Modifier
+                                                                                    .height(120.dp)
+                                                                                    .fillMaxWidth()
+                                                                                    .padding(top = 8.dp)
+                                                                            )
+                                                                        }
+                                                                    }
+                                                                },
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                update = { view ->
+                                                                    (view as ComposeView).setContent {
+                                                                        ScoreChart(
+                                                                            players = record.allPlayers,
+                                                                            modifier = Modifier
+                                                                                .height(120.dp)
+                                                                                .fillMaxWidth()
+                                                                                .padding(top = 8.dp)
+                                                                        )
+                                                                    }
+                                                                }
                                                             )
                                                         }
 
@@ -1141,10 +1173,22 @@ fun HomeScreen(
                                                                 )
 
                                                                 // Esecuzione dell'Intent per aprire WhatsApp/Telegram/ecc.
-                                                                launchShareIntent(
-                                                                    context,
-                                                                    shareText
-                                                                )
+                                                                // 📸 CATTURA E CONDIVISIONE COMBINATA
+                                                                coroutineScope.launch {
+                                                                    try {
+                                                                        // Fotografiamo il grafico catturato dalla View della Card
+                                                                        val bitmap = chartViewByCard?.drawToBitmap()
+                                                                        if (bitmap != null) {
+                                                                            // Inviamo sia il testo che l'immagine
+                                                                            launchShareIntentWithImage(context, shareText, bitmap)
+                                                                        } else {
+                                                                            launchShareIntent(context, shareText)
+                                                                        }
+                                                                    } catch (e: Exception) {
+                                                                        // Se la cattura fallisce, invia solo il testo
+                                                                        launchShareIntent(context, shareText)
+                                                                    }
+                                                                }
                                                             }) {
                                                                 Icon(
                                                                     Icons.Filled.Share,
@@ -1165,9 +1209,7 @@ fun HomeScreen(
                                                                 coroutineScope.launch {
                                                                     launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
                                                                     val result =
-                                                                        snackbarHostState.showSnackbar(
-                                                                            context.getString(R.string.msg_partita_eliminata), // Messaggio Snackbar: partita eliminata
-                                                                            context.getString(R.string.btn_annulla_undo), // Testo pulsante Snackbar: annulla eliminazione
+                                                                        snackbarHostState.showSnackbar(context.getString(R.string.msg_partita_eliminata), // Messaggio Snackbar: partita eliminata context.getString(R.string.btn_annulla_undo), // Testo pulsante Snackbar: annulla eliminazione
                                                                             duration = SnackbarDuration.Indefinite
                                                                         )
                                                                     if (result == SnackbarResult.ActionPerformed) {
