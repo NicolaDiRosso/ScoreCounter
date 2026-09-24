@@ -78,7 +78,6 @@ ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Je
       <b>Metti pressione con il timer</b><br>
       <img src="https://github.com/user-attachments/assets/e907778b-5c94-4e69-aa69-34ff862fc59b" width="250" alt="Popup del dado" />
     </td>
-  </tr>
   <td align="center">
       <b>Risolvi le dispute con il dado</b><br>
       <img src="https://github.com/user-attachments/assets/1c88bbe4-e734-4e55-ad4a-4a4c03d19b09" width="250" alt="Popup del dado" />
@@ -87,16 +86,20 @@ ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Je
 </table>
 
 ### 🏆 4. Risultati e Analisi
-*Molto più di un semplice punteggio: scopri chi si aggiudica i premi speciali e analizza l'andamento della gara sul grafico temporale.*
+*Molto più di un semplice punteggio: scopri chi si aggiudica i premi speciali e analizza l'andamento della gara sul grafico temporale e condividilo con gli amici.*
 <table>
   <tr>
     <td align="center">
-      <b>Classifica finale con grafico della partita</b><br>
-      <img src="https://github.com/user-attachments/assets/843155fa-271c-4549-a7b8-9cb3fc681bbe" width="250" alt="Classifica finale con grafico della partita"/>
+      <b>Osserva la i risultati con il grafico della partita</b><br>
+      <img src="https://github.com/user-attachments/assets/b2a1f603-88b2-444a-a206-5ec46777c449" width="250" alt="Classifica finale con grafico della partita"/>
     </td>
     <td align="center">
       <b>Gratification con medaglie scherzose</b><br>
-      <img src="https://github.com/user-attachments/assets/3d179504-7782-4f0b-bcbf-120a1e01566b" width="250" alt="Gratification con medaglie scherzose"/>
+      <img src="https://github.com/user-attachments/assets/9b057635-275f-43ff-b18a-307d49fb62a3" width="250" alt="Gratification con medaglie scherzose"/>
+    </td>
+  <td align="center">
+      <b>Comprendi le medaglie</b><br>
+      <img src="https://github.com/user-attachments/assets/0162adee-4cae-4db4-9292-2442d4148da2" width="250" alt="Gratification con medaglie scherzose"/>
     </td>
   </tr>
 </table>
