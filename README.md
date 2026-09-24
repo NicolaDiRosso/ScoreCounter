@@ -52,15 +52,15 @@ ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Je
 <table>
   <tr>
     <td align="center">
-      <b>Configurazione Partita</b><br>
+      <b>Configura la partita</b><br>
       <img src="https://github.com/user-attachments/assets/1c6c53cb-6970-4330-a173-8cca3ec6de0c" width="250" alt="Schermata di creazione match"/>
     </td>
     <td align="center">
-      <b>Personalizzazione per ogni giocatore</b><br>
+      <b>Personalizza ogni giocatore</b><br>
       <img src="https://github.com/user-attachments/assets/3ab525cf-1d63-4a7a-96bf-a5cc16bf1d29" width="250" alt="Storico partite e record assoluti"/>
     </td>
     <td align="center">
-      <b>Gestione giocatori salvati</b><br>
+      <b>Gestisci i giocatori salvati</b><br>
       <img src="https://github.com/user-attachments/assets/6c345fdb-e0a2-46e6-9bb1-f0814dd4f445" width="250" alt="Pannello gestione giocatori preferiti"/>
     </td>
   </tr>
@@ -71,12 +71,17 @@ ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Je
 <table>
   <tr>
     <td align="center">
-      <b>Contatore e Combo</b><br>
-      <img src="https://github.com/user-attachments/assets/b7fbe4c9-f7b7-4270-b2a4-0264a6a1ab6f" width="250" alt="Match in corso con effetto On Fire"/>
+      <b>Tieni il conto dei punti</b><br>
+      <img src="https://github.com/user-attachments/assets/f715bbae-0cb8-4657-b3d7-e80fa3af5c2a" width="250" alt="Match in corso con effetto On Fire"/>
     </td>
     <td align="center">
-      <b>Strumenti integrati</b><br>
-      <img src="https://github.com/user-attachments/assets/802a9101-cd97-42aa-9426-c4840f869f46" width="250" alt="Popup del dado" />
+      <b>Metti pressione con il timer</b><br>
+      <img src="https://github.com/user-attachments/assets/e907778b-5c94-4e69-aa69-34ff862fc59b" width="250" alt="Popup del dado" />
+    </td>
+  </tr>
+  <td align="center">
+      <b>Risolvi le dispute con il dado</b><br>
+      <img src="https://github.com/user-attachments/assets/1c88bbe4-e734-4e55-ad4a-4a4c03d19b09" width="250" alt="Popup del dado" />
     </td>
   </tr>
 </table>
