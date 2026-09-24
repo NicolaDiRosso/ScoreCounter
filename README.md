@@ -34,15 +34,15 @@ ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Je
   <tr>
     <td align="center">
       <b>Homepage con storico</b><br>
-      <img src="https://github.com/user-attachments/assets/df7741bb-2b94-440a-b965-d610b47dc48c" width="250" alt="Home Screen con sfide rapide"/>
+      <img src="https://github.com/user-attachments/assets/b44950ca-88a9-4a41-8a04-b12302891a9e" width="250" alt="Home Screen con sfide rapide"/>
     </td>
      <td align="center">
       <b>Storico per ogni partita</b><br>
-      <img src="https://github.com/user-attachments/assets/ccd5de6b-24e9-427c-a597-1b149f8f7e5f" width="250" alt="Storico partite e record assoluti"/>
+      <img src="https://github.com/user-attachments/assets/7e1b3ab3-dee8-4dbe-8bdb-303f9e445b4f" width="250" alt="Storico partite e record assoluti"/>
     </td>
     <td align="center">
       <b>Statistiche globali</b><br>
-      <img src="https://github.com/user-attachments/assets/ee48b1dc-3f4c-43c4-a7d2-dbea1757c582" width="250" alt="Storico partite e record assoluti"/>
+      <img src="https://github.com/user-attachments/assets/b3d643d4-c0c9-413c-9e8a-e4f36ff28b01" width="250" alt="Storico partite e record assoluti"/>
     </td>
   </tr>
 </table>
