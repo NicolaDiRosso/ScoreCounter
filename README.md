@@ -53,15 +53,15 @@ ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Je
   <tr>
     <td align="center">
       <b>Configurazione Partita</b><br>
-      <img src="https://github.com/user-attachments/assets/05e27699-671b-415b-bb9f-c959a237ed23" width="250" alt="Schermata di creazione match"/>
+      <img src="https://github.com/user-attachments/assets/1c6c53cb-6970-4330-a173-8cca3ec6de0c" width="250" alt="Schermata di creazione match"/>
     </td>
     <td align="center">
-      <b>Personalizzazione del dado</b><br>
-      <img src="https://github.com/user-attachments/assets/e34acb2b-0309-4ac6-996d-6668cb54226b" width="250" alt="Storico partite e record assoluti"/>
+      <b>Personalizzazione per ogni giocatore</b><br>
+      <img src="https://github.com/user-attachments/assets/3ab525cf-1d63-4a7a-96bf-a5cc16bf1d29" width="250" alt="Storico partite e record assoluti"/>
     </td>
     <td align="center">
-      <b>Gestione Giocatori</b><br>
-      <img src="https://github.com/user-attachments/assets/df6aa4cc-b24b-440e-b531-ceca79a3409c" width="250" alt="Pannello gestione giocatori preferiti"/>
+      <b>Gestione giocatori salvati</b><br>
+      <img src="https://github.com/user-attachments/assets/6c345fdb-e0a2-46e6-9bb1-f0814dd4f445" width="250" alt="Pannello gestione giocatori preferiti"/>
     </td>
   </tr>
 </table>
