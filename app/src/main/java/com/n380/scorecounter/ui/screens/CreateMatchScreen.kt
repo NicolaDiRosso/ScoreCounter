@@ -30,6 +30,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb // Conversione cromatica per persistenza dati
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -131,11 +133,43 @@ fun CreateMatchScreen(
     val errSoloGiocatori =
         stringResource(R.string.err_solo_giocatori) // Recupero testo tradotto per errore tavolo vuoto
 
-    // ARCHITETTURA PAGINA (Scaffold)
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent, // Supporto per la visualizzazione del pattern grafico sottostante
-        snackbarHost = { SnackbarHost(snackbarHostState) },//prepara lo spazio per le notifiche a comparsa
+    // --------------------------------------------------------------------
+    // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
+    // --------------------------------------------------------------------
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape) {
+        // ====================================================================
+        // ORIENTAMENTO ORIZZONTALE (LANDSCAPE) -> DELEGATO A CreateMatchScreenLandscape.kt
+        // ====================================================================
+        CreateMatchScreenLandscape(
+            viewModel = viewModel,
+            newPlayerName = newPlayerName,
+            onNewPlayerNameChange = { newPlayerName = it },
+            playerToEdit = playerToEdit,
+            onPlayerToEditChange = { playerToEdit = it },
+            showError = showError,
+            onShowErrorChange = { showError = it },
+            canStart = canStart,
+            isNavigating = isNavigating,
+            onIsNavigatingChange = { isNavigating = it },
+            onShowFavoritesDialog = { showFavoritesDialog = true },
+            onNavigateToCounter = onNavigateToCounter,
+            haptic = haptic,
+            focusManager = focusManager,
+            keyboardController = keyboardController,
+            snackbarHostState = snackbarHostState,
+            coroutineScope = coroutineScope
+        )
+    } else {
+        // ====================================================================
+        // ORIENTAMENTO VERTICALE (PORTRAIT) -> SCAFFOLD STANDARD
+        // ====================================================================
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent, // Supporto per la visualizzazione del pattern grafico sottostante
+            snackbarHost = { SnackbarHost(snackbarHostState) },//prepara lo spazio per le notifiche a comparsa
 
         // BARRA INFERIORE: Pulsante principale di avvio sfida
         bottomBar = {
@@ -884,6 +918,7 @@ fun CreateMatchScreen(
                 }
             }
         }
+    }
     }
 
     // MODALE UNIFICATO: MODIFICA GIOCATORE (Nome e Colore)
