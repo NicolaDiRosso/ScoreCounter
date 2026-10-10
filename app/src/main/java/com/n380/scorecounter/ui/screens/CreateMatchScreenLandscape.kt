@@ -465,7 +465,7 @@ fun CreateMatchScreenLandscape(
         // ====================================================================
         Card(
             modifier = Modifier
-                .weight(0.50f)
+                .weight(0.56f)
                 .fillMaxHeight(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),

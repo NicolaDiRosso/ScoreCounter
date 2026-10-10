@@ -1055,6 +1055,9 @@ fun CreateMatchScreen(
         // Essendo il Dialog una finestra a sé stante (Z-Index superiore),
         // non possiamo usare le notifiche dello Scaffold base.
         val dialogSnackbarHostState = remember { SnackbarHostState() }
+        //creo la variabile per il  Dialog per la modalità orizzontale
+        val isDialogLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
         Dialog(
             onDismissRequest = { showFavoritesDialog = false },
             // ====================================================================
@@ -1091,275 +1094,489 @@ fun CreateMatchScreen(
                 // Usiamo un Box come genitore assoluto del Dialog per poter sovrapporre
                 // la Snackbar (le notifiche) sopra la Column principale, in basso al centro.
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // 3. Struttura verticale del Dialog
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp)
-                    ) {
-                        // INTESTAZIONE: ICONA + TITOLO
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Icona esplicativa per indicare la "Gestione"
-                            Icon(
-                                imageVector = Icons.Filled.ManageAccounts,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            AutoResizedText(
-                                stringResource(R.string.desc_gestisci_rapidi_icon),
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
-
-                        // INPUT: NUOVO PREFERITO
+                    if (isDialogLandscape) {
+                        // ====================================================================
+                        // 🧠 LEZIONE TEORICA ORIZZONTALE: 2-Column Split Dialog per Landscape
+                        // ====================================================================
+                        // 1. MOTIVAZIONE UX: Nello smartphone in orizzontale l'altezza è ridotta (~360dp).
+                        //    Invece di impilare tutto verticalmente (che schiaccerebbe la lista),
+                        //    dividiamo il dialog in due colonne affiancate sfruttando l'abbondante larghezza!
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp)
-                                // 🧠 FIX UI: Usiamo IntrinsicSize.Min per "agganciare" l'altezza del bottone
-                                // a quella del campo di testo, indipendentemente da quanto ingrandisce il font.
-                                .height(IntrinsicSize.Min),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            OutlinedTextField(
-                                value = newFavName,
-                                onValueChange = { newFavName = it },
-                                modifier = Modifier.weight(1f),
-                                placeholder = { Text(stringResource(R.string.hint_nuovo_nome)) },
-                                // 🧠 DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
-                                shape = RoundedCornerShape(12.dp),
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Filled.Person,
-                                        null,
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
-                            )
+                            // ================================================================
+                            // COLONNA SINISTRA (weight = 0.38f): CONTROLLI & TASTO CHIUDI
+                            // ================================================================
+                            // Raccoglie in verticale l'intestazione, l'input di testo per aggiungere un nuovo
+                            // giocatore ed il pulsante di chiusura ancorato in basso a sinistra.
+                            Column(
+                                modifier = Modifier
+                                    .weight(0.38f)
+                                    .fillMaxHeight(),
+                                verticalArrangement = Arrangement.SpaceBetween // Spinge il tasto Chiudi sul fondo
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    // INTESTAZIONE DIALOG: ICONA + TITOLO
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Filled.ManageAccounts,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        AutoResizedText(
+                                            stringResource(R.string.desc_gestisci_rapidi_icon),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
 
-                            val isAddFavEnabled = newFavName.trim()
-                                .isNotEmpty() && viewModel.favoriteNames.none {
-                                it.equals(
-                                    newFavName.trim(),
-                                    ignoreCase = true
-                                )
+                                    // MODULO DI INSERIMENTO: Campo Input + Tasto Aggiungi
+                                    // 🧠 LEZIONE TEORICA COMPOSE: IntrinsicSize.Min
+                                    // Permette al pulsante "Aggiungi" di ereditare matematicamente l'esatta
+                                    // altezza dell'OutlinedTextField adiacente, garantendo simmetria perfetta.
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(IntrinsicSize.Min),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        OutlinedTextField(
+                                            value = newFavName,
+                                            onValueChange = { newFavName = it },
+                                            modifier = Modifier.weight(1f),
+                                            placeholder = { Text(stringResource(R.string.hint_nuovo_nome), style = MaterialTheme.typography.bodySmall) },
+                                            shape = RoundedCornerShape(12.dp),
+                                            leadingIcon = {
+                                                Icon(
+                                                    Icons.Filled.Person,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            },
+                                            singleLine = true,
+                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+                                        )
+
+                                        // Validazione: abilita il pulsante solo se il nome non è vuoto né duplicato
+                                        val isAddFavEnabled = newFavName.trim().isNotEmpty() && viewModel.favoriteNames.none {
+                                            it.equals(newFavName.trim(), ignoreCase = true)
+                                        }
+
+                                        Button(
+                                            onClick = {
+                                                if (isAddFavEnabled) {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                    viewModel.addFavorite(newFavName.trim())
+                                                    newFavName = ""
+                                                }
+                                            },
+                                            modifier = Modifier.fillMaxHeight(),
+                                            shape = RoundedCornerShape(14.dp),
+                                            border = if (isAddFavEnabled) null else BorderStroke(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                            ),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                                contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                            )
+                                        ) { Text(stringResource(R.string.btn_aggiungi), style = MaterialTheme.typography.labelSmall) }
+                                    }
+                                }
+
+                                // PULSANTE CHIUDI: Ancorato in Basso a Sinistra col SpaceBetween della Column madre
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showFavoritesDialog = false
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = stringResource(R.string.desc_chiudi_icon),
+                                        modifier = Modifier.padding(end = 6.dp).size(20.dp)
+                                    )
+                                    AutoResizedText(
+                                        text = stringResource(R.string.btn_chiudi_gestione),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
 
-                            Button(
-                                onClick = {
-                                    if (isAddFavEnabled) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        viewModel.addFavorite(newFavName.trim())
-                                        newFavName = ""
-                                    }
-                                },
-                                // 🧠 FIX GEOMETRIA: fillMaxHeight() assicura che il bottone sia alto
-                                // esattamente quanto l'OutlinedTextField adiacente.
-                                modifier = Modifier.fillMaxHeight(),
+                            // ================================================================
+                            // COLONNA DESTRA (weight = 0.62f): LISTA PREFERITI A TUTTA ALTEZZA
+                            // ================================================================
+                            // Dedica il 100% dell'altezza verticale del dialog alla lista scorrevole dei giocatori.
+                            Card(
+                                modifier = Modifier
+                                    .weight(0.62f)
+                                    .fillMaxHeight(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                                 shape = RoundedCornerShape(20.dp),
-                                border = if (isAddFavEnabled) null else BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                                ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = 0.12f
-                                    ),
-                                    contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = 0.38f
-                                    )
-                                )
-                            ) { Text(stringResource(R.string.btn_aggiungi)) }
-                        }
-
-                        // LISTA DEI PREFERITI (Scorrevole)
-                        Card(
-                            modifier = Modifier.weight(1f).fillMaxWidth(),
-                            // 3. EFFETTO INCAVO: Sfondo opacizzato e bordo interno
-                            // per far capire che questa è un'area separata in cui si scorre.
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            shape = RoundedCornerShape(24.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        ) {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize().padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                             ) {
-                                itemsIndexed(viewModel.favoriteNames) { index, fav ->
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    itemsIndexed(viewModel.favoriteNames) { index, fav ->
+                                        val msgFavRimosso = stringResource(R.string.msg_rapido_rimosso, fav)
+                                        val btnAnnullaFav = stringResource(R.string.btn_annulla_undo)
 
-                                    // ====================================================================
-                                    // ESTRAZIONE STRINGHE FUORI DALL'ONCLICK
-                                    // Estraiamo le traduzioni qui, nel contesto Composable visivo.
-                                    // ====================================================================
-                                    val msgFavRimosso = stringResource(R.string.msg_rapido_rimosso, fav)
-                                    val btnAnnullaFav = stringResource(R.string.btn_annulla_undo)
-
-                                    Card(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        // 4. ELEMENTI IN RILIEVO: Colore puro, bordo e ombra
-                                        // per far sembrare ogni riga un "tassello" fisico premibile.
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                        shape = RoundedCornerShape(16.dp),
-                                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.30f))
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth()
-                                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                            shape = RoundedCornerShape(14.dp),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.30f))
                                         ) {
-                                            // CONTROLLI ORDINAMENTO
-                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                IconButton(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.TextHandleMove
-                                                        )
-                                                        viewModel.moveFavorite(index, index - 1)
-                                                    },
-                                                    enabled = index > 0,
-                                                    modifier = Modifier.size(28.dp)
-                                                ) {
-                                                    Icon(
-                                                        Icons.Filled.KeyboardArrowUp,
-                                                        null,
-                                                        tint = MaterialTheme.colorScheme.onSurface
-                                                    )
-                                                }
-
-                                                IconButton(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(
-                                                            HapticFeedbackType.TextHandleMove
-                                                        )
-                                                        viewModel.moveFavorite(index, index + 1)
-                                                    },
-                                                    enabled = index < viewModel.favoriteNames.size - 1,
-                                                    modifier = Modifier.size(28.dp)
-                                                ) {
-                                                    Icon(
-                                                        Icons.Filled.KeyboardArrowDown,
-                                                        null,
-                                                        tint = MaterialTheme.colorScheme.onSurface
-                                                    )
-                                                }
-                                            }
-
-                                            // NOME GIOCATORE
-                                            Text(
-                                                text = fav,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = FontWeight.Bold,
-                                                modifier = Modifier.weight(1f)
-                                                    .padding(start = 12.dp)
-                                            )
-
-                                            // ==========================================================
-                                            // AZIONE: MODIFICA
-                                            // Non specifichiamo "baseColor", quindi in automatico diventerà Blu!
-                                            // ==========================================================
-                                            TonalActionPill(
-                                                onClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                    favToEdit = fav
-                                                },
-                                                modifier = Modifier.padding(end = 6.dp) // 🧠 FIX UI: Aumentato margine per tasti più larghi
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Edit,
-                                                    contentDescription = stringResource(R.string.desc_modifica_icon),
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(22.dp) // 🧠 FIX UI: Ridotto a 20dp per farlo calzare nella pillola
+                                                // Tasti Ordinamento Su/Giù
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                            viewModel.moveFavorite(index, index - 1)
+                                                        },
+                                                        enabled = index > 0,
+                                                        modifier = Modifier.size(24.dp)
+                                                    ) {
+                                                        Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                                                    }
+                                                    IconButton(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                            viewModel.moveFavorite(index, index + 1)
+                                                        },
+                                                        enabled = index < viewModel.favoriteNames.size - 1,
+                                                        modifier = Modifier.size(24.dp)
+                                                    ) {
+                                                        Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                                    }
+                                                }
+
+                                                // Nome del Giocatore
+                                                Text(
+                                                    text = fav,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .padding(start = 10.dp)
                                                 )
-                                            }
 
-                                            // ==========================================================
-                                            // AZIONE: ELIMINAZIONE (CON SOVRASCRITTURA DEL COLORE)
-                                            // ==========================================================
-                                            TonalActionPill(
-                                                onClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                // Tasto Azione Modifica Nome
+                                                TonalActionPill(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        favToEdit = fav
+                                                    },
+                                                    modifier = Modifier.padding(end = 4.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Edit,
+                                                        contentDescription = stringResource(R.string.desc_modifica_icon),
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
 
-                                                    // Salvataggio dei riferimenti per eventuale ripristino
-                                                    val removedIndex = index
-                                                    val removedFav = fav
-
-                                                    // Eliminazione effettiva: Rimuove immediatamente l'elemento visivo
-                                                    viewModel.removeFavorite(fav)
-
-                                                    // Lancia una Coroutine per gestire il timing della Snackbar
-                                                    coroutineScope.launch {
-                                                        // Disabilita la vecchia snackbar se l'utente clicca velocemente
-                                                        dialogSnackbarHostState.currentSnackbarData?.dismiss()
-
-                                                        val result =
-                                                            dialogSnackbarHostState.showSnackbar(
+                                                // Tasto Azione Eliminazione (Rosso con Undo Snackbar)
+                                                TonalActionPill(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        val removedIndex = index
+                                                        val removedFav = fav
+                                                        viewModel.removeFavorite(fav)
+                                                        coroutineScope.launch {
+                                                            dialogSnackbarHostState.currentSnackbarData?.dismiss()
+                                                            val result = dialogSnackbarHostState.showSnackbar(
                                                                 message = msgFavRimosso,
                                                                 actionLabel = btnAnnullaFav,
                                                                 duration = SnackbarDuration.Short
                                                             )
-                                                        // Se l'utente preme "Annulla", ripristiniamo il giocatore
-                                                        if (result == SnackbarResult.ActionPerformed) {
-                                                            viewModel.restoreFavorite(
-                                                                removedIndex,
-                                                                removedFav
-                                                            )
+                                                            if (result == SnackbarResult.ActionPerformed) {
+                                                                viewModel.restoreFavorite(removedIndex, removedFav)
+                                                            }
                                                         }
-                                                    }
-                                                },
-                                                // 🎨 LA MAGIA: Forziamo il bottone a usare il Rosso (Error) invece dell'azzurro!
-                                                baseColor = MaterialTheme.colorScheme.error
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Delete,
-                                                    contentDescription = stringResource(R.string.desc_elimina_icon),
-                                                    tint = MaterialTheme.colorScheme.error,
-                                                    modifier = Modifier.size(22.dp)
-                                                )
+                                                    },
+                                                    baseColor = MaterialTheme.colorScheme.error
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Delete,
+                                                        contentDescription = stringResource(R.string.desc_elimina_icon),
+                                                        tint = MaterialTheme.colorScheme.error,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // PULSANTE CHIUSURA DIALOG
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                showFavoritesDialog = false
-                            },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                    } else {
+                        // ====================================================================
+                        // 🧠 ORIENTAMENTO VERTICALE (Layout Standard Portrait per Dialog)
+                        // ====================================================================
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(20.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = stringResource(R.string.desc_chiudi_icon),
-                                modifier = Modifier.padding(end = 8.dp).size(28.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.btn_chiudi_gestione),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.ManageAccounts,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                AutoResizedText(
+                                    stringResource(R.string.desc_gestisci_rapidi_icon),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp)
+                                    .height(IntrinsicSize.Min),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = newFavName,
+                                    onValueChange = { newFavName = it },
+                                    modifier = Modifier.weight(1f),
+                                    placeholder = { Text(stringResource(R.string.hint_nuovo_nome)) },
+                                    shape = RoundedCornerShape(12.dp),
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Filled.Person,
+                                            null,
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() })
+                                )
+
+                                val isAddFavEnabled = newFavName.trim()
+                                    .isNotEmpty() && viewModel.favoriteNames.none {
+                                    it.equals(
+                                        newFavName.trim(),
+                                        ignoreCase = true
+                                    )
+                                }
+
+                                Button(
+                                    onClick = {
+                                        if (isAddFavEnabled) {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            viewModel.addFavorite(newFavName.trim())
+                                            newFavName = ""
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxHeight(),
+                                    shape = RoundedCornerShape(20.dp),
+                                    border = if (isAddFavEnabled) null else BorderStroke(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                    ),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isAddFavEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                                            alpha = 0.12f
+                                        ),
+                                        contentColor = if (isAddFavEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(
+                                            alpha = 0.38f
+                                        )
+                                    )
+                                ) { Text(stringResource(R.string.btn_aggiungi)) }
+                            }
+
+                            Card(
+                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                shape = RoundedCornerShape(24.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            ) {
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    itemsIndexed(viewModel.favoriteNames) { index, fav ->
+                                        val msgFavRimosso = stringResource(R.string.msg_rapido_rimosso, fav)
+                                        val btnAnnullaFav = stringResource(R.string.btn_annulla_undo)
+
+                                        Card(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                            shape = RoundedCornerShape(16.dp),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.30f))
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.TextHandleMove
+                                                            )
+                                                            viewModel.moveFavorite(index, index - 1)
+                                                        },
+                                                        enabled = index > 0,
+                                                        modifier = Modifier.size(28.dp)
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Filled.KeyboardArrowUp,
+                                                            null,
+                                                            tint = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                    }
+
+                                                    IconButton(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(
+                                                                HapticFeedbackType.TextHandleMove
+                                                            )
+                                                            viewModel.moveFavorite(index, index + 1)
+                                                        },
+                                                        enabled = index < viewModel.favoriteNames.size - 1,
+                                                        modifier = Modifier.size(28.dp)
+                                                    ) {
+                                                        Icon(
+                                                            Icons.Filled.KeyboardArrowDown,
+                                                            null,
+                                                            tint = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                    }
+                                                }
+
+                                                Text(
+                                                    text = fav,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.weight(1f)
+                                                        .padding(start = 12.dp)
+                                                )
+
+                                                TonalActionPill(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        favToEdit = fav
+                                                    },
+                                                    modifier = Modifier.padding(end = 6.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Edit,
+                                                        contentDescription = stringResource(R.string.desc_modifica_icon),
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
+
+                                                TonalActionPill(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        val removedIndex = index
+                                                        val removedFav = fav
+                                                        viewModel.removeFavorite(fav)
+                                                        coroutineScope.launch {
+                                                            dialogSnackbarHostState.currentSnackbarData?.dismiss()
+                                                            val result =
+                                                                dialogSnackbarHostState.showSnackbar(
+                                                                    message = msgFavRimosso,
+                                                                    actionLabel = btnAnnullaFav,
+                                                                    duration = SnackbarDuration.Short
+                                                                )
+                                                            if (result == SnackbarResult.ActionPerformed) {
+                                                                viewModel.restoreFavorite(
+                                                                    removedIndex,
+                                                                    removedFav
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                    baseColor = MaterialTheme.colorScheme.error
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Delete,
+                                                        contentDescription = stringResource(R.string.desc_elimina_icon),
+                                                        tint = MaterialTheme.colorScheme.error,
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showFavoritesDialog = false
+                                },
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.desc_chiudi_icon),
+                                    modifier = Modifier.padding(end = 8.dp).size(28.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.btn_chiudi_gestione),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                     // ==========================================================
