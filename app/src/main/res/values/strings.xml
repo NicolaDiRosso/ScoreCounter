@@ -158,6 +158,14 @@
     <string name="btn_avvia_timer">START TIMER</string>
     <string name="btn_chiudi">CLOSE</string>
 
+    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <string name="title_statistiche_landscape">Statistics</string>
+    <string name="subtitle_statistiche_landscape">Discover your records</string>
+    <string name="title_sostieni_landscape">Support ScoreCounter</string>
+    <string name="subtitle_sostieni_landscape">Make a donation</string>
+    <string name="title_info_landscape">Info</string>
+    <string name="subtitle_info_landscape">Discover app &amp; send feedback</string>
+
     <!-- TESTO TRADOTTO PER IL FILE ResultsScreen-->
     <string name="sfida_senza_nome">Unnamed Challenge</string>
     <string name="desc_condividi">Share</string>

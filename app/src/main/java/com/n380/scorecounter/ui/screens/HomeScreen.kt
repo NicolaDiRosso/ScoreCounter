@@ -39,6 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -297,14 +299,41 @@ fun HomeScreen(
     }
 
     // --------------------------------------------------------------------
-    // SCAFFOLD: L'ARCHITETTURA BASE E GLI "SLOT" MATERIAL
+    // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
     // --------------------------------------------------------------------
-    // Lo Scaffold non è un semplice contenitore, ma uno schema pre-fabbricato da Google.
-    // Possiede degli "Slot" (buchi) specifici per posizionare gli elementi (TopBar, BottomBar, FAB).
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+    // LocalConfiguration.current ci permette di leggere in tempo reale se il telefono è ruotato in Landscape.
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape) {
+        // ====================================================================
+        // ORIENTAMENTO ORIZZONTALE (LANDSCAPE) -> DELEGATO A HomeScreenLandscape.kt
+        // ====================================================================
+        HomeScreenLandscape(
+            viewModel = viewModel,
+            onNavigateToCreate = onNavigateToCreate,
+            onNavigateToStats = onNavigateToStats,
+            onShowDonationDialog = { showDonationDialog = true },
+            onShowAboutDialog = { showAboutDialog = true },
+            expandedMatchIndex = expandedMatchIndex,
+            onExpandedMatchIndexChange = { expandedMatchIndex = it },
+            timeFormatter = timeFormatter,
+            haptic = haptic,
+            context = context,
+            coroutineScope = coroutineScope,
+            snackbarHostState = snackbarHostState,
+            showNewMatchButton = showNewMatchButton
+        )
+    } else {
+        // --------------------------------------------------------------------
+        // SCAFFOLD: L'ARCHITETTURA BASE E GLI "SLOT" MATERIAL (ORIENTAMENTO VERTICALE)
+        // --------------------------------------------------------------------
+        // Lo Scaffold non è un semplice contenitore, ma uno schema pre-fabbricato da Google.
+        // Possiede degli "Slot" (buchi) specifici per posizionare gli elementi (TopBar, BottomBar, FAB).
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
 
 
         // ====================================================================
@@ -1258,6 +1287,7 @@ fun HomeScreen(
                 }
             }
         }
+    }
         // ============================================================================
         // LAYER MODALE: OVERLAY DEL GRAFICO DETTAGLIATO (ESTRATTO)
         // ============================================================================

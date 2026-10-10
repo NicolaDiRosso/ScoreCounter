@@ -151,6 +151,14 @@
     <string name="btn_avvia_timer">DÉMARRER LE MINUTEUR</string>
     <string name="btn_chiudi">FERMER</string>
 
+    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <string name="title_statistiche_landscape">Statistiques</string>
+    <string name="subtitle_statistiche_landscape">Découvrez vos records</string>
+    <string name="title_sostieni_landscape">Soutenir ScoreCounter</string>
+    <string name="subtitle_sostieni_landscape">Faire un don</string>
+    <string name="title_info_landscape">Info</string>
+    <string name="subtitle_info_landscape">Découvrir l\'appli &amp; donner votre avis</string>
+
     <string name="sfida_senza_nome">Défi Sans Nom</string>
     <string name="desc_condividi">Partager</string>
     <string name="btn_condividi_risultati">Partager les Résultats</string>

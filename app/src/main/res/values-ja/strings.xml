@@ -151,6 +151,14 @@
     <string name="btn_avvia_timer">タイマー開始</string>
     <string name="btn_chiudi">閉じる</string>
 
+    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <string name="title_statistiche_landscape">統計</string>
+    <string name="subtitle_statistiche_landscape">記録を確認</string>
+    <string name="title_sostieni_landscape">ScoreCounterを応援</string>
+    <string name="subtitle_sostieni_landscape">寄付をする</string>
+    <string name="title_info_landscape">アプリ情報</string>
+    <string name="subtitle_info_landscape">アプリ紹介・フィードバック</string>
+
     <string name="sfida_senza_nome">名無しのチャレンジ</string>
     <string name="desc_condividi">共有</string>
     <string name="btn_condividi_risultati">結果を共有</string>

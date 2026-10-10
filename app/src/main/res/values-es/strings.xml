@@ -151,6 +151,14 @@
     <string name="btn_avvia_timer">INICIAR TEMPORIZADOR</string>
     <string name="btn_chiudi">CERRAR</string>
 
+    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <string name="title_statistiche_landscape">Estadísticas</string>
+    <string name="subtitle_statistiche_landscape">Descubre tus récords</string>
+    <string name="title_sostieni_landscape">Apoya a ScoreCounter</string>
+    <string name="subtitle_sostieni_landscape">Haz una donación</string>
+    <string name="title_info_landscape">Info</string>
+    <string name="subtitle_info_landscape">Descubre la app y envía comentarios</string>
+
     <string name="sfida_senza_nome">Desafío Sin Nombre</string>
     <string name="desc_condividi">Compartir</string>
     <string name="btn_condividi_risultati">Compartir Resultados</string>

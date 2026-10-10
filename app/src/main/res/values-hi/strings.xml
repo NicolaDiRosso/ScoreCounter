@@ -151,6 +151,14 @@
     <string name="btn_avvia_timer">टाइमर शुरू करें</string>
     <string name="btn_chiudi">बंद करें</string>
 
+    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <string name="title_statistiche_landscape">आँकड़े</string>
+    <string name="subtitle_statistiche_landscape">अपने रिकॉर्ड खोजें</string>
+    <string name="title_sostieni_landscape">ScoreCounter का समर्थन करें</string>
+    <string name="subtitle_sostieni_landscape">दान करें</string>
+    <string name="title_info_landscape">जानकारी</string>
+    <string name="subtitle_info_landscape">ऐप देखें और फ़ीडबैक भेजें</string>
+
     <string name="sfida_senza_nome">बिना नाम की चुनौती</string>
     <string name="desc_condividi">साझा करें</string>
     <string name="btn_condividi_risultati">परिणाम साझा करें</string>
