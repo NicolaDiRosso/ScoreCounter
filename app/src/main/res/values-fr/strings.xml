@@ -20,8 +20,8 @@
     <string name="feature_registra_partite">Enregistrer des parties avec points et combos.</string>
     <string name="feature_analizza_grafici">Analyser les graphiques pour prouver votre supériorité.</string>
     <string name="feature_assegna_titoli">Attribuer des titres honorifiques spéciaux à ceux qui le méritent.</string>
-    <string name="msg_vinca_il_migliore">Que le meilleur gagne !</string>
-    <string name="msg_segnalazione_bug">Pour signaler des bugs ou envoyer des suggestions, appuyez sur le bouton et envoyez-moi un e-mail (en joignant des images ou des vidéos) 😊.</string>
+    <string name="msg_vinca_il_migliore">Quelque chose ne fonctionne pas ?</string>
+    <string name="msg_segnalazione_bug">Si vous souhaitez signaler des bugs ou envoyer des suggestions, appuyez sur le bouton "Donner votre avis" et envoyez-moi un e-mail 😊</string>
     <string name="oggetto_email_feedback">ScoreCounter: Feedback/Rapport de bug</string>
     <string name="btn_invia_segnalazione">Envoyer des commentaires</string>
     <string name="btn_inizia_a_giocare">Commencer à jouer !</string>

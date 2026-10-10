@@ -20,8 +20,8 @@
     <string name="feature_registra_partite">अंकों और कॉम्बो के साथ मैचों को रिकॉर्ड करना।</string>
     <string name="feature_analizza_grafici">अपनी श्रेष्ठता साबित करने के लिए चार्ट का विश्लेषण करना।</string>
     <string name="feature_assegna_titoli">जो इसके हकदार हैं उन्हें विशेष मानद उपाधियाँ देना।</string>
-    <string name="msg_vinca_il_migliore">सर्वश्रेष्ठ खिलाड़ी की जीत हो!</string>
-    <string name="msg_segnalazione_bug">कीड़े (bugs) की रिपोर्ट करने या सुझाव भेजने के लिए, बटन दबाएं और मुझे एक ईमेल भेजें (चित्र या वीडियो संलग्न करें) 😊।</string>
+    <string name="msg_vinca_il_migliore">क्या कुछ काम नहीं कर रहा है?</string>
+    <string name="msg_segnalazione_bug">यदि आप बग रिपोर्ट करना चाहते हैं या सुझाव भेजना चाहते हैं, तो "फ़ीडबैक भेजें" बटन दबाएं और मुझे एक ईमेल भेजें 😊</string>
     <string name="oggetto_email_feedback">ScoreCounter: फीडबैक/बग रिपोर्ट</string>
     <string name="btn_invia_segnalazione">फीडबैक भेजें</string>
     <string name="btn_inizia_a_giocare">खेलना शुरू करें!</string>

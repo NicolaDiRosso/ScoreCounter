@@ -20,8 +20,8 @@
     <string name="feature_registra_partite">ポイントやコンボを含めた試合の記録。</string>
     <string name="feature_analizza_grafici">グラフを分析して自分の圧倒的な強さを証明。</string>
     <string name="feature_assegna_titoli">ふさわしいプレイヤーに特別な名誉称号を付与。</string>
-    <string name="msg_vinca_il_migliore">最高のプレイヤーが勝ちますように！</string>
-    <string name="msg_segnalazione_bug">バグの報告やご提案がある場合は、ボタンを押してメール（画像や動画を添付してください）をお送りください 😊。</string>
+    <string name="msg_vinca_il_migliore">何か不具合がありますか？</string>
+    <string name="msg_segnalazione_bug">バグの報告やご提案がある場合は、「フィードバック」ボタンを押してメールをお送りください 😊</string>
     <string name="oggetto_email_feedback">ScoreCounter: フィードバック/バグ報告</string>
     <string name="btn_invia_segnalazione">フィードバックを送信</string>
     <string name="btn_inizia_a_giocare">ゲームを始める！</string>
