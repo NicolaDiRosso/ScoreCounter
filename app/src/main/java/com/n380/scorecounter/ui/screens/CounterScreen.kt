@@ -445,6 +445,10 @@
                             modifier = Modifier.weight(1f)
                         ) {
                             // PULSANTE TIMER: Per impostare conti alla rovescia
+                            // 🧠 TEORIA BORDURA MATERIAL YOU (CONTRASTO TEMA CHIARO):
+                            // border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)):
+                            // Aggiunge un bordo esatto di 2dp in colore 'outline' Material 3, garantendo che in Tema Chiaro
+                            // (Light Theme) il pulsante si stacchi nettamente dallo sfondo senza confondersi con esso.
                             FilledTonalButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -456,12 +460,13 @@
                                     // Risultato: avranno SEMPRE la stessa larghezza dividendo lo spazio del blocco!
                                     .weight(1f),
                                 shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)), // 🎨 Bordo 2dp per stacco in Tema Chiaro
                                 contentPadding = PaddingValues(horizontal = 8.dp), // Ridotto per font grandi
                                 // Coloriamo il pulsante con il PrimaryContainer pastello!
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                ),
                             ) {
                                 Icon(Icons.Filled.Timer, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
                                 // 🧠 UX FIX: Usiamo AutoResizedText così anche la parola "Timer" 
@@ -485,6 +490,7 @@
                                     // 🧠 UX FIX: Stesso peso del compagno Timer per garantire simmetria
                                     .weight(1f),
                                 shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)), // 🎨 Bordo 2dp per stacco in Tema Chiaro
                                 contentPadding = PaddingValues(horizontal = 8.dp),
                                 // Coloriamo il pulsante con il PrimaryContainer pastello!
                                 colors = ButtonDefaults.filledTonalButtonColors(

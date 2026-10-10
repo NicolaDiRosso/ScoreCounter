@@ -33,6 +33,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.draw.drawWithContent // Per disegnare la luce
 import androidx.compose.ui.geometry.Offset // Per le coordinate del raggio luminoso
 import androidx.compose.ui.graphics.Brush // Per creare la sfumatura di luce
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
 import com.n380.scorecounter.R // Import per accedere agli ID delle risorse del progetto
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
@@ -201,14 +203,31 @@ fun GlobalStatsScreen(
 
     val globalPhoenix = viewModel.history
         .mapNotNull { it.getHistoricalFenice() }
+        .mapNotNull { it }
         .maxByOrNull { it.second } // it.second sono i punti recuperati
 
+    // --------------------------------------------------------------------
+    // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
+    // --------------------------------------------------------------------
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        // Usiamo il nostro solito trucco per far vedere il pattern di icone sullo sfondo!
-        containerColor = Color.Transparent,
+    if (isLandscape) {
+        // ====================================================================
+        // ORIENTAMENTO ORIZZONTALE (LANDSCAPE) -> DELEGATO A GlobalStatsScreenLandscape.kt
+        // ====================================================================
+        GlobalStatsScreenLandscape(
+            viewModel = viewModel,
+            onNavigateBack = onNavigateBack
+        )
+    } else {
+        // ====================================================================
+        // ORIENTAMENTO VERTICALE (PORTRAIT) -> SCAFFOLD STANDARD
+        // ====================================================================
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            // Usiamo il nostro solito trucco per far vedere il pattern di icone sullo sfondo!
+            containerColor = Color.Transparent,
 
         // ====================================================================
         // NUOVO DOCK INFERIORE (Esattamente uguale a HomeScreen)
@@ -1159,4 +1178,5 @@ fun GlobalStatsScreen(
             }
         }
     }
+}
 }
