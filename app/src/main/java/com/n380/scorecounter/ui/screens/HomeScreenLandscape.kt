@@ -1,6 +1,7 @@
 package com.n380.scorecounter.ui.screens
 
 import android.content.Context
+import android.view.View
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -25,21 +26,27 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.drawToBitmap
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.SlideUpAnimatedVisibility
 import com.n380.scorecounter.ui.components.buildMatchShareText
+import com.n380.scorecounter.ui.components.formatDate
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.launchShareIntent
+import com.n380.scorecounter.ui.components.launchShareIntentWithImage
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -239,6 +246,7 @@ fun HomeScreenLandscape(
         ) {
             HomeHistoryGridTableContent(
                 viewModel = viewModel,
+                timeFormatter = timeFormatter,
                 haptic = haptic,
                 context = context,
                 coroutineScope = coroutineScope,
@@ -342,6 +350,7 @@ private fun HomeLandscapeActionCard(
 @Composable
 private fun HomeHistoryGridTableContent(
     viewModel: MatchViewModel,
+    timeFormatter: SimpleDateFormat,
     haptic: HapticFeedback,
     context: Context,
     coroutineScope: CoroutineScope,
@@ -489,6 +498,9 @@ private fun HomeHistoryGridTableContent(
                 items(filteredHistory) { record ->
                     var expanded by remember { mutableStateOf(false) }
 
+                    // 📸 RIFERIMENTO VIEW PER CONDIVISIONE BITMAP
+                    var chartViewByCard by remember { mutableStateOf<View?>(null) }
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -583,73 +595,189 @@ private fun HomeHistoryGridTableContent(
                                         }
                                     }
 
+                                    // ------------------------------------------------------------
+                                    // GRAFICO DELL'ANDAMENTO PUNTEGGI (SCORE CHART)
+                                    // ------------------------------------------------------------
+                                    val validHistory = record.allPlayers.any {
+                                        (it.scoreHistory ?: emptyList()).size > 1
+                                    }
+                                    if (validHistory) {
+                                        Spacer(modifier = Modifier.height(10.dp))
+
+                                        // 🧠 TEORIA AREA TATTILE & OVERLAY GRAFICO:
+                                        // Racchiudiamo titolo del grafico e mini-grafico in una Column con combinedClickable.
+                                        // Toccando il grafico si innesca onExpandMatch, che imposta expandedMatchIndex aprendo
+                                        // il grafico a schermo intero (MatchAnalysisOverlay)!
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp)
+                                                .combinedClickable(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        onExpandMatch(viewModel.history.indexOf(record))
+                                                    },
+                                                    onLongClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        onExpandMatch(viewModel.history.indexOf(record))
+                                                    }
+                                                )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_andamento_punteggi),
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Icon(
+                                                    imageVector = Icons.Filled.Fullscreen,
+                                                    contentDescription = stringResource(R.string.desc_espandi_grafico),
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+
+                                            // 🧠 TEORIA ANDROID VIEW WRAPPER PER CATTURA BITMAP:
+                                            // Per poter fotografare il grafico come immagine (Bitmap) da condividere,
+                                            // avvolgiamo ScoreChart in una ComposeView salvandone il riferimento in chartViewByCard.
+                                            AndroidView(
+                                                factory = { ctx ->
+                                                    ComposeView(ctx).apply {
+                                                        chartViewByCard = this
+                                                        setContent {
+                                                            ScoreChart(
+                                                                players = record.allPlayers,
+                                                                modifier = Modifier
+                                                                    .height(100.dp)
+                                                                    .fillMaxWidth()
+                                                                    .padding(top = 4.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                },
+                                                modifier = Modifier.fillMaxWidth(),
+                                                update = { view ->
+                                                    (view as ComposeView).setContent {
+                                                        ScoreChart(
+                                                            players = record.allPlayers,
+                                                            modifier = Modifier
+                                                                .height(100.dp)
+                                                                .fillMaxWidth()
+                                                                .padding(top = 4.dp)
+                                                        )
+                                                    }
+                                                }
+                                            )
+                                        }
+
+                                        HorizontalDivider(modifier = Modifier.padding(top = 8.dp, bottom = 6.dp))
+                                    }
+
+                                    // ------------------------------------------------------------
+                                    // DATA/ORA PARTITA E PULSANTI AZIONE (CONDIVIDI ED ELIMINA)
+                                    // ------------------------------------------------------------
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 8.dp),
-                                        horizontalArrangement = Arrangement.End,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        IconButton(
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                val playersData = record.allPlayers.map { Pair(it.name, it.score) }
-                                                val mappedCecchino = record.getHistoricalCecchino()?.let { Pair(it.first.name, it.second) }
-                                                val mappedInarrestabile = record.getHistoricalInarrestabile()?.let { Pair(it.first.name, it.second) }
-                                                val mappedGambero = record.getHistoricalGambero()?.let { Pair(it.first.name, it.second) }
-                                                val mappedFenice = record.getHistoricalFenice()?.let { Pair(it.first.name, it.second) }
+                                        // 🧠 TEORIA BLOCCO DATA/ORA (AutoResizedText con Weight):
+                                        // AutoResizedText con Modifier.weight(1f) garantisce che la data ed orario
+                                        // (es. "Alle 14:30 del 22/09/2026") occupino tutto lo spazio disponibile a sinistra
+                                        // senza mai spingere o nascondere i pulsanti di condivisione ed eliminazione a destra!
+                                        AutoResizedText(
+                                            text = stringResource(
+                                                R.string.label_data_ora_partita,
+                                                timeFormatter.format(java.util.Date(record.timestamp)),
+                                                if (record.timestamp > 0L) formatDate(record.timestamp) else ""
+                                            ),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 8.dp)
+                                        )
 
-                                                val shareText = buildMatchShareText(
-                                                    context = context,
-                                                    title = record.title,
-                                                    durationSeconds = record.durationSeconds,
-                                                    timestamp = record.timestamp,
-                                                    rankedPlayersData = playersData,
-                                                    cecchinoData = mappedCecchino,
-                                                    inarrestabileData = mappedInarrestabile,
-                                                    gamberoData = mappedGambero,
-                                                    feniceData = mappedFenice
-                                                )
-
-                                                coroutineScope.launch {
-                                                    launchShareIntent(context, shareText)
-                                                }
-                                            },
-                                            modifier = Modifier.size(32.dp)
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
-                                            Icon(
-                                                Icons.Filled.Share,
-                                                null,
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
+                                            IconButton(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    val playersData = record.allPlayers.map { Pair(it.name, it.score) }
+                                                    val mappedCecchino = record.getHistoricalCecchino()?.let { Pair(it.first.name, it.second) }
+                                                    val mappedInarrestabile = record.getHistoricalInarrestabile()?.let { Pair(it.first.name, it.second) }
+                                                    val mappedGambero = record.getHistoricalGambero()?.let { Pair(it.first.name, it.second) }
+                                                    val mappedFenice = record.getHistoricalFenice()?.let { Pair(it.first.name, it.second) }
 
-                                        IconButton(
-                                            onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                val removedIndex = viewModel.history.indexOf(record)
-                                                viewModel.deleteMatch(record)
-
-                                                coroutineScope.launch {
-                                                    val result = snackbarHostState.showSnackbar(
-                                                        context.getString(R.string.msg_partita_eliminata),
-                                                        context.getString(R.string.btn_annulla_undo),
-                                                        duration = SnackbarDuration.Short
+                                                    val shareText = buildMatchShareText(
+                                                        context = context,
+                                                        title = record.title,
+                                                        durationSeconds = record.durationSeconds,
+                                                        timestamp = record.timestamp,
+                                                        rankedPlayersData = playersData,
+                                                        cecchinoData = mappedCecchino,
+                                                        inarrestabileData = mappedInarrestabile,
+                                                        gamberoData = mappedGambero,
+                                                        feniceData = mappedFenice
                                                     )
-                                                    if (result == SnackbarResult.ActionPerformed) {
-                                                        viewModel.restoreMatch(removedIndex, record)
+
+                                                    coroutineScope.launch {
+                                                        try {
+                                                            val bitmap = chartViewByCard?.drawToBitmap()
+                                                            if (bitmap != null) {
+                                                                launchShareIntentWithImage(context, shareText, bitmap)
+                                                            } else {
+                                                                launchShareIntent(context, shareText)
+                                                            }
+                                                        } catch (e: Exception) {
+                                                            launchShareIntent(context, shareText)
+                                                        }
                                                     }
-                                                }
-                                            },
-                                            modifier = Modifier.size(32.dp)
-                                        ) {
-                                            Icon(
-                                                Icons.Filled.Delete,
-                                                null,
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(18.dp)
-                                            )
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.Share,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+
+                                            IconButton(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    val removedIndex = viewModel.history.indexOf(record)
+                                                    viewModel.deleteMatch(record)
+
+                                                    coroutineScope.launch {
+                                                        val result = snackbarHostState.showSnackbar(
+                                                            context.getString(R.string.msg_partita_eliminata),
+                                                            context.getString(R.string.btn_annulla_undo),
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                        if (result == SnackbarResult.ActionPerformed) {
+                                                            viewModel.restoreMatch(removedIndex, record)
+                                                        }
+                                                    }
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.Delete,
+                                                    null,
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }

@@ -483,48 +483,8 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
-
-
                     // ==========================================================
-                    // 1. PULSANTE SUPPORTO (CUORE) - Terziario Pieno (Rosa)
-                    // ==========================================================
-                    FilledActionPill(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showDonationDialog = true
-                        },
-                        containerColor = MaterialTheme.colorScheme.tertiary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Favorite,
-                            contentDescription = stringResource(R.string.desc_donazione_icon),
-                            tint = MaterialTheme.colorScheme.onTertiary, // Contrasto sul rosa
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-
-                    // ==========================================================
-                    // 2. PULSANTE INFO - Primario Pieno (Colore del Tema)
-                    // ==========================================================
-                    FilledActionPill(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showAboutDialog = true
-                        },
-                        // 🎨 Diciamo alla pillola di riempirsi con il colore Primario solido
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Help,
-                            contentDescription = stringResource(R.string.desc_informazioni_app_icon),
-                            // 🧠 FONDAMENTALE: onPrimary garantisce la leggibilità dell'icona!
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-
-                    // ==========================================================
-                    // 3. PULSANTE STATISTICHE - Primario Pieno (Colore del Tema)
+                    // 1. PULSANTE STATISTICHE - Primario Pieno (Colore del Tema)
                     // ==========================================================
                     if (viewModel.history.isNotEmpty()) {
                         FilledActionPill(
@@ -542,6 +502,44 @@ fun HomeScreen(
                                 modifier = Modifier.size(30.dp)
                             )
                         }
+                    }
+
+                    // ==========================================================
+                    // 2. PULSANTE SUPPORTO (CUORE) - Terziario Pieno (Rosa)
+                    // ==========================================================
+                    FilledActionPill(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            showDonationDialog = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.tertiary
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = stringResource(R.string.desc_donazione_icon),
+                            tint = MaterialTheme.colorScheme.onTertiary, // Contrasto sul rosa
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+
+                    // ==========================================================
+                    // 3. PULSANTE INFO - Primario Pieno (Colore del Tema)
+                    // ==========================================================
+                    FilledActionPill(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            showAboutDialog = true
+                        },
+                        // 🎨 Diciamo alla pillola di riempirsi con il colore Primario solido
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Help,
+                            contentDescription = stringResource(R.string.desc_informazioni_app_icon),
+                            // 🧠 FONDAMENTALE: onPrimary garantisce la leggibilità dell'icona!
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(30.dp)
+                        )
                     }
                 }
             }
