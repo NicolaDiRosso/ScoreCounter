@@ -26,6 +26,8 @@
     import androidx.compose.ui.focus.focusRequester
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+    import android.content.res.Configuration
+    import androidx.compose.ui.platform.LocalConfiguration
     import androidx.compose.ui.platform.LocalContext
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -199,9 +201,46 @@
             showExitWarning = true
         }
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
+        // --------------------------------------------------------------------
+        // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
+        // --------------------------------------------------------------------
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        if (isLandscape) {
+            // ====================================================================
+            // ORIENTAMENTO ORIZZONTALE (LANDSCAPE) -> DELEGATO A CounterScreenLandscape.kt
+            // ====================================================================
+            CounterScreenLandscape(
+                viewModel = viewModel,
+                onNavigateToResults = onNavigateToResults,
+                onNavigateHome = onNavigateHome,
+                showResetDialog = showResetDialog,
+                onShowResetDialogChange = { showResetDialog = it },
+                showEndMatchDialog = showEndMatchDialog,
+                onShowEndMatchDialogChange = { showEndMatchDialog = it },
+                showInfoDialog = showInfoDialog,
+                onShowInfoDialogChange = { showInfoDialog = it },
+                showTimerDialog = showTimerDialog,
+                onShowTimerDialogChange = { showTimerDialog = it },
+                showDiceDialog = showDiceDialog,
+                onShowDiceDialogChange = { showDiceDialog = it },
+                diceResult = diceResult,
+                onDiceResultChange = { diceResult = it },
+                diceRollCount = diceRollCount,
+                onDiceRollCountChange = { diceRollCount = it },
+                playerForManualEdit = playerForManualEdit,
+                onPlayerForManualEditChange = { playerForManualEdit = it },
+                haptic = haptic,
+                snackbarHostState = snackbarHostState
+            )
+        } else {
+            // ====================================================================
+            // ORIENTAMENTO VERTICALE (PORTRAIT) -> SCAFFOLD STANDARD
+            // ====================================================================
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
 
             // Montiamo la Snackbar in questa schermata per gli avvisi
             snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -548,7 +587,7 @@
                     shape = RoundedCornerShape(24.dp)
                 ) {
                     // OTTIMIZZAZIONE LAYOUT:
-                    // Se lasciamo il padding sulla Column, la lista viene "tagliata" appena i nomi dei 
+                    // Se lasciamo il padding sulla Column, la lista viene "tagliata" appena i nomi dei
                     // giocatori toccano quel bordo invisibile durante lo scorrimento.
                     Column(modifier = Modifier.fillMaxSize()) {
 
@@ -583,6 +622,7 @@
                 }
             }
         }
+    }
 
         /*
          * =========================================================================================
