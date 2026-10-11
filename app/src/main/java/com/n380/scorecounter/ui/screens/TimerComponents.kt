@@ -1,6 +1,10 @@
 package com.n380.scorecounter.ui.screens
 
 import android.content.Context
+import android.content.res.Configuration
+import android.media.Ringtone
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.activity.compose.BackHandler
@@ -16,11 +20,16 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -33,10 +42,11 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource // 🌍 I18N: Import aggiunto per abilitare la traduzione dinamica delle stringhe
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -45,512 +55,634 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.n380.scorecounter.R
+import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
-// Import per la suoneria di sistema
-import android.media.Ringtone
-import android.media.RingtoneManager
-import android.net.Uri
-import androidx.compose.material.icons.filled.Close
-import com.n380.scorecounter.R // 🌍 I18N: Import del file R per accedere agli ID del dizionario strings.xml
-
 /**
  * ====================================================================
- * COMPONENTE: TimerSettingsDialog (Versione Definitiva Audio/Vibrazione)
- * ====================================================================
- * Novità introdotte:
- * 1. Focus Detection: Il display cambia bordo quando la tastiera è attiva.
- * 2. ImeAction.Done: Il tasto "Check" ora chiude forzatamente la tastiera.
- * 3. Alert Color: Arancione per i 10 secondi finali, Rosso per l'overtime.
- * 4. Gestione Audio Sicura: Previene la sovrapposizione di suoni multipli.
+ * COMPONENTE: TimerSettingsDialog (Versione Definitiva Audio/Vibrazione & Responsive)
  * ====================================================================
  */
 @Composable
 fun TimerSettingsDialog(
-    //STATE HOISTING (Sollevamento dello Stato)
-    // Il Dialog riceve la stringa iniziale dal Padre (CounterScreen)
-    // e usa 'onInputChanged' per avvisare il Padre di ogni modifica.
-    initialRawInput: String,          // 1. Riceve il testo salvato dal padre
-    onInputChanged: (String) -> Unit, // 2. "Walkie-talkie" per avvisare il padre delle modifiche
+    initialRawInput: String,
+    onInputChanged: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // ----------------------------------------------------------------
-    // VARIABILI DI SISTEMA (Context e Manager)
-    // ----------------------------------------------------------------
-    // 'LocalContext.current' ci dà l'accesso alle risorse fisiche e di sistema del telefono.
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-
-    // Il FocusManager ci permette di dire alla tastiera: "Nasconditi, l'utente ha finito".
     val focusManager = LocalFocusManager.current
 
-    // Gestore vibrazione: Usiamo il Context per chiedere ad Android il permesso di usare la vibrazione.
     val vibratorManager = remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
     val vibrator = remember { vibratorManager.defaultVibrator }
 
-    // ================================================================
-    // 🧠 TEORIA DELLO STATO (State Management) IN COMPOSE
-    // ================================================================
-    // 'isRunning': Booleana. Ci dice se il cronometro sta andando (true) o è fermo (false).
     var isRunning by remember { mutableStateOf(false) }
-
-    // 'isPaused': Booleana. Ci dice se il cronometro è in pausa (true) o no (false).
     var isPaused by remember { mutableStateOf(false) }
-
-    // 'timeLeft': Usa 'mutableLongStateOf' perché è ottimizzato per i numeri grandi (Long).
     var timeLeft by remember { mutableLongStateOf(0L) }
-
-    // 🎵 STATO AUDIO: Memorizza la suoneria in riproduzione per poterla fermare.
-    // Inizialmente è 'null' perché non c'è nessuna musica in riproduzione.
     var activeRingtone by remember { mutableStateOf<Ringtone?>(null) }
-
-    // 'rawInput': La stringa che l'utente digita fisicamente sulla tastiera (es. "1500")
     var rawInput by remember { mutableStateOf(initialRawInput) }
 
-    // Sincronizza ogni tasto premuto inviandolo al padre
     LaunchedEffect(rawInput) {
         onInputChanged(rawInput)
     }
 
-    // 🎯 STATO FOCUS: Registra se l'utente ha il cursore dentro il timer
     var isTextFieldFocused by remember { mutableStateOf(false) }
 
-    // 🧹 HELPER GLOBALE: Spegne tutto l'hardware (Vibrazione + Suono)
-    // Creiamo questa funzione una volta sola per poterla usare nei pulsanti e nel tasto "Back"
-    // senza dover riscrivere sempre le stesse tre righe.
     val stopAllAlarms = {
-        vibrator.cancel() // Ferma il motorino fisico
-        activeRingtone?.stop() // Ferma il lettore musicale (se esiste)
-        activeRingtone = null // 🧠 CRITICO: Resetta la variabile a null così il sistema sa che c'è silenzio
+        vibrator.cancel()
+        activeRingtone?.stop()
+        activeRingtone = null
     }
 
-    // Gestione tasto Back del telefono (gesture o freccia indietro fisica)
     BackHandler {
-        stopAllAlarms() // Spegne tutto se l'utente scappa via con la gesture indietro
+        stopAllAlarms()
         onDismiss()
     }
 
-    // ================================================================
-    // 🚀 MOTORE DEL TIMER (EFFETTI COLLATERALI / SIDE EFFECTS)
-    // ================================================================
     LaunchedEffect(isRunning, timeLeft) {
-        // Se il timer è attivo...
         if (isRunning) {
-            delay(1000L) // Pausa di 1 secondo esatto
-            
-            // Controllo di sicurezza post-delay.
-            // Se durante il secondo di attesa l'utente ha premuto "Ferma Timer",
-            // non dobbiamo procedere col decremento o l'attivazione dell'allarme.
+            delay(1000L)
             if (!isRunning) return@LaunchedEffect
 
-            timeLeft -= 1 // Togliamo 1 secondo
+            timeLeft -= 1
 
-            // Con "&& activeRingtone == null", creiamo un cancello.
-            // Quando il tempo arriva a 0, la musica non c'è (è null), quindi entra e la fa partire.
-            // Quando il tempo arriva a -1, la musica c'è GIA' (non è null), quindi NON entra
-            // e non sovrappone un altro suono!
             if (timeLeft <= 0 && activeRingtone == null) {
-                triggerContinuousAlarm(vibrator) // Fa partire la vibrazione a loop
-                activeRingtone = riproduciSuonoTimer(context) // Fa partire la suoneria e la SALVA nella variabile
+                triggerContinuousAlarm(vibrator)
+                activeRingtone = riproduciSuonoTimer(context)
             }
         }
     }
 
-    // ====================================================================
-    // 🎨 LOGICA COLORI DINAMICI E ANIMAZIONI DI STATO
-    // ====================================================================
-    // 🧠 TEORIA: 'animateColorAsState' è una magia di Compose.
-    // Se tu dicessi a Compose "cambia colore da Blu a Rosso", lui lo farebbe in 1 millisecondo (un flash brutto da vedere).
-    // Usando 'animateColorAsState', tu gli dai il colore di destinazione (targetValue), e Compose crea
-    // automaticamente tutti i fotogrammi intermedi per sfumare dolcemente dal vecchio al nuovo colore!
     val displayColor by animateColorAsState(
         targetValue = when {
-            // L'istruzione 'when' è come una cascata. Scende dall'alto e si ferma alla PRIMA condizione vera.
-
-            // 1. Se il timer è FERMO e NON in pausa (!isRunning && !isPaused), l'utente sta digitando. Colore Blu standard.
             !isRunning && !isPaused -> MaterialTheme.colorScheme.primary
-
-            // 2. Se il tempo è <= 0. La L (0L) indica che è un numero di tipo Long (più capiente di un Int normale).
-            // Usiamo il rosso per indicare il pericolo/overtime.
-            timeLeft <= 0 -> Color(0xFFE8514C) // Rosso Overtime
-
-            // 3. Se mancano 10 o meno secondi. È un avviso, usiamo l'arancione.
-            timeLeft <= 10 -> Color(0xFFEE9850) // Arancione Warning
-
-            // 4. 'else' è il caso base. Se nessuna delle precedenti è vera (es. mancano 50 secondi), colore standard.
+            timeLeft <= 0 -> Color(0xFFE8514C)
+            timeLeft <= 10 -> Color(0xFFEE9850)
             else -> MaterialTheme.colorScheme.primary
         },
-        // 🛠️ PRATICA: 'tween' è l'animazione. durationMillis = 500 significa che la sfumatura di colore
-        // impiegherà esattamente mezzo secondo (500 millisecondi) per completarsi.
         animationSpec = tween(durationMillis = 1000),
         label = "ColorAnimation"
     )
 
-    // ====================================================================
-    // 📦 LA FINESTRA DI DIALOGO (Popup)
-    // ====================================================================
-    AlertDialog(
-        // 🧠 TEORIA: onDismissRequest è l'evento che scatta quando l'utente tocca lo schermo nero FUORI dal popup.
-        // Lasciando le parentesi graffe vuote { }, annulliamo questo evento. Risultato?
-        // Il popup non si chiude se clicchi fuori per sbaglio. Si chiude SOLO coi nostri pulsanti.
-        onDismissRequest = { },
-        title = {
-            Text(
-                text = stringResource(R.string.titolo_timer_sfida), // 🌍 I18N: Sostituzione con la stringa tradotta per il titolo del Timer
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        },
-        text = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp), // Distanzia i figli di 20dp l'uno dall'altro
-                modifier = Modifier.fillMaxWidth()
+    // Lista unificata dei 6 Preset Rapidi del Timer
+    val quickPresets = listOf(
+        Pair("00:30", "30"),
+        Pair("01:00", "100"),
+        Pair("02:00", "200"),
+        Pair("05:00", "500"),
+        Pair("10:00", "1000"), // 10 Minuti (Nuovo!)
+        Pair("15:00", "1500")  // 15 Minuti (Nuovo!)
+    )
+
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape) {
+        // ====================================================================
+        // 🧠 LEZIONE TEORICA ORIZZONTALE: 2-Column Split Dialog per Timer
+        // ====================================================================
+        // 1. MOTIVAZIONE UX: Nello smartphone in orizzontale l'altezza è ridotta (~360dp).
+        //    Un AlertDialog standard impila titolo, display, preset e bottoni in verticale,
+        //    nascondendo o tagliando i preset rapidi del timer sotto i bottoni!
+        // 2. DISPOSIZIONE A 2 COLONNE (75% Larghezza, 85% Altezza):
+        //    - Sinistra (48%): Titolo, Display Digitale del tempo ("00:00") e Pulsanti d'Azione.
+        //    - Destra (52%): Griglia 2x3 a TUTTA ALTEZZA con i 6 Preset Rapidi (00:30 fino a 15:00).
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.75f)
+                    .fillMaxHeight(0.85f),
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp,
+                shadowElevation = 12.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
             ) {
-
-                // ====================================================================
-                // 🖥️ IL DISPLAY DIGITALE CON FEEDBACK DEL FOCUS
-                // ====================================================================
-                // Un 'Box' è un contenitore in cui gli elementi si sovrappongono l'uno sull'altro come fogli.
-                Box(
-                    // I modificatori (Modifier) in Compose si leggono a cascata (dall'alto in basso):
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth() // 1. Prima prendi tutta la larghezza
-                        .clip(RoundedCornerShape(20.dp)) // 2. Poi arrotonda i tuoi angoli
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)) // 3. Poi colorati lo sfondo (con trasparenza al 20%)
-
-                        // 🛠️ PRATICA: Il Bordo Dinamico
-                        // Se l'utente sta scrivendo (Focus = true) E il timer è fermo/non in pausa, disegna un bordo di 2dp col colore sfumato!
-                        // Altrimenti, disegna un bordo invisibile (Color.Transparent).
-                        .border(
-                            border = if (isTextFieldFocused && !isRunning && !isPaused)
-                                BorderStroke(2.dp, displayColor)
-                            else
-                                BorderStroke(0.dp, Color.Transparent),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(vertical = 24.dp), // 4. Infine, allargati dall'interno creando molto spazio sopra e sotto il testo.
-                    contentAlignment = Alignment.Center
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // 🧠 TEORIA DEL RENDERING CONDIZIONALE:
-                    // In Compose, un 'if' non nasconde semplicemente un pezzo di grafica... decide letteralmente
-                    // se COSTRUIRLO nella memoria del telefono o no.
-                    if (isRunning || isPaused) {
-                        // ==========================================================
-                        // MODO 1: IL TIMER STA ANDANDO O E' IN PAUSA (Sola lettura)
-                        // ==========================================================
-
-                        // 🛠️ MATEMATICA DEL TEMPO:
-                        // abs() sta per Absolute Value (Valore Assoluto). Trasforma i numeri negativi in positivi (es: -5 diventa 5).
-                        // Perché? Perché non possiamo fare la divisione del tempo con i numeri negativi, altrimenti sballa.
-                        val totalSeconds = abs(timeLeft)
-                        val m = totalSeconds / 60 // Dividendo per 60 troviamo i minuti interi
-                        val s =
-                            totalSeconds % 60 // Il 'modulo' (%) ci dà il RESTO della divisione. Quei sono i secondi!
-
-                        // Se il tempo reale era sceso sotto zero, prepariamo il segno Meno da appiccicare davanti al testo.
-                        val sign = if (timeLeft < 0) "-" else ""
-
-                        // %02d è un format testuale. Dice: "Infila qui il numero, e se è di una sola cifra (es. 5), mettici uno zero davanti (05)".
-                        Text(
-                            text = "$sign%02d:%02d".format(m, s),
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontSize = 60.sp,
-                                fontWeight = FontWeight.Black,
-                                color = displayColor
-                            )
-                        )
-                    } else {
-                        // ==========================================================
-                        // MODO 2: IL TIMER E' FERMO (Modalità Inserimento)
-                        // ==========================================================
-                        // padStart(4, '0') assicura che la stringa abbia sempre 4 caratteri. Se l'utente digita "15", diventa "0015".
-                        val paddedInput = rawInput.padStart(4, '0')
-                        // substring(0, 2) ritaglia i primi due numeri. Mettiamo i due punti in mezzo e abbiamo "00:15"!
-                        val formattedDisplay =
-                            "${paddedInput.substring(0, 2)}:${paddedInput.substring(2, 4)}"
-
-                        // 🧠 TEORIA DEL BASIC TEXT FIELD:
-                        // È il "motore grezzo" che gestisce la tastiera e l'input in Android, ma è privo di grafica.
-                        BasicTextField(
-                            value = rawInput, // Il testo attualmente digitato
-                            onValueChange = { newValue ->
-                                // Questa lambda scatta ogni volta che premi un tasto sulla tastiera.
-                                // 1. filter { it.isDigit() } butta via lettere o simboli strani.
-                                val digits = newValue.filter { it.isDigit() }
-                                // 2. takeLast(4) scarta i numeri vecchi spingendoli fuori, tenendo solo gli ultimi 4.
-                                // Ecco come si crea l'effetto "Microonde"!
-                                rawInput = digits.takeLast(4)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                // 🎯 FOCUS: Questo "Sensore" avverte quando l'utente tocca il testo per aprire la tastiera.
-                                // Quando succede, cambiamo la variabile di stato 'isTextFieldFocused', che a sua volta farà accendere il bordo!
-                                .onFocusChanged { focusState ->
-                                    isTextFieldFocused = focusState.isFocused
-                                },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number, // Richiede ad Android la tastiera solo numerica
-                                imeAction = ImeAction.Done // Trasforma il tasto Invio (a capo) nella "Spunta" di conferma
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    // Quando l'utente preme la Spunta, usiamo il FocusManager per "togliere l'attenzione"
-                                    // dal campo. Togliendo l'attenzione, Android chiude la tastiera da solo.
-                                    focusManager.clearFocus()
-                                }
-                            ),
-                            // 🛠️ IL TRUCCO VISIVO: Rendiamo il testo nativo e la stanghetta lampeggiante TRASPARENTI (Invisibili)
-                            textStyle = TextStyle(color = Color.Transparent),
-                            cursorBrush = SolidColor(Color.Transparent),
-
-                            // decorationBox ci permette di disegnare sopra al campo invisibile.
-                            // L'utente digita nel vuoto, ma noi gli facciamo credere di digitare qui dentro,
-                            // disegnando la nostra bellissima scritta formattata "00:00" gigante!
-                            decorationBox = {
-                                Text(
-                                    text = formattedDisplay,
-                                    style = MaterialTheme.typography.displayLarge.copy(
-                                        fontSize = 60.sp,
-                                        fontWeight = FontWeight.Black,
-                                        // Se hai il focus è luminoso, altrimenti applichiamo alpha=0.6f (semi trasparente) per sembrare "spento"
-                                        color = if (isTextFieldFocused) displayColor else displayColor.copy(
-                                            alpha = 0.6f
-                                        )
-                                    ),
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        )
-                    }
-                }
-
-                // ====================================================================
-                // 🔘 I PULSANTI RAPIDI PREDEFINITI (Versione Flessibile)
-                // ====================================================================
-                if (!isRunning && !isPaused) {
-                    // 🧠 TEORIA DEI PAIR (Coppie):
-                    // Pair("Testo Visivo", "Dato Grezzo")
-                    // In questo modo svincoliamo la grafica (ciò che legge l'utente)
-                    // dalla logica (ciò che serve al nostro trucco del microonde).
-                    val quickPresets = listOf(
-                        Pair("00:30", "30"),    // Il microonde leggerà "0030" -> 00:30
-                        Pair("01:00", "100"),    // Il microonde leggerà "0200" -> 02:00
-                        Pair("02:00", "200"),    // Il microonde leggerà "0500" -> 05:00
-                        Pair("05:00", "500")   // Il microonde leggerà "1000" -> 10:00
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // COLONNA SINISTRA (48%): TITOLO, DISPLAY TEMPO & TASTI D'AZIONE
+                    Column(
+                        modifier = Modifier
+                            .weight(0.48f)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // 🧠 CICLO DINAMICO DEI PULSANTI RAPIDI
-                        // .forEach esegue questo blocco di codice per ogni elemento nella lista,
-                        // creando i bottoni automaticamente senza dover fare copia-incolla.
-                        // Usiamo 'preset ->' per dare un nome chiaro all'elemento corrente (invece del generico 'it').
-                        // - preset.first  = L'etichetta visibile sul bottone (es. "30s")
-                        // - preset.second = Il valore matematico passato al timer (es. "30")
-                        quickPresets.forEach { preset ->
-                            Surface(
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.titolo_timer_sfida),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                textAlign = TextAlign.Center
+                            )
+
+                            // DISPLAY DIGITALE
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
+                                    .border(
+                                        border = if (isTextFieldFocused && !isRunning && !isPaused)
+                                            BorderStroke(2.dp, displayColor)
+                                        else
+                                            BorderStroke(0.dp, Color.Transparent),
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isRunning || isPaused) {
+                                    val totalSeconds = abs(timeLeft)
+                                    val m = totalSeconds / 60
+                                    val s = totalSeconds % 60
+                                    val sign = if (timeLeft < 0) "-" else ""
+
+                                    Text(
+                                        text = "$sign%02d:%02d".format(m, s),
+                                        style = MaterialTheme.typography.displayMedium.copy(
+                                            fontSize = 42.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = displayColor
+                                        )
+                                    )
+                                } else {
+                                    val paddedInput = rawInput.padStart(4, '0')
+                                    val formattedDisplay = "${paddedInput.substring(0, 2)}:${paddedInput.substring(2, 4)}"
+
+                                    BasicTextField(
+                                        value = rawInput,
+                                        onValueChange = { newValue ->
+                                            val digits = newValue.filter { it.isDigit() }
+                                            rawInput = digits.takeLast(4)
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .onFocusChanged { focusState -> isTextFieldFocused = focusState.isFocused },
+                                        keyboardOptions = KeyboardOptions(
+                                            keyboardType = KeyboardType.Number,
+                                            imeAction = ImeAction.Done
+                                        ),
+                                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                                        textStyle = TextStyle(color = Color.Transparent),
+                                        cursorBrush = SolidColor(Color.Transparent),
+                                        decorationBox = {
+                                            Text(
+                                                text = formattedDisplay,
+                                                style = MaterialTheme.typography.displayMedium.copy(
+                                                    fontSize = 42.sp,
+                                                    fontWeight = FontWeight.Black,
+                                                    color = if (isTextFieldFocused) displayColor else displayColor.copy(alpha = 0.6f)
+                                                ),
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // TASTI AVVIA / PAUSA / FERMA / CHIUDI ANCORATI IN BASSO
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (isRunning || isPaused) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().animateContentSize(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    AnimatedVisibility(
+                                        visible = timeLeft > 0,
+                                        enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
+                                        exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300)),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Button(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                stopAllAlarms()
+                                                if (isRunning) { isRunning = false; isPaused = true } else { isRunning = true; isPaused = false }
+                                            },
+                                            modifier = Modifier.fillMaxWidth().height(44.dp),
+                                            shape = RoundedCornerShape(14.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Icon(if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow, null, modifier = Modifier.size(24.dp))
+                                        }
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            isRunning = false
+                                            isPaused = false
+                                            stopAllAlarms()
+                                        },
+                                        modifier = Modifier.weight(1f).height(44.dp),
+                                        shape = RoundedCornerShape(14.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                    ) {
+                                        Icon(Icons.Filled.Stop, null, modifier = Modifier.size(if (timeLeft > 0) 24.dp else 20.dp))
+                                    }
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        focusManager.clearFocus()
+                                        val padded = rawInput.padStart(4, '0')
+                                        val m = padded.substring(0, 2).toLongOrNull() ?: 0L
+                                        val s = padded.substring(2, 4).toLongOrNull() ?: 0L
+                                        val totalSeconds = (m * 60) + s
+
+                                        if (totalSeconds > 0) {
+                                            timeLeft = totalSeconds
+                                            isRunning = true
+                                            isPaused = false
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().height(44.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Icon(Icons.Filled.PlayArrow, null, modifier = Modifier.size(20.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(stringResource(R.string.btn_avvia_timer), fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            OutlinedButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    // Assegniamo a 'rawInput' esattamente il secondo elemento della coppia (preset.second).
-                                    // Non serve più fare moltiplicazioni strane!
-                                    rawInput = preset.second
+                                    stopAllAlarms()
+                                    onDismiss()
                                 },
-                                modifier = Modifier.weight(1f).height(44.dp),
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                border = BorderStroke(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                                )
+                                modifier = Modifier.fillMaxWidth().height(44.dp),
+                                shape = RoundedCornerShape(14.dp)
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        // Mostriamo sul bottone il primo elemento della coppia (preset.first).
-                                        // Essendo stringhe puramente numeriche ("00:30") l'I18N non è richiesto.
-                                        text = preset.first,
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
+                                Icon(Icons.Filled.Close, stringResource(R.string.desc_chiudi_icon), modifier = Modifier.padding(end = 6.dp).size(20.dp))
+                                Text(stringResource(R.string.btn_chiudi), fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    // COLONNA DESTRA (52%): 6 PRESET RAPIDI ADATTIVI A TUTTA ALTEZZA (SENZA SPAZI VUOTI!)
+                    Column(
+                        modifier = Modifier
+                            .weight(0.52f)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Preset Rapidi",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        // 🧠 UX FIX: Column con weight(1f) per far allungare le 3 righe in altezza
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            quickPresets.chunked(2).forEach { rowItems ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f), // 🌟 Ogni riga prende 1/3 dell'altezza totale!
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    rowItems.forEach { preset ->
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                rawInput = preset.second
+                                            },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(), // 🌟 La card si allunga per riempire la riga!
+                                            shape = RoundedCornerShape(14.dp),
+                                            color = MaterialTheme.colorScheme.surfaceVariant,
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(
+                                                    text = preset.first,
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        },
+        }
+    } else {
         // ====================================================================
-        // 🏁 BOTTONI PRINCIPALI DI CONFERMA
+        // ORIENTAMENTO VERTICALE (Layout Standard Portrait per AlertDialog)
         // ====================================================================
-        confirmButton = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                if (isRunning || isPaused) {
-                    // RIGA CON PULSANTI PAUSA / RIPRENDI E FERMA TIMER (Animata e Adattiva)
-                    Row(
+        AlertDialog(
+            onDismissRequest = { },
+            title = {
+                Text(
+                    text = stringResource(R.string.titolo_timer_sfida),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateContentSize(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
+                            .border(
+                                border = if (isTextFieldFocused && !isRunning && !isPaused)
+                                    BorderStroke(2.dp, displayColor)
+                                else
+                                    BorderStroke(0.dp, Color.Transparent),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // TASTO PAUSA / RIPRENDI (Visibile SOLO quando il tempo non è scaduto, cioè timeLeft > 0)
-                        AnimatedVisibility(
-                            visible = timeLeft > 0,
-                            enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
-                            exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    stopAllAlarms() // Spegne eventuali allarmi attivi
+                        if (isRunning || isPaused) {
+                            val totalSeconds = abs(timeLeft)
+                            val m = totalSeconds / 60
+                            val s = totalSeconds % 60
+                            val sign = if (timeLeft < 0) "-" else ""
 
-                                    if (isRunning) {
-                                        isRunning = false
-                                        isPaused = true
-                                    } else {
-                                        isRunning = true
-                                        isPaused = false
-                                    }
+                            Text(
+                                text = "$sign%02d:%02d".format(m, s),
+                                style = MaterialTheme.typography.displayLarge.copy(
+                                    fontSize = 60.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = displayColor
+                                )
+                            )
+                        } else {
+                            val paddedInput = rawInput.padStart(4, '0')
+                            val formattedDisplay = "${paddedInput.substring(0, 2)}:${paddedInput.substring(2, 4)}"
+
+                            BasicTextField(
+                                value = rawInput,
+                                onValueChange = { newValue ->
+                                    val digits = newValue.filter { it.isDigit() }
+                                    rawInput = digits.takeLast(4)
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(56.dp),
-                                shape = RoundedCornerShape(20.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-                        }
-
-                        // TASTO FERMA TIMER (Sempre presente, si espande a 100% se il tempo è scaduto <= 0)
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                isRunning = false
-                                isPaused = false
-                                stopAllAlarms()
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(56.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Stop,
-                                contentDescription = null,
-                                modifier = Modifier.size(if (timeLeft > 0) 32.dp else 24.dp)
-                            )
-                            // Se il tempo è scaduto (timeLeft <= 0), mostra anche la scritta "FERMA TIMER" affianco all'icona
-                            AnimatedVisibility(
-                                visible = timeLeft <= 0,
-                                enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
-                                exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300))
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Spacer(Modifier.width(8.dp))
+                                    .onFocusChanged { focusState -> isTextFieldFocused = focusState.isFocused },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(
+                                    onDone = { focusManager.clearFocus() }
+                                ),
+                                textStyle = TextStyle(color = Color.Transparent),
+                                cursorBrush = SolidColor(Color.Transparent),
+                                decorationBox = {
                                     Text(
-                                        text = stringResource(R.string.btn_ferma_timer),
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        text = formattedDisplay,
+                                        style = MaterialTheme.typography.displayLarge.copy(
+                                            fontSize = 60.sp,
+                                            fontWeight = FontWeight.Black,
+                                            color = if (isTextFieldFocused) displayColor else displayColor.copy(alpha = 0.6f)
+                                        ),
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
                                     )
+                                }
+                            )
+                        }
+                    }
+
+                    if (!isRunning && !isPaused) {
+                        // 🧠 LEZIONE TEORICA VERTICALE: FadedRightEdgeWrapper + LazyRow
+                        // Avvolgiamo i 6 preset in un 'FadedRightEdgeWrapper' con scorrimento orizzontale LazyRow.
+                        // Usiamo contentPadding(end = 40.dp) così l'ultimo chip (15:00) scivola DEL TUTTO oltre la sfumatura quando si arriva in fondo!
+                        FadedRightEdgeWrapper(
+                            modifier = Modifier.fillMaxWidth(),
+                            fadeColor = MaterialTheme.colorScheme.surface
+                        ) {
+                            LazyRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(end = 40.dp) // 🧠 UX FIX: Abbondante margine finale per far scorrere l'ultimo chip oltre la sfumatura
+                            ) {
+                                items(quickPresets) { preset ->
+                                    Surface(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            rawInput = preset.second
+                                        },
+                                        modifier = Modifier
+                                            .width(88.dp)
+                                            .height(44.dp),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        border = BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                        )
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(
+                                                text = preset.first,
+                                                fontWeight = FontWeight.Bold,
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                } else {
-                    // TASTO AVVIA TIMER (A LARGHEZZA INTERA)
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            focusManager.clearFocus()
+                }
+            },
+            confirmButton = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (isRunning || isPaused) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateContentSize(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            AnimatedVisibility(
+                                visible = timeLeft > 0,
+                                enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
+                                exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300)),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        stopAllAlarms()
 
-                            val padded = rawInput.padStart(4, '0')
-                            val m = padded.substring(0, 2).toLongOrNull() ?: 0L
-                            val s = padded.substring(2, 4).toLongOrNull() ?: 0L
-                            val totalSeconds = (m * 60) + s
-
-                            if (totalSeconds > 0) {
-                                timeLeft = totalSeconds
-                                isRunning = true
-                                isPaused = false
+                                        if (isRunning) {
+                                            isRunning = false
+                                            isPaused = true
+                                        } else {
+                                            isRunning = true
+                                            isPaused = false
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    shape = RoundedCornerShape(20.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
                             }
+
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    isRunning = false
+                                    isPaused = false
+                                    stopAllAlarms()
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(56.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Stop,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(if (timeLeft > 0) 32.dp else 24.dp)
+                                )
+                                AnimatedVisibility(
+                                    visible = timeLeft <= 0,
+                                    enter = fadeIn(tween(300)) + expandHorizontally(tween(300)),
+                                    exit = fadeOut(tween(300)) + shrinkHorizontally(tween(300))
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.btn_ferma_timer),
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                focusManager.clearFocus()
+
+                                val padded = rawInput.padStart(4, '0')
+                                val m = padded.substring(0, 2).toLongOrNull() ?: 0L
+                                val s = padded.substring(2, 4).toLongOrNull() ?: 0L
+                                val totalSeconds = (m * 60) + s
+
+                                if (totalSeconds > 0) {
+                                    timeLeft = totalSeconds
+                                    isRunning = true
+                                    isPaused = false
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.btn_avvia_timer),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            stopAllAlarms()
+                            onDismiss()
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
+                        shape = RoundedCornerShape(20.dp)
                     ) {
-                        Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.desc_chiudi_icon),
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
                         Text(
-                            text = stringResource(R.string.btn_avvia_timer),
+                            text = stringResource(R.string.btn_chiudi),
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
-
-                // TASTO CHIUDI E ANNULLA
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        stopAllAlarms()
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.desc_chiudi_icon),
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.btn_chiudi),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
-        }
-    )
+        )
+    }
 }
 
 /**
  * ====================================================================
  * LOGICA DI VIBRAZIONE CONTINUA
  * ====================================================================
- * Questa funzione comunica direttamente col motorino fisico (Hardware) del telefono.
  */
 private fun triggerContinuousAlarm(vibrator: android.os.Vibrator) {
-    // 🧠 TEORIA DELL'ONDA (Waveform):
-    // I timings dicono al motorino QUANTO TEMPO in millisecondi (ms) deve stare in un certo stato.
     val timings = longArrayOf(0, 400, 200, 400, 200)
-
-    // Le amplitudes dicono al motorino LA POTENZA per ogni tempo. 0 = Spento. 255 = Potenza Massima.
-    // Leggendoli insieme: Aspetta 0ms, Vibra al max per 400ms, Spegniti per 200ms, Vibra per 400ms, ecc.
     val amplitudes = intArrayOf(0, 255, 0, 255, 0)
-
-    // L'ultimo parametro '0' è il "Repeat Index" (Indice di ripetizione).
-    // Diciamo ad Android di finire l'array e poi ricominciare da capo (posizione 0) all'infinito!
     vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, 0))
 }
 
@@ -558,30 +690,18 @@ private fun triggerContinuousAlarm(vibrator: android.os.Vibrator) {
  * ====================================================================
  * GESTORE AUDIO: Suono di Allarme (RingtoneManager)
  * ====================================================================
- * Cerca la suoneria di sistema e la riproduce.
- * 🧠 CRITICO: Restituisce l'oggetto Ringtone (il lettore musicale).
- * Noi ce lo salviamo in una variabile nel Compose, così poi possiamo usare il comando .stop() per zittirlo!
  */
 private fun riproduciSuonoTimer(context: Context): Ringtone? {
     return try {
-        // Uri (Uniform Resource Identifier) è un indirizzo. Chiediamo la suoneria "SVEGLIA" predefinita dal telefono.
         var suonoUri: Uri? = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-
-        // Se il telefono ha un bug e non trova la sveglia, passiamo al Piano B: Suono della NOTIFICA (es. i messaggi).
         if (suonoUri == null) {
             suonoUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         }
-
-        // Carichiamo il file audio nel lettore (Ringtone)
         val ringtone = RingtoneManager.getRingtone(context, suonoUri)
-        // Lo facciamo partire
         ringtone?.play()
-
-        // Restituiamo il "telecomando" del lettore a chi ha chiamato questa funzione.
         ringtone
     } catch (e: Exception) {
-        // I blocchi try-catch evitano che l'app crashi in caso di errori critici di sistema o permessi mancanti.
         e.printStackTrace()
-        null // Se fallisce, restituisce 'null', dicendo che non c'è nessun audio in riproduzione.
+        null
     }
 }
