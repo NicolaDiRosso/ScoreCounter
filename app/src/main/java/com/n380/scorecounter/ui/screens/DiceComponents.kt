@@ -1,23 +1,28 @@
 package com.n380.scorecounter.ui.screens
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource // Import per abilitare la lettura dal file strings.xml
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.n380.scorecounter.R // Import per accedere agli ID univoci (es. R.string...)
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.n380.scorecounter.R
 
-//animazione dei numeri casuali del dado
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -40,188 +45,301 @@ import com.n380.scorecounter.ui.components.AutoResizedText
  */
 @Composable
 fun DiceSettingsDialog(
-    // ====================================================================
-    // 🧠 LEZIONE TEORICA: STATE HOISTING (Sollevamento dello Stato)
-    // ====================================================================
-    // In Jetpack Compose, l'architettura perfetta prevede che i componenti "figli" (come questo popup)
-    // non modifichino mai direttamente i dati centrali dell'app. Devono essere componenti "stupidi" e reattivi.
-    // I dati e le decisioni vengono "sollevati" (hoisted) verso il "padre" (CreateMatchScreen).
-    //
-    // 1. DATO IN INGRESSO (Sola Lettura):
-    currentSides: Int, // Riceve il numero di facce attuale (es. 6) dal padre. Non può modificarlo.
-
-    // 2. EVENTO IN USCITA (Callback / Lambda Expression):
-    // La sintassi '(Int) -> Unit' definisce una funzione che accetta un numero intero e non restituisce nulla.
-    // Funge da "walkie-talkie": quando l'utente preme "Applica", questo componente figlio chiama la funzione
-    // per avvisare il padre: "Ehi, l'utente ha scelto questo nuovo numero! Pensaci tu a salvarlo nel database!".
-    onSidesChanged: (Int) -> Unit, // Invia indietro il nuovo numero scelto quando si preme "Applica"
-
-    // 3. EVENTO DI CHIUSURA:
-    onDismiss: () -> Unit // Chiude il popup (anche questa è una funzione delegata al padre per togliere la visibilità)
+    currentSides: Int,
+    onSidesChanged: (Int) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
-    // ---> INCAPSULAMENTO DELLO STATO <---
-    // Abbiamo spostato queste variabili da CreateMatchScreen a qui dentro!
-    // Perché? Perché alla schermata principale non interessa sapere cosa l'utente sta
-    // digitando temporaneamente nella casella di testo. Le interessa solo il risultato finale.
     var pendingDiceSides by remember { mutableIntStateOf(currentSides) }
     var customDiceInput by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            // 🧠 LEZIONE I18N: Utilizzo Base
-            // Sostituiamo il testo hardcoded (es. "Dado Spareggio") con stringResource().
-            // Il sistema va nel file strings.xml, cerca la riga 'titolo_impostazioni_dado' e stampa
-            // la stringa associata in base alla lingua del dispositivo, senza bisogno di scrivere logiche if/else.
-            Text(stringResource(R.string.titolo_impostazioni_dado), fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-                // 🧠 LEZIONE I18N: Testi lunghi descrittivi
-                // Anche i testi lunghi e complessi vengono estratti. Questo rende il codice Kotlin
-                // molto più pulito da leggere, delegando i "muri di testo" ai file XML.
-                Text(
-                    text = stringResource(R.string.desc_impostazioni_dado),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+    if (isLandscape) {
+        // ====================================================================
+        // 🧠 LEZIONE TEORICA ORIZZONTALE: 2-Column Split Dialog Reattivo (75% Larghezza)
+        // ====================================================================
+        // 1. LARGHEZZA PERCENTUALE (fillMaxWidth = 0.75f, fillMaxHeight = 0.85f):
+        //    Invece di usare dimensioni fisse in dp (che sui tablet risultano piccole e compresse),
+        //    usiamo il 75% della larghezza e l'90% dell'altezza totale dello schermo.
+        //    In questo modo il dialog scala perfettamente sia su smartphone che su tablet!
+        //
+        // 2. DISPOSIZIONE A 2 COLONNE:
+        //    - Sinistra (42%): Titolo, Descrizione e Pulsanti Annulla/Applica ancorati in basso a sinistra.
+        //    - Destra (58%): Formati dadi rapidi e Campo d'inserimento manuale a TUTTA ALTEZZA.
+        //
+        // 3. PADDING INTERNO DELLE CARTE DADI:
+        //    Le scritte (es. "Dado (D6)") hanno 12.dp di padding orizzontale interno per non essere soffocate.
+        Dialog(
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.75f)
+                    .fillMaxHeight(0.90f),
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp,
+                shadowElevation = 12.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // COLONNA SINISTRA (42%): TITOLO, DESCRIZIONE & PULSANTI ANNULLA/APPLICA
+                    Column(
+                        modifier = Modifier
+                            .weight(0.42f)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                text = stringResource(R.string.titolo_impostazioni_dado),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = stringResource(R.string.desc_impostazioni_dado),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
 
-                // 🧠 LEZIONE I18N: Sostituzione singola riga
-                // Qui peschiamo la stringa "Scegli un formato rapido..." in italiano, o "Choose a quick format..." in inglese.
-                Text(stringResource(R.string.label_scegli_formato_dado), style = MaterialTheme.typography.bodyMedium)
+                        // PULSANTI ANNULLA & APPLICA (Ancorati in basso a sinistra sotto la descrizione)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    onDismiss()
+                                }
+                            ) {
+                                AutoResizedText(stringResource(R.string.btn_annulla))
+                            }
 
-                // GRIGLIA DADI STANDARD
-                val diceOptions = listOf(6, 10, 20, 100)
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    diceOptions.chunked(2).forEach { rowItems ->
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            rowItems.forEach { sides ->
-                                val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
-                                Card(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(60.dp)
-                                        .clickable {
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            pendingDiceSides = sides
-                                            customDiceInput = ""
-                                        },
-                                    colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
-                                    // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp per coerenza con i chip di selezione (Soft Pill)
-                                    shape = RoundedCornerShape(20.dp),
-                                    // 🎨 UI DESIGN: Aggiungiamo un bordo per definire meglio la forma delle card.
-                                    // Utilizzare un BorderStroke aiuta a far risaltare il componente e a dare coerenza
-                                    // con il resto del design system (es. campi di testo e pulsanti secondari).
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                            Button(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(46.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    val manualSides = customDiceInput.toIntOrNull()
+                                    val finalSides = if (manualSides != null && manualSides > 0) manualSides else pendingDiceSides
+
+                                    onSidesChanged(finalSides)
+                                    onDismiss()
+                                }
+                            ) {
+                                AutoResizedText(stringResource(R.string.btn_applica))
+                            }
+                        }
+                    }
+
+                    // COLONNA DESTRA (58%): FORMATIONI RAPIDI & INSERIMENTO MANUALE (TUTTA ALTEZZA)
+                    Column(
+                        modifier = Modifier
+                            .weight(0.58f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.label_scegli_formato_dado),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        // GRIGLIA DADI RAPIDI (2x2) CON PADDING INTERNO SPAZIOSO (12dp)
+                        val diceOptions = listOf(6, 10, 20, 100)
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            diceOptions.chunked(2).forEach { rowItems ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                        // ==========================================================
-                                        // 🧠 LEZIONE TEORICA I18N: I SEGNAPOSTO FORMATTATI (Formatted Placeholders)
-                                        // ==========================================================
-                                        // Nel vecchio codice avevi la stringa interpolata: text = "D$sides"
-                                        // Questo approccio hardcoded è il nemico numero uno delle traduzioni. In altre lingue,
-                                        // la lettera 'D' potrebbe andare DOPO il numero, oppure la parola potrebbe essere diversa.
-                                        //
-                                        // LA SOLUZIONE: Nel file strings.xml scriviamo <string name="label_dado">D%d</string>
-                                        // - '%d' (Decimal): È un "buco" che avvisa il sistema che lì in mezzo andrà un numero intero.
-                                        // (Se avessimo dovuto inserirci un testo, avremmo usato '%s' per String).
-                                        //
-                                        // Quando chiamiamo stringResource passandogli 'sides' come parametro aggiuntivo,
-                                        // la funzione inietterà automaticamente il valore esattamente al posto del '%d',
-                                        // rispettando magicamente la sintassi e l'ordine della lingua in uso!
-                                        // ==========================================================
-                                        AutoResizedText(
-                                            stringResource(R.string.label_dado, sides),
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                                        )
+                                    rowItems.forEach { sides ->
+                                        val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
+                                        Card(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(52.dp)
+                                                .clickable {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                    pendingDiceSides = sides
+                                                    customDiceInput = ""
+                                                },
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                                            ),
+                                            shape = RoundedCornerShape(16.dp),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                                // 🧠 UX FIX: Padding orizzontale da 12dp per evitare che il testo "Dado (D6)" tocchi i bordi
+                                                AutoResizedText(
+                                                    stringResource(R.string.label_dado, sides),
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                        // INSERIMENTO MANUALE
+                        Text(
+                            text = stringResource(R.string.label_inserimento_manuale),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        OutlinedTextField(
+                            value = customDiceInput,
+                            onValueChange = { if (it.all { char -> char.isDigit() }) customDiceInput = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.hint_es_facce_dado), style = MaterialTheme.typography.bodySmall) },
+                            label = { Text(stringResource(R.string.hint_n_facce), style = MaterialTheme.typography.bodySmall) },
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
+                        )
+                    }
+                }
+            }
+        }
+    } else {
+        // ====================================================================
+        // ORIENTAMENTO VERTICALE (Layout Standard Portrait per AlertDialog)
+        // ====================================================================
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(stringResource(R.string.titolo_impostazioni_dado), fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.desc_impostazioni_dado),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text(stringResource(R.string.label_scegli_formato_dado), style = MaterialTheme.typography.bodyMedium)
+
+                    val diceOptions = listOf(6, 10, 20, 100)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        diceOptions.chunked(2).forEach { rowItems ->
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                rowItems.forEach { sides ->
+                                    val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
+                                    Card(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(60.dp)
+                                            .clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                pendingDiceSides = sides
+                                                customDiceInput = ""
+                                            },
+                                        colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
+                                        shape = RoundedCornerShape(20.dp),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                            AutoResizedText(
+                                                stringResource(R.string.label_dado, sides),
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                // --->Divisore Orizzontale<---
-                // In questo modo sfrutta solo lo spazio naturale (spacedBy) senza aggiungerne altro!
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
 
-                // --->Raggruppamento Logico <---
-                // Chiudiamo il titolo e la casella in una "mini-colonna" separata.
-                // Così tra loro ci saranno solo 4 pixel (spacedBy(4.dp)) invece di 16!
-                Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                    // 🧠 LEZIONE I18N: Traduzione dell'intestazione dell'input manuale ("Inserimento manuale")
-                    Text(
-                        text = stringResource(R.string.label_inserimento_manuale),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                        Text(
+                            text = stringResource(R.string.label_inserimento_manuale),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                    OutlinedTextField(
-                        value = customDiceInput,
-                        onValueChange = { if (it.all { char -> char.isDigit() }) customDiceInput = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        // 🧠 LEZIONE I18N: Parametri dinamici di un TextField
-                        // I testi di aiuto all'interno dei campi compilabili (placeholder e label)
-                        // si traducono esattamente come un normale componente Text.
-                        placeholder = { Text(stringResource(R.string.hint_es_facce_dado)) },
-                        label = { Text(stringResource(R.string.hint_n_facce)) },
-                        // 🧠 DESIGN CHANGE: Stondatura ridotta a 12.dp per coerenza con i nuovi campi di testo (Module style)
-                        shape = RoundedCornerShape(12.dp),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onDismiss()
+                        OutlinedTextField(
+                            value = customDiceInput,
+                            onValueChange = { if (it.all { char -> char.isDigit() }) customDiceInput = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text(stringResource(R.string.hint_es_facce_dado)) },
+                            label = { Text(stringResource(R.string.hint_n_facce)) },
+                            shape = RoundedCornerShape(12.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true
+                        )
                     }
-                ) {
-                    // 🧠 LEZIONE I18N: Riutilizzo Intelligente (Reusability)
-                    // La chiave R.string.btn_annulla ("Annulla"/"Cancel") è usata in tante schermate.
-                    // Invece di creare un ID nuovo per ogni bottone, usiamo sempre lo stesso riferimento.
-                    // Così, se un domani vorremo cambiare "Annulla" in "Cancella", basterà modificare
-                    // il file XML una volta sola e l'app si aggiornerà ovunque!
-                    Text(stringResource(R.string.btn_annulla), maxLines = 1)
                 }
-
-                Button(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        val manualSides = customDiceInput.toIntOrNull()
-                        val finalSides = if (manualSides != null && manualSides > 0) manualSides else pendingDiceSides
-
-                        onSidesChanged(finalSides)
-                        onDismiss()
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onDismiss()
+                        }
+                    ) {
+                        Text(stringResource(R.string.btn_annulla), maxLines = 1)
                     }
-                ) {
-                    // 🧠 LEZIONE I18N: Estrazione etichetta "Applica"
-                    Text(stringResource(R.string.btn_applica))
+
+                    Button(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            val manualSides = customDiceInput.toIntOrNull()
+                            val finalSides = if (manualSides != null && manualSides > 0) manualSides else pendingDiceSides
+
+                            onSidesChanged(finalSides)
+                            onDismiss()
+                        }
+                    ) {
+                        Text(stringResource(R.string.btn_applica))
+                    }
                 }
-            }
-        },
-        dismissButton = null
-    )
+            },
+            dismissButton = null
+        )
+    }
 }
 
 /**
@@ -234,87 +352,56 @@ fun DiceSettingsDialog(
  */
 @Composable
 fun DiceRollDialog(
-    result: Int, // Il numero casuale generato, in sola lettura
-    diceSides: Int, // Riceviamo il numero di facce del dado (ci serve per l'intestazione testuale)
-
-    // 🧠 GESTIONE DELLO STATO: CHIAVE DI FORZATURA ANIMAZIONE
-    // Se l'utente lancia il dado e ottiene 4, e poi rilancia ottenendo ancora 4,
-    // Compose ignorerebbe il cambiamento perché "result" è identico.
-    // Incrementando 'rollCount' a ogni click dal padre, cambiamo le carte in tavola
-    // e costringiamo Compose a ri-eseguire'animazione per forza!
-    rollCount: Int, // Indice univoco del lancio per forzare la reattività di Compose
-
-    onRollAgain: () -> Unit, // Callback per urlare al padre: "L'utente rivuole lanciare!"
-    onDismiss: () -> Unit,    // Callback per urlare al padre: "Nascondi questa finestra!"
-    onOpenSettings: () -> Unit  // Chiamata callback per aprire le impostazioni
+    result: Int,
+    diceSides: Int,
+    rollCount: Int,
+    onRollAgain: () -> Unit,
+    onDismiss: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            // ====================================================================
-            // 🧠 FIX UX/UI: INTESTAZIONE PULITA CON "TONAL ICON" (Bordo e Sfondo)
-            // ====================================================================
-            // Usiamo una Row. Il titolo prende lo spazio a sinistra, l'ingranaggio
-            // "nudo" (senza la pillola e la scritta "Gestisci") si posiziona a destra
-            // senza rubare la scena al contenuto principale del Dialog.
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                // Aggiungiamo un gap fisso di 10.dp.
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // IL TITOLO DEL DIALOG DEL DADO
                 AutoResizedText(
                     text = stringResource(R.string.titolo_lancio_dado),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
-                    // Il weight(1f) dice al titolo: "Prenditi tutto lo spazio a sinistra
-                    // spingendo il bottone a destra. Se non c'è spazio, rimpicciolisciti tu!"
                     modifier = Modifier.weight(1f)
                 )
 
-                // ====================================================================
-                // L'INGRANAGGIO STILIZZATO (Surface, Bordo e Sfondo - No Testo)
-                // ====================================================================
                 Surface(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onOpenSettings()
                     },
-                    // 🧠 DESIGN CHANGE: Stondatura aumentata a 20.dp per coerenza con i pulsanti d'azione
                     shape = RoundedCornerShape(20.dp),
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                 ) {
-                    // Usiamo una Row per affiancare il testo (es. "D6") all'icona
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), // Padding proporzionato
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        // ICONA IMPOSTAZIONI
                         Icon(
                             imageVector = Icons.Filled.Settings,
-                            // Label accessibilità mantenuta
                             contentDescription = stringResource(R.string.desc_gestisci_rapidi_icon),
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp) // Icona ben visibile
+                            modifier = Modifier.size(20.dp)
                         )
-                        // INDICATORE DEL FORMATO ATTUALE (es. "D20")
                         AutoResizedText(
-                            text = "D$diceSides", // Costruiamo dinamicamente la scritta "D" + numero
+                            text = "D$diceSides",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            // ====================================================================
-                            // PREVENZIONE CRASH VISIVO (Edge Case Management)
-                            // ====================================================================
-                            // Limitiamo la larghezza massima a 60.dp (sufficiente per numeri come D9999).
-                            // Se l'utente inserisce un numero spropositato, interviene maxLines ed ellipsis
-                            // troncando il testo (es. "D999..."), salvando così il titolo principale.
                             modifier = Modifier.widthIn(max = 50.dp),
                         )
                     }
@@ -322,7 +409,6 @@ fun DiceRollDialog(
             }
         },
         text = {
-            // Row per mantenere l'emoji ferma e animare solo il numero al suo fianco
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -332,48 +418,17 @@ fun DiceRollDialog(
             ) {
                 Text(text = "🎲 ", style = MaterialTheme.typography.displayLarge, color = MaterialTheme.colorScheme.primary)
 
-                /*
-                Recomposition (Ricomposizione) e AnimatedContent:
-                In Jetpack Compose, l'interfaccia grafica si aggiorna solo quando lo Stato (State) che sta osservando subisce una mutazione.
-                Il componente AnimatedContent ascolta il parametro targetState.
-                Quando rileva una mutazione, innesca la transitionSpec (le animazioni di entrata e uscita).
-                 */
-
-                // AnimatedContent gestisce la transizione fluida tra il vecchio e il nuovo stato
                 AnimatedContent(
-                    // Utilizziamo un Pair come chiave: anche se il 'result' è uguale,
-                    // il 'rollCount' cambia sempre, forzando l'esecuzione dell'animazione.
                     targetState = Pair(result, rollCount),
-
-                    /**La Tupla (La classe Pair in Kotlin):
-                    Un Pair è una struttura dati (una tupla di due elementi) che impacchetta due variabili in un singolo oggetto formattato come (A, B).
-                    Passando ad AnimatedContent la chiave Pair(result, rollCount), noi cambiamo l'oggetto dell'uguaglianza strutturale.
-                    Analizziamo due lanci consecutivi che danno come risultato 4:
-                    -Lancio 1: result è 4, rollCount è 1. Lo stato è Pair(4, 1).
-                    -Lancio 2: result è 4, rollCount è 2 (perché il contatore dei click sale sempre). Lo stato diventa Pair(4, 2).
-
-                    Ora Compose esegue il confronto: Pair(4, 1) == Pair(4, 2).
-                    Poiché il secondo elemento del Pair è diverso, l'uguaglianza strutturale restituisce false.
-                    Compose registra ufficialmente una mutazione di stato, distrugge il nodo precedente e genera un nuovo nodo nel composition tree,
-                    innescando l'animazione in modo garantito al 100%.
-                     */
-
                     transitionSpec = {
-                        // Animazione di entrata: il nuovo numero arriva dal basso verso l'alto con dissolvenza
                         val enterAnimation = slideInVertically(animationSpec = tween(300)) { height -> height } +
                                 fadeIn(animationSpec = tween(300))
-
-                        // Animazione di uscita: il vecchio numero scorre verso l'alto e scompare
                         val exitAnimation = slideOutVertically(animationSpec = tween(300)) { height -> -height } +
                                 fadeOut(animationSpec = tween(300))
-
-                        // Esegue entrata e uscita contemporaneamente (effetto Slot Machine)
                         enterAnimation.togetherWith(exitAnimation)
                     },
                     label = "DiceRollAnimation"
                 ) { targetPair ->
-                    // Mostriamo solo il primo valore della coppia (il risultato del dado)
-                    // (Qui non serve I18N perché è un numero nudo e crudo!)
                     Text(
                         text = "${targetPair.first}",
                         style = MaterialTheme.typography.displayLarge,
@@ -384,31 +439,26 @@ fun DiceRollDialog(
             }
         },
         confirmButton = {
-            // ====================================================================
-            // 🧠 FIX UX/UI: BOTTONI PIÙ GRANDI (55.dp) MA STESSA FORMA (20.dp)
-            // ====================================================================
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
                     modifier = Modifier
                         .weight(1f)
-                        .height(55.dp), // Altezza riportata a 55dp (come richiesto)
-                    shape = RoundedCornerShape(20.dp), // Angoli mantenuti a 20dp (Coerenza geometrica)
+                        .height(55.dp),
+                    shape = RoundedCornerShape(20.dp),
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         onDismiss()
                     }
                 ) {
-                    // 🧠 LEZIONE I18N: Riutilizzo chiave di chiusura.
                     Text(stringResource(R.string.btn_chiudi), fontWeight = FontWeight.Bold)
                 }
 
                 Button(
                     modifier = Modifier
                         .weight(1f)
-                        .height(55.dp), // Altezza riportata a 55dp (come richiesto)
-                    shape = RoundedCornerShape(20.dp), // Angoli mantenuti a 20dp (Coerenza geometrica)
+                        .height(55.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
-                        // Sfondo acceso (primaryContainer) per l'azione principale
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
@@ -417,7 +467,6 @@ fun DiceRollDialog(
                         onRollAgain()
                     }
                 ) {
-                    // 🧠 LEZIONE I18N: Lettura dell'etichetta "Rilancia" dal dizionario
                     AutoResizedText(stringResource(R.string.btn_rilancia), fontWeight = FontWeight.Bold)
                 }
             }
