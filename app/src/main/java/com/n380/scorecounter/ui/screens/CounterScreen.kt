@@ -29,6 +29,8 @@
     import android.content.res.Configuration
     import androidx.compose.ui.platform.LocalConfiguration
     import androidx.compose.ui.platform.LocalContext
+    import androidx.compose.ui.window.Dialog
+    import androidx.compose.ui.window.DialogProperties
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.lifecycle.compose.LocalLifecycleOwner
     import androidx.compose.ui.res.stringResource // 🌍 I18N: Import fondamentale per le traduzioni UI
@@ -1152,103 +1154,293 @@
 
         // POPUP TUTORIAL: SPIEGAZIONE DELLE MECCANICHE NASCOSTE DELL'APP
         if (showInfoDialog) {
-            AlertDialog(
-                onDismissRequest = {
-                    showInfoDialog = false
-                }, // Se l'utente clicca fuori dal popup, si chiude
-                title = { Text(stringResource(R.string.titolo_info_funzionalita), fontWeight = FontWeight.Bold) }, // 🌍 I18N
-                text = {
-                    // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            val isInfoLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-                        // 🌍 I18N: Tutte le stringhe informative corpose sono state delegate al dizionario,
-                        // rendendo la colonna snella e altamente leggibile.
-                        Text(
-                            stringResource(R.string.titolo_info_punteggio),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
-                        )
-                        Text(
-                            stringResource(R.string.msg_info_punteggio),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Justify
-                        )
-
-                        Text(
-                            stringResource(R.string.titolo_info_fire),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                        )
-                        Text(
-                            stringResource(R.string.msg_info_fire),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Justify
-                        )
-
-                        Text(
-                            stringResource(R.string.titolo_info_manuale),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                        )
-                        Text(
-                            stringResource(R.string.msg_info_manuale),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Justify
-                        )
-
-                        Text(
-                            stringResource(R.string.titolo_info_dado),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                        )
-                        Text(
-                            stringResource(R.string.msg_info_dado),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Justify
-                        )
-
-                        Text(
-                            stringResource(R.string.titolo_info_timer),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                        )
-                        Text(
-                            stringResource(R.string.msg_info_timer),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Justify
-                        )
-                    }
-                },
-                confirmButton = {
-                    // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
-                    Button(
-                        onClick = {
-                            // 🧠 FIX UI: Pulito il riferimento a HapticFeedbackType rimuovendo il percorso ridondante.
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showInfoDialog = false// Chiude il popup quando si preme il bottone
-                        },
+            if (isInfoLandscape) {
+                // ====================================================================
+                // 🧠 LEZIONE TEORICA ORIZZONTALE: Dialog Espanso con Blocco Clic Esterno
+                // ====================================================================
+                // 1. BLOCCO CHIUSURA ACCIDENTALE: onDismissRequest = { } (lambda vuota) impedisce
+                //    al dialog di chiudersi se l'utente tocca per errore fuori dal popup.
+                // 2. STRUTTURA A SCHEDE RIQUADRATE (Tablet Optimization):
+                //    Ciascuna regola è racchiusa in una Surface riquadrata. Sui tablet con schermi grandi,
+                //    le schede strutturano perfettamente l'altezza senza lasciare vuoti antiestetici in basso!
+                Dialog(
+                    onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE: Si chiude solo coi nostri pulsanti
+                    properties = DialogProperties(usePlatformDefaultWidth = false)
+                ) {
+                    Surface(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(20.dp)
+                            .fillMaxWidth(0.65f)
+                            .fillMaxHeight(0.90f),
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.background,
+                        shadowElevation = 12.dp,
+                        tonalElevation = 2.dp,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Check,
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp),
-
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // INTESTAZIONE: TITOLO
+                            Text(
+                                text = stringResource(R.string.titolo_info_funzionalita),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 12.dp)
                             )
-                        Spacer(Modifier.width(8.dp))
-                        AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge) // 🌍 I18N
-                    }
 
+                            // CORPO SCORREVOLE DELLE REGOLE IN SCHEDE RIQUADRATE
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                // SCHEDA 1: PUNTEGGIO RAPIDO
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            stringResource(R.string.titolo_info_punteggio),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            stringResource(R.string.msg_info_punteggio),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Justify
+                                        )
+                                    }
+                                }
+
+                                // SCHEDA 2: STATO ON FIRE
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            stringResource(R.string.titolo_info_fire),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            stringResource(R.string.msg_info_fire),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Justify
+                                        )
+                                    }
+                                }
+
+                                // SCHEDA 3: INSERIMENTO MANUALE
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            stringResource(R.string.titolo_info_manuale),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            stringResource(R.string.msg_info_manuale),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Justify
+                                        )
+                                    }
+                                }
+
+                                // SCHEDA 4: DADO SPAREGGIO
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            stringResource(R.string.titolo_info_dado),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            stringResource(R.string.msg_info_dado),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Justify
+                                        )
+                                    }
+                                }
+
+                                // SCHEDA 5: TIMER SFIDA
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            stringResource(R.string.titolo_info_timer),
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            stringResource(R.string.msg_info_timer),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            textAlign = TextAlign.Justify
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // PULSANTE HO CAPITO
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showInfoDialog = false
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(20.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                AutoResizedText(
+                                    stringResource(R.string.btn_ho_capito),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
+                        }
+                    }
                 }
-            )
+            } else {
+                // ====================================================================
+                // ORIENTAMENTO VERTICALE (Layout Standard Portrait per AlertDialog)
+                // ====================================================================
+                AlertDialog(
+                    onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE: Si chiude solo coi nostri pulsanti
+                    title = { Text(stringResource(R.string.titolo_info_funzionalita), fontWeight = FontWeight.Bold) }, // 🌍 I18N
+                    text = {
+                        // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+
+                            // 🌍 I18N: Tutte le stringhe informative corpose sono state delegate al dizionario,
+                            // rendendo la colonna snella e altamente leggibile.
+                            Text(
+                                stringResource(R.string.titolo_info_punteggio),
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
+                            )
+                            Text(
+                                stringResource(R.string.msg_info_punteggio),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Justify
+                            )
+
+                            Text(
+                                stringResource(R.string.titolo_info_fire),
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                            )
+                            Text(
+                                stringResource(R.string.msg_info_fire),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Justify
+                            )
+
+                            Text(
+                                stringResource(R.string.titolo_info_manuale),
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                            )
+                            Text(
+                                stringResource(R.string.msg_info_manuale),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Justify
+                            )
+
+                            Text(
+                                stringResource(R.string.titolo_info_dado),
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                            )
+                            Text(
+                                stringResource(R.string.msg_info_dado),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Justify
+                            )
+
+                            Text(
+                                stringResource(R.string.titolo_info_timer),
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
+                            )
+                            Text(
+                                stringResource(R.string.msg_info_timer),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Justify
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
+                        Button(
+                            onClick = {
+                                // 🧠 FIX UI: Pulito il riferimento a HapticFeedbackType rimuovendo il percorso ridondante.
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                showInfoDialog = false// Chiude il popup quando si preme il bottone
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp),
+
+                                )
+                            Spacer(Modifier.width(8.dp))
+                            AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge) // 🌍 I18N
+                        }
+
+                    }
+                )
+            }
         }
         // ---> POPUP DEL TIMER <---
         // Viene invocato dal file TimerComponents.kt che abbiamo creato a parte

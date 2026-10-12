@@ -72,7 +72,7 @@ fun DiceSettingsDialog(
         // 3. PADDING INTERNO DELLE CARTE DADI:
         //    Le scritte (es. "Dado (D6)") hanno 12.dp di padding orizzontale interno per non essere soffocate.
         Dialog(
-            onDismissRequest = onDismiss,
+            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE: Si chiude solo coi pulsanti espliciti
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Surface(
@@ -232,7 +232,7 @@ fun DiceSettingsDialog(
         // ORIENTAMENTO VERTICALE (Layout Standard Portrait per AlertDialog)
         // ====================================================================
         AlertDialog(
-            onDismissRequest = onDismiss,
+            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE: Si chiude solo coi pulsanti espliciti
             title = {
                 Text(stringResource(R.string.titolo_impostazioni_dado), fontWeight = FontWeight.Bold)
             },
