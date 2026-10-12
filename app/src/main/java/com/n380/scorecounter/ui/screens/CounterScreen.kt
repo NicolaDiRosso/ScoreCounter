@@ -1349,70 +1349,121 @@
                     onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE: Si chiude solo coi nostri pulsanti
                     title = { Text(stringResource(R.string.titolo_info_funzionalita), fontWeight = FontWeight.Bold) }, // 🌍 I18N
                     text = {
-                        // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        // 🧠 LEZIONE TEORICA VERTICALE: Schede Surface Riquadrate per Ogni Punto
+                        // Racchiudiamo ciascuna delle 5 regole in una Card Surface con angoli a 16.dp e bordo sottile.
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // SCHEDA 1: PUNTEGGIO RAPIDO
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        stringResource(R.string.titolo_info_punteggio),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        stringResource(R.string.msg_info_punteggio),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Justify
+                                    )
+                                }
+                            }
 
-                            // 🌍 I18N: Tutte le stringhe informative corpose sono state delegate al dizionario,
-                            // rendendo la colonna snella e altamente leggibile.
-                            Text(
-                                stringResource(R.string.titolo_info_punteggio),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
-                            )
-                            Text(
-                                stringResource(R.string.msg_info_punteggio),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Justify
-                            )
+                            // SCHEDA 2: STATO ON FIRE
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        stringResource(R.string.titolo_info_fire),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        stringResource(R.string.msg_info_fire),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Justify
+                                    )
+                                }
+                            }
 
-                            Text(
-                                stringResource(R.string.titolo_info_fire),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                            )
-                            Text(
-                                stringResource(R.string.msg_info_fire),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Justify
-                            )
+                            // SCHEDA 3: INSERIMENTO MANUALE
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        stringResource(R.string.titolo_info_manuale),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        stringResource(R.string.msg_info_manuale),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Justify
+                                    )
+                                }
+                            }
 
-                            Text(
-                                stringResource(R.string.titolo_info_manuale),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                            )
-                            Text(
-                                stringResource(R.string.msg_info_manuale),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Justify
-                            )
+                            // SCHEDA 4: DADO SPAREGGIO
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        stringResource(R.string.titolo_info_dado),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        stringResource(R.string.msg_info_dado),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Justify
+                                    )
+                                }
+                            }
 
-                            Text(
-                                stringResource(R.string.titolo_info_dado),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                            )
-                            Text(
-                                stringResource(R.string.msg_info_dado),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Justify
-                            )
-
-                            Text(
-                                stringResource(R.string.titolo_info_timer),
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                            )
-                            Text(
-                                stringResource(R.string.msg_info_timer),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Justify
-                            )
+                            // SCHEDA 5: TIMER SFIDA
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        stringResource(R.string.titolo_info_timer),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                    Text(
+                                        stringResource(R.string.msg_info_timer),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Justify
+                                    )
+                                }
+                            }
                         }
                     },
                     confirmButton = {
