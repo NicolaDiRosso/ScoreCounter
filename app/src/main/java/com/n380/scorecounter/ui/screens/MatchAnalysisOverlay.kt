@@ -20,6 +20,11 @@
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.compose.ui.res.stringResource // 🌍 I18N: Import per il sistema di traduzione nativo Android
+    import android.content.res.Configuration
+    import androidx.compose.ui.platform.LocalConfiguration
+    import androidx.compose.ui.window.Dialog
+    import androidx.compose.ui.window.DialogProperties
+    import androidx.compose.ui.text.style.TextAlign
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.unit.dp
     import com.n380.scorecounter.R // 🌍 I18N: Accesso all'indice (R)estources
@@ -191,89 +196,194 @@
                                 // =========================================================
                                 // POPUP INFORMATIVO SULLA LETTURA DEL GRAFICO
                                 // =========================================================
+                                // =========================================================
+                                // POPUP INFORMATIVO SULLA LETTURA DEL GRAFICO (Standardized Surface Cards)
+                                // =========================================================
                                 if (showChartInfoDialog) {
-                                    AlertDialog(
-                                        onDismissRequest = { showChartInfoDialog = false },
-                                        title = {
-                                            Text(
-                                                text = stringResource(R.string.titolo_guida_grafico), // 🌍 I18N
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        },
-                                        text = {
-                                            Column(
-                                                modifier = Modifier.verticalScroll(rememberScrollState())
-                                            ) {
-                                                Text(
-                                                    text = stringResource(R.string.titolo_guida_punti), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(bottom = 2.dp, top = 8.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_guida_punti), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
+                                    val isChartLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-                                                Text(
-                                                    text = stringResource(R.string.titolo_guida_tempo), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_guida_tempo), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-
-                                                Text(
-                                                    text = stringResource(R.string.titolo_guida_pallini), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_guida_pallini), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-
-                                                Text(
-                                                    text = stringResource(R.string.titolo_guida_sorpassi), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(bottom = 2.dp, top = 16.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_guida_sorpassi), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-                                            }
-                                        },
-                                        confirmButton = {
-                                            Button(
-                                                onClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                    showChartInfoDialog = false
-                                                },
+                                    if (isChartLandscape) {
+                                        // 🧠 ORIENTAMENTO ORIZZONTALE: Dialog 65%x90% a due schede riquadrate
+                                        Dialog(
+                                            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE: Si chiude solo coi pulsanti espliciti
+                                            properties = DialogProperties(usePlatformDefaultWidth = false)
+                                        ) {
+                                            Surface(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(48.dp),
-                                                shape = RoundedCornerShape(20.dp)
+                                                    .fillMaxWidth(0.65f)
+                                                    .fillMaxHeight(0.90f),
+                                                shape = RoundedCornerShape(24.dp),
+                                                color = MaterialTheme.colorScheme.background,
+                                                shadowElevation = 12.dp,
+                                                tonalElevation = 2.dp,
+                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Check,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(22.dp)
-                                                )
-                                                Spacer(Modifier.width(8.dp))
-                                                AutoResizedText(
-                                                    text = stringResource(R.string.btn_ho_capito), // 🌍 I18N: Riutilizzo chiave della CounterScreen
-                                                    fontWeight = FontWeight.Bold,
-                                                    style = MaterialTheme.typography.bodyLarge
-                                                )
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(20.dp),
+                                                    verticalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.titolo_guida_grafico),
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(bottom = 12.dp)
+                                                    )
+
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .fillMaxWidth()
+                                                            .verticalScroll(rememberScrollState()),
+                                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                                    ) {
+                                                        // SCHEDA 1: PUNTI
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_guida_punti), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_guida_punti), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        // SCHEDA 2: TEMPO
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_guida_tempo), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_guida_tempo), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        // SCHEDA 3: PALLINI
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_guida_pallini), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_guida_pallini), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        // SCHEDA 4: SORPASSI
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_guida_sorpassi), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_guida_sorpassi), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+                                                    }
+
+                                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                                    Button(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                            showChartInfoDialog = false
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    ) {
+                                                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                                                        Spacer(Modifier.width(8.dp))
+                                                        AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                                    }
+                                                }
                                             }
                                         }
-                                    )
+                                    } else {
+                                        // 🧠 ORIENTAMENTO VERTICALE: AlertDialog con schede Surface riquadrate
+                                        AlertDialog(
+                                            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
+                                            title = { Text(stringResource(R.string.titolo_guida_grafico), fontWeight = FontWeight.Bold) },
+                                            text = {
+                                                Column(
+                                                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                                ) {
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_guida_punti), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_guida_punti), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_guida_tempo), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_guida_tempo), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_guida_pallini), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_guida_pallini), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_guida_sorpassi), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_guida_sorpassi), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            confirmButton = {
+                                                Button(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        showChartInfoDialog = false
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                                                    shape = RoundedCornerShape(20.dp)
+                                                ) {
+                                                    Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                                                    Spacer(Modifier.width(8.dp))
+                                                    AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                                }
+                                            }
+                                        )
+                                    }
                                 }
                                 Card(
                                     modifier = Modifier.fillMaxWidth().height(350.dp),
@@ -362,115 +472,193 @@
                                     }
 
                                     // =========================================================
-                                    // POPUP INFORMATIVO SUI PREMI (AlertDialog)
+                                    // POPUP INFORMATIVO SUI PREMI (Standardized Surface Cards)
                                     // =========================================================
-                                    // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
                                     if (showAwardsInfoDialog) {
-                                        AlertDialog(
-                                            // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
-                                            onDismissRequest = { showAwardsInfoDialog = false },
-                                            title = {
-                                                Text(
-                                                    text = stringResource(R.string.titolo_guida_premi), // 🌍 I18N: Riutilizzo chiave da ResultsScreen
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            },
-                                            text = {
-                                                // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                                                Column(
-                                                    modifier = Modifier.verticalScroll(
-                                                        rememberScrollState()
-                                                    )
-                                                ) {
+                                        val isAwardsLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-                                                    // 🧠 LEZIONE I18N: Tutto questo blocco testuale per il popup
-                                                    // è stato clonato (riutilizzato) dalle medesime chiavi che abbiamo già
-                                                    // dichiarato nello step precedente per la ResultScreen. Massimo risparmio!
-                                                    Text(
-                                                        text = stringResource(R.string.titolo_cecchino_guida), // 🌍 I18N
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(
-                                                            bottom = 2.dp,
-                                                            top = 8.dp
-                                                        )
-                                                    )
-                                                    Text(
-                                                        text = stringResource(R.string.msg_cecchino), // 🌍 I18N
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-
-                                                    Text(
-                                                        text = stringResource(R.string.titolo_inarrestabile_guida), // 🌍 I18N
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(
-                                                            bottom = 2.dp,
-                                                            top = 16.dp
-                                                        )
-                                                    )
-                                                    Text(
-                                                        text = stringResource(R.string.msg_inarrestabile), // 🌍 I18N
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-
-                                                    Text(
-                                                        text = stringResource(R.string.titolo_gambero_guida), // 🌍 I18N
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(
-                                                            bottom = 2.dp,
-                                                            top = 16.dp
-                                                        )
-                                                    )
-                                                    Text(
-                                                        text = stringResource(R.string.msg_gambero), // 🌍 I18N
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-
-                                                    Text(
-                                                        text = stringResource(R.string.titolo_fenice_guida), // 🌍 I18N
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(
-                                                            bottom = 2.dp,
-                                                            top = 16.dp
-                                                        )
-                                                    )
-                                                    Text(
-                                                        text = stringResource(R.string.msg_fenice), // 🌍 I18N
-                                                        style = MaterialTheme.typography.bodyMedium
-                                                    )
-                                                }
-                                            },
-                                            confirmButton = {
-                                                // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
-                                                Button(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.Confirm)
-                                                        showAwardsInfoDialog =
-                                                            false// Chiude il popup quando si preme il bottone
-                                                    },
+                                        if (isAwardsLandscape) {
+                                            // 🧠 ORIENTAMENTO ORIZZONTALE: Dialog 65%x90% a due schede riquadrate
+                                            Dialog(
+                                                onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
+                                                properties = DialogProperties(usePlatformDefaultWidth = false)
+                                            ) {
+                                                Surface(
                                                     modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(48.dp),
-                                                    shape = RoundedCornerShape(20.dp)
+                                                        .fillMaxWidth(0.65f)
+                                                        .fillMaxHeight(0.90f),
+                                                    shape = RoundedCornerShape(24.dp),
+                                                    color = MaterialTheme.colorScheme.background,
+                                                    shadowElevation = 12.dp,
+                                                    tonalElevation = 2.dp,
+                                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                                                 ) {
-                                                    Icon(
-                                                        imageVector = Icons.Filled.Check,
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(22.dp),
-
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxSize()
+                                                            .padding(20.dp),
+                                                        verticalArrangement = Arrangement.SpaceBetween
+                                                    ) {
+                                                        Text(
+                                                            text = stringResource(R.string.titolo_guida_premi),
+                                                            style = MaterialTheme.typography.titleLarge,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.padding(bottom = 12.dp)
                                                         )
-                                                    Spacer(Modifier.width(8.dp))
-                                                    AutoResizedText(
-                                                        text = stringResource(R.string.btn_ho_capito), // 🌍 I18N: Riutilizzo
-                                                        fontWeight = FontWeight.Bold,
-                                                        style = MaterialTheme.typography.bodyLarge
-                                                    )
+
+                                                        Column(
+                                                            modifier = Modifier
+                                                                .weight(1f)
+                                                                .fillMaxWidth()
+                                                                .verticalScroll(rememberScrollState()),
+                                                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                                                        ) {
+                                                            // SCHEDA 1: CECCHINO
+                                                            Surface(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                shape = RoundedCornerShape(16.dp),
+                                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                            ) {
+                                                                Column(modifier = Modifier.padding(12.dp)) {
+                                                                    Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                    Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                                }
+                                                            }
+
+                                                            // SCHEDA 2: INARRESTABILE
+                                                            Surface(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                shape = RoundedCornerShape(16.dp),
+                                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                            ) {
+                                                                Column(modifier = Modifier.padding(12.dp)) {
+                                                                    Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                    Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                                }
+                                                            }
+
+                                                            // SCHEDA 3: GAMBERO
+                                                            Surface(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                shape = RoundedCornerShape(16.dp),
+                                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                            ) {
+                                                                Column(modifier = Modifier.padding(12.dp)) {
+                                                                    Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                    Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                                }
+                                                            }
+
+                                                            // SCHEDA 4: FENICE
+                                                            Surface(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                shape = RoundedCornerShape(16.dp),
+                                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                            ) {
+                                                                Column(modifier = Modifier.padding(12.dp)) {
+                                                                    Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                    Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                                }
+                                                            }
+                                                        }
+
+                                                        Spacer(modifier = Modifier.height(12.dp))
+
+                                                        Button(
+                                                            onClick = {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                                showAwardsInfoDialog = false
+                                                            },
+                                                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                                                            shape = RoundedCornerShape(20.dp)
+                                                        ) {
+                                                            Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                                                            Spacer(Modifier.width(8.dp))
+                                                            AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        )
+                                        } else {
+                                            // 🧠 ORIENTAMENTO VERTICALE: AlertDialog con schede Surface riquadrate
+                                            AlertDialog(
+                                                onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
+                                                title = { Text(stringResource(R.string.titolo_guida_premi), fontWeight = FontWeight.Bold) },
+                                                text = {
+                                                    Column(
+                                                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                                    ) {
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                confirmButton = {
+                                                    Button(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                            showAwardsInfoDialog = false
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    ) {
+                                                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                                                        Spacer(Modifier.width(8.dp))
+                                                        AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                                    }
+                                                }
+                                            )
+                                        }
                                     }
                                     //showAwardsInfoDialog
 

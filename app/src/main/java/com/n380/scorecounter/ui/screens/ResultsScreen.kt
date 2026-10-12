@@ -19,6 +19,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource // 🌍 I18N: Import fondamentale per la traduzione
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
@@ -555,118 +560,193 @@ fun ResultsScreen(
                                 }
 
                                 // =========================================================
-                                // POPUP INFORMATIVO SUI PREMI (AlertDialog)
+                                // POPUP INFORMATIVO SUI PREMI (Standardized Surface Cards)
                                 // =========================================================
-                                // 🧠 COMPOSE STATE: Questo blocco reagisce alla variabile 'showAwardsInfoDialog'.
                                 if (showAwardsInfoDialog) {
-                                    AlertDialog(
-                                        // onDismissRequest scatta se l'utente tocca fuori dal popup o preme "Indietro" sul telefono
-                                        onDismissRequest = { showAwardsInfoDialog = false },
-                                        title = {
-                                            Text(
-                                                text = stringResource(R.string.titolo_guida_premi), // 🌍 I18N
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        },
-                                        text = {
-                                            // verticalScroll permette di scorrere il testo col dito se lo schermo del telefono è troppo piccolo
-                                            Column(
-                                                modifier = Modifier.verticalScroll(
-                                                    rememberScrollState()
-                                                )
-                                            ) {
+                                    val isAwardsLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-                                                // =========================================================
-                                                // 🧠 LEZIONE TEORICA I18N: Testi lunghi nei Dialog
-                                                // =========================================================
-                                                // I muri di testo dentro ai popup sono i canditati ideali per l'internazionalizzazione.
-                                                // Rimuovere blocchi di testo di 3-4 righe e sostituirli con una chiamata `stringResource`
-                                                // pulisce drasticamente la leggibilità del file Kotlin.
-                                                Text(
-                                                    text = stringResource(R.string.titolo_cecchino_guida), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(
-                                                        bottom = 2.dp,
-                                                        top = 8.dp
-                                                    )
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_cecchino), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-
-                                                Text(
-                                                    text = stringResource(R.string.titolo_inarrestabile_guida), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(
-                                                        bottom = 2.dp,
-                                                        top = 16.dp
-                                                    )
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_inarrestabile), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-
-                                                Text(
-                                                    text = stringResource(R.string.titolo_gambero_guida), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(
-                                                        bottom = 2.dp,
-                                                        top = 16.dp
-                                                    )
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_gambero), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-
-                                                Text(
-                                                    text = stringResource(R.string.titolo_fenice_guida), // 🌍 I18N
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.padding(
-                                                        bottom = 2.dp,
-                                                        top = 16.dp
-                                                    )
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.msg_fenice), // 🌍 I18N
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-                                            }
-                                        },
-                                        confirmButton = {
-                                            // Pulsante pieno (Button) al posto del TextButton, con la nostra stondatura ufficiale a 20.dp
-                                            Button(
-                                                onClick = {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                    showAwardsInfoDialog =
-                                                        false// Chiude il popup quando si preme il bottone
-                                                },
+                                    if (isAwardsLandscape) {
+                                        // 🧠 ORIENTAMENTO ORIZZONTALE: Dialog 65%x90% a schede Surface riquadrate
+                                        Dialog(
+                                            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
+                                            properties = DialogProperties(usePlatformDefaultWidth = false)
+                                        ) {
+                                            Surface(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(48.dp),
-                                                shape = RoundedCornerShape(20.dp)
+                                                    .fillMaxWidth(0.65f)
+                                                    .fillMaxHeight(0.90f),
+                                                shape = RoundedCornerShape(24.dp),
+                                                color = MaterialTheme.colorScheme.background,
+                                                shadowElevation = 12.dp,
+                                                tonalElevation = 2.dp,
+                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.Check,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(22.dp),
-
+                                                Column(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(20.dp),
+                                                    verticalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.titolo_guida_premi),
+                                                        style = MaterialTheme.typography.titleLarge,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier.padding(bottom = 12.dp)
                                                     )
-                                                Spacer(Modifier.width(8.dp))
-                                                AutoResizedText(
-                                                    text = stringResource(R.string.btn_ho_capito), // 🌍 I18N: Riutilizzato
-                                                    fontWeight = FontWeight.Bold,
-                                                    style = MaterialTheme.typography.bodyLarge
-                                                )
+
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .fillMaxWidth()
+                                                            .verticalScroll(rememberScrollState()),
+                                                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                                                    ) {
+                                                        // SCHEDA 1: CECCHINO
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        // SCHEDA 2: INARRESTABILE
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        // SCHEDA 3: GAMBERO
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+
+                                                        // SCHEDA 4: FENICE
+                                                        Surface(
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                        ) {
+                                                            Column(modifier = Modifier.padding(12.dp)) {
+                                                                Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                                Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                            }
+                                                        }
+                                                    }
+
+                                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                                    Button(
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                            showAwardsInfoDialog = false
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    ) {
+                                                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                                                        Spacer(Modifier.width(8.dp))
+                                                        AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                                    }
+                                                }
                                             }
                                         }
-                                    )
+                                    } else {
+                                        // 🧠 ORIENTAMENTO VERTICALE: AlertDialog con schede Surface riquadrate
+                                        AlertDialog(
+                                            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
+                                            title = { Text(stringResource(R.string.titolo_guida_premi), fontWeight = FontWeight.Bold) },
+                                            text = {
+                                                Column(
+                                                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                                ) {
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+
+                                                    Surface(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        shape = RoundedCornerShape(16.dp),
+                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                                    ) {
+                                                        Column(modifier = Modifier.padding(12.dp)) {
+                                                            Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
+                                                            Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            confirmButton = {
+                                                Button(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        showAwardsInfoDialog = false
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                                                    shape = RoundedCornerShape(20.dp)
+                                                ) {
+                                                    Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                                                    Spacer(Modifier.width(8.dp))
+                                                    AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                                                }
+                                            }
+                                        )
+                                    }
                                 }
 
 
