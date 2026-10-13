@@ -246,6 +246,49 @@
     <string name="titolo_fenice_suprema">🦅 Phénix Suprême</string>
     <string name="desc_fenice_suprema">La remontée la plus légendaire depuis la dernière place</string>
 
+    <string name="titolo_dittatore_guida">👑 Le Dictateur</string>
+    <string name="msg_dittatore">Décerné au joueur qui passe le plus de tours à la 1ère place (en cas d\'égalité, celui qui a le score final le plus élevé).</string>
+    <string name="premio_dittatore">Le Dictateur</string>
+
+    <string name="titolo_predatore_guida">🐺 Le Prédateur</string>
+    <string name="msg_predatore">Décerné au joueur qui réalise le plus de dépassements dans le classement.</string>
+    <string name="premio_predatore">Le Prédateur</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 Au Coude à Coude</string>
+    <string name="msg_testa_a_testa">Prix partagé ! Accordé aux 1ère et 2ème places si l\'écart final est de 1 point ou moins.</string>
+    <string name="premio_testa_a_testa">Au Coude à Coude</string>
+
+    <string name="titolo_lumaca_guida">🐌 L\'Escargot</string>
+    <string name="msg_lumaca">Décerné au joueur avec le moins de variations de score ou la plus longue série sans changement.</string>
+    <string name="premio_lumaca">L\'Escargot</string>
+
+    <string name="titolo_diesel_guida">🚂 Le Diesel</string>
+    <string name="msg_diesel">Décerné au joueur qui a obtenu au moins 75% de ses points totaux en seconde période.</string>
+    <string name="premio_diesel">Le Diesel</string>
+
+    <string name="desc_guida_premi">Découvrez tous les prix spéciaux attribués automatiquement à la fin de chaque partie !</string>
+
+    <string name="label_turni">%d tours</string>
+    <string name="label_sorpassi">%d dépassements</string>
+    <string name="label_variazioni">%d variations</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
+
+    <string name="titolo_dittatore_assoluto">👑 Dictateur Absolu</string>
+    <string name="desc_dittatore_assoluto">Plus grand nombre de tours passés à la 1ère place</string>
+
+    <string name="titolo_predatore_alfa">🐺 Prédateur Alpha</string>
+    <string name="desc_predatore_alfa">Plus grand nombre de dépassements effectués en une seule partie</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 Escargot d\'Or</string>
+    <string name="desc_lumaca_d_oro">Le moins de variations de score sur toute une partie</string>
+
+    <string name="titolo_motore_diesel">🚂 Moteur Diesel</string>
+    <string name="desc_motore_diesel">Plus fort pourcentage de points obtenus en seconde période</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 Coude à Coude Épique</string>
+    <string name="desc_testa_a_testa_epico">Partie avec le score le plus élevé décidée par 1 point ou moins</string>
+
     <string name="desc_logo_app">Logo de l\'App</string>
     <string name="widget_btn_nuova_sfida">+ Nouveau Défi</string>
 </resources>

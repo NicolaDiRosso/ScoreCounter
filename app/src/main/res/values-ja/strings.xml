@@ -246,6 +246,49 @@
     <string name="titolo_fenice_suprema">🦅 至高のフェニックス</string>
     <string name="desc_fenice_suprema">最下位からの最も伝説的な逆転劇</string>
 
+    <string name="titolo_dittatore_guida">👑 独裁者</string>
+    <string name="msg_dittatore">1位の位置で最も多くのターンを過ごしたプレイヤーに贈られます（同点の場合は最終スコアが最も高いプレイヤー）。</string>
+    <string name="premio_dittatore">独裁者</string>
+
+    <string name="titolo_predatore_guida">🐺 捕食者</string>
+    <string name="msg_predatore">ランキングで最も多くの追い抜きを行ったプレイヤーに贈られます。</string>
+    <string name="premio_predatore">捕食者</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 互角の勝負</string>
+    <string name="msg_testa_a_testa">共有賞！最終スコアの差が1ポイント以下の共有1位・2位に贈られます。</string>
+    <string name="premio_testa_a_testa">互角の勝負</string>
+
+    <string name="titolo_lumaca_guida">🐌 カタツムリ</string>
+    <string name="msg_lumaca">スコアの変動が最も少ない、または最も長く停滞していたプレイヤーに贈られます。</string>
+    <string name="premio_lumaca">カタツムリ</string>
+
+    <string name="titolo_diesel_guida">🚂 ディーゼル</string>
+    <string name="msg_diesel">ゲームの後半で獲得ポイントの75%以上を獲得したプレイヤーに贈られます。</string>
+    <string name="premio_diesel">ディーゼル</string>
+
+    <string name="desc_guida_premi">試合終了時に自動的に与えられるすべての特別賞をご覧ください！</string>
+
+    <string name="label_turni">%d ターン</string>
+    <string name="label_sorpassi">%d 回追い抜き</string>
+    <string name="label_variazioni">%d 回変動</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
+
+    <string name="titolo_dittatore_assoluto">👑 絶対的独裁者</string>
+    <string name="desc_dittatore_assoluto">1位を維持したターンの最多記録</string>
+
+    <string name="titolo_predatore_alfa">🐺 アルファ・プレデター</string>
+    <string name="desc_predatore_alfa">1試合における最多追い抜き回数</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 黄金のカツムリ</string>
+    <string name="desc_lumaca_d_oro">1試合を通じたスコア変動の最小記録</string>
+
+    <string name="titolo_motore_diesel">🚂 ディーゼルエンジン</string>
+    <string name="desc_motore_diesel">後半におけるポイント獲得割合の最高記録</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 伝説の接戦</string>
+    <string name="desc_testa_a_testa_epico">1ポイント差以内で決着した最高スコア試合</string>
+
     <string name="desc_logo_app">アプリのロゴ</string>
     <string name="widget_btn_nuova_sfida">+ 新しいチャレンジ</string>
 </resources>

@@ -246,6 +246,49 @@
     <string name="titolo_fenice_suprema">🦅 Fénix Suprema</string>
     <string name="desc_fenice_suprema">La remontada más legendaria desde el último puesto</string>
 
+    <string name="titolo_dittatore_guida">👑 El Dictador</string>
+    <string name="msg_dittatore">Otorgado al jugador que pasa más turnos en 1.ª posición (en caso de empate, quien tenga la puntuación final más alta).</string>
+    <string name="premio_dittatore">El Dictador</string>
+
+    <string name="titolo_predatore_guida">🐺 El Depredador</string>
+    <string name="msg_predatore">Otorgado al jugador que realiza más adelantamientos en la clasificación.</string>
+    <string name="premio_predatore">El Depredador</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 Cabeza a Cabeza</string>
+    <string name="msg_testa_a_testa">¡Premio compartido! Se otorga al 1.º y 2.º lugar si la diferencia final es de 1 punto o menos.</string>
+    <string name="premio_testa_a_testa">Cabeza a Cabeza</string>
+
+    <string name="titolo_lumaca_guida">🐌 El Caracol</string>
+    <string name="msg_lumaca">Otorgado al jugador con menos variaciones de puntuación o la racha más larga sin cambios.</string>
+    <string name="premio_lumaca">El Caracol</string>
+
+    <string name="titolo_diesel_guida">🚂 El Diésel</string>
+    <string name="msg_diesel">Otorgado al jugador que obtuvo al menos el 75% de sus puntos totales en la segunda mitad del juego.</string>
+    <string name="premio_diesel">El Diésel</string>
+
+    <string name="desc_guida_premi">¡Descubre todos los premios especiales asignados automáticamente al final de cada partida!</string>
+
+    <string name="label_turni">%d turnos</string>
+    <string name="label_sorpassi">%d adelantamientos</string>
+    <string name="label_variazioni">%d variaciones</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s y %2$s</string>
+
+    <string name="titolo_dittatore_assoluto">👑 Dictador Absoluto</string>
+    <string name="desc_dittatore_assoluto">Mayor número de turnos pasados en 1.ª posición</string>
+
+    <string name="titolo_predatore_alfa">🐺 Depredador Alfa</string>
+    <string name="desc_predatore_alfa">Mayor cantidad de adelantamientos en una sola partida</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 Caracol de Oro</string>
+    <string name="desc_lumaca_d_oro">Menor cantidad de variaciones de puntuación en toda la partida</string>
+
+    <string name="titolo_motore_diesel">🚂 Motor Diésel</string>
+    <string name="desc_motore_diesel">Mayor porcentaje de puntos obtenidos en la segunda mitad</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 Cabeza a Cabeza Épico</string>
+    <string name="desc_testa_a_testa_epico">Partida con mayor puntuación decidida por 1 punto o menos</string>
+
     <string name="desc_logo_app">Logo de la App</string>
     <string name="widget_btn_nuova_sfida">+ Nuevo Desafío</string>
 </resources>

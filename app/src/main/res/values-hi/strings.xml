@@ -246,6 +246,49 @@
     <string name="titolo_fenice_suprema">🦅 सर्वोच्च फिनिक्स</string>
     <string name="desc_fenice_suprema">अंतिम स्थान से सबसे ऐतिहासिक वापसी</string>
 
+    <string name="titolo_dittatore_guida">👑 तानाशाह</string>
+    <string name="msg_dittatore">उस खिलाड़ी को दिया जाता है जो प्रथम स्थान पर सबसे अधिक मोड़ बिताता है (टाई के मामले में, उच्चतम अंतिम स्कोर वाला)।</string>
+    <string name="premio_dittatore">तानाशाह</string>
+
+    <string name="titolo_predatore_guida">🐺 शिकारी</string>
+    <string name="msg_predatore">रैंकिंग में सबसे अधिक ओवरटेक करने वाले खिलाड़ी को दिया जाता है।</string>
+    <string name="premio_predatore">शिकारी</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 कांटे की टक्कर</string>
+    <string name="msg_testa_a_testa">साझा पुरस्कार! प्रथम और द्वितीय स्थान वाले खिलाड़ियों को दिया जाता है यदि अंतिम अंतर 1 अंक या उससे कम है।</string>
+    <string name="premio_testa_a_testa">कांटे की टक्कर</string>
+
+    <string name="titolo_lumaca_guida">🐌 घोंघा</string>
+    <string name="msg_lumaca">सबसे कम स्कोर भिन्नता या बिना किसी बदलाव के सबसे लंबे समय तक रहने वाले खिलाड़ी को दिया जाता है।</string>
+    <string name="premio_lumaca">घोंघा</string>
+
+    <string name="titolo_diesel_guida">🚂 डीजल</string>
+    <string name="msg_diesel">खेल के दूसरे भाग में अपने कुल अंकों का कम से कम 75% हासिल करने वाले खिलाड़ी को दिया जाता है।</string>
+    <string name="premio_diesel">डीजल</string>
+
+    <string name="desc_guida_premi">हर मैच के अंत में स्वचालित रूप से दिए जाने वाले सभी विशेष पुरस्कारों की खोज करें!</string>
+
+    <string name="label_turni">%d बारी</string>
+    <string name="label_sorpassi">%d ओवरटेक</string>
+    <string name="label_variazioni">%d बदलाव</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s और %2$s</string>
+
+    <string name="titolo_dittatore_assoluto">👑 पूर्ण तानाशाह</string>
+    <string name="desc_dittatore_assoluto">प्रथम स्थान पर बिताए गए मोड़ों की उच्चतम संख्या</string>
+
+    <string name="titolo_predatore_alfa">🐺 अल्फा शिकारी</string>
+    <string name="desc_predatore_alfa">एक ही मैच में किए गए सबसे अधिक ओवरटेक</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 सुनहरा घोंघा</string>
+    <string name="desc_lumaca_d_oro">पूरे मैच में सबसे कम स्कोर परिवर्तन</string>
+
+    <string name="titolo_motore_diesel">🚂 डीजल इंजन</string>
+    <string name="desc_motore_diesel">दूसरे भाग में अर्जित अंकों का उच्चतम प्रतिशत</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 महाकाव्य कांटे की टक्कर</string>
+    <string name="desc_testa_a_testa_epico">1 अंक या उससे कम अंतर से तय हुआ उच्चतम स्कोरिंग मैच</string>
+
     <string name="desc_logo_app">ऐप का लोगो</string>
     <string name="widget_btn_nuova_sfida">+ नयी चुनौती</string>
 </resources>

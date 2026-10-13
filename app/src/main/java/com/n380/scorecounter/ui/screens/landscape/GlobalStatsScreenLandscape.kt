@@ -123,6 +123,14 @@ fun GlobalStatsScreenLandscape(
     var isExpInfinita by remember { mutableStateOf(false) }
     var isExpDittatore by remember { mutableStateOf(false) }
     var isExpPiromane by remember { mutableStateOf(false) }
+    var isExpSniper by remember { mutableStateOf(false) }
+    var isExpCrab by remember { mutableStateOf(false) }
+    var isExpPhoenix by remember { mutableStateOf(false) }
+    var isExpDictator by remember { mutableStateOf(false) }
+    var isExpPredator by remember { mutableStateOf(false) }
+    var isExpNeckAndNeck by remember { mutableStateOf(false) }
+    var isExpSnail by remember { mutableStateOf(false) }
+    var isExpDiesel by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
@@ -584,7 +592,9 @@ fun GlobalStatsScreenLandscape(
                 // 5. MIGLIOR CECCHINO
                 item {
                     GlobalStatCardClean(
-                        title = stringResource(R.string.titolo_miglior_cecchino)
+                        title = stringResource(R.string.titolo_miglior_cecchino),
+                        isExpanded = isExpSniper,
+                        onToggleExpand = { isExpSniper = !isExpSniper }
                     ) {
                         if (globalSniper != null) {
                             Row(
@@ -604,11 +614,25 @@ fun GlobalStatsScreenLandscape(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
-                            Text(
-                                text = stringResource(R.string.label_in_partita, globalSniper.first.title),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            AnimatedVisibility(visible = isExpSniper) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_miglior_cecchino),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalSniper.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalSniper.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
                         } else {
                             Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
@@ -618,7 +642,9 @@ fun GlobalStatsScreenLandscape(
                 // 6. IL RE DEI GAMBERI
                 item {
                     GlobalStatCardClean(
-                        title = stringResource(R.string.titolo_re_gamberi)
+                        title = stringResource(R.string.titolo_re_gamberi),
+                        isExpanded = isExpCrab,
+                        onToggleExpand = { isExpCrab = !isExpCrab }
                     ) {
                         if (globalCrab != null) {
                             Row(
@@ -638,11 +664,25 @@ fun GlobalStatsScreenLandscape(
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
-                            Text(
-                                text = stringResource(R.string.label_in_partita, globalCrab.first.title),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            AnimatedVisibility(visible = isExpCrab) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_re_gamberi),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalCrab.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalCrab.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
                         } else {
                             Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
@@ -652,7 +692,9 @@ fun GlobalStatsScreenLandscape(
                 // 7. FENICE SUPREMA
                 item {
                     GlobalStatCardClean(
-                        title = stringResource(R.string.titolo_fenice_suprema)
+                        title = stringResource(R.string.titolo_fenice_suprema),
+                        isExpanded = isExpPhoenix,
+                        onToggleExpand = { isExpPhoenix = !isExpPhoenix }
                     ) {
                         if (globalPhoenix != null) {
                             Row(
@@ -672,190 +714,284 @@ fun GlobalStatsScreenLandscape(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                             }
-                            Text(
-                                text = stringResource(R.string.label_in_partita, globalPhoenix.first.title),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                                } else {
-                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                            AnimatedVisibility(visible = isExpPhoenix) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_fenice_suprema),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalPhoenix.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalPhoenix.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
+                        } else {
+                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+                }
 
-                        // 8. DITTATORE ASSOLUTO
-                        item {
-                            GlobalStatCardClean(
-                                title = stringResource(R.string.titolo_dittatore_assoluto)
+                // 8. DITTATORE ASSOLUTO
+                item {
+                    GlobalStatCardClean(
+                        title = stringResource(R.string.titolo_dittatore_assoluto),
+                        isExpanded = isExpDictator,
+                        onToggleExpand = { isExpDictator = !isExpDictator }
+                    ) {
+                        if (globalDictator != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (globalDictator != null) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = globalDictator.second.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                        Text(
-                                            text = "${globalDictator.third} turni",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Black,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                Text(
+                                    text = globalDictator.second.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = "${globalDictator.third} turni",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            AnimatedVisibility(visible = isExpDictator) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_dittatore_assoluto),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Text(
                                         text = stringResource(R.string.label_in_partita, globalDictator.first.title),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                     )
-                                } else {
-                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalDictator.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
+                        } else {
+                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+                }
 
-                        // 9. PREDATORE ALFA
-                        item {
-                            GlobalStatCardClean(
-                                title = stringResource(R.string.titolo_predatore_alfa)
+                // 9. PREDATORE ALFA
+                item {
+                    GlobalStatCardClean(
+                        title = stringResource(R.string.titolo_predatore_alfa),
+                        isExpanded = isExpPredator,
+                        onToggleExpand = { isExpPredator = !isExpPredator }
+                    ) {
+                        if (globalPredator != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (globalPredator != null) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = globalPredator.second.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                        Text(
-                                            text = "${globalPredator.third} sorp.",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Black,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                Text(
+                                    text = globalPredator.second.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = "${globalPredator.third} sorp.",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            AnimatedVisibility(visible = isExpPredator) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_predatore_alfa),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Text(
                                         text = stringResource(R.string.label_in_partita, globalPredator.first.title),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                     )
-                                } else {
-                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalPredator.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
+                        } else {
+                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+                }
 
-                        // 10. TESTA A TESTA EPICO
-                        item {
-                            GlobalStatCardClean(
-                                title = stringResource(R.string.titolo_testa_a_testa_epico)
+                // 10. TESTA A TESTA EPICO
+                item {
+                    GlobalStatCardClean(
+                        title = stringResource(R.string.titolo_testa_a_testa_epico),
+                        isExpanded = isExpNeckAndNeck,
+                        onToggleExpand = { isExpNeckAndNeck = !isExpNeckAndNeck }
+                    ) {
+                        if (globalNeckAndNeck != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (globalNeckAndNeck != null) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.label_testa_a_testa_valore, globalNeckAndNeck.second.name, globalNeckAndNeck.third.name),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                        Text(
-                                            text = "${globalNeckAndNeck.second.score} pt",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Black,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                Text(
+                                    text = stringResource(R.string.label_testa_a_testa_valore, globalNeckAndNeck.second.name, globalNeckAndNeck.third.name),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = "${globalNeckAndNeck.second.score} pt",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            AnimatedVisibility(visible = isExpNeckAndNeck) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_testa_a_testa_epico),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Text(
                                         text = stringResource(R.string.label_in_partita, globalNeckAndNeck.first.title),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                     )
-                                } else {
-                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalNeckAndNeck.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
+                        } else {
+                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+                }
 
-                        // 11. LUMACA D'ORO
-                        item {
-                            GlobalStatCardClean(
-                                title = stringResource(R.string.titolo_lumaca_d_oro)
+                // 11. LUMACA D'ORO
+                item {
+                    GlobalStatCardClean(
+                        title = stringResource(R.string.titolo_lumaca_d_oro),
+                        isExpanded = isExpSnail,
+                        onToggleExpand = { isExpSnail = !isExpSnail }
+                    ) {
+                        if (globalSnail != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (globalSnail != null) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = globalSnail.second.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                        Text(
-                                            text = "${globalSnail.third} var.",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Black,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                Text(
+                                    text = globalSnail.second.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = "${globalSnail.third} var.",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            AnimatedVisibility(visible = isExpSnail) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.desc_lumaca_d_oro),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                     Text(
                                         text = stringResource(R.string.label_in_partita, globalSnail.first.title),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                     )
-                                } else {
-                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalSnail.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
+                        } else {
+                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
+                    }
+                }
 
-                        // 12. MOTORE DIESEL
-                        item {
-                            GlobalStatCardClean(
-                                title = stringResource(R.string.titolo_motore_diesel)
+                // 12. MOTORE DIESEL
+                item {
+                    GlobalStatCardClean(
+                        title = stringResource(R.string.titolo_motore_diesel),
+                        isExpanded = isExpDiesel,
+                        onToggleExpand = { isExpDiesel = !isExpDiesel }
+                    ) {
+                        if (globalDiesel != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (globalDiesel != null) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = globalDiesel.second.name,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Black
-                                        )
-                                        Text(
-                                            text = "${globalDiesel.third}%",
-                                            style = MaterialTheme.typography.titleLarge,
-                                            fontWeight = FontWeight.Black,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
+                                Text(
+                                    text = globalDiesel.second.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black
+                                )
+                                Text(
+                                    text = "${globalDiesel.third}%",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            AnimatedVisibility(visible = isExpDiesel) {
+                                Column(modifier = Modifier.padding(top = 4.dp)) {
                                     Text(
-                                        text = stringResource(R.string.label_in_partita, globalDiesel.first.title),
+                                        text = stringResource(R.string.desc_motore_diesel),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                } else {
-                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalDiesel.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.label_giocata_il, formatDate(globalDiesel.first.timestamp)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
+                        } else {
+                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
             }
         }
+    }
+}
 
 /**
  * COMPONENTE SCHEDA RECORD PULITA

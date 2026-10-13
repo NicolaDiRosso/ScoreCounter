@@ -1093,12 +1093,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_miglior_cecchino),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_miglior_cecchino),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalSniper.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalSniper.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1148,12 +1159,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_re_gamberi),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_re_gamberi),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalCrab.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalCrab.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1203,12 +1225,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_fenice_suprema),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_fenice_suprema),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalPhoenix.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalPhoenix.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1258,12 +1291,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_dittatore_assoluto),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_dittatore_assoluto),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalDictator.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalDictator.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1313,12 +1357,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_predatore_alfa),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_predatore_alfa),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalPredator.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalPredator.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1368,12 +1423,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_lumaca_d_oro),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_lumaca_d_oro),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalSnail.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalSnail.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1423,12 +1489,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_motore_diesel),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_motore_diesel),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalDiesel.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalDiesel.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(
@@ -1478,12 +1555,23 @@ fun GlobalStatsScreen(
                                                 enter = expandVertically() + fadeIn(),
                                                 exit = shrinkVertically() + fadeOut()
                                             ) {
-                                                Text(
-                                                    text = stringResource(R.string.desc_testa_a_testa_epico),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.padding(bottom = 4.dp)
-                                                )
+                                                Column(modifier = Modifier.padding(top = 4.dp)) {
+                                                    Text(
+                                                        text = stringResource(R.string.desc_testa_a_testa_epico),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_in_partita, globalNeckAndNeck.first.title),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    Text(
+                                                        text = stringResource(R.string.label_giocata_il, formatDate(globalNeckAndNeck.first.timestamp)),
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                                    )
+                                                }
                                             }
                                         }
                                         AutoScalingScoreText(

@@ -246,6 +246,49 @@
     <string name="titolo_fenice_suprema">🦅 Supreme Phönix</string>
     <string name="desc_fenice_suprema">Die legendärste Aufholjagd vom letzten Platz</string>
 
+    <string name="titolo_dittatore_guida">👑 Der Diktator</string>
+    <string name="msg_dittatore">Wird dem Spieler verliehen, der die meisten Runden auf dem 1. Platz verbringt (bei Gleichstand derjenige mit der höchsten Endpunktzahl).</string>
+    <string name="premio_dittatore">Der Diktator</string>
+
+    <string name="titolo_predatore_guida">🐺 Das Raubtier</string>
+    <string name="msg_predatore">Wird dem Spieler verliehen, der die meisten Überholmanöver in der Rangliste durchführt.</string>
+    <string name="premio_predatore">Das Raubtier</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 Kopf-an-Kopf</string>
+    <string name="msg_testa_a_testa">Geteilter Preis! Wird dem 1. und 2. Platz verliehen, wenn der Abstand 1 Punkt oder weniger beträgt.</string>
+    <string name="premio_testa_a_testa">Kopf-an-Kopf</string>
+
+    <string name="titolo_lumaca_guida">🐌 Die Schnecke</string>
+    <string name="msg_lumaca">Wird dem Spieler mit den wenigsten Punktevariationen oder der längsten Serie ohne Änderungen verliehen.</string>
+    <string name="premio_lumaca">Die Schnecke</string>
+
+    <string name="titolo_diesel_guida">🚂 Der Diesel</string>
+    <string name="msg_diesel">Wird dem Spieler verliehen, der mindestens 75 % seiner Punkte in der zweiten Spielhälfte erzielt hat.</string>
+    <string name="premio_diesel">Der Diesel</string>
+
+    <string name="desc_guida_premi">Entdecke alle Spezialpreise, die am Ende jedes Spiels automatisch vergeben werden!</string>
+
+    <string name="label_turni">%d Runden</string>
+    <string name="label_sorpassi">%d Überholmanöver</string>
+    <string name="label_variazioni">%d Variationen</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
+
+    <string name="titolo_dittatore_assoluto">👑 Absoluter Diktator</string>
+    <string name="desc_dittatore_assoluto">Höchste Anzahl von Runden auf dem 1. Platz</string>
+
+    <string name="titolo_predatore_alfa">🐺 Alpha-Raubtier</string>
+    <string name="desc_predatore_alfa">Die meisten Überholmanöver in einem einzigen Spiel</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 Goldene Schnecke</string>
+    <string name="desc_lumaca_d_oro">Wenigste Punktevariationen im gesamten Spiel</string>
+
+    <string name="titolo_motore_diesel">🚂 Dieselmotor</string>
+    <string name="desc_motore_diesel">Höchster Prozentsatz an Punkten in der zweiten Hälfte</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 Episches Kopf-an-Kopf</string>
+    <string name="desc_testa_a_testa_epico">Spiel mit der höchsten Punktzahl, entschieden durch 1 Punkt oder weniger</string>
+
     <string name="desc_logo_app">App-Logo</string>
     <string name="widget_btn_nuova_sfida">+ Neue Herausforderung</string>
 </resources>
