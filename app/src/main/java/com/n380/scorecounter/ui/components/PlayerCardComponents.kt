@@ -625,77 +625,84 @@
         playerName: String,     // Il nome del giocatore vincente
         playerColorInt: Int,    // Il colore del giocatore (Int ARGB)
         valueText: String,      // Il testo del punteggio da stampare nel badge (es. "+10 pt")
-        // 🧠 TEORIA COMPOSE: Il parametro Modifier
-        // Passare un modifier vuoto di default ci permette di "iniettare"
-        // comportamenti dall'esterno. In ResultsScreen lo useremo per passargli
-        // l'animazione a cascata, mentre in HomeScreen lo lasceremo vuoto!
         modifier: Modifier = Modifier
     ) {
         val playerColor = Color(playerColorInt)
 
-        // 🎨 MATERIAL 3 EXPRESSIVE: La Card
+        // 🎨 MATERIAL 3 EXPRESSIVE: La Card dei Premi
         Card(
-            modifier = modifier.fillMaxWidth(), // Applica l'eventuale animazione e riempie la larghezza
+            modifier = modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                // 🎨 COLORI ADATTIVI: Usiamo il colore del giocatore ma con opacità al 30% (alpha = 0.30f).
                 containerColor = playerColor.copy(alpha = 0.30f)
             ),
-            // 🎨 FORME DINAMICHE: Un raggio di 20.dp crea un bordo molto "rotondo" e moderno
             shape = RoundedCornerShape(20.dp),
-            // Bordo leggermente più scuro dello sfondo per delineare i contorni
             border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
         ) {
+            // ====================================================================
+            // 🧠 LEZIONE TEORICA COMPOSE: LAYOUT A PESI PERCENTUALI REATTIVI (18% / 54% / 28%)
+            // ====================================================================
+            // Per garantire che la card mantenga proporzioni impeccabili sia su smartphone (colonne strette)
+            // che su tablet (colonne ampie), non usiamo dimensioni fisse in dp per le icone o i badge.
+            // Dividiamo la Row interna in 3 blocchi con pesi percentuali flessibili:
+            // - 18% (weight 0.18f): Box dell'Icona Emoji
+            // - 54% (weight 0.54f): Colonna Testi (Titolo Premio + Nome Giocatore)
+            // - 28% (weight 0.28f): Card Badge Punteggio/Combo
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically // Centra tutto verticalmente
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Icona a tema (Emoji usata come testo)
-                Text(
-                    text = icon,
-                    style = MaterialTheme.typography.displaySmall,
-                    modifier = Modifier.padding(end = 16.dp)
-                )
+                // 1. BLOCCO ICONA EMOJI (~18% di larghezza della card)
+                Box(
+                    modifier = Modifier.weight(0.18f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AutoResizedText(
+                        text = icon,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                }
 
-                // 🧠 ACCESSIBILITÀ (A11y) & UX:
-                // 1. Usiamo 'primary' per il titolo del premio, per staccarlo dallo sfondo.
-                // 2. Usiamo 'onSurface' per il nome del giocatore: garantisce contrasto assoluto.
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                // 2. BLOCCO TESTI E DETTAGLI (~54% di larghezza della card)
+                Column(
+                    modifier = Modifier
+                        .weight(0.54f)
+                        .padding(horizontal = 6.dp)
+                ) {
+                    AutoResizedText(
                         text = title,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary, // Colore vibrante e sempre leggibile
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
+                    AutoResizedText(
                         text = playerName,
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface, // Bianco o Nero dinamico
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Black
                     )
                 }
 
-                // --- IL BADGE DEL PUNTEGGIO ---
+                // 3. BLOCCO BADGE PUNTEGGIO/COMBO (~28% di larghezza della card)
                 Card(
+                    modifier = Modifier.weight(0.28f),
                     colors = CardDefaults.cardColors(containerColor = playerColor),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text(
-                        text = valueText,
-                        modifier = Modifier.padding(
-                            horizontal = 12.dp,
-                            vertical = 6.dp
-                        ),
-                        // ============================================================
-                        // Su color dei punteggi scegliamo 'onSurface' per rendere il colore
-                        // dinamico (bianco in Dark Mode) proprio come il nome del giocatore.
-                        // ============================================================
-                        color = MaterialTheme.colorScheme.onSurface,
-
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp, horizontal = 4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AutoResizedText(
+                            text = valueText,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 }
             }
         }

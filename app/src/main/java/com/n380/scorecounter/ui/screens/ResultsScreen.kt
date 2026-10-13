@@ -169,11 +169,35 @@ fun ResultsScreen(
     }
     // ======================================================
 
-    // Avvolgiamo lo Scaffold in un Box (Scatola). Il Box serve per sovrapporre il "livello"
-    // dei coriandoli sopra il "livello" della classifica (lo Scaffold).
-    Box(modifier = Modifier.fillMaxSize()) {
+    // Rilevamento dell'orientamento dello schermo
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        Scaffold(
+    if (isLandscape) {
+        // ====================================================================
+        // ORIENTAMENTO ORIZZONTALE (LANDSCAPE) -> DELEGATO A ResultsScreenLandscape.kt
+        // ====================================================================
+        ResultsScreenLandscape(
+            viewModel = viewModel,
+            rankedPlayers = rankedPlayers,
+            cecchinoStat = cecchinoStat,
+            inarrestabileStat = inarrestabileStat,
+            gamberoStat = gamberoStat,
+            feniceStat = feniceStat,
+            showAwardsInfoDialog = showAwardsInfoDialog,
+            onShowAwardsInfoDialogChange = { showAwardsInfoDialog = it },
+            isClosing = isClosing,
+            onIsClosingChange = { isClosing = it },
+            showConfetti = showConfetti,
+            onShowConfettiChange = { showConfetti = it },
+            onNavigateHome = onNavigateHome
+        )
+    } else {
+        // ====================================================================
+        // ORIENTAMENTO VERTICALE (PORTRAIT) -> SCAFFOLD STANDARD
+        // ====================================================================
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent,
             bottomBar = {
@@ -851,4 +875,5 @@ fun ResultsScreen(
             }
         }
     }
+}
 }
