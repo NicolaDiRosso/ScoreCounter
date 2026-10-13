@@ -39,6 +39,11 @@ import com.n380.scorecounter.R // Import per accedere agli ID delle risorse del 
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
+import com.n380.scorecounter.model.getHistoricalDittatore
+import com.n380.scorecounter.model.getHistoricalPredatore
+import com.n380.scorecounter.model.getHistoricalTestaATesta
+import com.n380.scorecounter.model.getHistoricalLumaca
+import com.n380.scorecounter.model.getHistoricalDiesel
 import com.n380.scorecounter.ui.components.formatDate // Per mostrare la data nelle card espanse
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -114,6 +119,14 @@ fun GlobalStatsScreen(
     var isExpInfinita by remember { mutableStateOf(false) }
     var isExpDittatore by remember { mutableStateOf(false) }
     var isExpPiromane by remember { mutableStateOf(false) }
+    var isExpSniper by remember { mutableStateOf(false) }
+    var isExpCrab by remember { mutableStateOf(false) }
+    var isExpPhoenix by remember { mutableStateOf(false) }
+    var isExpDictator by remember { mutableStateOf(false) }
+    var isExpPredator by remember { mutableStateOf(false) }
+    var isExpNeckAndNeck by remember { mutableStateOf(false) }
+    var isExpSnail by remember { mutableStateOf(false) }
+    var isExpDiesel by remember { mutableStateOf(false) }
 
 
     // ====================================================================
@@ -195,17 +208,36 @@ fun GlobalStatsScreen(
     // e silenziosamente tutte le partite in cui il premio non c'era (null).
     // Dopodiché, maxByOrNull trova la partita in cui il punteggio di quel premio è stato il più alto in assoluto!
     val globalSniper = viewModel.history
-        .mapNotNull { it.getHistoricalCecchino() }
-        .maxByOrNull { it.second } // it.second è il punteggio del salto
+        .mapNotNull { match -> match.getHistoricalCecchino()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third } // it.third è il punteggio del salto
 
     val globalCrab = viewModel.history
-        .mapNotNull { it.getHistoricalGambero() }
-        .maxByOrNull { it.second } // it.second sono i punti persi
+        .mapNotNull { match -> match.getHistoricalGambero()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third } // it.third sono i punti persi
 
     val globalPhoenix = viewModel.history
-        .mapNotNull { it.getHistoricalFenice() }
-        .mapNotNull { it }
-        .maxByOrNull { it.second } // it.second sono i punti recuperati
+        .mapNotNull { match -> match.getHistoricalFenice()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third } // it.third sono i punti recuperati
+
+    val globalDictator = viewModel.history
+        .mapNotNull { match -> match.getHistoricalDittatore()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
+
+    val globalPredator = viewModel.history
+        .mapNotNull { match -> match.getHistoricalPredatore()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
+
+    val globalNeckAndNeck = viewModel.history
+        .mapNotNull { match -> match.getHistoricalTestaATesta()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.second.score } // Return the one with the highest overall score
+
+    val globalSnail = viewModel.history
+        .mapNotNull { match -> match.getHistoricalLumaca()?.let { Triple(match, it.first, it.second) } }
+        .minByOrNull { it.third } // For snail we want the minimum variations
+
+    val globalDiesel = viewModel.history
+        .mapNotNull { match -> match.getHistoricalDiesel()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
 
     // --------------------------------------------------------------------
     // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
@@ -1024,7 +1056,7 @@ fun GlobalStatsScreen(
                             if (globalSniper != null) {
                                 // Niente più padding(top = 16.dp) qui, perché ci pensa già la Column esterna!
                                 Card(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpSniper = !isExpSniper },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1034,37 +1066,43 @@ fun GlobalStatsScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                // Testo per l'intestazione del premio Cecchino a livello globale
-                                                text = stringResource(R.string.titolo_miglior_cecchino),
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_miglior_cecchino),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpSniper) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                             Spacer(modifier = Modifier.height(5.dp))
 
                                             Text(
-                                                text = globalSniper.first.name,
+                                                text = globalSniper.second.name,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )
 
-                                            // UX/UI: Breve descrizione per chiarire l'obiettivo
-                                            Text(
-                                                // Specifica qual è stata la prodezza compiuta per questo record
-                                                text = stringResource(R.string.desc_miglior_cecchino),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                                    alpha = 0.8f
-                                                ),
-                                                modifier = Modifier.padding(bottom = 4.dp)
-                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpSniper,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_miglior_cecchino),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
                                         }
-                                        // Record Cecchino (Ora Auto-Scaling!)
                                         AutoScalingScoreText(
-                                            text = "+${globalSniper.second}",
-                                            // Ricicla la traduzione del suffisso standard per i punteggi
+                                            text = "+${globalSniper.third}",
                                             suffix = stringResource(R.string.suffix_pt)
                                         )
                                     }
@@ -1074,7 +1112,7 @@ fun GlobalStatsScreen(
                             // 🦞 IL RE DEI GAMBERI (Record negativo assoluto)
                             if (globalCrab != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpCrab = !isExpCrab },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1084,36 +1122,42 @@ fun GlobalStatsScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                // Intestazione per la statistica del punteggio peggiore in assoluto
-                                                text = stringResource(R.string.titolo_re_gamberi),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_re_gamberi),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpCrab) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                             Spacer(modifier = Modifier.height(5.dp))
 
                                             Text(
-                                                text = globalCrab.first.name,
+                                                text = globalCrab.second.name,
                                                 style = MaterialTheme.typography.titleLarge,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )
-                                            // UX/UI: Breve descrizione
-                                            Text(
-                                                // Descrive la natura negativa di questo curioso record
-                                                text = stringResource(R.string.desc_re_gamberi),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                                    alpha = 0.8f
-                                                ),
-                                                modifier = Modifier.padding(bottom = 4.dp)
-                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpCrab,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_re_gamberi),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
                                         }
-                                        // Record Gambero (Ora Auto-Scaling!)
                                         AutoScalingScoreText(
-                                            text = "${globalCrab.second}",
-                                            // Applica il suffisso puntuale tradotto
+                                            text = "-${globalCrab.third}",
                                             suffix = stringResource(R.string.suffix_pt)
                                         )
                                     }
@@ -1123,7 +1167,7 @@ fun GlobalStatsScreen(
                             // 🦅 LA FENICE SUPREMA (Miglior recupero di sempre)
                             if (globalPhoenix != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpPhoenix = !isExpPhoenix },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1133,36 +1177,317 @@ fun GlobalStatsScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                // Definisce l'intestazione per il premio globale del miglior recupero punti
-                                                text = stringResource(R.string.titolo_fenice_suprema),
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_fenice_suprema),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpPhoenix) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                             Spacer(modifier = Modifier.height(5.dp))
 
                                             Text(
-                                                text = globalPhoenix.first.name,
+                                                text = globalPhoenix.second.name,
                                                 style = MaterialTheme.typography.titleMedium,
                                                 color = MaterialTheme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.Black
                                             )
-                                            // UX/UI: Breve descrizione
-                                            Text(
-                                                // Sintetizza il significato epico di aver ottenuto la Fenice Suprema
-                                                text = stringResource(R.string.desc_fenice_suprema),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                                    alpha = 0.8f
-                                                ),
-                                                modifier = Modifier.padding(bottom = 4.dp)
-                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpPhoenix,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_fenice_suprema),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
                                         }
-                                        // Record Fenice (Ora Auto-Scaling!)
                                         AutoScalingScoreText(
-                                            text = "+${globalPhoenix.second}",
-                                            // Applica la desinenza punti formattata dal file di risorse
+                                            text = "+${globalPhoenix.third}",
+                                            suffix = stringResource(R.string.suffix_pt)
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 👑 DITTATORE ASSOLUTO
+                            if (globalDictator != null) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpDictator = !isExpDictator },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_dittatore_assoluto),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpDictator) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalDictator.second.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpDictator,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_dittatore_assoluto),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
+                                        }
+                                        AutoScalingScoreText(
+                                            text = "${globalDictator.third}",
+                                            suffix = " turni"
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 🐺 PREDATORE ALFA
+                            if (globalPredator != null) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpPredator = !isExpPredator },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_predatore_alfa),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpPredator) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalPredator.second.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpPredator,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_predatore_alfa),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
+                                        }
+                                        AutoScalingScoreText(
+                                            text = "${globalPredator.third}",
+                                            suffix = " sorpassi"
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 🐌 LUMACA D'ORO
+                            if (globalSnail != null) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpSnail = !isExpSnail },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_lumaca_d_oro),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpSnail) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalSnail.second.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpSnail,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_lumaca_d_oro),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
+                                        }
+                                        AutoScalingScoreText(
+                                            text = "${globalSnail.third}",
+                                            suffix = " var."
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 🚂 MOTORE DIESEL
+                            if (globalDiesel != null) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpDiesel = !isExpDiesel },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_motore_diesel),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpDiesel) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = globalDiesel.second.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpDiesel,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_motore_diesel),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
+                                        }
+                                        AutoScalingScoreText(
+                                            text = "${globalDiesel.third}",
+                                            suffix = "%"
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 🤝 TESTA A TESTA PIU' EPICO (Punteggio più alto con scarto <= 1)
+                            if (globalNeckAndNeck != null) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable { isExpNeckAndNeck = !isExpNeckAndNeck },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_testa_a_testa_epico),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Icon(
+                                                    imageVector = if (isExpNeckAndNeck) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(5.dp))
+
+                                            Text(
+                                                text = stringResource(R.string.label_testa_a_testa_valore, globalNeckAndNeck.second.name, globalNeckAndNeck.third.name),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                fontWeight = FontWeight.Black
+                                            )
+                                            AnimatedVisibility(
+                                                visible = isExpNeckAndNeck,
+                                                enter = expandVertically() + fadeIn(),
+                                                exit = shrinkVertically() + fadeOut()
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.desc_testa_a_testa_epico),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    modifier = Modifier.padding(bottom = 4.dp)
+                                                )
+                                            }
+                                        }
+                                        AutoScalingScoreText(
+                                            text = "${globalNeckAndNeck.second.score}",
                                             suffix = stringResource(R.string.suffix_pt)
                                         )
                                     }

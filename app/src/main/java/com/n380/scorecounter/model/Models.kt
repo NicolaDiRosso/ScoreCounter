@@ -147,3 +147,236 @@ package com.n380.scorecounter.model
         }
         return if (comebackPlayer != null) Pair(comebackPlayer, maxRecovery) else null
     }
+
+    /**
+     * ====================================================================
+     * LOGICA STORICA: IL DITTATORE 👑 (Extension Function per MatchRecord)
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Il premio "Il Dittatore" viene assegnato al giocatore che è rimasto in 1ª posizione
+     * (da solo o a pari merito) per il maggior numero di turni durante l'intera sfida.
+     *
+     * Passo-passo:
+     * 1. Verifichiamo che la lista dei giocatori non sia vuota e che vi siano almeno 2 turni.
+     * 2. Inizializziamo una mappa `turnsInFirst` dove la chiave è il giocatore e il valore è il contatore di turni in testa.
+     * 3. Per ciascun turno `t` da 0 a `numTurns - 1`:
+     *    - Calcoliamo il punteggio massimo registrato al turno `t` con `maxOfOrNull`.
+     *    - Assegniamo +1 punto in classifica a tutti i giocatori che al turno `t` avevano quel punteggio massimo.
+     * 4. Estraiamo il valore massimo di turni in testa (`maxTurns`). Se `maxTurns` è 0, nessuno ha guidato la partita.
+     * 5. In caso di parità di turni in prima posizione tra due o più giocatori, applichiamo la regola di
+     *    spareggio ufficiale: vince chi ha il punteggio finale complessivo più alto (`maxByOrNull { it.score }`).
+     *
+     * @return Una coppia `Pair(PlayerRecord, Int)` col giocatore e il numero di turni in testa, oppure `null`.
+     */
+    fun MatchRecord.getHistoricalDittatore(): Pair<PlayerRecord, Int>? {
+        if (allPlayers.isEmpty()) return null
+        val numTurns = allPlayers.first().scoreHistory?.size ?: 0
+        if (numTurns < 2) return null
+
+        val turnsInFirst = mutableMapOf<PlayerRecord, Int>()
+        allPlayers.forEach { turnsInFirst[it] = 0 }
+
+        for (t in 0 until numTurns) {
+            val maxScore = allPlayers.maxOfOrNull { it.scoreHistory?.getOrNull(t) ?: 0 } ?: 0
+            allPlayers.forEach { player ->
+                if ((player.scoreHistory?.getOrNull(t) ?: 0) == maxScore) {
+                    turnsInFirst[player] = turnsInFirst[player]!! + 1
+                }
+            }
+        }
+
+        val maxTurns = turnsInFirst.values.maxOrNull() ?: 0
+        if (maxTurns == 0) return null
+
+        val candidates = turnsInFirst.filterValues { it == maxTurns }.keys
+        val dictator = candidates.maxByOrNull { it.score }
+
+        return if (dictator != null) Pair(dictator, maxTurns) else null
+    }
+
+    /**
+     * ====================================================================
+     * LOGICA STORICA: IL PREDATORE 🐺 (Extension Function per MatchRecord)
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Il premio "Il Predatore" celebra l'aggressività tattica: premia il giocatore che ha
+     * compiuto il maggior numero di "sorpassi" diretti in classifica durante la partita.
+     *
+     * Definizione matematica di Sorpasso al turno `t`:
+     * Un giocatore A effettua un sorpasso sul giocatore B al turno `t` se e solo se:
+     * - Al turno precedente `t - 1`, il punteggio di A era STRETTAMENTE MINORE del punteggio di B (`A < B`).
+     * - Al turno attuale `t`, il punteggio di A è diventato STRETTAMENTE MAGGIORE del punteggio di B (`A > B`).
+     *
+     * Passo-passo:
+     * 1. Iteriamo su tutti i turni dal secondo in poi (`t` da 1 a `numTurns - 1`).
+     * 2. Confrontiamo ogni coppia ordinata di giocatori `(A, B)`.
+     * 3. Se la condizione di sorpasso si verifica, incrementiamo il contatore dei sorpassi per il giocatore A.
+     * 4. Troviamo il numero massimo di sorpassi totalizzati. In caso di parità, vince chi ha il punteggio finale più alto.
+     *
+     * @return Una coppia `Pair(PlayerRecord, Int)` col giocatore e il numero di sorpassi effettuati, oppure `null`.
+     */
+    fun MatchRecord.getHistoricalPredatore(): Pair<PlayerRecord, Int>? {
+        if (allPlayers.size < 2) return null
+        val numTurns = allPlayers.first().scoreHistory?.size ?: 0
+        if (numTurns < 2) return null
+
+        val overtakes = mutableMapOf<PlayerRecord, Int>()
+        allPlayers.forEach { overtakes[it] = 0 }
+
+        for (t in 1 until numTurns) {
+            for (playerA in allPlayers) {
+                for (playerB in allPlayers) {
+                    if (playerA == playerB) continue
+                    val scoreAtT = playerA.scoreHistory?.getOrNull(t) ?: 0
+                    val scoreAtTMinus1 = playerA.scoreHistory?.getOrNull(t-1) ?: 0
+                    val scoreBAtT = playerB.scoreHistory?.getOrNull(t) ?: 0
+                    val scoreBAtTMinus1 = playerB.scoreHistory?.getOrNull(t-1) ?: 0
+                    if (scoreAtT > scoreBAtT && scoreAtTMinus1 < scoreBAtTMinus1) {
+                        overtakes[playerA] = overtakes[playerA]!! + 1
+                    }
+                }
+            }
+        }
+
+        val maxOvertakes = overtakes.values.maxOrNull() ?: 0
+        if (maxOvertakes == 0) return null
+
+        val predator = overtakes.filterValues { it == maxOvertakes }.keys.maxByOrNull { it.score }
+        
+        return if (predator != null) Pair(predator, maxOvertakes) else null
+    }
+
+    /**
+     * ====================================================================
+     * LOGICA STORICA: TESTA A TESTA 🤝 (Extension Function per MatchRecord)
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Questo è l'unico PREMIO CONDIVISO della partita. Viene assegnato CONTEMPORANEAMENTE
+     * al 1° e al 2° classificato se e solo se la partita è stata tiratissima fino all'ultimo punto!
+     *
+     * Requisito Matematico:
+     * Distacco finale tra il primo classificato (`p1`) e il secondo classificato (`p2`) <= 1 punto
+     * (incluso il caso di pareggio perfetto dove il distacco è 0).
+     *
+     * @return Una coppia `Pair(PlayerRecord, PlayerRecord)` con i due giocatori del duello, oppure `null`.
+     */
+    fun MatchRecord.getHistoricalTestaATesta(): Pair<PlayerRecord, PlayerRecord>? {
+        if (allPlayers.size < 2) return null
+        val sortedPlayers = allPlayers.sortedByDescending { it.score }
+        val p1 = sortedPlayers[0]
+        val p2 = sortedPlayers[1]
+        
+        if (p1.score - p2.score <= 1) {
+            return Pair(p1, p2)
+        }
+        return null
+    }
+
+    /**
+     * ====================================================================
+     * LOGICA STORICA: LA LUMACA 🐌 (Extension Function per MatchRecord)
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Il premio "La Lumaca" identifica il giocatore più lento o passivo della partita.
+     *
+     * Criteri di calcolo sequenziali:
+     * 1. Minor numero di variazioni di punteggio (conteggio delle volte in cui `scoreHistory[t] != scoreHistory[t-1]`).
+     * 2. Primo criterio di spareggio: Maggior numero di turni CONSECUTIVI trascorsi fermo a zero variazioni.
+     * 3. Secondo criterio di spareggio: Punteggio finale complessivo più basso (ritmo di crescita inferiore).
+     *
+     * @return Una coppia `Pair(PlayerRecord, Int)` col giocatore e il numero di variazioni effettuate, oppure `null`.
+     */
+    fun MatchRecord.getHistoricalLumaca(): Pair<PlayerRecord, Int>? {
+        if (allPlayers.isEmpty()) return null
+        val numTurns = allPlayers.first().scoreHistory?.size ?: 0
+        if (numTurns < 2) return null
+
+        var bestSnail: PlayerRecord? = null
+        var minVariations = Int.MAX_VALUE
+        var maxConsecutiveZerosTieBreak = -1
+        var lowestScoreTieBreak = Int.MAX_VALUE
+
+        for (player in allPlayers) {
+            val history = player.scoreHistory ?: emptyList()
+            var variations = 0
+            var currentConsecutiveZeros = 0
+            var maxConsecutiveZeros = 0
+
+            for (t in 1 until history.size) {
+                if (history[t] != history[t-1]) {
+                    variations++
+                    currentConsecutiveZeros = 0
+                } else {
+                    currentConsecutiveZeros++
+                    if (currentConsecutiveZeros > maxConsecutiveZeros) {
+                        maxConsecutiveZeros = currentConsecutiveZeros
+                    }
+                }
+            }
+            
+            if (variations < minVariations || 
+               (variations == minVariations && maxConsecutiveZeros > maxConsecutiveZerosTieBreak) ||
+               (variations == minVariations && maxConsecutiveZeros == maxConsecutiveZerosTieBreak && player.score < lowestScoreTieBreak)) {
+                
+                minVariations = variations
+                maxConsecutiveZerosTieBreak = maxConsecutiveZeros
+                lowestScoreTieBreak = player.score
+                bestSnail = player
+            }
+        }
+        return if (bestSnail != null) Pair(bestSnail, minVariations) else null
+    }
+
+    /**
+     * ====================================================================
+     * LOGICA STORICA: IL DIESEL 🚂 (Extension Function per MatchRecord)
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Premiamo il giocatore "a scoppio ritardato": colui che ha carburato tardi ma ha fatto
+     * un'esplosione nel finale.
+     *
+     * Condizione vincolante:
+     * Almeno il 75% dei punti totali guadagnati durante la partita deve essere stato
+     * ottenuto nella SECONDA METÀ della cronologia dei turni.
+     *
+     * Calcolo Matematico:
+     * - `halfIndex = numTurns / 2`
+     * - `secondHalfPoints = history.last() - history[halfIndex]`
+     * - `totalPoints = history.last() - history[0]`
+     * - `percentage = secondHalfPoints / totalPoints`
+     * - Se `percentage >= 0.75` (75%), il giocatore è idoneo!
+     *
+     * @return Una coppia `Pair(PlayerRecord, Int)` col giocatore e la percentuale in numero intero (es. 85%), oppure `null`.
+     */
+    fun MatchRecord.getHistoricalDiesel(): Pair<PlayerRecord, Int>? {
+        if (allPlayers.isEmpty()) return null
+        val numTurns = allPlayers.first().scoreHistory?.size ?: 0
+        if (numTurns < 4) return null
+
+        var bestDiesel: PlayerRecord? = null
+        var maxSecondHalfPercentage = 0.0
+        var maxSecondHalfPoints = 0
+        
+        val halfIndex = numTurns / 2
+
+        for (player in allPlayers) {
+            val history = player.scoreHistory ?: emptyList()
+            if (history.size < numTurns) continue
+            val secondHalfPoints = history.last() - history[halfIndex]
+            val totalPoints = history.last() - history[0]
+            
+            if (totalPoints > 0 && secondHalfPoints > 0) {
+                val percentage = secondHalfPoints.toDouble() / totalPoints.toDouble()
+                if (percentage >= 0.75) {
+                    if (percentage > maxSecondHalfPercentage || 
+                       (percentage == maxSecondHalfPercentage && secondHalfPoints > maxSecondHalfPoints)) {
+                        maxSecondHalfPercentage = percentage
+                        maxSecondHalfPoints = secondHalfPoints
+                        bestDiesel = player
+                    }
+                }
+            }
+        }
+        
+        return if (bestDiesel != null) Pair(bestDiesel, (maxSecondHalfPercentage * 100).toInt()) else null
+    }

@@ -53,6 +53,11 @@ fun ResultsScreenLandscape(
     inarrestabileStat: Pair<Player, Int>?,
     gamberoStat: Pair<Player, Int>?,
     feniceStat: Pair<Player, Int>?,
+    dittatoreStat: Pair<Player, Int>?,
+    predatoreStat: Pair<Player, Int>?,
+    testaATestaStat: Pair<Player, Player>?,
+    lumacaStat: Pair<Player, Int>?,
+    dieselStat: Pair<Player, Int>?,
     showAwardsInfoDialog: Boolean,
     onShowAwardsInfoDialogChange: (Boolean) -> Unit,
     isClosing: Boolean,
@@ -333,7 +338,12 @@ fun ResultsScreenLandscape(
                             cecchinoStat?.let { Pair("cecchino", it) },
                             inarrestabileStat?.let { Pair("inarrestabile", it) },
                             gamberoStat?.let { Pair("gambero", it) },
-                            feniceStat?.let { Pair("fenice", it) }
+                            feniceStat?.let { Pair("fenice", it) },
+                            dittatoreStat?.let { Pair("dittatore", it) },
+                            predatoreStat?.let { Pair("predatore", it) },
+                            testaATestaStat?.let { Pair("testaatesta", it) },
+                            lumacaStat?.let { Pair("lumaca", it) },
+                            dieselStat?.let { Pair("diesel", it) }
                         )
 
                         activeAwards.chunked(2).forEach { rowItems ->
@@ -344,34 +354,96 @@ fun ResultsScreenLandscape(
                                 rowItems.forEach { award ->
                                     Box(modifier = Modifier.weight(1f)) {
                                         when (award.first) {
-                                            "cecchino" -> AwardCard(
-                                                icon = "🎯",
-                                                title = stringResource(R.string.premio_cecchino),
-                                                playerName = award.second.first.name,
-                                                playerColorInt = award.second.first.color,
-                                                valueText = stringResource(R.string.label_punti_positivi, award.second.second)
-                                            )
-                                            "inarrestabile" -> AwardCard(
-                                                icon = "🔥",
-                                                title = stringResource(R.string.premio_inarrestabile),
-                                                playerName = award.second.first.name,
-                                                playerColorInt = award.second.first.color,
-                                                valueText = stringResource(R.string.label_combo, award.second.second)
-                                            )
-                                            "gambero" -> AwardCard(
-                                                icon = "🦞",
-                                                title = stringResource(R.string.premio_gambero),
-                                                playerName = award.second.first.name,
-                                                playerColorInt = award.second.first.color,
-                                                valueText = stringResource(R.string.label_punti_negativi, award.second.second)
-                                            )
-                                            "fenice" -> AwardCard(
-                                                icon = "🦅",
-                                                title = stringResource(R.string.premio_fenice),
-                                                playerName = award.second.first.name,
-                                                playerColorInt = award.second.first.color,
-                                                valueText = stringResource(R.string.label_punti_positivi, award.second.second)
-                                            )
+                                            "cecchino" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🎯",
+                                                    title = stringResource(R.string.premio_cecchino),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_punti_positivi, data.second)
+                                                )
+                                            }
+                                            "inarrestabile" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🔥",
+                                                    title = stringResource(R.string.premio_inarrestabile),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_combo, data.second)
+                                                )
+                                            }
+                                            "gambero" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🦞",
+                                                    title = stringResource(R.string.premio_gambero),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_punti_negativi, data.second)
+                                                )
+                                            }
+                                            "fenice" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🦅",
+                                                    title = stringResource(R.string.premio_fenice),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_punti_positivi, data.second)
+                                                )
+                                            }
+                                            "dittatore" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "👑",
+                                                    title = stringResource(R.string.premio_dittatore),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_turni, data.second)
+                                                )
+                                            }
+                                            "predatore" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🐺",
+                                                    title = stringResource(R.string.premio_predatore),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_sorpassi, data.second)
+                                                )
+                                            }
+                                            "testaatesta" -> {
+                                                val data = award.second as Pair<Player, Player>
+                                                AwardCard(
+                                                    icon = "🤝",
+                                                    title = stringResource(R.string.premio_testa_a_testa),
+                                                    playerName = stringResource(R.string.label_testa_a_testa_valore, data.first.name, data.second.name),
+                                                    playerColorInt = data.first.color,
+                                                    valueText = ""
+                                                )
+                                            }
+                                            "lumaca" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🐌",
+                                                    title = stringResource(R.string.premio_lumaca),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_variazioni, data.second)
+                                                )
+                                            }
+                                            "diesel" -> {
+                                                val data = award.second as Pair<Player, Int>
+                                                AwardCard(
+                                                    icon = "🚂",
+                                                    title = stringResource(R.string.premio_diesel),
+                                                    playerName = data.first.name,
+                                                    playerColorInt = data.first.color,
+                                                    valueText = stringResource(R.string.label_percentuale, data.second)
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -505,107 +577,11 @@ fun ResultsScreenLandscape(
 
         // POPUP INFORMATIVO SUI PREMI (Standardized Surface Cards)
         if (showAwardsInfoDialog) {
-            Dialog(
-                onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth(0.65f)
-                        .fillMaxHeight(0.90f),
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.background,
-                    shadowElevation = 12.dp,
-                    tonalElevation = 2.dp,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.titolo_guida_premi),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                onShowAwardsInfoDialogChange(false)
-                            },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
-                            Spacer(Modifier.width(8.dp))
-                            AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                        }
-                    }
+            AwardsGuideDialogLandscape(
+                onDismissRequest = {
+                    onShowAwardsInfoDialogChange(false)
                 }
-            }
+            )
         }
     }
 }

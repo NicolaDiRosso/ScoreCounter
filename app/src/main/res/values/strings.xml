@@ -194,9 +194,36 @@
     <string name="msg_fenice">Awarded to the player with the most epic comeback, calculated between their lowest point and the final score.</string>
     <string name="premio_fenice">The Phoenix</string>
 
+    <string name="titolo_dittatore_guida">👑 The Dictator</string>
+    <string name="msg_dittatore">Awarded to the player who spends the most turns in 1st position (in case of a tie, the one with the highest final score).</string>
+    <string name="premio_dittatore">The Dictator</string>
+
+    <string name="titolo_predatore_guida">🐺 The Predator</string>
+    <string name="msg_predatore">Awarded to the player who performs the most overtakes in the ranking (overtaking an opponent who was ahead in the previous turn).</string>
+    <string name="premio_predatore">The Predator</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 Neck and Neck</string>
+    <string name="msg_testa_a_testa">Shared award! Given to the 1st and 2nd place players if their final score gap is 1 point or less.</string>
+    <string name="premio_testa_a_testa">Neck and Neck</string>
+
+    <string name="titolo_lumaca_guida">🐌 The Snail</string>
+    <string name="msg_lumaca">Awarded to the player with the fewest score variations or the longest consecutive streak without changes.</string>
+    <string name="premio_lumaca">The Snail</string>
+
+    <string name="titolo_diesel_guida">🚂 The Diesel</string>
+    <string name="msg_diesel">Awarded to the player who earned at least 75% of their total points in the second half of the game.</string>
+    <string name="premio_diesel">The Diesel</string>
+
+    <string name="desc_guida_premi">Discover all the special awards automatically assigned at the end of every match!</string>
+
     <string name="label_punti_positivi">+%d pt</string>
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">x%d</string>
+    <string name="label_turni">%d turns</string>
+    <string name="label_sorpassi">%d overtakes</string>
+    <string name="label_variazioni">%d variations</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
 
     <!-- TESTO TRADOTTO PER IL FILE MatchAnalysisOverlay-->
     <string name="titolo_analisi_partita">Match Analysis</string>
@@ -256,6 +283,21 @@
 
     <string name="titolo_fenice_suprema">🦅 Supreme Phoenix</string>
     <string name="desc_fenice_suprema">The most legendary comeback from last place</string>
+
+    <string name="titolo_dittatore_assoluto">👑 Absolute Dictator</string>
+    <string name="desc_dittatore_assoluto">Highest number of turns spent in 1st position</string>
+
+    <string name="titolo_predatore_alfa">🐺 Alpha Predator</string>
+    <string name="desc_predatore_alfa">Most overtakes performed in a single match</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 Golden Snail</string>
+    <string name="desc_lumaca_d_oro">Fewest score variations across an entire match</string>
+
+    <string name="titolo_motore_diesel">🚂 Diesel Engine</string>
+    <string name="desc_motore_diesel">Highest percentage of points earned in the second half</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 Epic Neck and Neck</string>
+    <string name="desc_testa_a_testa_epico">Highest scoring match decided by 1 point or less</string>
 
     <!-- TESTO TRADOTTO PER IL FILE ScoreWidget-->
     <string name="desc_logo_app">App Logo</string>

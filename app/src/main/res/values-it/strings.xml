@@ -195,9 +195,36 @@
     <string name="msg_fenice">Assegnato a chi compie la rimonta più epica, calcolata tra il suo punto più basso e il punteggio finale.</string>
     <string name="premio_fenice">La Fenice</string>
 
+    <string name="titolo_dittatore_guida">👑 Il Dittatore</string>
+    <string name="msg_dittatore">Assegnato al giocatore che ha trascorso il maggior numero di turni in 1ª posizione (in caso di parità, chi ha il punteggio finale più alto).</string>
+    <string name="premio_dittatore">Il Dittatore</string>
+
+    <string name="titolo_predatore_guida">🐺 Il Predatore</string>
+    <string name="msg_predatore">Assegnato a chi compie il maggior numero di sorpassi in classifica (superando chi era davanti nel turno precedente).</string>
+    <string name="premio_predatore">Il Predatore</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 Testa a Testa</string>
+    <string name="msg_testa_a_testa">Premio condiviso! Assegnato al 1° e 2° classificato se il distacco finale è di 1 punto o c\'è un pareggio.</string>
+    <string name="premio_testa_a_testa">Testa a Testa</string>
+
+    <string name="titolo_lumaca_guida">🐌 La Lumaca</string>
+    <string name="msg_lumaca">Assegnato al giocatore con il minor numero di variazioni di punteggio o fermo per più turni consecutivi.</string>
+    <string name="premio_lumaca">La Lumaca</string>
+
+    <string name="titolo_diesel_guida">🚂 Il Diesel</string>
+    <string name="msg_diesel">Assegnato a chi ha ottenuto almeno il 75% dei suoi punti totali nella seconda metà della partita.</string>
+    <string name="premio_diesel">Il Diesel</string>
+
+    <string name="desc_guida_premi">Scopri tutti i riconoscimenti speciali assegnati in automatico alla fine di ogni partita!</string>
+
     <string name="label_punti_positivi">+%d pt</string>
     <string name="label_punti_negativi">-%d pt</string>
     <string name="label_combo">x%d</string>
+    <string name="label_turni">%d turni</string>
+    <string name="label_sorpassi">%d sorpassi</string>
+    <string name="label_variazioni">%d variazioni</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s e %2$s</string>
 
     <!-- TESTO PER IL  FILE MatchAnalysisOverlay-->
     <string name="titolo_analisi_partita">Analisi Partita</string>
@@ -257,6 +284,21 @@
 
     <string name="titolo_fenice_suprema">🦅 La Fenice Suprema</string>
     <string name="desc_fenice_suprema">La rimonta più leggendaria dall\'ultimo posto</string>
+
+    <string name="titolo_dittatore_assoluto">👑 Dittatore Assoluto</string>
+    <string name="desc_dittatore_assoluto">Maggior numero di turni passati in 1ª posizione</string>
+
+    <string name="titolo_predatore_alfa">🐺 Predatore Alfa</string>
+    <string name="desc_predatore_alfa">Maggior numero di sorpassi effettuati in una singola partita</string>
+
+    <string name="titolo_lumaca_d_oro">🐌 Lumaca d\'Oro</string>
+    <string name="desc_lumaca_d_oro">Minor numero di variazioni di punteggio in un\'intera partita</string>
+
+    <string name="titolo_motore_diesel">🚂 Motore Diesel</string>
+    <string name="desc_motore_diesel">Più alta percentuale di punti ottenuti nella seconda metà</string>
+
+    <string name="titolo_testa_a_testa_epico">🤝 Testa a Testa Epico</string>
+    <string name="desc_testa_a_testa_epico">La partita con punteggio più alto finita in pareggio o con 1 punto di scarto</string>
 
     <!-- TESTO PER IL FILE ScoreWidget-->
     <string name="desc_logo_app">Logo App</string>

@@ -829,5 +829,195 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: IL DITTATORE 👑
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Trova il giocatore che ha trascorso il maggior numero di turni in prima posizione
+     * durante la partita corrente.
+     *
+     * Logica di Calcolo:
+     * 1. Verifica che la lista dei giocatori non sia vuota e che la partita abbia almeno 2 turni.
+     * 2. Inizializza una mappa delle presenze in testa `turnsInFirst`.
+     * 3. Scansiona ogni turno `t` e trova il punteggio massimo globale `maxScore`.
+     * 4. Assegna +1 punto in classifica di leadership a chi possiede il punteggio massimo al turno `t`.
+     * 5. Se più giocatori sono a pari merito per turni in testa, si applica lo spareggio
+     *    in base al punteggio finale più alto (`maxByOrNull { it.score }`).
+     */
+    fun getDittatore(): Pair<Player, Int>? {
+        if (players.isEmpty()) return null
+        val numTurns = players.first().scoreHistory.size
+        if (numTurns < 2) return null
+
+        val turnsInFirst = mutableMapOf<Player, Int>()
+        players.forEach { turnsInFirst[it] = 0 }
+
+        for (t in 0 until numTurns) {
+            val maxScore = players.maxOfOrNull { it.scoreHistory[t] } ?: 0
+            players.forEach { player ->
+                if (player.scoreHistory[t] == maxScore) {
+                    turnsInFirst[player] = turnsInFirst[player]!! + 1
+                }
+            }
+        }
+
+        val maxTurns = turnsInFirst.values.maxOrNull() ?: 0
+        if (maxTurns == 0) return null
+
+        val candidates = turnsInFirst.filterValues { it == maxTurns }.keys
+        val dictator = candidates.maxByOrNull { it.score }
+
+        return if (dictator != null) Pair(dictator, maxTurns) else null
+    }
+
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: IL PREDATORE 🐺
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Trova il giocatore che ha compiuto il maggior numero di sorpassi in classifica.
+     *
+     * Definizione di Sorpasso:
+     * Un sorpasso avviene al turno `t` quando un giocatore A passa da avere un punteggio
+     * inferiore ad un avversario B al turno `t - 1`, ad un punteggio superiore al turno `t`.
+     */
+    fun getPredatore(): Pair<Player, Int>? {
+        if (players.size < 2) return null
+        val numTurns = players.first().scoreHistory.size
+        if (numTurns < 2) return null
+
+        val overtakes = mutableMapOf<Player, Int>()
+        players.forEach { overtakes[it] = 0 }
+
+        for (t in 1 until numTurns) {
+            for (playerA in players) {
+                for (playerB in players) {
+                    if (playerA == playerB) continue
+                    if (playerA.scoreHistory[t] > playerB.scoreHistory[t] && 
+                        playerA.scoreHistory[t-1] < playerB.scoreHistory[t-1]) {
+                        overtakes[playerA] = overtakes[playerA]!! + 1
+                    }
+                }
+            }
+        }
+
+        val maxOvertakes = overtakes.values.maxOrNull() ?: 0
+        if (maxOvertakes == 0) return null
+
+        val predator = overtakes.filterValues { it == maxOvertakes }.keys.maxByOrNull { it.score }
+        
+        return if (predator != null) Pair(predator, maxOvertakes) else null
+    }
+
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: TESTA A TESTA 🤝
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Premio condiviso assegnato esclusivamente al 1° e 2° classificato se lo scarto
+     * finale tra loro è <= 1 punto (incluso il pareggio).
+     */
+    fun getTestaATesta(): Pair<Player, Player>? {
+        if (players.size < 2) return null
+        val sortedPlayers = players.sortedByDescending { it.score }
+        val p1 = sortedPlayers[0]
+        val p2 = sortedPlayers[1]
+        
+        if (p1.score - p2.score <= 1) {
+            return Pair(p1, p2)
+        }
+        return null
+    }
+
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: LA LUMACA 🐌
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Assegnato al giocatore col minor numero di variazioni di punteggio o rimasto
+     * fermo per più turni consecutivi.
+     */
+    fun getLumaca(): Pair<Player, Int>? {
+        if (players.isEmpty()) return null
+        val numTurns = players.first().scoreHistory.size
+        if (numTurns < 2) return null
+
+        var bestSnail: Player? = null
+        var minVariations = Int.MAX_VALUE
+        var maxConsecutiveZerosTieBreak = -1
+        var lowestScoreTieBreak = Int.MAX_VALUE
+
+        for (player in players) {
+            val history = player.scoreHistory
+            var variations = 0
+            var currentConsecutiveZeros = 0
+            var maxConsecutiveZeros = 0
+
+            for (t in 1 until numTurns) {
+                if (history[t] != history[t-1]) {
+                    variations++
+                    currentConsecutiveZeros = 0
+                } else {
+                    currentConsecutiveZeros++
+                    if (currentConsecutiveZeros > maxConsecutiveZeros) {
+                        maxConsecutiveZeros = currentConsecutiveZeros
+                    }
+                }
+            }
+            
+            if (variations < minVariations || 
+               (variations == minVariations && maxConsecutiveZeros > maxConsecutiveZerosTieBreak) ||
+               (variations == minVariations && maxConsecutiveZeros == maxConsecutiveZerosTieBreak && player.score < lowestScoreTieBreak)) {
+                
+                minVariations = variations
+                maxConsecutiveZerosTieBreak = maxConsecutiveZeros
+                lowestScoreTieBreak = player.score
+                bestSnail = player
+            }
+        }
+        return if (bestSnail != null) Pair(bestSnail, minVariations) else null
+    }
+
+    /**
+     * ====================================================================
+     * STATISTICHE AVANZATE: IL DIESEL 🚂
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO:
+     * Assegnato al giocatore che ha ottenuto almeno il 75% dei suoi punti totali
+     * nella seconda metà della partita.
+     */
+    fun getDiesel(): Pair<Player, Int>? {
+        if (players.isEmpty()) return null
+        val numTurns = players.first().scoreHistory.size
+        if (numTurns < 4) return null
+
+        var bestDiesel: Player? = null
+        var maxSecondHalfPercentage = 0.0
+        var maxSecondHalfPoints = 0
+        
+        val halfIndex = numTurns / 2
+
+        for (player in players) {
+            val history = player.scoreHistory
+            val secondHalfPoints = history.last() - history[halfIndex]
+            val totalPoints = history.last() - history[0]
+            
+            if (totalPoints > 0 && secondHalfPoints > 0) {
+                val percentage = secondHalfPoints.toDouble() / totalPoints.toDouble()
+                if (percentage >= 0.75) {
+                    if (percentage > maxSecondHalfPercentage || 
+                       (percentage == maxSecondHalfPercentage && secondHalfPoints > maxSecondHalfPoints)) {
+                        maxSecondHalfPercentage = percentage
+                        maxSecondHalfPoints = secondHalfPoints
+                        bestDiesel = player
+                    }
+                }
+            }
+        }
+        
+        return if (bestDiesel != null) Pair(bestDiesel, (maxSecondHalfPercentage * 100).toInt()) else null
+    }
 }
 

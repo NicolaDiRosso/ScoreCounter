@@ -27,9 +27,14 @@ import androidx.compose.ui.window.DialogProperties
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.getHistoricalCecchino
-import com.n380.scorecounter.model.getHistoricalInarrestabile
-import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalFenice
+import com.n380.scorecounter.model.getHistoricalGambero
+import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.model.getHistoricalDittatore
+import com.n380.scorecounter.model.getHistoricalPredatore
+import com.n380.scorecounter.model.getHistoricalTestaATesta
+import com.n380.scorecounter.model.getHistoricalLumaca
+import com.n380.scorecounter.model.getHistoricalDiesel
 import com.n380.scorecounter.ui.components.*
 
 /**
@@ -57,6 +62,11 @@ fun MatchAnalysisOverlayLandscape(
     val storiciInarrestabile = remember(match) { match.getHistoricalInarrestabile() }
     val storiciGambero = remember(match) { match.getHistoricalGambero() }
     val storiciFenice = remember(match) { match.getHistoricalFenice() }
+    val storiciDittatore = remember(match) { match.getHistoricalDittatore() }
+    val storiciPredatore = remember(match) { match.getHistoricalPredatore() }
+    val storiciTestaATesta = remember(match) { match.getHistoricalTestaATesta() }
+    val storiciLumaca = remember(match) { match.getHistoricalLumaca() }
+    val storiciDiesel = remember(match) { match.getHistoricalDiesel() }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -199,6 +209,56 @@ fun MatchAnalysisOverlayLandscape(
                                         playerName = player.name,
                                         playerColorInt = player.color,
                                         valueText = stringResource(R.string.label_punti_positivi, punti)
+                                    )
+                                }
+
+                                storiciDittatore?.let { (player, turni) ->
+                                    AwardCard(
+                                        icon = "👑",
+                                        title = stringResource(R.string.premio_dittatore),
+                                        playerName = player.name,
+                                        playerColorInt = player.color,
+                                        valueText = stringResource(R.string.label_turni, turni)
+                                    )
+                                }
+
+                                storiciPredatore?.let { (player, sorpassi) ->
+                                    AwardCard(
+                                        icon = "🐺",
+                                        title = stringResource(R.string.premio_predatore),
+                                        playerName = player.name,
+                                        playerColorInt = player.color,
+                                        valueText = stringResource(R.string.label_sorpassi, sorpassi)
+                                    )
+                                }
+
+                                storiciTestaATesta?.let { (p1, p2) ->
+                                    AwardCard(
+                                        icon = "🤝",
+                                        title = stringResource(R.string.premio_testa_a_testa),
+                                        playerName = stringResource(R.string.label_testa_a_testa_valore, p1.name, p2.name),
+                                        playerColorInt = p1.color,
+                                        valueText = "" // Nessun valore extra numerico da mostrare
+                                    )
+                                }
+
+                                storiciLumaca?.let { (player, variazioni) ->
+                                    AwardCard(
+                                        icon = "🐌",
+                                        title = stringResource(R.string.premio_lumaca),
+                                        playerName = player.name,
+                                        playerColorInt = player.color,
+                                        valueText = stringResource(R.string.label_variazioni, variazioni)
+                                    )
+                                }
+
+                                storiciDiesel?.let { (player, percentuale) ->
+                                    AwardCard(
+                                        icon = "🚂",
+                                        title = stringResource(R.string.premio_diesel),
+                                        playerName = player.name,
+                                        playerColorInt = player.color,
+                                        valueText = stringResource(R.string.label_percentuale, percentuale)
                                     )
                                 }
                             }
@@ -406,75 +466,11 @@ fun MatchAnalysisOverlayLandscape(
 
             // POPUP GUIDA PREMI (Standardized Surface Cards)
             if (showAwardsInfoDialog) {
-                Dialog(
-                    onDismissRequest = { },
-                    properties = DialogProperties(usePlatformDefaultWidth = false)
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth(0.65f)
-                            .fillMaxHeight(0.90f),
-                        shape = RoundedCornerShape(24.dp),
-                        color = MaterialTheme.colorScheme.background,
-                        shadowElevation = 12.dp,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize().padding(20.dp),
-                            verticalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = stringResource(R.string.titolo_guida_premi),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-
-                            Column(
-                                modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
-                                        Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                        Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                    }
-                                }
-                                Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
-                                        Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                        Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                    }
-                                }
-                                Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
-                                        Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                        Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                    }
-                                }
-                                Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))) {
-                                    Column(modifier = Modifier.padding(12.dp)) {
-                                        Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                        Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                    }
-                                }
-                            }
-
-                            Button(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    onShowAwardsInfoDialogChange(false)
-                                },
-                                modifier = Modifier.fillMaxWidth().height(48.dp),
-                                shape = RoundedCornerShape(20.dp)
-                            ) {
-                                Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
-                                Spacer(Modifier.width(8.dp))
-                                AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                            }
-                        }
+                AwardsGuideDialogLandscape(
+                    onDismissRequest = {
+                        onShowAwardsInfoDialogChange(false)
                     }
-                }
+                )
             }
         }
     }

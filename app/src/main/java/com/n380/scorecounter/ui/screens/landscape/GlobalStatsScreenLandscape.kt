@@ -30,6 +30,11 @@ import com.n380.scorecounter.R
 import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
+import com.n380.scorecounter.model.getHistoricalDittatore
+import com.n380.scorecounter.model.getHistoricalPredatore
+import com.n380.scorecounter.model.getHistoricalTestaATesta
+import com.n380.scorecounter.model.getHistoricalLumaca
+import com.n380.scorecounter.model.getHistoricalDiesel
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.formatDate
 import com.n380.scorecounter.ui.components.formatTime
@@ -82,16 +87,36 @@ fun GlobalStatsScreenLandscape(
     val topArsonist = fireStatsMap.maxByOrNull { it.value }
 
     val globalSniper = viewModel.history
-        .mapNotNull { match -> match.getHistoricalCecchino()?.let { Pair(match, it) } }
-        .maxByOrNull { it.second.second }
+        .mapNotNull { match -> match.getHistoricalCecchino()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
 
     val globalCrab = viewModel.history
-        .mapNotNull { match -> match.getHistoricalGambero()?.let { Pair(match, it) } }
-        .maxByOrNull { it.second.second }
+        .mapNotNull { match -> match.getHistoricalGambero()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
 
     val globalPhoenix = viewModel.history
-        .mapNotNull { match -> match.getHistoricalFenice()?.let { Pair(match, it) } }
-        .maxByOrNull { it.second.second }
+        .mapNotNull { match -> match.getHistoricalFenice()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
+
+    val globalDictator = viewModel.history
+        .mapNotNull { match -> match.getHistoricalDittatore()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
+
+    val globalPredator = viewModel.history
+        .mapNotNull { match -> match.getHistoricalPredatore()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
+
+    val globalNeckAndNeck = viewModel.history
+        .mapNotNull { match -> match.getHistoricalTestaATesta()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.second.score }
+
+    val globalSnail = viewModel.history
+        .mapNotNull { match -> match.getHistoricalLumaca()?.let { Triple(match, it.first, it.second) } }
+        .minByOrNull { it.third }
+
+    val globalDiesel = viewModel.history
+        .mapNotNull { match -> match.getHistoricalDiesel()?.let { Triple(match, it.first, it.second) } }
+        .maxByOrNull { it.third }
 
     // Stati di espansione locale per le card dei record
     var isExpRecord by remember { mutableStateOf(false) }
@@ -568,12 +593,12 @@ fun GlobalStatsScreenLandscape(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = globalSniper.second.first.name,
+                                    text = globalSniper.second.name,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Black
                                 )
                                 Text(
-                                    text = "+${globalSniper.second.second} pt",
+                                    text = "+${globalSniper.third} pt",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Black,
                                     color = MaterialTheme.colorScheme.primary
@@ -602,12 +627,12 @@ fun GlobalStatsScreenLandscape(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = globalCrab.second.first.name,
+                                    text = globalCrab.second.name,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Black
                                 )
                                 Text(
-                                    text = "-${globalCrab.second.second} pt",
+                                    text = "-${globalCrab.third} pt",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Black,
                                     color = MaterialTheme.colorScheme.error
@@ -636,12 +661,12 @@ fun GlobalStatsScreenLandscape(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = globalPhoenix.second.first.name,
+                                    text = globalPhoenix.second.name,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Black
                                 )
                                 Text(
-                                    text = "+${globalPhoenix.second.second} pt",
+                                    text = "+${globalPhoenix.third} pt",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Black,
                                     color = MaterialTheme.colorScheme.primary
@@ -652,15 +677,185 @@ fun GlobalStatsScreenLandscape(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        } else {
-                            Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                } else {
+                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+
+                        // 8. DITTATORE ASSOLUTO
+                        item {
+                            GlobalStatCardClean(
+                                title = stringResource(R.string.titolo_dittatore_assoluto)
+                            ) {
+                                if (globalDictator != null) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = globalDictator.second.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                        Text(
+                                            text = "${globalDictator.third} turni",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalDictator.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+
+                        // 9. PREDATORE ALFA
+                        item {
+                            GlobalStatCardClean(
+                                title = stringResource(R.string.titolo_predatore_alfa)
+                            ) {
+                                if (globalPredator != null) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = globalPredator.second.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                        Text(
+                                            text = "${globalPredator.third} sorp.",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalPredator.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+
+                        // 10. TESTA A TESTA EPICO
+                        item {
+                            GlobalStatCardClean(
+                                title = stringResource(R.string.titolo_testa_a_testa_epico)
+                            ) {
+                                if (globalNeckAndNeck != null) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.label_testa_a_testa_valore, globalNeckAndNeck.second.name, globalNeckAndNeck.third.name),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                        Text(
+                                            text = "${globalNeckAndNeck.second.score} pt",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalNeckAndNeck.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+
+                        // 11. LUMACA D'ORO
+                        item {
+                            GlobalStatCardClean(
+                                title = stringResource(R.string.titolo_lumaca_d_oro)
+                            ) {
+                                if (globalSnail != null) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = globalSnail.second.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                        Text(
+                                            text = "${globalSnail.third} var.",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalSnail.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+
+                        // 12. MOTORE DIESEL
+                        item {
+                            GlobalStatCardClean(
+                                title = stringResource(R.string.titolo_motore_diesel)
+                            ) {
+                                if (globalDiesel != null) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = globalDiesel.second.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Black
+                                        )
+                                        Text(
+                                            text = "${globalDiesel.third}%",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            fontWeight = FontWeight.Black,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    Text(
+                                        text = stringResource(R.string.label_in_partita, globalDiesel.first.title),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                } else {
+                                    Text(stringResource(R.string.msg_nessun_record), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
-}
 
 /**
  * COMPONENTE SCHEDA RECORD PULITA

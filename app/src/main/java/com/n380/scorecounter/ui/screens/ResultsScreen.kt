@@ -49,6 +49,7 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.launch
 import android.view.View
 import com.n380.scorecounter.ui.screens.landscape.ResultsScreenLandscape
+import com.n380.scorecounter.ui.screens.landscape.AwardsGuideDialog
 
 // ====================================================================
 // LA SCHERMATA DELLA CLASSIFICA (RISULTATI) - VERSIONE ANIMATA
@@ -137,6 +138,11 @@ fun ResultsScreen(
 
     //-----> LA FENICE <-----
     val feniceStat = remember { viewModel.getRitornoDiFiamma() }
+    val dittatoreStat = remember { viewModel.getDittatore() }
+    val predatoreStat = remember { viewModel.getPredatore() }
+    val testaATestaStat = remember { viewModel.getTestaATesta() }
+    val lumacaStat = remember { viewModel.getLumaca() }
+    val dieselStat = remember { viewModel.getDiesel() }
 
 
     // FUNZIONE DI SUPPORTO INTERNA: Crea l'effetto "comparsa e scivolamento"
@@ -184,6 +190,11 @@ fun ResultsScreen(
             inarrestabileStat = inarrestabileStat,
             gamberoStat = gamberoStat,
             feniceStat = feniceStat,
+            dittatoreStat = dittatoreStat,
+            predatoreStat = predatoreStat,
+            testaATestaStat = testaATestaStat,
+            lumacaStat = lumacaStat,
+            dieselStat = dieselStat,
             showAwardsInfoDialog = showAwardsInfoDialog,
             onShowAwardsInfoDialogChange = { showAwardsInfoDialog = it },
             isClosing = isClosing,
@@ -585,193 +596,14 @@ fun ResultsScreen(
                                 }
 
                                 // =========================================================
-                                // POPUP INFORMATIVO SUI PREMI (Standardized Surface Cards)
+                                // POPUP INFORMATIVO SUI PREMI (Componente Adattivo)
                                 // =========================================================
                                 if (showAwardsInfoDialog) {
-                                    val isAwardsLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-                                    if (isAwardsLandscape) {
-                                        // 🧠 ORIENTAMENTO ORIZZONTALE: Dialog 65%x90% a schede Surface riquadrate
-                                        Dialog(
-                                            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
-                                            properties = DialogProperties(usePlatformDefaultWidth = false)
-                                        ) {
-                                            Surface(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(0.65f)
-                                                    .fillMaxHeight(0.90f),
-                                                shape = RoundedCornerShape(24.dp),
-                                                color = MaterialTheme.colorScheme.background,
-                                                shadowElevation = 12.dp,
-                                                tonalElevation = 2.dp,
-                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                                            ) {
-                                                Column(
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .padding(20.dp),
-                                                    verticalArrangement = Arrangement.SpaceBetween
-                                                ) {
-                                                    Text(
-                                                        text = stringResource(R.string.titolo_guida_premi),
-                                                        style = MaterialTheme.typography.titleLarge,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.padding(bottom = 12.dp)
-                                                    )
-
-                                                    Column(
-                                                        modifier = Modifier
-                                                            .weight(1f)
-                                                            .fillMaxWidth()
-                                                            .verticalScroll(rememberScrollState()),
-                                                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                                                    ) {
-                                                        // SCHEDA 1: CECCHINO
-                                                        Surface(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            shape = RoundedCornerShape(16.dp),
-                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                        ) {
-                                                            Column(modifier = Modifier.padding(12.dp)) {
-                                                                Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                                Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                            }
-                                                        }
-
-                                                        // SCHEDA 2: INARRESTABILE
-                                                        Surface(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            shape = RoundedCornerShape(16.dp),
-                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                        ) {
-                                                            Column(modifier = Modifier.padding(12.dp)) {
-                                                                Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                                Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                            }
-                                                        }
-
-                                                        // SCHEDA 3: GAMBERO
-                                                        Surface(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            shape = RoundedCornerShape(16.dp),
-                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                        ) {
-                                                            Column(modifier = Modifier.padding(12.dp)) {
-                                                                Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                                Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                            }
-                                                        }
-
-                                                        // SCHEDA 4: FENICE
-                                                        Surface(
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            shape = RoundedCornerShape(16.dp),
-                                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                        ) {
-                                                            Column(modifier = Modifier.padding(12.dp)) {
-                                                                Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                                Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                            }
-                                                        }
-                                                    }
-
-                                                    Spacer(modifier = Modifier.height(12.dp))
-
-                                                    Button(
-                                                        onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                            showAwardsInfoDialog = false
-                                                        },
-                                                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                                                        shape = RoundedCornerShape(20.dp)
-                                                    ) {
-                                                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
-                                                        Spacer(Modifier.width(8.dp))
-                                                        AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                                                    }
-                                                }
-                                            }
+                                    AwardsGuideDialog(
+                                        onDismissRequest = {
+                                            showAwardsInfoDialog = false
                                         }
-                                    } else {
-                                        // 🧠 ORIENTAMENTO VERTICALE: AlertDialog con schede Surface riquadrate
-                                        AlertDialog(
-                                            onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
-                                            title = { Text(stringResource(R.string.titolo_guida_premi), fontWeight = FontWeight.Bold) },
-                                            text = {
-                                                Column(
-                                                    modifier = Modifier.verticalScroll(rememberScrollState()),
-                                                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                                                ) {
-                                                    Surface(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        shape = RoundedCornerShape(16.dp),
-                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                    ) {
-                                                        Column(modifier = Modifier.padding(12.dp)) {
-                                                            Text(stringResource(R.string.titolo_cecchino_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                            Text(stringResource(R.string.msg_cecchino), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                        }
-                                                    }
-
-                                                    Surface(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        shape = RoundedCornerShape(16.dp),
-                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                    ) {
-                                                        Column(modifier = Modifier.padding(12.dp)) {
-                                                            Text(stringResource(R.string.titolo_inarrestabile_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                            Text(stringResource(R.string.msg_inarrestabile), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                        }
-                                                    }
-
-                                                    Surface(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        shape = RoundedCornerShape(16.dp),
-                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                    ) {
-                                                        Column(modifier = Modifier.padding(12.dp)) {
-                                                            Text(stringResource(R.string.titolo_gambero_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                            Text(stringResource(R.string.msg_gambero), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                        }
-                                                    }
-
-                                                    Surface(
-                                                        modifier = Modifier.fillMaxWidth(),
-                                                        shape = RoundedCornerShape(16.dp),
-                                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                                    ) {
-                                                        Column(modifier = Modifier.padding(12.dp)) {
-                                                            Text(stringResource(R.string.titolo_fenice_guida), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                                            Text(stringResource(R.string.msg_fenice), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            confirmButton = {
-                                                Button(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                        showAwardsInfoDialog = false
-                                                    },
-                                                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                                                    shape = RoundedCornerShape(20.dp)
-                                                ) {
-                                                    Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
-                                                    Spacer(Modifier.width(8.dp))
-                                                    AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                                                }
-                                            }
-                                        )
-                                    }
+                                    )
                                 }
 
 
@@ -848,6 +680,96 @@ fun ResultsScreen(
                                         )
                                     )
                                 }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: IL DITTATORE 👑
+                            // ====================================================================
+                            dittatoreStat?.let { stat ->
+                                val (dictatorPlayer, turns) = stat
+                                Spacer(modifier = Modifier.height(8.dp))
+                                AwardCard(
+                                    icon = "👑",
+                                    title = stringResource(R.string.premio_dittatore),
+                                    playerName = dictatorPlayer.name,
+                                    playerColorInt = dictatorPlayer.color,
+                                    valueText = stringResource(R.string.label_turni, turns),
+                                    modifier = staggeredModifier(rankedPlayers.size + 7).padding(
+                                        horizontal = 4.dp
+                                    )
+                                )
+                            }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: IL PREDATORE 🐺
+                            // ====================================================================
+                            predatoreStat?.let { stat ->
+                                val (predatorPlayer, overtakes) = stat
+                                Spacer(modifier = Modifier.height(8.dp))
+                                AwardCard(
+                                    icon = "🐺",
+                                    title = stringResource(R.string.premio_predatore),
+                                    playerName = predatorPlayer.name,
+                                    playerColorInt = predatorPlayer.color,
+                                    valueText = stringResource(R.string.label_sorpassi, overtakes),
+                                    modifier = staggeredModifier(rankedPlayers.size + 8).padding(
+                                        horizontal = 4.dp
+                                    )
+                                )
+                            }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: TESTA A TESTA 🤝
+                            // ====================================================================
+                            testaATestaStat?.let { stat ->
+                                val (p1, p2) = stat
+                                Spacer(modifier = Modifier.height(8.dp))
+                                AwardCard(
+                                    icon = "🤝",
+                                    title = stringResource(R.string.premio_testa_a_testa),
+                                    playerName = stringResource(R.string.label_testa_a_testa_valore, p1.name, p2.name),
+                                    playerColorInt = p1.color,
+                                    valueText = "",
+                                    modifier = staggeredModifier(rankedPlayers.size + 9).padding(
+                                        horizontal = 4.dp
+                                    )
+                                )
+                            }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: LA LUMACA 🐌
+                            // ====================================================================
+                            lumacaStat?.let { stat ->
+                                val (snailPlayer, variations) = stat
+                                Spacer(modifier = Modifier.height(8.dp))
+                                AwardCard(
+                                    icon = "🐌",
+                                    title = stringResource(R.string.premio_lumaca),
+                                    playerName = snailPlayer.name,
+                                    playerColorInt = snailPlayer.color,
+                                    valueText = stringResource(R.string.label_variazioni, variations),
+                                    modifier = staggeredModifier(rankedPlayers.size + 10).padding(
+                                        horizontal = 4.dp
+                                    )
+                                )
+                            }
+
+                            // ====================================================================
+                            // STATISTICHE AVANZATE: IL DIESEL 🚂
+                            // ====================================================================
+                            dieselStat?.let { stat ->
+                                val (dieselPlayer, percentage) = stat
+                                Spacer(modifier = Modifier.height(8.dp))
+                                AwardCard(
+                                    icon = "🚂",
+                                    title = stringResource(R.string.premio_diesel),
+                                    playerName = dieselPlayer.name,
+                                    playerColorInt = dieselPlayer.color,
+                                    valueText = stringResource(R.string.label_percentuale, percentage),
+                                    modifier = staggeredModifier(rankedPlayers.size + 11).padding(
+                                        horizontal = 4.dp
+                                    )
+                                )
+                            }
                             }// <-- Fine della Column (ex LazyColumn)
                         } // <-- FINE DEL TAVOLO (Card contenitiva)
                     }
