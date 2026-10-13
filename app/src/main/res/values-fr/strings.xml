@@ -131,6 +131,7 @@
     <string name="msg_conferma_uscita">Si vous revenez à l\'Accueil, la progression actuelle sera perdue à jamais. Êtes-vous sûr de vouloir quitter ?</string>
     <string name="btn_conferma_uscita">Quitter</string>
     <string name="titolo_info_funzionalita">Infos fonctionnalités</string>
+    <string name="desc_info_funzionalita">Découvrez toutes les astuces et fonctionnalités cachées pour mieux gérer votre partie !</string>
     <string name="titolo_info_punteggio">🚀 Score Rapide</string>
     <string name="msg_info_punteggio">Maintenez le bouton \'+\' enfoncé pour ajouter rapidement 10 points ou le bouton \'-\' pour en retirer 5.</string>
     <string name="titolo_info_fire">🔥 Statut On Fire</string>
@@ -193,6 +194,7 @@
     <string name="label_vinta_da_con_punti">🏆 Gagnée par %1$s avec %2$d pt</string>
     <string name="desc_info_grafico">Infos Graphique</string>
     <string name="titolo_guida_grafico">Comment lire le graphique</string>
+    <string name="desc_guida_grafico">Apprenez à interpréter les lignes, les points et les dépassements dans la partie !</string>
     <string name="titolo_guida_punti">📈 Points (Axe Vertical)</string>
     <string name="msg_guida_punti">Plus la ligne monte, plus le score du joueur est élevé.</string>
     <string name="titolo_guida_tempo">⏱️ Temps (Axe Horizontal)</string>

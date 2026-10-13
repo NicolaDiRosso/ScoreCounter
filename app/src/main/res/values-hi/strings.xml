@@ -131,6 +131,7 @@
     <string name="msg_conferma_uscita">यदि आप होम पर वापस जाते हैं, तो वर्तमान प्रगति हमेशा के लिए खो जाएगी। क्या आप वाकई बाहर निकलना चाहते हैं?</string>
     <string name="btn_conferma_uscita">बाहर निकलें</string>
     <string name="titolo_info_funzionalita">सुविधा की जानकारी</string>
+    <string name="desc_info_funzionalita">अपने मैच को बेहतर ढंग से प्रबंधित करने के लिए सभी छिपे हुए ट्रिक्स और सुविधाओं की खोज करें!</string>
     <string name="titolo_info_punteggio">🚀 त्वरित स्कोर</string>
     <string name="msg_info_punteggio">तेज़ी से 10 अंक जोड़ने के लिए \'+\' बटन को या 5 अंक घटाने के लिए \'-\' बटन को दबाकर रखें।</string>
     <string name="titolo_info_fire">🔥 On Fire स्थिति</string>
@@ -193,6 +194,7 @@
     <string name="label_vinta_da_con_punti">🏆 %1$s द्वारा %2$d अंकों के साथ जीता गया</string>
     <string name="desc_info_grafico">चार्ट की जानकारी</string>
     <string name="titolo_guida_grafico">चार्ट को कैसे पढ़ें</string>
+    <string name="desc_guida_grafico">मैच में लाइनों, अंकों और ओवरटेक को समझना सीखें!</string>
     <string name="titolo_guida_punti">📈 अंक (लंबवत अक्ष)</string>
     <string name="msg_guida_punti">रेखा जितनी ऊपर जाएगी, खिलाड़ी का स्कोर उतना ही अधिक होगा।</string>
     <string name="titolo_guida_tempo">⏱️ समय (क्षैतिज अक्ष)</string>

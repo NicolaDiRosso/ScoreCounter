@@ -131,6 +131,7 @@
     <string name="msg_conferma_uscita">Wenn du zum Hauptmenü zurückkehrst, geht der aktuelle Fortschritt für immer verloren. Bist du sicher, dass du das Spiel verlassen willst?</string>
     <string name="btn_conferma_uscita">Verlassen</string>
     <string name="titolo_info_funzionalita">Funktions-Infos</string>
+    <string name="desc_info_funzionalita">Entdecke alle versteckten Tricks und Funktionen, um dein Spiel optimal zu verwalten!</string>
     <string name="titolo_info_punteggio">🚀 Schnelles Punkten</string>
     <string name="msg_info_punteggio">Halte die \'+ \'-Taste gedrückt, um schnell 10 Punkte hinzuzufügen, oder die \'- \'-Taste, um 5 Punkte abzuziehen.</string>
     <string name="titolo_info_fire">🔥 On Fire Status</string>
@@ -193,6 +194,7 @@
     <string name="label_vinta_da_con_punti">🏆 Gewonnen von %1$s mit %2$d Pkt.</string>
     <string name="desc_info_grafico">Diagramm-Infos</string>
     <string name="titolo_guida_grafico">So liest du das Diagramm</string>
+    <string name="desc_guida_grafico">Lerne, wie du Linien, Punkte und Überholmanöver im Spiel interpretierst!</string>
     <string name="titolo_guida_punti">📈 Punkte (Vertikale Achse)</string>
     <string name="msg_guida_punti">Je höher die Linie steigt, desto höher ist der Punktestand des Spielers.</string>
     <string name="titolo_guida_tempo">⏱️ Zeit (Horizontale Achse)</string>

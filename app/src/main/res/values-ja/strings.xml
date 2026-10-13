@@ -131,6 +131,7 @@
     <string name="msg_conferma_uscita">ホームに戻ると、現在の進行状況が永久に失われます。本当に終了しますか？</string>
     <string name="btn_conferma_uscita">終了</string>
     <string name="titolo_info_funzionalita">機能ガイド</string>
+    <string name="desc_info_funzionalita">試合を最大限に活用するための隠されたコツや機能をすべて発見しましょう！</string>
     <string name="titolo_info_punteggio">🚀 クイック加点</string>
     <string name="msg_info_punteggio">「+」ボタンを長押しすると素早く10点追加され、「-」ボタンを長押しすると5点引かれます。</string>
     <string name="titolo_info_fire">🔥 On Fire 状態</string>
@@ -193,6 +194,7 @@
     <string name="label_vinta_da_con_punti">🏆 %1$s が %2$d 点で勝利</string>
     <string name="desc_info_grafico">グラフ情報</string>
     <string name="titolo_guida_grafico">グラフの見方</string>
+    <string name="desc_guida_grafico">試合内の折れ線、ポイント、追い抜きを読解する方法を学びましょう！</string>
     <string name="titolo_guida_punti">📈 ポイント (縦軸)</string>
     <string name="msg_guida_punti">線が上にいくほど、プレイヤーのスコアが高いことを示します。</string>
     <string name="titolo_guida_tempo">⏱️ 時間 (横軸)</string>

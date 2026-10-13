@@ -138,6 +138,7 @@
     <string name="msg_conferma_uscita">Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?</string>
     <string name="btn_conferma_uscita">Esci</string>
     <string name="titolo_info_funzionalita">Info funzionalità</string>
+    <string name="desc_info_funzionalita">Scopri tutti i trucchi e le funzioni nascoste per gestire al meglio la tua partita!</string>
     <string name="titolo_info_punteggio">🚀 Punteggio Rapido</string>
     <string name="msg_info_punteggio">Tieni premuto il tasto \'+\' per aggiungere 10 punti o il tasto \'-\' per toglierne 5 in modo rapido.</string>
     <string name="titolo_info_fire">🔥 Stato On Fire</string>
@@ -231,6 +232,7 @@
     <string name="label_vinta_da_con_punti">🏆 Vinta da %1$s con %2$d pt</string>
     <string name="desc_info_grafico">Info Grafico</string>
     <string name="titolo_guida_grafico">Come leggere il grafico</string>
+    <string name="desc_guida_grafico">Scopri come interpretare le linee, i punti e i sorpassi della partita!</string>
     <string name="titolo_guida_punti">📈 Punti (Asse Verticale)</string>
     <string name="msg_guida_punti">Più la linea sale in alto, maggiore è il punteggio del giocatore.</string>
     <string name="titolo_guida_tempo">⏱️ Tempo (Asse Orizzontale)</string>

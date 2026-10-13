@@ -470,109 +470,13 @@ fun ResultsScreenLandscape(
             )
         }
 
-        // POPUP INFORMATIVO SULLA LETTURA DEL GRAFICO (Standardized Surface Cards)
+        // POPUP INFORMATIVO SULLA LETTURA DEL GRAFICO (Componente Adattivo)
         if (showChartInfoDialog) {
-            Dialog(
-                onDismissRequest = { }, // 🧠 BLOCCO CHIUSURA ACCIDENTALE
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth(0.65f)
-                        .fillMaxHeight(0.90f),
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.background,
-                    shadowElevation = 12.dp,
-                    tonalElevation = 2.dp,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.titolo_guida_grafico),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_guida_punti), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_guida_punti), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_guida_tempo), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_guida_tempo), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_guida_pallini), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_guida_pallini), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(stringResource(R.string.titolo_guida_sorpassi), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
-                                    Text(stringResource(R.string.msg_guida_sorpassi), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Justify)
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                showChartInfoDialog = false
-                            },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
-                            Spacer(Modifier.width(8.dp))
-                            AutoResizedText(stringResource(R.string.btn_ho_capito), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                        }
-                    }
+            ChartGuideDialog(
+                onDismissRequest = {
+                    showChartInfoDialog = false
                 }
-            }
+            )
         }
 
         // POPUP INFORMATIVO SUI PREMI (Standardized Surface Cards)

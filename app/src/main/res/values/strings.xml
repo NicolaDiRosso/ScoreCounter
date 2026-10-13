@@ -140,6 +140,7 @@
     <string name="msg_conferma_uscita">If you return to Home, current progress will be lost forever. Are you sure you want to exit?</string>
     <string name="btn_conferma_uscita">Exit</string>
     <string name="titolo_info_funzionalita">Feature Info</string>
+    <string name="desc_info_funzionalita">Discover all the hidden tricks and features to best manage your match!</string>
     <string name="titolo_info_punteggio">🚀 Quick Score</string>
     <string name="msg_info_punteggio">Press and hold the \'+\' button to quickly add 10 points or the \'-\' button to subtract 5.</string>
     <string name="titolo_info_fire">🔥 On Fire Status</string>
@@ -230,6 +231,7 @@
     <string name="label_vinta_da_con_punti">🏆 Won by %1$s with %2$d pt</string>
     <string name="desc_info_grafico">Chart Info</string>
     <string name="titolo_guida_grafico">How to read the chart</string>
+    <string name="desc_guida_grafico">Learn how to interpret lines, points, and overtakes in the match!</string>
     <string name="titolo_guida_punti">📈 Points (Vertical Axis)</string>
     <string name="msg_guida_punti">The higher the line goes, the higher the player\'s score.</string>
     <string name="titolo_guida_tempo">⏱️ Time (Horizontal Axis)</string>
