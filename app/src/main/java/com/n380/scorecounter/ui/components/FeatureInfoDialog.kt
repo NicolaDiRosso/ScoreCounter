@@ -1,0 +1,374 @@
+package com.n380.scorecounter.ui.components
+
+import android.content.res.Configuration
+import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.n380.scorecounter.R
+
+/**
+ * Modello interno per la lista delle funzionalità nella guida.
+ */
+private data class FeatureInfoItem(
+    val titleRes: Int,
+    val msgRes: Int
+)
+
+/**
+ * Lista completa delle 5 funzionalità guidate
+ */
+private val allFeatureItems = listOf(
+    FeatureInfoItem(R.string.titolo_info_punteggio, R.string.msg_info_punteggio),
+    FeatureInfoItem(R.string.titolo_info_fire, R.string.msg_info_fire),
+    FeatureInfoItem(R.string.titolo_info_manuale, R.string.msg_info_manuale),
+    FeatureInfoItem(R.string.titolo_info_dado, R.string.msg_info_dado),
+    FeatureInfoItem(R.string.titolo_info_timer, R.string.msg_info_timer)
+)
+
+/**
+ * ====================================================================
+ * DIALOG INFO FUNZIONALITA' ADATTIVO (Landscape & Portrait)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Questo dialog segue lo stesso identico Design System applicato alla Guida ai Premi:
+ * - Orizzontale (Landscape): Split-Screen responsivo a 2 pannelli con tasto ancorato in basso
+ * - Verticale (Portrait): Modal Dialog con lista di schede espandibili.
+ */
+@Composable
+fun FeatureInfoDialog(
+    onDismissRequest: () -> Unit
+) {
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape) {
+        FeatureInfoDialogLandscape(onDismissRequest = onDismissRequest)
+    } else {
+        FeatureInfoDialogPortrait(onDismissRequest = onDismissRequest)
+    }
+}
+
+/**
+ * LAYOUT ORIZZONTALE (Landscape Split-Screen)
+ */
+@Composable
+fun FeatureInfoDialogLandscape(
+    onDismissRequest: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+
+    Dialog(
+        onDismissRequest = { }, // Blocca la chiusura accidentale toccando fuori
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.92f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // PANNELLO SINISTRO (~28%): Intestazione + Pulsante ancorato in basso
+                Column(
+                    modifier = Modifier
+                        .weight(0.28f)
+                        .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = stringResource(R.string.desc_info_icon),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.titolo_info_funzionalita),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.desc_info_funzionalita),
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onDismissRequest()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        AutoResizedText(
+                            stringResource(R.string.btn_ho_capito),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+
+                // PANNELLO DESTRO (~72%): Bacheca a 2 colonne di schede espandibili
+                Surface(
+                    modifier = Modifier
+                        .weight(0.72f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        items(allFeatureItems) { item ->
+                            ExpandableFeatureCard(
+                                titleRes = item.titleRes,
+                                msgRes = item.msgRes
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * LAYOUT VERTICALE (Portrait)
+ */
+@Composable
+fun FeatureInfoDialogPortrait(
+    onDismissRequest: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+
+    Dialog(
+        onDismissRequest = { },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.85f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Intestazione
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(end = 8.dp)
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.titolo_info_funzionalita),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.desc_info_funzionalita),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Lista verticale delle schede espandibili
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(bottom = 12.dp)
+                    ) {
+                        items(allFeatureItems) { item ->
+                            ExpandableFeatureCard(
+                                titleRes = item.titleRes,
+                                msgRes = item.msgRes
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Pulsante inferiore
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismissRequest()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Icon(Icons.Filled.Check, null, modifier = Modifier.size(22.dp))
+                    Spacer(Modifier.width(8.dp))
+                    AutoResizedText(
+                        stringResource(R.string.btn_ho_capito),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * SCHEDA ESPANDIBILE PER LA SINGOLA FUNZIONALITA'
+ */
+@Composable
+fun ExpandableFeatureCard(
+    titleRes: Int,
+    msgRes: Int
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                isExpanded = !isExpanded
+            },
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(titleRes),
+                    fontWeight = FontWeight.ExtraBold,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column(modifier = Modifier.padding(top = 6.dp)) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(bottom = 6.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                    )
+                    Text(
+                        text = stringResource(msgRes),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+        }
+    }
+}
