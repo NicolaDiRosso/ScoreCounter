@@ -53,15 +53,33 @@
         // 🧠 REFACTORING: Spostato qui dalla Home! Appartiene solo a questa schermata.
         var showAwardsInfoDialog by rememberSaveable { mutableStateOf(false) }
 
-        //Controllo visibilità della guida alla lettura del grafico.
+        // Controllo visibilità della guida alla lettura del grafico.
         var showChartInfoDialog by rememberSaveable { mutableStateOf(false) }
 
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            // Riportiamo il colore a solido (senza alpha) perché lo sfondo a icone
-            // riempirà visivamente lo spazio.
-            color = MaterialTheme.colorScheme.background
-        ) {
+        val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        if (isLandscape) {
+            // ====================================================================
+            // ORIENTAMENTO ORIZZONTALE (LANDSCAPE) -> DELEGATO A MatchAnalysisOverlayLandscape.kt
+            // ====================================================================
+            MatchAnalysisOverlayLandscape(
+                match = match,
+                showAwardsInfoDialog = showAwardsInfoDialog,
+                onShowAwardsInfoDialogChange = { showAwardsInfoDialog = it },
+                showChartInfoDialog = showChartInfoDialog,
+                onShowChartInfoDialogChange = { showChartInfoDialog = it },
+                onClose = onClose
+            )
+        } else {
+            // ====================================================================
+            // ORIENTAMENTO VERTICALE (PORTRAIT) -> OVERLAY STANDARD
+            // ====================================================================
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                // Riportiamo il colore a solido (senza alpha) perché lo sfondo a icone
+                // riempirà visivamente lo spazio.
+                color = MaterialTheme.colorScheme.background
+            ) {
             // 🧠 LEZIONE Z-INDEX: Il Box ci permette di sovrapporre i livelli.
             Box(modifier = Modifier.fillMaxSize()) {
 
@@ -804,3 +822,4 @@
             }
         }
     }
+}

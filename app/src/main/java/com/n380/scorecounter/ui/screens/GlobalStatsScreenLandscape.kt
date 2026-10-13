@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -41,18 +43,10 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
  * 🧠 CONCETTI TEORICI CHIAVE DI JETPACK COMPOSE (REATTIVITÀ ORIZZONTALE):
  *
  * 1. ARCHITETTURA A 2 PANNELLI (Row + Weights):
- *    - Pannello Sinistro (weight = 0.36f): Contiene il Titolo, la Card del Campione Assoluto,
- *      il Riepilogo Generale delle partite/tempo ed il pulsante "Chiudi Statistiche" distanziato in basso.
+ *    - Pannello Sinistro (weight = 0.36f): Contiene il Titolo, la Tavola contenitiva SurfaceVariant
+ *      con Campione Assoluto e Riepilogo Generale, ed il pulsante "Chiudi Statistiche" distanziato in basso.
  *    - Pannello Destro (weight = 0.64f): Contiene una Griglia Adattiva a 2-3 colonne (LazyVerticalGrid)
- *      che mostra tutte le schede dei record dettagliati senza icone doppie (gli emoji sono già nei titoli).
- *
- * 2. WINDOW INSETS & HARDWARE CUTOUT (displayCutoutPadding):
- *    Garantisce che il titolo o le schede a sinistra non finiscano mai sotto il foro
- *    o la tacca (punch-hole/notch) della fotocamera frontale dello smartphone.
- *
- * 3. GRIGLIA ADATTIVA E MULTI-DISPOSITIVO (GridCells.Adaptive):
- *    `GridCells.Adaptive(minSize = 220.dp)` organizza le schede dei record in 2 colonne sugli smartphone
- *    e in 3 o 4 colonne sui tablet in modo fluido e dinamico.
+ *      che mostra tutte le schede dei record dettagliati senza icone doppie.
  * ====================================================================
  */
 @Composable
@@ -65,7 +59,7 @@ fun GlobalStatsScreenLandscape(
     var isClosing by remember { mutableStateOf(false) }
 
     // --------------------------------------------------------------------
-    // MATEMATICA E CALCOLO DEI RECORD STORICI (STESSA LOGICA DEL PORTRAIT)
+    // MATEMATICA E CALCOLO DEI RECORD STORICI
     // --------------------------------------------------------------------
     val totalMatches = viewModel.history.size
     val totalSeconds = viewModel.history.sumOf { it.durationSeconds }
@@ -116,229 +110,251 @@ fun GlobalStatsScreenLandscape(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // ====================================================================
-        // 🏛️ PANNELLO DI SINISTRA: TITOLO, CAMPIONE, RIEPILOGO E TASTO CHIUDI
+        // 🏛️ PANNELLO DI SINISTRA: TITOLO, TAVOLA CONTENITIVA E TASTO CHIUDI
         // ====================================================================
         Column(
             modifier = Modifier
                 .weight(0.36f)
                 .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween // Distanzia armoniosamente il blocco superiore dal tasto Chiudi
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            // TITOLO DELLA PAGINA "Statistiche Partite"
+            AutoResizedText(
+                text = stringResource(R.string.titolo_statistiche_partite),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp, start = 2.dp)
+            )
+
+            // ------------------------------------------------------------
+            // TAVOLA CONTENITIVA (SURFACE VARIANT 24dp): RAGGRUPPA CAMPIONE & RIEPILOGO
+            // ------------------------------------------------------------
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(bottom = 10.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(24.dp)
             ) {
-                // TITOLO DELLA PAGINA
-                AutoResizedText(
-                    text = stringResource(R.string.titolo_statistiche_partite),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // ------------------------------------------------------------
-                // CARD 1: CAMPIONE ASSOLUTO (Sfondo Primario + Animazione Shimmer)
-                // ------------------------------------------------------------
-                val infiniteTransition = rememberInfiniteTransition(label = "shimmer_campione_land")
-                val translateAnim by infiniteTransition.animateFloat(
-                    initialValue = -500f,
-                    targetValue = 2000f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(durationMillis = 4500, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
-                    ),
-                    label = "shimmer_translation_campione_land"
-                )
-                val shimmerColor = MaterialTheme.colorScheme.primary
-                val shimmerBrush = Brush.linearGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        shimmerColor.copy(alpha = 0.3f),
-                        Color.Transparent
-                    ),
-                    start = Offset(translateAnim, translateAnim),
-                    end = Offset(translateAnim + 400f, translateAnim + 400f)
-                )
-
-                Card(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .drawWithContent {
-                            drawContent()
-                            drawRect(brush = shimmerBrush)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    shape = RoundedCornerShape(20.dp)
+                        .fillMaxSize()
+                        .padding(12.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Box(
+                    // ------------------------------------------------------------
+                    // CARD 1: CAMPIONE ASSOLUTO (Sfondo Primario + Animazione Shimmer)
+                    // ------------------------------------------------------------
+                    val infiniteTransition = rememberInfiniteTransition(label = "shimmer_campione_land")
+                    val translateAnim by infiniteTransition.animateFloat(
+                        initialValue = -500f,
+                        targetValue = 2000f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 4500, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
+                        ),
+                        label = "shimmer_translation_campione_land"
+                    )
+                    val shimmerColor = MaterialTheme.colorScheme.primary
+                    val shimmerBrush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            shimmerColor.copy(alpha = 0.3f),
+                            Color.Transparent
+                        ),
+                        start = Offset(translateAnim, translateAnim),
+                        end = Offset(translateAnim + 400f, translateAnim + 400f)
+                    )
+
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(14.dp)
+                            .drawWithContent {
+                                drawContent()
+                                drawRect(brush = shimmerBrush)
+                            },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        shape = RoundedCornerShape(20.dp)
                     ) {
-                        // Medaglia gigante in sottofondo
-                        Icon(
-                            imageVector = Icons.Filled.WorkspacePremium,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.25f),
+                        Box(
                             modifier = Modifier
-                                .size(85.dp)
-                                .align(Alignment.CenterEnd)
-                                .offset(x = 10.dp)
-                        )
+                                .fillMaxWidth()
+                                .padding(14.dp)
+                        ) {
+                            // Medaglia gigante in sottofondo
+                            Icon(
+                                imageVector = Icons.Filled.WorkspacePremium,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.25f),
+                                modifier = Modifier
+                                    .size(85.dp)
+                                    .align(Alignment.CenterEnd)
+                                    .offset(x = 10.dp)
+                            )
 
-                        Column(modifier = Modifier.fillMaxWidth(0.75f)) {
-                            AutoResizedText(
-                                text = stringResource(R.string.titolo_campione_assoluto),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                            AutoResizedText(
-                                text = bestPlayer?.key ?: stringResource(R.string.nessuno),
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Black,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(vertical = 2.dp)
-                            )
-                            Surface(
-                                modifier = Modifier.padding(top = 4.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.primary,
-                                shadowElevation = 2.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                            Column(modifier = Modifier.fillMaxWidth(0.75f)) {
+                                AutoResizedText(
+                                    text = stringResource(R.string.titolo_campione_assoluto),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                                AutoResizedText(
+                                    text = bestPlayer?.key ?: stringResource(R.string.nessuno),
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                )
+                                Surface(
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shadowElevation = 2.dp
                                 ) {
-                                    Icon(
-                                        Icons.Filled.EmojiEvents,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.size(18.dp).padding(end = 4.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.label_vittorie, bestPlayer?.value ?: 0),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = MaterialTheme.colorScheme.onPrimary
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.EmojiEvents,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                            modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.label_vittorie, bestPlayer?.value ?: 0),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // ------------------------------------------------------------
-                // CARD 2: RIEPILOGO GENERALE (Partite Giocate e Tempo Totale)
-                // ------------------------------------------------------------
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(18.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = stringResource(R.string.titolo_riepilogo_generale),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Filled.Style,
-                                    null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                AutoResizedText(
-                                    text = stringResource(R.string.label_partite_giocate),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(start = 6.dp)
-                                )
-                            }
+                    // ------------------------------------------------------------
+                    // CARD 2: RIEPILOGO GENERALE (Partite Giocate e Tempo Totale)
+                    // ------------------------------------------------------------
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(18.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "$totalMatches",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 6.dp),
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Filled.Timer,
-                                    null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                AutoResizedText(
-                                    text = stringResource(R.string.label_tempo_giocato),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(start = 6.dp)
-                                )
-                            }
-                            Text(
-                                text = formatTime(totalSeconds),
+                                text = stringResource(R.string.titolo_riepilogo_generale),
                                 style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
                             )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Filled.Style,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    AutoResizedText(
+                                        text = stringResource(R.string.label_partite_giocate),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(start = 6.dp)
+                                    )
+                                }
+                                Text(
+                                    text = "$totalMatches",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 6.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Filled.Timer,
+                                        null,
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    AutoResizedText(
+                                        text = stringResource(R.string.label_tempo_giocato),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(start = 6.dp)
+                                    )
+                                }
+                                Text(
+                                    text = formatTime(totalSeconds),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }
             }
 
             // ------------------------------------------------------------
-            // PULSANTE × CHIUDI STATISTICHE (Ancorato in Basso con Spaziatura)
+            // PULSANTE × CHIUDI STATISTICHE (Ancorato in Basso con Spaziatura Pulita)
             // ------------------------------------------------------------
-            Button(
-                onClick = {
-                    if (!isClosing) {
-                        isClosing = true
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateBack()
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
+            Surface(
+                color = MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
                 shape = RoundedCornerShape(20.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = stringResource(R.string.desc_chiudi_icon),
-                    modifier = Modifier.padding(end = 6.dp).size(22.dp)
-                )
-                AutoResizedText(
-                    text = stringResource(R.string.btn_chiudi_statistiche),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Button(
+                    onClick = {
+                        if (!isClosing) {
+                            isClosing = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateBack()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.desc_chiudi_icon),
+                        modifier = Modifier.padding(end = 6.dp).size(22.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.btn_chiudi_statistiche),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
 
@@ -359,7 +375,7 @@ fun GlobalStatsScreenLandscape(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // 1. RECORD DI PUNTI (La stringa R.string.titolo_record_punti contiene già l'emoji 🔝)
+                // 1. RECORD DI PUNTI
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_record_punti),
@@ -407,7 +423,7 @@ fun GlobalStatsScreenLandscape(
                     }
                 }
 
-                // 2. LA PARTITA INFINITA (La stringa R.string.titolo_partita_infinita contiene già l'emoji ⏳)
+                // 2. LA PARTITA INFINITA
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_partita_infinita),
@@ -454,7 +470,7 @@ fun GlobalStatsScreenLandscape(
                     }
                 }
 
-                // 3. IL DITTATORE (La stringa R.string.titolo_dittatore contiene già l'emoji 👑)
+                // 3. IL DITTATORE
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_dittatore),
@@ -502,7 +518,7 @@ fun GlobalStatsScreenLandscape(
                     }
                 }
 
-                // 4. IL PIROMANE (La stringa R.string.titolo_piromane contiene già l'emoji 🔥)
+                // 4. IL PIROMANE
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_piromane),
@@ -541,7 +557,7 @@ fun GlobalStatsScreenLandscape(
                     }
                 }
 
-                // 5. MIGLIOR CECCHINO (La stringa R.string.titolo_miglior_cecchino contiene già l'emoji 🎯)
+                // 5. MIGLIOR CECCHINO
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_miglior_cecchino)
@@ -575,7 +591,7 @@ fun GlobalStatsScreenLandscape(
                     }
                 }
 
-                // 6. IL RE DEI GAMBERI (La stringa R.string.titolo_re_gamberi contiene già l'emoji 🦞)
+                // 6. IL RE DEI GAMBERI
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_re_gamberi)
@@ -609,7 +625,7 @@ fun GlobalStatsScreenLandscape(
                     }
                 }
 
-                // 7. FENICE SUPREMA (La stringa R.string.titolo_fenice_suprema contiene già l'emoji 🦅)
+                // 7. FENICE SUPREMA
                 item {
                     GlobalStatCardClean(
                         title = stringResource(R.string.titolo_fenice_suprema)
@@ -648,29 +664,26 @@ fun GlobalStatsScreenLandscape(
 }
 
 /**
- * ====================================================================
- * COMPONENTE DIDATTICO: GlobalStatCardClean
- * ====================================================================
- * Card pulita per mostrare un record singolo senza icone doppiamente inserite.
- * Il titolo contiene già gli emoji del tema (es. 🔝, ⏳, 👑, 🔥, 🎯, 🦞, 🦅).
- * ====================================================================
+ * COMPONENTE SCHEDA RECORD PULITA
  */
 @Composable
 private fun GlobalStatCardClean(
     title: String,
     isExpanded: Boolean = false,
     onToggleExpand: (() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (onToggleExpand != null) Modifier.clickable { onToggleExpand() } else Modifier
+                if (onToggleExpand != null) Modifier.clickable {
+                    onToggleExpand()
+                } else Modifier
             ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(18.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -680,17 +693,16 @@ private fun GlobalStatCardClean(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
+                    fontWeight = FontWeight.Bold
                 )
                 if (onToggleExpand != null) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

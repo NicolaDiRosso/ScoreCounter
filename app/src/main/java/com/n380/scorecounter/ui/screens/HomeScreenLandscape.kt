@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -118,81 +120,93 @@ fun HomeScreenLandscape(
         horizontalArrangement = Arrangement.spacedBy(16.dp) // Distanza tra pannello sinistro e destro
     ) {
         // ====================================================================
-        // 🏛️ PANNELLO DI SINISTRA: TITOLO, 3 SCHEDE AZIONE ESTESE E NUOVA SFIDA
+        // 🏛️ PANNELLO DI SINISTRA: TITOLO, TAVOLA CONTENITIVA E NUOVA SFIDA
         // ====================================================================
-        // 🧠 TEORIA WEIGHT: Modifier.weight(0.38f) assegna esattamente il 38% della larghezza totale dello schermo a questo pannello.
         Column(
             modifier = Modifier
                 .weight(0.38f)
                 .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween // Distribuisce lo spazio in modo che il tasto "+ Nuova Sfida" vada in fondo
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // TITOLO SCHERMATA
-                // 🧠 TEORIA AUTORESIZEDTEXT: Calcola dinamicamente lo spazio orizzontale in Dp
-                // e riduce il font sp qualora l'utente abbia impostato un testo gigante nelle impostazioni di sistema.
-                AutoResizedText(
-                    text = stringResource(R.string.titolo_storico_sfide),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp)
-                )
+            // TITOLO DELLA PAGINA "Storico Sfide"
+            AutoResizedText(
+                text = stringResource(R.string.titolo_storico_sfide),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp, start = 2.dp)
+            )
 
-                // ------------------------------------------------------------
-                // CARD AZIONE 1: STATISTICHE GLOBALI
-                // ------------------------------------------------------------
-                if (viewModel.history.isNotEmpty()) {
+            // ------------------------------------------------------------
+            // TAVOLA CONTENITIVA (SURFACE VARIANT 24dp): RAGGRUPPA LE 3 SCHEDE AZIONE
+            // ------------------------------------------------------------
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(bottom = 10.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 1: STATISTICHE GLOBALI
+                    // ------------------------------------------------------------
+                    if (viewModel.history.isNotEmpty()) {
+                        HomeLandscapeActionCard(
+                            icon = Icons.Filled.BarChart,
+                            title = stringResource(R.string.title_statistiche_landscape),
+                            subtitle = stringResource(R.string.subtitle_statistiche_landscape),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            iconBackgroundColor = MaterialTheme.colorScheme.primary,
+                            iconTintColor = MaterialTheme.colorScheme.onPrimary,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onNavigateToStats()
+                            }
+                        )
+                    }
+
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 2: SOSTIENI SCORHUNTER (DONAZIONE)
+                    // ------------------------------------------------------------
                     HomeLandscapeActionCard(
-                        icon = Icons.Filled.BarChart,
-                        title = stringResource(R.string.title_statistiche_landscape),
-                        subtitle = stringResource(R.string.subtitle_statistiche_landscape),
+                        icon = Icons.Filled.Favorite,
+                        title = stringResource(R.string.title_sostieni_landscape),
+                        subtitle = stringResource(R.string.subtitle_sostieni_landscape),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
+                        iconTintColor = MaterialTheme.colorScheme.onTertiary,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onShowDonationDialog()
+                        }
+                    )
+
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 3: INFO APP & FEEDBACK
+                    // ------------------------------------------------------------
+                    HomeLandscapeActionCard(
+                        icon = Icons.AutoMirrored.Filled.Help,
+                        title = stringResource(R.string.title_info_landscape),
+                        subtitle = stringResource(R.string.subtitle_info_landscape),
                         containerColor = MaterialTheme.colorScheme.surface,
                         iconBackgroundColor = MaterialTheme.colorScheme.primary,
                         iconTintColor = MaterialTheme.colorScheme.onPrimary,
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onNavigateToStats()
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onShowAboutDialog()
                         }
                     )
                 }
-
-                // ------------------------------------------------------------
-                // CARD AZIONE 2: SOSTIENI SCORHUNTER (DONAZIONE)
-                // ------------------------------------------------------------
-                HomeLandscapeActionCard(
-                    icon = Icons.Filled.Favorite,
-                    title = stringResource(R.string.title_sostieni_landscape),
-                    subtitle = stringResource(R.string.subtitle_sostieni_landscape),
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
-                    iconTintColor = MaterialTheme.colorScheme.onTertiary,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onShowDonationDialog()
-                    }
-                )
-
-                // ------------------------------------------------------------
-                // CARD AZIONE 3: INFO APP & FEEDBACK
-                // ------------------------------------------------------------
-                HomeLandscapeActionCard(
-                    icon = Icons.AutoMirrored.Filled.Help,
-                    title = stringResource(R.string.title_info_landscape),
-                    subtitle = stringResource(R.string.subtitle_info_landscape),
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    iconBackgroundColor = MaterialTheme.colorScheme.primary,
-                    iconTintColor = MaterialTheme.colorScheme.onPrimary,
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onShowAboutDialog()
-                    }
-                )
             }
 
             // ------------------------------------------------------------
