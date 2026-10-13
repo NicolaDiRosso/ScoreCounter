@@ -1,6 +1,5 @@
-package com.n380.scorecounter.ui.screens
+package com.n380.scorecounter.ui.screens.landscape
 
-import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -20,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource

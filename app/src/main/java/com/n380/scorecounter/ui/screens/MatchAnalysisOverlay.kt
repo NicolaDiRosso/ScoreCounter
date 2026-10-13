@@ -34,6 +34,7 @@
     import com.n380.scorecounter.ui.components.PatternedBackground
     import com.n380.scorecounter.ui.components.ScoreChart
     import com.n380.scorecounter.ui.components.formatTime
+    import com.n380.scorecounter.ui.screens.landscape.MatchAnalysisOverlayLandscape
 
     /**
      * ====================================================================

@@ -47,6 +47,7 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.n380.scorecounter.ui.screens.landscape.GlobalStatsScreenLandscape
 
 /**
  * ====================================================================

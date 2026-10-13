@@ -1,4 +1,4 @@
-package com.n380.scorecounter.ui.screens
+package com.n380.scorecounter.ui.screens.landscape
 
 import android.content.Context
 import android.view.View
@@ -24,6 +24,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -53,6 +54,7 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 
 /**
  * ====================================================================
@@ -284,9 +286,9 @@ private fun HomeLandscapeActionCard(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    containerColor: androidx.compose.ui.graphics.Color,
-    iconBackgroundColor: androidx.compose.ui.graphics.Color,
-    iconTintColor: androidx.compose.ui.graphics.Color,
+    containerColor: Color,
+    iconBackgroundColor: Color,
+    iconTintColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -708,7 +710,7 @@ private fun HomeHistoryGridTableContent(
                                         AutoResizedText(
                                             text = stringResource(
                                                 R.string.label_data_ora_partita,
-                                                timeFormatter.format(java.util.Date(record.timestamp)),
+                                                timeFormatter.format(Date(record.timestamp)),
                                                 if (record.timestamp > 0L) formatDate(record.timestamp) else ""
                                             ),
                                             style = MaterialTheme.typography.bodySmall,

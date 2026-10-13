@@ -48,6 +48,7 @@ import com.n380.scorecounter.ui.components.launchShareIntentWithImage
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.launch
 import android.view.View
+import com.n380.scorecounter.ui.screens.landscape.ResultsScreenLandscape
 
 // ====================================================================
 // LA SCHERMATA DELLA CLASSIFICA (RISULTATI) - VERSIONE ANIMATA

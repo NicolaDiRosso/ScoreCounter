@@ -48,6 +48,7 @@
     import com.n380.scorecounter.model.Player
     import com.n380.scorecounter.ui.components.PlayerScoreCard
     import com.n380.scorecounter.ui.components.formatTime
+    import com.n380.scorecounter.ui.screens.landscape.CounterScreenLandscape
     import com.n380.scorecounter.viewmodel.MatchViewModel
     import kotlinx.coroutines.delay
 

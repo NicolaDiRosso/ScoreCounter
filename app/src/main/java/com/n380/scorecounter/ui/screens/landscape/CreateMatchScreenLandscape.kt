@@ -1,4 +1,4 @@
-package com.n380.scorecounter.ui.screens
+package com.n380.scorecounter.ui.screens.landscape
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*

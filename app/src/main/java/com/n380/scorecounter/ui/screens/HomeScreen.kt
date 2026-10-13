@@ -68,6 +68,7 @@ import com.n380.scorecounter.ui.components.formatDate
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.launchShareIntent
 import com.n380.scorecounter.ui.components.launchShareIntentWithImage
+import com.n380.scorecounter.ui.screens.landscape.HomeScreenLandscape
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
