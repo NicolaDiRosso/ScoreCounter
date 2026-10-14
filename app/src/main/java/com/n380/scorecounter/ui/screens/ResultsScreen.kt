@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import android.view.View
 import com.n380.scorecounter.ui.screens.landscape.ResultsScreenLandscape
 import com.n380.scorecounter.ui.screens.landscape.AwardsGuideDialog
+import com.n380.scorecounter.ui.components.ChartGuideDialog
 
 // ====================================================================
 // LA SCHERMATA DELLA CLASSIFICA (RISULTATI) - VERSIONE ANIMATA
@@ -120,6 +121,9 @@ fun ResultsScreen(
     // Variabile di Stato per controllare la visibilità del popup informativo sui premi
     // Parte su 'false' così il popup è nascosto di default.
     var showAwardsInfoDialog by remember { mutableStateOf(false) }
+
+    // Variabile di Stato per controllare la visibilità del popup guida grafico
+    var showChartInfoDialog by remember { mutableStateOf(false) }
 
     // 🧠 FIX WARNING: Estraiamo la stringa di fallback qui, nel contesto Composable corretto.
     // In questo modo evitiamo di usare context.getString() dentro l'onClick, risolvendo l'avviso dell'IDE.
@@ -490,6 +494,21 @@ fun ResultsScreen(
                                     )
                                     // Molla spaziale (Weight): Spinge il pulsante seguente a destra
                                     Spacer(modifier = Modifier.weight(1f))
+
+                                    // TASTO INFO PER GUIDA GRAFICO
+                                    IconButton(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            showChartInfoDialog = true
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Info,
+                                            contentDescription = stringResource(R.string.desc_info_grafico),
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
 
                                 val recordsForChart = viewModel.players.map {
@@ -793,6 +812,15 @@ fun ResultsScreen(
                     onAnimationFinished = {
                         // Quando l'animazione ha finito, settiamo a false così smette di disegnare
                         showConfetti = false
+                    }
+                )
+            }
+
+            // POPUP GUIDA GRAFICO
+            if (showChartInfoDialog) {
+                ChartGuideDialog(
+                    onDismissRequest = {
+                        showChartInfoDialog = false
                     }
                 )
             }

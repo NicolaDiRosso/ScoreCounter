@@ -1,9 +1,7 @@
 package com.n380.scorecounter.ui.components
 
 import android.content.res.Configuration
-import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -16,8 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,7 +24,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -57,9 +52,9 @@ private val allChartItems = listOf(
  * DIALOG GUIDA GRAFICO ADATTIVO (Landscape & Portrait)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
- * Segue la stessa architettura reattiva dei dialog principali:
- * - Orizzontale (Landscape): Split-Screen a 2 pannelli
- * - Verticale (Portrait): Modal Dialog con schede espandibili.
+ * Schede sempre visibili ed espanse per consultazione immediata dei 4 concetti chiave:
+ * - Orizzontale (Landscape): Split-Screen a 2 pannelli con griglia a 2 colonne
+ * - Verticale (Portrait): Modal Dialog con schede direttamente visibili.
  */
 @Composable
 fun ChartGuideDialog(
@@ -163,7 +158,7 @@ fun ChartGuideDialogLandscape(
                     }
                 }
 
-                // PANNELLO DESTRO (~72%): Griglia a 2 colonne delle schede del grafico
+                // PANNELLO DESTRO (~72%): Griglia a 2 colonne delle schede del grafico con testo direttamente visibile
                 Surface(
                     modifier = Modifier
                         .weight(0.72f)
@@ -182,7 +177,7 @@ fun ChartGuideDialogLandscape(
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         items(allChartItems) { item ->
-                            ExpandableChartCard(
+                            ChartGuideCard(
                                 titleRes = item.titleRes,
                                 msgRes = item.msgRes
                             )
@@ -250,7 +245,7 @@ fun ChartGuideDialogPortrait(
                     }
                 }
 
-                // Lista verticale di schede espandibili
+                // Lista verticale di schede con testo direttamente visibile
                 Surface(
                     modifier = Modifier
                         .weight(1f)
@@ -267,7 +262,7 @@ fun ChartGuideDialogPortrait(
                         contentPadding = PaddingValues(bottom = 12.dp)
                     ) {
                         items(allChartItems) { item ->
-                            ExpandableChartCard(
+                            ChartGuideCard(
                                 titleRes = item.titleRes,
                                 msgRes = item.msgRes
                             )
@@ -302,23 +297,15 @@ fun ChartGuideDialogPortrait(
 }
 
 /**
- * SCHEDA ESPANDIBILE PER IL SINGOLO PUNTO GUIDA DEL GRAFICO
+ * SCHEDA SEMPRE ESPANSA CON INFORMAZIONI SUBITO VISIBILI
  */
 @Composable
-fun ExpandableChartCard(
+fun ChartGuideCard(
     titleRes: Int,
     msgRes: Int
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-    val haptic = LocalHapticFeedback.current
-
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                isExpanded = !isExpanded
-            },
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
@@ -326,48 +313,25 @@ fun ExpandableChartCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp)
+                .padding(12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(titleRes),
-                    fontWeight = FontWeight.ExtraBold,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Icon(
-                    imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column(modifier = Modifier.padding(top = 6.dp)) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(bottom = 6.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
-                    )
-                    Text(
-                        text = stringResource(msgRes),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Start
-                    )
-                }
-            }
+            Text(
+                text = stringResource(titleRes),
+                fontWeight = FontWeight.ExtraBold,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            HorizontalDivider(
+                modifier = Modifier.padding(bottom = 6.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+            )
+            Text(
+                text = stringResource(msgRes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Start
+            )
         }
     }
 }
