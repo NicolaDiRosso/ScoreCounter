@@ -1,6 +1,8 @@
 package com.n380.scorecounter.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -12,16 +14,20 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.n380.scorecounter.dataStore
 import com.n380.scorecounter.model.MatchBackup
 import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.model.PlayerRecord
+import com.n380.scorecounter.model.ScoreCounterBackup
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 // 2. IL VIEWMODEL è il VERO cervello dell'app.
@@ -45,6 +51,13 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // significa che qualcuno ha segnato un punto (positivo o negativo) o che la partita non è vergine.
     val canEndMatch: Boolean
         get() = players.any { it.scoreHistory.size > 1 }
+
+    // 🧠 CONTROLLO DATI SALVATI LOCALI
+    // Questa proprietà controlla se l'applicazione contiene già dei dati salvati in memoria
+    // (partite concluse nello storico, giocatori salvati nei preferiti o titoli personalizzati).
+    // Usata per mostrare un avviso prima di sovrascrivere tutto durante l'importazione.
+    val hasSavedData: Boolean
+        get() = history.isNotEmpty() || favoriteNames.isNotEmpty() || matchTitleHistory.isNotEmpty()
 
     val players = mutableStateListOf<Player>()
     val history = mutableStateListOf<MatchRecord>()
@@ -1018,6 +1031,175 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         return if (bestDiesel != null) Pair(bestDiesel, (maxSecondHalfPercentage * 100).toInt()) else null
+    }
+
+    /**
+     * ====================================================================
+     * SALVATAGGIO COMPLETO DI TUTTI I DATI NEL DATASTORE
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Questa funzione scrive in modo asincrono nel DataStore di Android sia lo storico delle partite,
+     * sia la lista dei giocatori preferiti, sia la cronologia dei titoli personalizzati.
+     * Viene chiamata subito dopo un'importazione da file di backup per garantire la persistenza locale.
+     */
+    private fun saveAllToDataStore() {
+        viewModelScope.launch {
+            val historyJson = gson.toJson(history)
+            val favsJson = gson.toJson(favoriteNames)
+            val titlesJson = gson.toJson(matchTitleHistory)
+
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[historyKey] = historyJson
+                prefs[favoritesKey] = favsJson
+                prefs[titleHistoryKey] = titlesJson
+            }
+        }
+    }
+
+    /**
+     * ====================================================================
+     * ESPORTAZIONE SALVATAGGI IN FILE JSON ESTERNO
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Questa funzione raccoglie l'intera memoria dell'app (storico partite, preferiti, titoli)
+     * e la trasforma in un file di testo JSON in chiaro e formattato con rientri (Pretty-Printing).
+     *
+     * @param context Il contesto Android per accedere al ContentResolver di sistema.
+     * @param uri L'indirizzo URI del file selezionato o creato dall'utente tramite SAF.
+     * @param onSuccess Callback invocata quando l'esportazione si conclude con successo.
+     * @param onError Callback invocata in caso di errore di scrittura.
+     */
+    fun exportBackupToUri(
+        context: Context,
+        uri: Uri,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        // Avviamo una coroutine sul thread I/O per non bloccare l'interfaccia grafica durante la scrittura su disco
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 1. Creiamo l'oggetto contenitore del backup
+                val backupData = ScoreCounterBackup(
+                    version = 1,
+                    timestamp = System.currentTimeMillis(),
+                    history = history.toList(),
+                    favoriteNames = favoriteNames.toList(),
+                    matchTitleHistory = matchTitleHistory.toList()
+                )
+
+                // 2. Usiamo GsonBuilder con PrettyPrinting per creare un file JSON leggibile e pulito
+                val prettyGson = GsonBuilder().setPrettyPrinting().create()
+                val jsonString = prettyGson.toJson(backupData)
+
+                // 3. Scriviamo il testo nel file esterno tramite lo Storage Access Framework (SAF)
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    outputStream.write(jsonString.toByteArray(Charsets.UTF_8))
+                }
+
+                // Torniamo sul thread principale per aggiornare la UI e notificare l'utente
+                withContext(Dispatchers.Main) {
+                    onSuccess()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError(e.localizedMessage ?: "Errore durante l'esportazione del file")
+                }
+            }
+        }
+    }
+
+    /**
+     * ====================================================================
+     * IMPORTAZIONE E RIPRISTINO SALVATAGGI DA FILE JSON ESTERNO
+     * ====================================================================
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Questa funzione legge un file JSON esterno selezionato dall'utente e ripristina la memoria dell'app.
+     *
+     * Supporta due modalità d'importazione:
+     * - `isMerge == true` (UNIONE): Aggiunge le partite e i preferiti del file che non sono ancora presenti
+     *   nella memoria locale, senza cancellare o duplicare nulla.
+     * - `isMerge == false` (SOSTITUZIONE): Cancella i dati attuali e li rimpiazza con quelli del file.
+     *
+     * @param context Il contesto Android per accedere al ContentResolver.
+     * @param uri L'indirizzo URI del file .json selezionato dall'utente.
+     * @param isMerge Se true effettua l'unione dei dati, altrimenti sovrascrive tutto.
+     * @param onSuccess Callback con il conteggio delle nuove partite importate.
+     * @param onError Callback invocata in caso di file corrotto o errore di lettura.
+     */
+    fun importBackupFromUri(
+        context: Context,
+        uri: Uri,
+        isMerge: Boolean,
+        onSuccess: (importedCount: Int) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // 1. Lettura dello stream di testo dal file JSON tramite ContentResolver
+                val jsonString = context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    inputStream.bufferedReader(Charsets.UTF_8).readText()
+                } ?: throw IllegalArgumentException("Impossibile aprire il file di backup")
+
+                // 2. Conversione da stringa JSON a oggetto Kotlin ScoreCounterBackup tramite Gson
+                val backupData = gson.fromJson(jsonString, ScoreCounterBackup::class.java)
+                    ?: throw IllegalArgumentException("File di backup corrotto o non riconosciuto")
+
+                withContext(Dispatchers.Main) {
+                    var newMatchesCount = 0
+
+                    if (isMerge) {
+                        // UNIONE INTELLIGENTE (MERGE)
+                        // Identifichiamo le partite già presenti usando la combinazione univoca (timestamp + titolo)
+                        val existingKeys = history.map { Pair(it.timestamp, it.title) }.toSet()
+
+                        backupData.history.forEach { record ->
+                            val key = Pair(record.timestamp, record.title)
+                            if (key !in existingKeys) {
+                                history.add(0, record) // Inseriamo in cima alla lista dello storico
+                                newMatchesCount++
+                            }
+                        }
+
+                        // Uniamo i giocatori preferiti evitando duplicati (ignorando maiuscole/minuscole)
+                        backupData.favoriteNames.forEach { favName ->
+                            val cleanName = favName.trim()
+                            if (cleanName.isNotEmpty() && favoriteNames.none { it.equals(cleanName, ignoreCase = true) }) {
+                                favoriteNames.add(cleanName)
+                            }
+                        }
+
+                        // Uniamo la cronologia dei titoli
+                        backupData.matchTitleHistory.forEach { title ->
+                            val cleanTitle = title.trim()
+                            if (cleanTitle.isNotEmpty() && matchTitleHistory.none { it.equals(cleanTitle, ignoreCase = true) }) {
+                                matchTitleHistory.add(cleanTitle)
+                            }
+                        }
+                    } else {
+                        // SOSTITUZIONE COMPLETA (REPLACE)
+                        history.clear()
+                        history.addAll(backupData.history)
+
+                        favoriteNames.clear()
+                        favoriteNames.addAll(backupData.favoriteNames)
+
+                        matchTitleHistory.clear()
+                        matchTitleHistory.addAll(backupData.matchTitleHistory)
+
+                        newMatchesCount = backupData.history.size
+                    }
+
+                    // 3. Salva immediatamente le novità nel DataStore locale
+                    saveAllToDataStore()
+
+                    onSuccess(newMatchesCount)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError(e.localizedMessage ?: "Formato del file di backup non valido")
+                }
+            }
+        }
     }
 }
 

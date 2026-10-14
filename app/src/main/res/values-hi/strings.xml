@@ -293,4 +293,31 @@
 
     <string name="desc_logo_app">ऐप का लोगो</string>
     <string name="widget_btn_nuova_sfida">+ नयी चुनौती</string>
+
+    <!-- BACKUP & RIPRISTINO DATI -->
+    <string name="titolo_backup_dialog">डेटा बैकअप और पुनर्प्राप्ति</string>
+    <string name="desc_backup_dialog">अपने मैचों को JSON में निर्यात करें या पिछला बैकअप सुरक्षित रूप से पुनर्प्राप्त करें।</string>
+    <string name="titolo_esporta_backup">📤 बैकअप निर्यात करें</string>
+    <string name="msg_esporta_backup">सभी पूर्ण मैचों, पसंदीदा खिलाड़ियों और कस्टम शीर्षकों को एक आसान JSON फ़ाइल में सहेजें। आप इसे ड्राइव, डाउनलोड या व्हाट्सएप/ईमेल से भेज सकते हैं।</string>
+    <string name="btn_esporta_file">JSON फ़ाइल में निर्यात करें</string>
+    <string name="titolo_importa_backup">📥 बैकअप आयात करें</string>
+    <string name="msg_importa_backup">अपने मैच इतिहास और पसंदीदा खिलाड़ियों को पुनर्प्राप्त करने के लिए पहले से निर्यात की गई .json बैकअप फ़ाइल चुनें।</string>
+    <string name="btn_importa_file">फ़ाइल से आयात करें</string>
+    <string name="titolo_privacy_backup">🔒 खुला और पारदर्शी प्रारूप</string>
+    <string name="msg_privacy_backup">बैकअप फ़ाइलें स्पष्ट JSON प्रारूप में सहेजी जाती हैं, जिससे आपको अपने डेटा पर पूरा नियंत्रण मिलता है।</string>
+    <string name="titolo_conferma_import">पुनर्प्राप्ति मोड</string>
+    <string name="desc_dettagliata_import">चुनें कि बैकअप फ़ाइल से मैचों और खिलाड़ियों को कैसे लागू किया जाए:</string>
+    <string name="msg_conferma_import">आप बैकअप डेटा कैसे लागू करना चाहते हैं?</string>
+    <string name="btn_unisci_dati">वर्तमान डेटा के साथ जोड़ें</string>
+    <string name="btn_sostituisci_dati">सभी वर्तमान डेटा को बदलें</string>
+    <string name="msg_backup_esportato_ok">बैकअप सफलतापूर्वक निर्यात किया गया!</string>
+    <string name="msg_backup_importato_ok">%d नए मैच सफलतापूर्वक आयात किए गए!</string>
+    <string name="msg_backup_errore">बैकअप विफल रहा: %s</string>
+    <string name="desc_backup_icon">डेटा बैकअप और पुनर्प्राप्ति</string>
+    <string name="desc_menu_opzioni">अधिक विकल्प</string>
+    <string name="titolo_warning_sostituisci">⚠️ चेतावनी: डेटा ओवरराइट</string>
+    <string name="msg_warning_sostituisci">सभी डेटा को बदलने से ऐप में वर्तमान में सहेजे गए सभी मैच और पसंदीदा खिलाड़ी स्थायी रूप से हटा दिए जाएंगे। क्या आप वाकई आगे बढ़ना चाहते हैं?</string>
+    <string name="btn_procedi_sostituisci">आगे बढ़ें और ओवरराइट करें</string>
+    <string name="titolo_errore_import">असंगत फ़ाइल</string>
+    <string name="msg_errore_import_file">चयनित फ़ाइल एक मान्य स्कोरकाउंटर बैकअप नहीं है या दूषित है। कृपया एक मान्य .json फ़ाइल चुनें।</string>
 </resources>

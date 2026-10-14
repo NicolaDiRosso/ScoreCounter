@@ -293,4 +293,31 @@
 
     <string name="desc_logo_app">App-Logo</string>
     <string name="widget_btn_nuova_sfida">+ Neue Herausforderung</string>
+
+    <!-- BACKUP & RIPRISTINO DATI -->
+    <string name="titolo_backup_dialog">Datensicherung &amp; Wiederherstellung</string>
+    <string name="desc_backup_dialog">Exportiere deine Spiele nach JSON oder stelle eine vorherige Sicherung wieder her.</string>
+    <string name="titolo_esporta_backup">📤 Sicherung exportieren</string>
+    <string name="msg_esporta_backup">Speichere alle abgeschlossenen Spiele, Lieblingsspieler und Titel in einer JSON-Datei. Du kannst sie auf Drive, Downloads oder per WhatsApp/E-Mail speichern.</string>
+    <string name="btn_esporta_file">In JSON-Datei exportieren</string>
+    <string name="titolo_importa_backup">📥 Sicherung importieren</string>
+    <string name="msg_importa_backup">Wähle eine zuvor exportierte .json-Sicherungsdatei aus, um deine Spielhistorie und Lieblingsspieler wiederherzustellen.</string>
+    <string name="btn_importa_file">Aus Datei importieren</string>
+    <string name="titolo_privacy_backup">🔒 Offenes &amp; Unverschlüsseltes Format</string>
+    <string name="msg_privacy_backup">Sicherungsdateien werden im Klartext-JSON-Format gespeichert, damit du die volle Kontrolle über deine Daten hast.</string>
+    <string name="titolo_conferma_import">Wiederherstellungsmodus</string>
+    <string name="desc_dettagliata_import">Wähle, wie die Spiele und Spieler aus der Sicherungsdatei angewendet werden sollen:</string>
+    <string name="msg_conferma_import">Wie möchtest du die Sicherungsdaten anwenden?</string>
+    <string name="btn_unisci_dati">Mit aktuellen Daten zusammenführen</string>
+    <string name="btn_sostituisci_dati">Alle aktuellen Daten ersetzen</string>
+    <string name="msg_backup_esportato_ok">Sicherung erfolgreich exportiert!</string>
+    <string name="msg_backup_importato_ok">%d neue Spiele erfolgreich importiert!</string>
+    <string name="msg_backup_errore">Sicherung fehlgeschlagen: %s</string>
+    <string name="desc_backup_icon">Datensicherung &amp; Wiederherstellung</string>
+    <string name="desc_menu_opzioni">Weitere Optionen</string>
+    <string name="titolo_warning_sostituisci">⚠️ Warnung: Daten überschreiben</string>
+    <string name="msg_warning_sostituisci">Das Ersetzen aller Daten löscht und überschreibt alle aktuell in der App gespeicherten Spiele und Lieblingsspieler dauerhaft. Möchtest du wirklich fortfahren?</string>
+    <string name="btn_procedi_sostituisci">Fortfahren &amp; Überschreiben</string>
+    <string name="titolo_errore_import">Inkompatible Datei</string>
+    <string name="msg_errore_import_file">Die ausgewählte Datei ist keine gültige ScoreCounter-Sicherung oder ist beschädigt. Bitte wähle eine gültige .json-Datei.</string>
 </resources>

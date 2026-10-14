@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -59,6 +61,9 @@ import com.n380.scorecounter.model.getHistoricalInarrestabile
 import com.n380.scorecounter.ui.components.AboutAppDialog
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.DonationDialog
+import com.n380.scorecounter.ui.components.BackupRestoreDialog
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Storage
 import com.n380.scorecounter.ui.components.FilledActionPill
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.SlideUpAnimatedVisibility
@@ -122,6 +127,12 @@ fun HomeScreen(
 
     // Stato per la visibilità del dialogo "Informazioni App"
     var showAboutDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Stato per la visibilità del dialogo "Backup e Ripristino Dati"
+    var showBackupDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Stato per l'apertura del Menu a Tendina "Altre Opzioni"
+    var showTopMenu by remember { mutableStateOf(false) }
 
     // GESTIONE DI STATO (UI State):
     // Variabile booleana che governa l'iniezione nel grafo grafico del dialogo "Supporta il progetto".
@@ -300,6 +311,23 @@ fun HomeScreen(
     }
 
     // --------------------------------------------------------------------
+    // DIALOGO MODALE: BACKUP E RIPRISTINO DATI
+    // --------------------------------------------------------------------
+    if (showBackupDialog) {
+        BackupRestoreDialog(
+            viewModel = viewModel,
+            onDismiss = { showBackupDialog = false },
+            onImportSuccess = { successMessage ->
+                showBackupDialog = false // 🧠 CHIUDE TUTTI I POPUP DEL BACKUP
+                coroutineScope.launch {
+                    // 🧠 MOSTRA IL BANNER (SNACKBAR) SULLA HOME CON IL MESSAGGIO DI CONFERMA
+                    snackbarHostState.showSnackbar(successMessage)
+                }
+            }
+        )
+    }
+
+    // --------------------------------------------------------------------
     // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
     // --------------------------------------------------------------------
     // LocalConfiguration.current ci permette di leggere in tempo reale se il telefono è ruotato in Landscape.
@@ -316,6 +344,7 @@ fun HomeScreen(
             onNavigateToStats = onNavigateToStats,
             onShowDonationDialog = { showDonationDialog = true },
             onShowAboutDialog = { showAboutDialog = true },
+            onShowBackupDialog = { showBackupDialog = true },
             expandedMatchIndex = expandedMatchIndex,
             onExpandedMatchIndexChange = { expandedMatchIndex = it },
             timeFormatter = timeFormatter,
@@ -485,62 +514,139 @@ fun HomeScreen(
                 ) {
 
                     // ==========================================================
-                    // 1. PULSANTE STATISTICHE - Primario Pieno (Colore del Tema)
+                    // 1. PULSANTE STATISTICHE GLOBALI (Azione Primaria Bordo Pista)
                     // ==========================================================
+                    // 🧠 STRATEGIA UX CHIAVE: Le Statistiche Globali sono una funzionalità core di gioco
+                    // (non una semplice opzione di sistema) che l'utente consulta di frequente per i record.
+                    // Di conseguenza, la lasciamo IN EVIDENZA fuori dal menu come pulsante d'accesso rapido diretto!
                     if (viewModel.history.isNotEmpty()) {
                         FilledActionPill(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onNavigateToStats()
                             },
-                            // 🎨 Anche questo riempito con il colore Primario solido
                             containerColor = MaterialTheme.colorScheme.primary
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.BarChart,
                                 contentDescription = stringResource(R.string.desc_statistiche_globali),
-                                tint = MaterialTheme.colorScheme.onPrimary, // 🧠 Stessa regola di contrasto
+                                tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(30.dp)
                             )
                         }
                     }
 
                     // ==========================================================
-                    // 2. PULSANTE SUPPORTO (CUORE) - Terziario Pieno (Rosa)
+                    // 2. MENU A TENDINA "ALTRE OPZIONI" (DropdownMenu Material 3)
                     // ==========================================================
-                    FilledActionPill(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showDonationDialog = true
-                        },
-                        containerColor = MaterialTheme.colorScheme.tertiary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Favorite,
-                            contentDescription = stringResource(R.string.desc_donazione_icon),
-                            tint = MaterialTheme.colorScheme.onTertiary, // Contrasto sul rosa
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
+                    // 🧠 SOLUZIONE SCALABILE PER IL FUTURO:
+                    // Invece di affollare la barra in alto con troppe icone (Donazione, Info, Backup, Impostazioni...),
+                    // raggruppiamo le utility di sistema in un elegante Menu a Tendina Material 3.
+                    // In questo modo la UI rimane pulita, reattiva e pronta per ospitare nuove impostazioni future!
+                    Box {
+                        FilledActionPill(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                showTopMenu = !showTopMenu
+                            },
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.MoreVert,
+                                contentDescription = stringResource(R.string.desc_menu_opzioni),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
 
-                    // ==========================================================
-                    // 3. PULSANTE INFO - Primario Pieno (Colore del Tema)
-                    // ==========================================================
-                    FilledActionPill(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showAboutDialog = true
-                        },
-                        // 🎨 Diciamo alla pillola di riempirsi con il colore Primario solido
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Help,
-                            contentDescription = stringResource(R.string.desc_informazioni_app_icon),
-                            // 🧠 FONDAMENTALE: onPrimary garantisce la leggibilità dell'icona!
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(30.dp)
-                        )
+                        // DROPDOWN MENU MATERIAL 3 CON GERARCHIA PER PRIORITÀ
+                        DropdownMenu(
+                            expanded = showTopMenu,
+                            onDismissRequest = { showTopMenu = false },
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                .border(
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                    shape = RoundedCornerShape(16.dp)
+                                ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            // PRIORITÀ 1: BACKUP E RIPRISTINO DATI (Utility critica salvataggi)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.titolo_backup_dialog),
+                                        fontWeight = FontWeight.SemiBold,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Storage,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showTopMenu = false
+                                    showBackupDialog = true
+                                }
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                            // PRIORITÀ 2: SOSTIENI SCORECOUNTER (Supporto sviluppatore)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.titolo_donazione),
+                                        fontWeight = FontWeight.SemiBold,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Favorite,
+                                        contentDescription = null,
+                                        tint = Color(0xFFE91E63),
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showTopMenu = false
+                                    showDonationDialog = true
+                                }
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                            // PRIORITÀ 3: INFORMAZIONI APP (Guida & Feedback)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.app_name),
+                                        fontWeight = FontWeight.SemiBold,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Help,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showTopMenu = false
+                                    showAboutDialog = true
+                                }
+                            )
+                        }
                     }
                 }
             }
