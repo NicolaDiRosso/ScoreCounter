@@ -32,6 +32,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -133,131 +134,21 @@ fun HomeScreenLandscape(
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // TITOLO DELLA PAGINA "Storico Sfide" E MENU OPZIONI
-            Row(
+            // TITOLO DELLA PAGINA "Storico Sfide"
+            // 🧠 DESIGN ORIZZONTALE LANDSCAPE:
+            // Nel pannello di sinistra della vista landscape, tutte le schede azione
+            // (Statistiche Globali, Sostieni ScoreCounter, Info e Backup & Ripristino)
+            // sono già chiaramente visibili ed estese all'interno della tavola contenitiva qui sotto.
+            // Di conseguenza, l'intestazione rimane pulita con il solo titolo principale.
+            AutoResizedText(
+                text = stringResource(R.string.titolo_storico_sfide),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 6.dp, start = 2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                AutoResizedText(
-                    text = stringResource(R.string.titolo_storico_sfide),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                )
-
-                // MENU OPZIONI MATERIAL 3 PER LANDSCAPE
-                var showTopMenuLandscape by remember { mutableStateOf(false) }
-
-                Box {
-                    IconButton(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showTopMenuLandscape = !showTopMenuLandscape
-                        },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = stringResource(R.string.desc_menu_opzioni),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = showTopMenuLandscape,
-                        onDismissRequest = { showTopMenuLandscape = false },
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                            .border(
-                                BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-                                shape = RoundedCornerShape(16.dp)
-                            ),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        // PRIORITÀ 1: BACKUP E RIPRISTINO DATI
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.titolo_backup_dialog),
-                                    fontWeight = FontWeight.SemiBold,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Storage,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                showTopMenuLandscape = false
-                                onShowBackupDialog()
-                            }
-                        )
-
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                        // PRIORITÀ 2: SOSTIENI SCORECOUNTER
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.titolo_donazione),
-                                    fontWeight = FontWeight.SemiBold,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Favorite,
-                                    contentDescription = null,
-                                    tint = Color(0xFFE91E63),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                showTopMenuLandscape = false
-                                onShowDonationDialog()
-                            }
-                        )
-
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                        // PRIORITÀ 3: INFORMAZIONI APP
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.app_name),
-                                    fontWeight = FontWeight.SemiBold,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Help,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                showTopMenuLandscape = false
-                                onShowAboutDialog()
-                            }
-                        )
-                    }
-                }
-            }
+                    .padding(bottom = 6.dp, start = 2.dp)
+            )
 
             // ------------------------------------------------------------
             // TAVOLA CONTENITIVA (SURFACE VARIANT 24dp): RAGGRUPPA LE 3 SCHEDE AZIONE

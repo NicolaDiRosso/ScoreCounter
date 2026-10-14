@@ -519,6 +519,13 @@ fun HomeScreen(
                     // 🧠 STRATEGIA UX CHIAVE: Le Statistiche Globali sono una funzionalità core di gioco
                     // (non una semplice opzione di sistema) che l'utente consulta di frequente per i record.
                     // Di conseguenza, la lasciamo IN EVIDENZA fuori dal menu come pulsante d'accesso rapido diretto!
+                    val isTablet = LocalConfiguration.current.smallestScreenWidthDp >= 600
+                    val menuWidthModifier = if (isTablet) Modifier.widthIn(min = 340.dp, max = 400.dp) else Modifier.widthIn(min = 220.dp, max = 280.dp)
+                    val menuItemTextStyle = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium
+                    val menuItemFontWeight = if (isTablet) FontWeight.Bold else FontWeight.SemiBold
+                    val menuItemIconSize = if (isTablet) 28.dp else 22.dp
+                    val pillIconSize = if (isTablet) 36.dp else 30.dp
+
                     if (viewModel.history.isNotEmpty()) {
                         FilledActionPill(
                             onClick = {
@@ -531,18 +538,18 @@ fun HomeScreen(
                                 imageVector = Icons.Filled.BarChart,
                                 contentDescription = stringResource(R.string.desc_statistiche_globali),
                                 tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(30.dp)
+                                modifier = Modifier.size(pillIconSize)
                             )
                         }
                     }
 
                     // ==========================================================
-                    // 2. MENU A TENDINA "ALTRE OPZIONI" (DropdownMenu Material 3)
+                    // 2. MENU A TENDINA "ALTRE OPZIONI" (DropdownMenu Material 3 Adattivo)
                     // ==========================================================
-                    // 🧠 SOLUZIONE SCALABILE PER IL FUTURO:
-                    // Invece di affollare la barra in alto con troppe icone (Donazione, Info, Backup, Impostazioni...),
-                    // raggruppiamo le utility di sistema in un elegante Menu a Tendina Material 3.
-                    // In questo modo la UI rimane pulita, reattiva e pronta per ospitare nuove impostazioni future!
+                    // 🧠 REATTIVITÀ DINAMICA SCHERMO (Tablet vs Smartphone):
+                    // smallestScreenWidthDp >= 600 identifica i Tablet.
+                    // Su Tablet la larghezza del menu passa a 340-400dp, il font passa a titleMedium
+                    // e le icone salgono a 28dp per un'armonia visiva perfetta su schermi grandi.
                     Box {
                         FilledActionPill(
                             onClick = {
@@ -555,15 +562,16 @@ fun HomeScreen(
                                 imageVector = Icons.Filled.MoreVert,
                                 contentDescription = stringResource(R.string.desc_menu_opzioni),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(if (isTablet) 32.dp else 28.dp)
                             )
                         }
 
-                        // DROPDOWN MENU MATERIAL 3 CON GERARCHIA PER PRIORITÀ
+                        // DROPDOWN MENU MATERIAL 3 DINAMICO
                         DropdownMenu(
                             expanded = showTopMenu,
                             onDismissRequest = { showTopMenu = false },
                             modifier = Modifier
+                                .then(menuWidthModifier)
                                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .border(
                                     BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
@@ -576,8 +584,8 @@ fun HomeScreen(
                                 text = {
                                     Text(
                                         text = stringResource(R.string.titolo_backup_dialog),
-                                        fontWeight = FontWeight.SemiBold,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        fontWeight = menuItemFontWeight,
+                                        style = menuItemTextStyle
                                     )
                                 },
                                 leadingIcon = {
@@ -585,9 +593,10 @@ fun HomeScreen(
                                         imageVector = Icons.Filled.Storage,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(22.dp)
+                                        modifier = Modifier.size(menuItemIconSize)
                                     )
                                 },
+                                modifier = if (isTablet) Modifier.padding(vertical = 4.dp) else Modifier,
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     showTopMenu = false
@@ -602,8 +611,8 @@ fun HomeScreen(
                                 text = {
                                     Text(
                                         text = stringResource(R.string.titolo_donazione),
-                                        fontWeight = FontWeight.SemiBold,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        fontWeight = menuItemFontWeight,
+                                        style = menuItemTextStyle
                                     )
                                 },
                                 leadingIcon = {
@@ -611,9 +620,10 @@ fun HomeScreen(
                                         imageVector = Icons.Filled.Favorite,
                                         contentDescription = null,
                                         tint = Color(0xFFE91E63),
-                                        modifier = Modifier.size(22.dp)
+                                        modifier = Modifier.size(menuItemIconSize)
                                     )
                                 },
+                                modifier = if (isTablet) Modifier.padding(vertical = 4.dp) else Modifier,
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     showTopMenu = false
@@ -628,8 +638,8 @@ fun HomeScreen(
                                 text = {
                                     Text(
                                         text = stringResource(R.string.app_name),
-                                        fontWeight = FontWeight.SemiBold,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        fontWeight = menuItemFontWeight,
+                                        style = menuItemTextStyle
                                     )
                                 },
                                 leadingIcon = {
@@ -637,9 +647,10 @@ fun HomeScreen(
                                         imageVector = Icons.Filled.Help,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(22.dp)
+                                        modifier = Modifier.size(menuItemIconSize)
                                     )
                                 },
+                                modifier = if (isTablet) Modifier.padding(vertical = 4.dp) else Modifier,
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                     showTopMenu = false
