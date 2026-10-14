@@ -1,6 +1,5 @@
 package com.n380.scorecounter.ui.components
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -29,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.n380.scorecounter.R
 
@@ -36,324 +36,203 @@ import com.n380.scorecounter.R
 // 🧠 COMPONENTE UI: DIALOGO INFORMAZIONI APP (ABOUT)
 // ====================================================================================
 /**
- * Componente scorporato dalla HomeScreen per alleggerire il Main File (Principio DRY e Clean Architecture).
- *
- * 🧠 TEORIA RESPONSIVE LANDSCAPE:
- * In modalità orizzontale (Landscape), la dimensione verticale dello schermo cala a ~360dp.
- * Per evitare che l'AlertDialog venga tagliato in alto e in basso, usiamo `LocalConfiguration`
- * per commutare tra il layout verticale standard (Portrait) ed un layout a 2 colonne affiancate (Landscape).
- *
- * @param onDismiss Lambda invocata quando l'utente richiede la chiusura del popup.
+ * Componente scorporato dalla HomeScreen per alleggerire il Main File.
+ * Adotta il nuovo Design System unificato con schede Surface e supporto reattivo Portrait/Landscape.
  */
 @Composable
 fun AboutAppDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
-
-    // 🧠 TEORIA ORIENTAMENTO: Rilevamento in tempo reale dell'orientamento dello schermo
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     if (isLandscape) {
-        // ====================================================================
-        // 🖥️ LAYOUT ORIZZONTALE LANDSCAPE (A 2 COLONNE)
-        // ====================================================================
-        AlertDialog(
-            onDismissRequest = onDismiss,
+        AboutAppDialogLandscape(onDismiss = onDismiss)
+    } else {
+        AboutAppDialogPortrait(onDismiss = onDismiss)
+    }
+}
+
+/**
+ * LAYOUT VERTICALE (Portrait)
+ */
+@Composable
+private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val emailSubject = stringResource(R.string.oggetto_email_feedback)
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
             modifier = Modifier
-                .fillMaxWidth(0.92f) // Allarga il popup in orizzontale
-                .heightIn(max = 320.dp), // Blocca l'altezza massima per non finire fuori dallo schermo
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            confirmButton = {}, // I pulsanti sono incorporati nella colonna destra del contenuto
-            text = {
+                .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.85f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // INTESTAZIONE (Header)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 ) {
-                    // PANNELLO DI SINISTRA: TITOLO, DESCRIZIONE E LISTA FEATURE SCORREVOLE
+                    Icon(
+                        imageVector = Icons.Filled.VideogameAsset,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(end = 10.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        fontWeight = FontWeight.Black,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // CORPO SCORREVOLE IN SCHEDE
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
                     Column(
                         modifier = Modifier
-                            .weight(1.1f)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.VideogameAsset,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.app_name),
-                                fontWeight = FontWeight.Black,
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
-
-                        Text(
-                            text = stringResource(R.string.desc_informazioni_app),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.sottotitolo_cosa_puoi_fare),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-
-                        val features = listOf(
-                            stringResource(R.string.feature_registra_partite),
-                            stringResource(R.string.feature_analizza_grafici),
-                            stringResource(R.string.feature_assegna_titoli)
-                        )
-                        features.forEach { feature ->
-                            Row(modifier = Modifier.padding(bottom = 2.dp)) {
-                                Text("• ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                Text(feature, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-
-                    // PANNELLO DI DESTRA: CALLOUT E PULSANTI D'AZIONE
-                    Column(
-                        modifier = Modifier
-                            .weight(0.9f)
+                            .fillMaxSize()
+                            .padding(12.dp)
                             .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        // Scheda 1: Descrizione Intro
                         Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                         ) {
-                            Column(modifier = Modifier.padding(10.dp)) {
+                            Text(
+                                text = stringResource(R.string.desc_informazioni_app),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+
+                        // Scheda 2: Cosa puoi fare (Lista puntata)
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
                                 Text(
-                                    text = stringResource(R.string.msg_vinca_il_migliore),
-                                    style = MaterialTheme.typography.bodySmall,
+                                    text = stringResource(R.string.sottotitolo_cosa_puoi_fare),
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
+                                    style = MaterialTheme.typography.labelLarge,
+                                    modifier = Modifier.padding(bottom = 6.dp)
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                val features = listOf(
+                                    stringResource(R.string.feature_registra_partite),
+                                    stringResource(R.string.feature_analizza_grafici),
+                                    stringResource(R.string.feature_assegna_titoli)
+                                )
+                                features.forEach { feature ->
+                                    Row(modifier = Modifier.padding(bottom = 4.dp)) {
+                                        Text(
+                                            "• ",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            feature,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Scheda 3: Bug Report & Feedback
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = stringResource(R.string.msg_vinca_il_migliore),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
                                 Text(
                                     text = stringResource(R.string.msg_segnalazione_bug),
                                     style = MaterialTheme.typography.bodySmall,
-                                    textAlign = TextAlign.Center
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Start
                                 )
                             }
                         }
-
-                        val emailSubject = stringResource(R.string.oggetto_email_feedback)
-                        OutlinedButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                                    data = Uri.parse("mailto:scorecounter.feedback@gmail.com")
-                                    putExtra(Intent.EXTRA_SUBJECT, emailSubject)
-                                }
-                                try { context.startActivity(emailIntent) } catch (e: Exception) {}
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Email,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_invia_segnalazione),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                onDismiss()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp),
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Check,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(Modifier.width(6.dp))
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_inizia_a_giocare),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
                     }
                 }
-            }
-        )
-    } else {
-        // ====================================================================
-        // 📱 LAYOUT VERTICALE PORTRAIT STANDARD
-        // ====================================================================
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.VideogameAsset,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp) // Leggermente più piccola e raffinata
-                )
-            },
-            title = {
-                Text(
-                    stringResource(R.string.app_name), // Nome dell'applicazione nel titolo del dialogo About
-                    fontWeight = FontWeight.Black, // Più "pesante" per un look da titolo vero
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
-            text = {
-                // ==========================================================
-                // 🧠 FIX TESTO TAGLIATO E FORMATTAZIONE
-                // 1. Usiamo 'verticalScroll' per far scorrere il contenuto se lo schermo è piccolo.
-                // 2. Dividiamo le frasi in componenti 'Text' separati per gestire spazi e stili.
-                // ==========================================================
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(
-                        stringResource(R.string.desc_informazioni_app), // Descrizione lunga dell'applicazione
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify, // l'oggetto TextAlign con Justify ci permette di giustificare il testo
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
 
-                    // Sottotitolo colorato
-                    Text(
-                        stringResource(R.string.sottotitolo_cosa_puoi_fare), // Intestazione sezione funzionalità
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    // 🧠 FORMATTAZIONE PRO: Creiamo la lista puntata graficamente
-                    val features = listOf(
-                        stringResource(R.string.feature_registra_partite), // Feature 1: Registrazione partite
-                        stringResource(R.string.feature_analizza_grafici), // Feature 2: Analisi grafici
-                        stringResource(R.string.feature_assegna_titoli) // Feature 3: Assegnazione titoli
-                    )
-                    features.forEach { feature ->
-                        Row(modifier = Modifier.padding(bottom = 4.dp)) {
-                            Text(
-                                "• ",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Justify
-                            )
-                            Text(
-                                feature,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Intestazione sezione "C'è qualcosa che non funziona?" evidenziata
-                    Text(
-                        stringResource(R.string.msg_vinca_il_migliore), // Intestazione sezione bug report
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        stringResource(R.string.msg_segnalazione_bug), // Istruzioni per feedback e bug report
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            },
-            // ==========================================================
-            // SCOMPARTIMENTO FISSO IN BASSO (confirmButton)
-            // ==========================================================
-            confirmButton = {
-                // IL CONTENITORE: Impila i bottoni uno sopra l'altro
+                // PULSANTI DI AZIONE
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    // 🧠 SPAZIATURA VERTICALE: Applichiamo Arrangement.spacedBy(12.dp)
-                    // per distanziare i bottoni in modo armonioso e coerente con il DonationDialog,
-                    // evitando che risultino "attaccati" l'uno all'altro.
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    // 1. PRIMO BOTTONE (Azione Secondaria: Email)
-
-                    // Estraiamo la stringa QUI, nel contesto del Composable (@Composable scope),
-                    // utilizzando la funzione nativa 'stringResource'. In questo modo Compose
-                    // mantiene l'osservabilità sulla lingua del dispositivo.
-                    val emailSubject = stringResource(R.string.oggetto_email_feedback)
-                    // COMPONENTE: OutlinedButton per il contatto
                     OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                            // DEFINIZIONE DELL'INTENT
-                            // Ora passiamo semplicemente la variabile 'emailSubject' che abbiamo pre-calcolato fuori.
                             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                                 data = Uri.parse("mailto:scorecounter.feedback@gmail.com")
                                 putExtra(Intent.EXTRA_SUBJECT, emailSubject)
                             }
-
-                            // Metodo della Classe Context: Avvia l'applicazione esterna
-                            try {
-                                context.startActivity(emailIntent)
-                            } catch (e: Exception) {
-                                // Gestione dell'eccezione nel caso non esistano app email installate
-                            }
+                            try { context.startActivity(emailIntent) } catch (e: Exception) {}
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp),
+                            .height(46.dp),
                         shape = RoundedCornerShape(20.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = null,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        AutoResizedText(stringResource(
-                            R.string.btn_invia_segnalazione),
-                            style = MaterialTheme.typography.labelLarge,
+                        AutoResizedText(
+                            text = stringResource(R.string.btn_invia_segnalazione),
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
 
-                    // 2. SECONDO BOTTONE (Azione Primaria: Gioca)
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onDismiss() // Invochiamo la lambda del genitore per chiudere
+                            onDismiss()
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -367,14 +246,208 @@ fun AboutAppDialog(onDismiss: () -> Unit) {
                         )
                         Spacer(Modifier.width(8.dp))
                         AutoResizedText(
-                            stringResource(R.string.btn_inizia_a_giocare),
+                            text = stringResource(R.string.btn_inizia_a_giocare),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
                 }
             }
-        )
+        }
+    }
+}
+
+/**
+ * LAYOUT ORIZZONTALE (Landscape Split-Screen)
+ */
+@Composable
+private fun AboutAppDialogLandscape(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val emailSubject = stringResource(R.string.oggetto_email_feedback)
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.92f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // PANNELLO SINISTRO (~28%): Icona, Titolo, Tasto ancorato in basso
+                Column(
+                    modifier = Modifier
+                        .weight(0.28f)
+                        .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.VideogameAsset,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            fontWeight = FontWeight.Black,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onDismiss()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Icon(Icons.Filled.Check, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        AutoResizedText(
+                            stringResource(R.string.btn_inizia_a_giocare),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+
+                // PANNELLO DESTRO (~72%): Schede Informative + Email Feedback
+                Surface(
+                    modifier = Modifier
+                        .weight(0.72f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Scheda 1: Descrizione Intro
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Text(
+                                text = stringResource(R.string.desc_informazioni_app),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
+
+                        // Scheda 2: Features
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(
+                                    text = stringResource(R.string.sottotitolo_cosa_puoi_fare),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                                val features = listOf(
+                                    stringResource(R.string.feature_registra_partite),
+                                    stringResource(R.string.feature_analizza_grafici),
+                                    stringResource(R.string.feature_assegna_titoli)
+                                )
+                                features.forEach { feature ->
+                                    Row(modifier = Modifier.padding(bottom = 2.dp)) {
+                                        Text("• ", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                        Text(feature, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Scheda 3: Bug Report & Action
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                                    Text(
+                                        text = stringResource(R.string.msg_vinca_il_migliore),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.msg_segnalazione_bug),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                                            data = Uri.parse("mailto:scorecounter.feedback@gmail.com")
+                                            putExtra(Intent.EXTRA_SUBJECT, emailSubject)
+                                        }
+                                        try { context.startActivity(emailIntent) } catch (e: Exception) {}
+                                    },
+                                    shape = RoundedCornerShape(16.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Icon(Icons.Default.Email, null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(stringResource(R.string.btn_invia_segnalazione), style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -384,352 +457,416 @@ fun AboutAppDialog(onDismiss: () -> Unit) {
 // ====================================================================================
 /**
  * Componente isolato che ospita il messaggio personale del programmatore.
- *
- * 🧠 TEORIA RESPONSIVE LANDSCAPE:
- * In orizzontale, la finestra di dialogo viene formattata a 2 colonne (Row):
- * - Sinistra: Saluto e messaggio personale di Nicola (scorrevole).
- * - Destra: Box evidenziato Ad-Free, Bottone PayPal e Bottone di chiusura cortese.
- *
- * @param onDismiss Lambda di callback per il Sollevamento dello Stato (State Hoisting).
+ * Adotta il nuovo Design System unificato con schede Surface e supporto reattivo Portrait/Landscape.
  */
 @Composable
 fun DonationDialog(onDismiss: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
-
-    // 🧠 TEORIA ORIENTAMENTO: Rilevamento in tempo reale dell'orientamento dello schermo
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     if (isLandscape) {
-        // ====================================================================
-        // 🖥️ LAYOUT ORIZZONTALE LANDSCAPE (A 2 COLONNE)
-        // ====================================================================
-        AlertDialog(
-            onDismissRequest = onDismiss,
+        DonationDialogLandscape(onDismiss = onDismiss)
+    } else {
+        DonationDialogPortrait(onDismiss = onDismiss)
+    }
+}
+
+/**
+ * LAYOUT VERTICALE (Portrait)
+ */
+@Composable
+private fun DonationDialogPortrait(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .heightIn(max = 320.dp),
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-            confirmButton = {},
-            text = {
+                .fillMaxHeight(0.85f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // INTESTAZIONE (Header)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 ) {
-                    // PANNELLO DI SINISTRA: SALUTO E TESTO DEL MESSAGGIO (SCORREVOLE)
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = null,
+                        tint = Color(0xFFE91E63),
+                        modifier = Modifier
+                            .size(36.dp)
+                            .padding(end = 10.dp)
+                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.titolo_donazione),
+                            fontWeight = FontWeight.Black,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.msg_donazione_saluto),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // CORPO SCORREVOLE IN SCHEDE
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
                     Column(
                         modifier = Modifier
-                            .weight(1.1f)
-                            .verticalScroll(rememberScrollState())
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier.padding(bottom = 8.dp)
+                        // Scheda 1: Messaggio Personale Nicola
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Favorite,
-                                contentDescription = null,
-                                tint = Color(0xFFE91E63),
-                                modifier = Modifier.size(28.dp)
-                            )
-                            AutoResizedText(
-                                text = stringResource(R.string.titolo_donazione),
-                                fontWeight = FontWeight.Black,
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.titleLarge
+                            Text(
+                                text = stringResource(R.string.msg_donazione_intro),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(12.dp)
                             )
                         }
 
-                        Text(
-                            text = stringResource(R.string.msg_donazione_saluto),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 6.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.msg_donazione_intro),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.msg_donazione_scopo),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.msg_donazione_grazie),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Justify,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-
-                    // PANNELLO DI DESTRA: BOX PROMESSA AD-FREE E PULSANTI DONAZIONE
-                    Column(
-                        modifier = Modifier
-                            .weight(0.9f)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                        // Scheda 2: Focus Box "Senza Pubblicità"
                         Surface(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                         ) {
                             Text(
                                 text = stringResource(R.string.msg_donazione_promessa),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(10.dp),
+                                modifier = Modifier.padding(12.dp),
                                 textAlign = TextAlign.Center
                             )
                         }
 
-                        val context = LocalContext.current
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                val paypalUrl = "https://www.paypal.com/donate/?hosted_button_id=XJF97D5YQ5SXE"
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(paypalUrl))
-                                try {
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {}
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp)
-                                .clip(RoundedCornerShape(20.dp)),
-                            shape = RoundedCornerShape(20.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
+                        // Scheda 3: Obiettivo e Ringraziamenti
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_paypal_logo),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(28.dp),
-                                    tint = Color.Unspecified
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = stringResource(R.string.msg_donazione_scopo),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Start,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(bottom = 8.dp)
                                 )
-                                Spacer(Modifier.width(6.dp))
-                                AutoResizedText(
-                                    text = stringResource(R.string.btn_donazione_paypal),
-                                    fontWeight = FontWeight.Bold
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                )
+                                Text(
+                                    text = stringResource(R.string.msg_donazione_grazie),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Start,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
-
-                        OutlinedButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onDismiss()
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp),
-                            shape = RoundedCornerShape(20.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                        ) {
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_donazione_chiudi),
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
                     }
                 }
-            }
-        )
-    } else {
-        // ====================================================================
-        // 📱 LAYOUT VERTICALE PORTRAIT STANDARD
-        // ====================================================================
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    // Sovrascrittura cromatica assoluta: forziamo un Rosa/Rosso vibrante
-                    // a prescindere dal tema (Light/Dark) per l'impatto emotivo dell'icona.
-                    tint = Color(0xFFE91E63),
-                    modifier = Modifier.size(36.dp)
-                )
-            },
-            title = {
-                AutoResizedText(
-                    text = stringResource(R.string.titolo_donazione), // I18n: "Sostieni ScoreCounter"
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
-            text = {
-                // 🧠 GESTIONE OVERFLOW VERTICALE:
-                // Trattandosi di un testo emozionale e lungo, è matematicamente certo che
-                // su display piccoli (o font ingranditi dall'utente) eccederà i confini dello schermo.
-                // Il 'verticalScroll' garantisce che il bottone di conferma resti sempre raggiungibile.
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
 
-                    // Titolo di benvenuto testuale
-                    Text(
-                        text = stringResource(R.string.msg_donazione_saluto),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    // Corpo principale del messaggio
-                    Text(
-                        text = stringResource(R.string.msg_donazione_intro),
-                        style = MaterialTheme.typography.bodyMedium,
-                        // 'TextAlign.Justify' allinea il testo ai margini, tipico dei testi di lettura
-                        textAlign = TextAlign.Justify,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    // 🧠 ACCENT BOX (Focus Visivo):
-                    // Creiamo una sub-Surface per "incorniciare" la tua promessa più importante
-                    // (l'assenza di pubblicità). L'utente capta subito questo blocco staccato dal testo.
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.padding(bottom = 16.dp).fillMaxWidth()
-                    ) {
-                        Text(
-                            text = stringResource(R.string.msg_donazione_promessa),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(12.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    // Secondo blocco di testo: Scopo dei fondi
-                    Text(
-                        text = stringResource(R.string.msg_donazione_scopo),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-
-                    // Conclusione e ringraziamenti finali
-                    Text(
-                        text = stringResource(R.string.msg_donazione_grazie),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Justify,
-                        fontWeight = FontWeight.Medium // Leggermente più spesso per chiudere con impatto
-                    )
-                }
-            },
-            confirmButton = {
-                // ACCESSO AL CONTESTO PER INTENT DI RETE
-                // 'LocalContext' ci serve per poter "chiedere" ad Android di lanciare un'app esterna (il browser o l'app PayPal)
-                val context = LocalContext.current
-
-                // STACK VERTICALE DEI BOTTONI (Colonna)
-                // Sostituiamo il singolo bottone con una Column per poterne impilare due:
-                // 1. Bottone primario (colorato) per la donazione.
-                // 2. Bottone secondario (solo contorno o trasparente) per la chiusura cortese.
+                // PULSANTI DI AZIONE
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp) // Spaziatura elegante tra i due bottoni
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-
-                    // 1. BOTTONE PRIMARIO: DONAZIONE PAYPAL
+                    // Bottone Paypal
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-
-                            // 🧠 DEFINIZIONE DELL'INTENT (Navigazione Esterna)
-                            // Creiamo un 'Intent.ACTION_VIEW' passandogli un Uri web.
-                            // Questo dice ad Android: "Cerca un'app in grado di aprire questo indirizzo web".
                             val paypalUrl = "https://www.paypal.com/donate/?hosted_button_id=XJF97D5YQ5SXE"
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(paypalUrl))
-                            try {
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                // Blocco catch di sicurezza: previene crash rarissimi in cui il telefono
-                                // non possiede nemmeno un browser installato (improbabile, ma best practice).
-                            }
+                            try { context.startActivity(intent) } catch (e: Exception) {}
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp)
-                            .clip(RoundedCornerShape(20.dp)),//Forziamo il ritaglio della maschera visiva (clip)
-                        // con la stessa forma geometrica (RoundedCornerShape) passata al parametro 'shape'.
-                        // Questo impedisce a qualsiasi elemento interno (Row o PNG) di sbordare o alterare la curvatura.
+                            .clip(RoundedCornerShape(20.dp)),
                         shape = RoundedCornerShape(20.dp),
-                        // Usiamo un colore diverso (es. secondario) per dare risalto all'azione di donazione?
-                        // Oppure lasciamo il primary di default rimuovendo 'colors'.
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        // ALLINEAMENTO ORIZZONTALE E VERTICALE BILANCIATO
-                        // Il corpo del bottone in Compose è implicitamente una Row.
-                        // Per far sì che l'icona PNG e il testo AutoResizedText viaggino sulla stessa linea
-                        // baricentrica senza oscillazioni dovute ai margini del file PNG,
-                        // l'icona viene dimensionata con cura e privata di filtri cromatici.
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            // 🧠 TEORIA DEL RENDERING DELLE IMMAGINI IN COMPOSE:
-                            // Per evitare che Android colori tutto il logo di bianco o di nero distruggendolo,
-                            // impostiamo il parametro 'tint = Color.Unspecified'.
-                            // Questo dice al motore grafico Skia di Android: "Disegna il file PNG esattamente con i suoi colori originali".
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_paypal_logo), // Nome del tuo file PNG dentro la cartella res/drawable
+                                painter = painterResource(id = R.drawable.ic_paypal_logo),
                                 contentDescription = null,
-                                modifier = Modifier.size(34.dp), // Dimensione standard bilanciata per i touch target delle icone nei bottoni
-                                tint = Color.Unspecified // 👈 FONDAMENTALE: Mantiene i colori blu/azzurro nativi del PNG di PayPal
+                                modifier = Modifier.size(32.dp),
+                                tint = Color.Unspecified
                             )
-
-                            // Spaziatore fisso a 12.dp per distaccare l'immagine dal testo dell'ascoltatore,
-                            // evitando che i due elementi collidano visivamente.
                             Spacer(Modifier.width(6.dp))
-
                             AutoResizedText(
-                                text = stringResource(R.string.btn_donazione_paypal), // Es. "Dona con PayPal"
-                                fontWeight = FontWeight.Bold
+                                text = stringResource(R.string.btn_donazione_paypal),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
                     }
 
-                    // 2. BOTTONE SECONDARIO: CHIUSURA CORTESE ("Grazie Nicola!")
+                    // Bottone Chiusura
                     OutlinedButton(
                         onClick = {
-                            // Feedback aptico differenziato (LongPress) per denotare un'azione secondaria/uscita
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onDismiss() // Invoca la lambda per distruggere il dialogo
+                            onDismiss()
                         },
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(46.dp),
                         shape = RoundedCornerShape(20.dp),
-                        // Creiamo un bordo sottile per renderlo un bottone secondario meno invasivo
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
                         AutoResizedText(
-                            text = stringResource(R.string.btn_donazione_chiudi), // Es. "Grazie Nicola!"
+                            text = stringResource(R.string.btn_donazione_chiudi),
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
             }
-        )
+        }
+    }
+}
+
+/**
+ * LAYOUT ORIZZONTALE (Landscape Split-Screen)
+ */
+@Composable
+private fun DonationDialogLandscape(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.92f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // PANNELLO SINISTRO (~28%): Icona Cuore, Titolo, Tasto Chiudi ancorato
+                Column(
+                    modifier = Modifier
+                        .weight(0.28f)
+                        .fillMaxHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = null,
+                            tint = Color(0xFFE91E63),
+                            modifier = Modifier
+                                .size(44.dp)
+                                .padding(bottom = 4.dp)
+                        )
+                        AutoResizedText(
+                            text = stringResource(R.string.titolo_donazione),
+                            fontWeight = FontWeight.Black,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.msg_donazione_saluto),
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onDismiss()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(42.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        AutoResizedText(
+                            text = stringResource(R.string.btn_donazione_chiudi),
+                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+
+                // PANNELLO DESTRO (~72%): Schede Messaggio + Bottone Paypal
+                Surface(
+                    modifier = Modifier
+                        .weight(0.72f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Scheda 1: Messaggio Intro Nicola
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Text(
+                                text = stringResource(R.string.msg_donazione_intro),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
+
+                        // Scheda 2: Ad-Free Promessa + PayPal Action
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(10.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.msg_donazione_promessa),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                                )
+                                Button(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        val paypalUrl = "https://www.paypal.com/donate/?hosted_button_id=XJF97D5YQ5SXE"
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(paypalUrl))
+                                        try { context.startActivity(intent) } catch (e: Exception) {}
+                                    },
+                                    shape = RoundedCornerShape(16.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_paypal_logo),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = Color.Unspecified
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.btn_donazione_paypal),
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+                            }
+                        }
+
+                        // Scheda 3: Scopo e Grazie
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Column(modifier = Modifier.padding(10.dp)) {
+                                Text(
+                                    text = stringResource(R.string.msg_donazione_scopo),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    textAlign = TextAlign.Start,
+                                    modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(bottom = 6.dp),
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
+                                )
+                                Text(
+                                    text = stringResource(R.string.msg_donazione_grazie),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
