@@ -538,6 +538,8 @@ fun ResultsScreen(
                                                 setContent {
                                                     ScoreChart(
                                                         players = recordsForChart,
+                                                        isDetailed = true,
+                                                        showTimeZoom = false, // 🧠 NASCONDE I PULSANTI DELLO ZOOM NEI RISULTATI FINALI
                                                         modifier = Modifier.fillMaxSize().padding(12.dp)
                                                     )
                                                 }
@@ -549,6 +551,8 @@ fun ResultsScreen(
                                             (view as ComposeView).setContent {
                                                 ScoreChart(
                                                     players = recordsForChart,
+                                                    isDetailed = true,
+                                                    showTimeZoom = false, // 🧠 NASCONDE I PULSANTI DELLO ZOOM NEI RISULTATI FINALI
                                                     modifier = Modifier.fillMaxSize().padding(12.dp)
                                                 )
                                             }

@@ -331,4 +331,13 @@
     <string name="btn_procedi_sostituisci">Proceed &amp; Overwrite</string>
     <string name="titolo_errore_import">Incompatible File</string>
     <string name="msg_errore_import_file">The selected file is not a valid ScoreCounter backup or is corrupted. Please select a valid .json backup file.</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">Full</string>
+    <string name="label_segmento_q1">1st Q</string>
+    <string name="label_segmento_q2">2nd Q</string>
+    <string name="label_segmento_q3">3rd Q</string>
+    <string name="label_segmento_q4">4th Q</string>
+    <string name="titolo_guida_zoom">🔍 Time Zoom</string>
+    <string name="msg_guida_zoom">Tap one or up to 3 consecutive time quarters to zoom into a specific game phase!</string>
 </resources>

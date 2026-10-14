@@ -320,4 +320,13 @@
     <string name="btn_procedi_sostituisci">Proceder y Sobrescribir</string>
     <string name="titolo_errore_import">Archivo no compatible</string>
     <string name="msg_errore_import_file">El archivo seleccionado no es una copia válida de ScoreCounter o está dañado. Selecciona un archivo .json válido.</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">Todas</string>
+    <string name="label_segmento_q1">1.º T</string>
+    <string name="label_segmento_q2">2.º T</string>
+    <string name="label_segmento_q3">3.er T</string>
+    <string name="label_segmento_q4">4.º T</string>
+    <string name="titolo_guida_zoom">🔍 Zoom Temporal</string>
+    <string name="msg_guida_zoom">¡Toca uno o hasta 3 trimestres temporales consecutivos para ampliar una fase de juego específica!</string>
 </resources>

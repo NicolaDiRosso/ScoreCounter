@@ -209,7 +209,8 @@
         players: List<PlayerRecord>,
         modifier: Modifier = Modifier,
         isDetailed: Boolean = false, // 🧠 L'INTERRUTTORE: Se è false, disegna in piccolo. Se è true, in grande.
-        durationSeconds: Long = 0L
+        durationSeconds: Long = 0L,
+        showTimeZoom: Boolean = true // 🧠 CONTROLLO VISIBILITÀ SELETTORE: Se false, nasconde le pillole dello zoom (es. nei Risultati)
     ) {
         // Estraiamo il motore di vibrazione del telefono (Serve per far vibrare i quadratini)
         val haptic = LocalHapticFeedback.current
@@ -227,6 +228,11 @@
         // può esserci una volta sola (non possono esserci due "Marco" nascosti).
         var hiddenPlayers by remember { mutableStateOf(setOf<String>()) }
 
+        // 🧠 SELEZIONE QUARTI TEMPORALI CON DESELEZIONE SINGOLA:
+        // Utilizziamo un `Set<Int>` per memorizzare i singoli quarti attivi (es. {1, 3}).
+        // Un insieme vuoto `emptySet()` indica che nessuna restrizione è attiva ("Tutta la partita").
+        var selectedQuarters by remember { mutableStateOf(setOf<Int>()) }
+
         // PROTEZIONE ANTI-CRASH: Se non ci sono giocatori, fermati e non disegnare nulla.
         if (players.isEmpty()) return
 
@@ -240,81 +246,207 @@
         val visiblePlayers = validPlayers.filter { !hiddenPlayers.contains(it.name) }
 
         // ====================================================================
-        // 🧠 2. LA MATEMATICA DELL'AUTO-ZOOM
+        // 🧠 2. LA MATEMATICA DELL'AUTO-ZOOM E TRANSIZIONE ANIMATA (60 FPS)
         // ====================================================================
-        // Per far sì che il grafico faccia "Zoom", deve sapere qual è il tetto massimo e minimo.
-        // Invece di guardare TUTTI i giocatori, gli diciamo di guardare SOLO 'visiblePlayers'.
-        // In questo modo, se spegni il giocatore primo in classifica, il 'maxScore' si abbassa
-        // istantaneamente, e il grafico per magia si adatta ai giocatori rimanenti!
-        val maxScore = visiblePlayers.mapNotNull { it.scoreHistory?.maxOrNull() }.maxOrNull() ?: 0
-        val minScore = visiblePlayers.mapNotNull { it.scoreHistory?.minOrNull() }.minOrNull() ?: 0
+        // Calcoliamo la dimensione massima della cronologia dei turni tra i giocatori visibili
+        val maxTurnCount = visiblePlayers.mapNotNull { it.scoreHistory?.size }.maxOrNull() ?: 1
+        val maxTurnIndex = (maxTurnCount - 1).coerceAtLeast(1).toFloat()
+
+        // Calcoliamo i turni di inizio e fine dell'intervallo selezionato in base ai quarti attivi
+        val (targetStartTurn, targetEndTurn) = if (selectedQuarters.isEmpty()) {
+            Pair(0f, maxTurnIndex)
+        } else {
+            val minQ = selectedQuarters.minOrNull() ?: 1
+            val maxQ = selectedQuarters.maxOrNull() ?: 4
+            val startFraction = (minQ - 1) * 0.25f
+            val endFraction = maxQ * 0.25f
+            Pair(maxTurnIndex * startFraction, maxTurnIndex * endFraction)
+        }
+
+        // 🧠 ANIMAZIONI FLUIDE (animateFloatAsState):
+        // Quando l'utente seleziona o estende l'intervallo di quarti, queste variabili animano
+        // gradualmente i turni di inizio e fine in 400 millisecondi con curva fisica 'FastOutSlowInEasing'.
+        val animStartTurn by animateFloatAsState(
+            targetValue = targetStartTurn,
+            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            label = "animStartTurn"
+        )
+        val animEndTurn by animateFloatAsState(
+            targetValue = targetEndTurn,
+            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            label = "animEndTurn"
+        )
+
+        // Ricaviamo il punteggio minimo e massimo all'interno del segmento di tempo selezionato
+        val sliceStartIdx = targetStartTurn.toInt().coerceIn(0, maxTurnIndex.toInt())
+        val sliceEndIdx = targetEndTurn.toInt().coerceIn(sliceStartIdx, maxTurnIndex.toInt())
+
+        val globalMaxScore = visiblePlayers.mapNotNull { it.scoreHistory?.maxOrNull() }.maxOrNull() ?: 0
+        val globalMinScore = visiblePlayers.mapNotNull { it.scoreHistory?.minOrNull() }.minOrNull() ?: 0
+
+        val targetMaxScore = visiblePlayers.flatMap { player ->
+            val h = player.scoreHistory ?: emptyList()
+            if (h.isEmpty()) emptyList()
+            else {
+                val start = sliceStartIdx.coerceIn(0, h.size - 1)
+                val end = (sliceEndIdx + 1).coerceIn(start + 1, h.size)
+                h.subList(start, end)
+            }
+        }.maxOrNull() ?: globalMaxScore
+
+        val targetMinScore = visiblePlayers.flatMap { player ->
+            val h = player.scoreHistory ?: emptyList()
+            if (h.isEmpty()) emptyList()
+            else {
+                val start = sliceStartIdx.coerceIn(0, h.size - 1)
+                val end = (sliceEndIdx + 1).coerceIn(start + 1, h.size)
+                h.subList(start, end)
+            }
+        }.minOrNull() ?: globalMinScore
+
+        // Animiamo fluidamente anche il tetto massimo e minimo dell'asse Y dei punteggi!
+        val animMaxScore by animateFloatAsState(
+            targetValue = targetMaxScore.toFloat(),
+            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            label = "animMaxScore"
+        )
+        val animMinScore by animateFloatAsState(
+            targetValue = targetMinScore.toFloat(),
+            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+            label = "animMinScore"
+        )
 
         // ====================================================================
         // 3. I COLORI ADATTIVI (Chiaro/Scuro)
         // ====================================================================
         val nativeAdaptiveTextColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
-        // Se il grafico è piccolo (isDetailed = false), facciamo la griglia più invisibile (alpha 0.1f)
-        // per non confondere l'occhio. Se è grande, la calchiamo un po' di più (alpha 0.2f).
         val adaptiveGridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDetailed) 0.2f else 0.1f)
         val adaptiveTickColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
 
-        // Colonna principale che conterrà il Canvas (sopra) e la Legenda (sotto)
+        // Colonna principale che conterrà il Selettore a Quarti, il Canvas (centro) e la Legenda (sotto)
         Column(modifier = modifier) {
 
             // ====================================================================
-            // 🎨 4. LA TELA DA DISEGNO (CANVAS)
+            // 🧠 SELETTORE A QUARTI TEMPORALI CON DESELEZIONE INDIVIDUALE
+            // (Mostrato solo se isDetailed == true E showTimeZoom == true)
+            // ====================================================================
+            if (isDetailed && showTimeZoom) {
+                val segments = listOf(
+                    Pair(0, stringResource(R.string.label_segmento_tutta)),
+                    Pair(1, stringResource(R.string.label_segmento_q1)),
+                    Pair(2, stringResource(R.string.label_segmento_q2)),
+                    Pair(3, stringResource(R.string.label_segmento_q3)),
+                    Pair(4, stringResource(R.string.label_segmento_q4))
+                )
+
+                // 🧠 LOGICA DEDICATA: DESELEZIONE SINGOLA DEI QUARTI
+                // Quando si tocca "Tutta" (q == 0), svuota l'insieme (torna a 0% - 100%).
+                // Quando si tocca un quarto q (1..4):
+                // - Se q è GIA' presente nell'insieme `selectedQuarters`: lo RIMUOVE (deseleziona SOLO quel quarto q).
+                // - Se q NON è presente: lo AGGIUNGE all'insieme.
+                // - Se l'insieme risultante contiene tutti e 4 i quarti o si svuota: si azzera tornando a "Tutta".
+                val onQuarterClick: (Int) -> Unit = { q ->
+                    if (q == 0) {
+                        selectedQuarters = emptySet()
+                    } else {
+                        val newSet = if (selectedQuarters.contains(q)) {
+                            selectedQuarters - q // Rimuove SOLO questo specifico quarto!
+                        } else {
+                            selectedQuarters + q // Aggiunge questo specifico quarto!
+                        }
+
+                        // Se vengono selezionati tutti e 4 i quarti o l'insieme si svuota -> ripristina a "Tutta"
+                        selectedQuarters = if (newSet.size >= 4) emptySet() else newSet
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(3.dp),
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            segments.forEach { (index, label) ->
+                                val isSelected = if (index == 0) {
+                                    selectedQuarters.isEmpty()
+                                } else {
+                                    selectedQuarters.contains(index)
+                                }
+
+                                Surface(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        onQuarterClick(index)
+                                    },
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+                                ) {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ====================================================================
+            // 🎨 4. LA TELA DA DISEGNO (CANVAS) CON ZOOM VETTORIALE ANIMATO
             // ====================================================================
             Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
-                // 🧠 I MARGINI DI SICUREZZA (Padding)
-                // Usiamo ".toPx()" per convertire i "dp" (unità di misura dello schermo) in "Pixel" matematici.
-                // Se il grafico è piccolo, diamo margini stretti (es. padYTop = 4). Se è grande, margini larghi.
                 val padYTop = if (isDetailed) 10.dp.toPx() else 4.dp.toPx()
                 val padYBottom = if (isDetailed) 50.dp.toPx() else 24.dp.toPx()
                 val padX = if (isDetailed) 20.dp.toPx() else 12.dp.toPx()
 
-                // 'drawW' (Larghezza) e 'drawH' (Altezza) sono la misura effettiva in pixel
-                // dove possiamo disegnare le linee senza sbattere sui bordi.
                 val drawW = (size.width - padX * 2).coerceAtLeast(1f)
                 val drawH = (size.height - padYTop - padYBottom).coerceAtLeast(1f)
 
-                // L'escursione termica dei punti (es. massimo 50, minimo 0 = range di 50).
-                val yRange = (maxScore - minScore).coerceAtLeast(1).toFloat()
+                val yRange = (animMaxScore - animMinScore).coerceAtLeast(1f)
+                val turnSpan = (animEndTurn - animStartTurn).coerceAtLeast(0.001f)
 
                 // 🧠 IL PENNELLO DEL TESTO
                 val textPaint = android.graphics.Paint().apply {
                     color = nativeAdaptiveTextColor
-                    // Se grafico grande -> font 32f. Se piccolo -> font 22f.
                     textSize = if (isDetailed) 32f else 22f
-                    textAlign = android.graphics.Paint.Align.RIGHT // Allineato a destra (verso l'asse)
+                    textAlign = android.graphics.Paint.Align.RIGHT
                     typeface = android.graphics.Typeface.DEFAULT_BOLD
                 }
 
                 // --------------------------------------------------------------------
                 // ASSE Y (Le fasce orizzontali dei Punteggi)
                 // --------------------------------------------------------------------
-                // Quante righe vogliamo? 4 se grande, 2 se piccolo (altrimenti sarebbero tutte accavallate).
                 val ySteps = if (isDetailed) 4 else 2
                 for (i in 0..ySteps) {
-                    // Calcolo della posizione Y (Dall'alto verso il basso)
                     val y = padYTop + drawH - (i * (drawH / ySteps))
 
-                    // Disegna la linea grigia da sinistra (start) a destra (end)
                     drawLine(
                         color = adaptiveGridColor,
                         start = Offset(padX, y),
                         end = Offset(padX + drawW, y),
-                        strokeWidth = if (isDetailed) 2f else 1f // Linea sottile se grafico piccolo
+                        strokeWidth = if (isDetailed) 2f else 1f
                     )
 
-                    // Calcola il numero da scrivere (Es. riga 1 = 10 punti, riga 2 = 20 punti)
-                    val value = minScore + (yRange / ySteps) * i
+                    val value = animMinScore + (yRange / ySteps) * i
 
-                    // Sposta il testo un po' a sinistra e un po' in basso per non coprire la linea
                     val textOffsetX = if (isDetailed) 24f else 16f
                     val textOffsetY = if (isDetailed) 10f else 8f
 
-                    // Disegna fisicamente il numero (es. "20") sulla tela!
                     drawContext.canvas.nativeCanvas.drawText(
                         value.toInt().toString(),
                         padX - textOffsetX,
@@ -327,35 +459,31 @@
                 // ASSE X (Le fasce verticali del Tempo)
                 // --------------------------------------------------------------------
                 textPaint.textAlign = android.graphics.Paint.Align.CENTER
-                // Quante colonne? 4 se grande, 2 se piccolo (Inizio e Fine).
                 val xSteps = if (isDetailed) 4 else 2
                 for (i in 0..xSteps) {
-                    val xPos = padX + i * (drawW / xSteps) // Posizione orizzontale
+                    val xPos = padX + i * (drawW / xSteps)
 
-                    // Linea grigia verticale di sfondo
                     drawLine(
                         color = adaptiveGridColor,
                         start = Offset(xPos, padYTop),
                         end = Offset(xPos, padYTop + drawH),
                         strokeWidth = if (isDetailed) 2f else 1f
                     )
-                    // Piccola tacchetta scura che sporge sotto il grafico
                     drawLine(
                         color = adaptiveTickColor,
                         start = Offset(xPos, size.height - padYBottom),
-                        end = Offset(xPos, size.height - padYBottom + (if(isDetailed) 12f else 6f)),
+                        end = Offset(xPos, size.height - padYBottom + (if (isDetailed) 12f else 6f)),
                         strokeWidth = if (isDetailed) 3f else 2f
                     )
 
-                    // 🧠 LOGICA DELLE ETICHETTE DEL TEMPO
                     val label = if (durationSeconds > 0) {
-                        // Se c'è un timer vero, calcola il tempo esatto di quel segmento
-                        val fractionSeconds = (durationSeconds.toFloat() / xSteps) * i
-                        formatTime(fractionSeconds.toLong())
+                        val currentStartSec = (durationSeconds.toFloat() * (animStartTurn / maxTurnIndex))
+                        val currentEndSec = (durationSeconds.toFloat() * (animEndTurn / maxTurnIndex))
+                        val fractionSec = currentStartSec + ((currentEndSec - currentStartSec) / xSteps) * i
+                        formatTime(fractionSec.toLong())
                     } else {
-                        // Se NON c'è timer, mette le scritte manuali (Inizio, 1/4, Metà...)
                         if (isDetailed) {
-                            when(i) {
+                            when (i) {
                                 0 -> labelInizio
                                 1 -> "1/4"
                                 2 -> labelMeta
@@ -363,8 +491,7 @@
                                 else -> labelFine
                             }
                         } else {
-                            // Se il grafico è piccolo ha solo 3 tacche (0, 1, 2)
-                            when(i) {
+                            when (i) {
                                 0 -> labelInizio
                                 1 -> labelMeta
                                 else -> labelFine
@@ -372,45 +499,49 @@
                         }
                     }
                     val textBottomOffset = if (isDetailed) 45f else 30f
-                    // Scrive la parola sul fondo
                     drawContext.canvas.nativeCanvas.drawText(label, xPos, size.height - padYBottom + textBottomOffset, textPaint)
                 }
 
                 // --------------------------------------------------------------------
-                // 🧠 5. DISEGNO DEI SENTIERI (Le linee dei giocatori)
+                // 🧠 5. DISEGNO DEI SENTIERI CON INTERPOLAZIONE E ZOOM FLUIDO
                 // --------------------------------------------------------------------
-                // NOTA BENE: Questo ciclo analizza SOLO 'visiblePlayers'.
-                // I giocatori spenti sono ignorati, quindi non vengono disegnati!
                 visiblePlayers.forEach { player ->
-                    val color = Color(player.color) // Prende il colore del giocatore
-                    val path = androidx.compose.ui.graphics.Path() // Crea un "sentiero" vuoto
+                    val color = Color(player.color)
+                    val path = androidx.compose.ui.graphics.Path()
                     val history = player.scoreHistory ?: emptyList()
 
-                    if (history.size >= 1) {
-                        // Distanza orizzontale esatta tra ogni round
-                        val localXStep = drawW / (history.size - 1).coerceAtLeast(1).toFloat()
+                    if (history.isNotEmpty()) {
+                        var firstPointDrawn = false
 
                         history.forEachIndexed { turn, score ->
-                            // Matematica cartesiana: X (avanza col tempo), Y (sale coi punti)
-                            val x = padX + (turn * localXStep)
-                            val y = padYTop + drawH - ((score - minScore) / yRange * drawH)
+                            // Calcolo posizione X interpolata rispetto all'intervallo animato (animStartTurn ... animEndTurn)
+                            val normX = (turn.toFloat() - animStartTurn) / turnSpan
+                            val x = padX + (normX * drawW)
 
-                            // moveTo posiziona la penna all'inizio, lineTo traccia la linea fino al punto successivo
-                            if (turn == 0) path.moveTo(x, y)
-                            else path.lineTo(x, y)
+                            // Calcolo posizione Y interpolata rispetto al range di punteggio animato
+                            val normY = (score.toFloat() - animMinScore) / yRange
+                            val y = padYTop + drawH - (normY * drawH)
 
-                            // Disegna un pallino su ogni round
-                            val radius = if (isDetailed) 2.dp.toPx() else 1.dp.toPx()
-                            drawCircle(color, radius, Offset(x, y))
+                            // Disegniamo solo i punti presenti nella porzione orizzontale visibile
+                            if (x in (padX - 10f)..(padX + drawW + 10f)) {
+                                if (!firstPointDrawn) {
+                                    path.moveTo(x, y)
+                                    firstPointDrawn = true
+                                } else {
+                                    path.lineTo(x, y)
+                                }
+
+                                val radius = if (isDetailed) 3.dp.toPx() else 1.dp.toPx()
+                                drawCircle(color, radius, Offset(x, y))
+                            }
                         }
                     }
 
-                    // Stampa l'intero "sentiero" (Path) sulla tela, con angoli arrotondati (StrokeCap.Round)
                     drawPath(
                         path = path,
                         color = color,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(
-                            width = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx(), // Linea spessa o sottile
+                            width = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx(),
                             cap = androidx.compose.ui.graphics.StrokeCap.Round,
                             join = androidx.compose.ui.graphics.StrokeJoin.Round
                         )

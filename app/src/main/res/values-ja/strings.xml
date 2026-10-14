@@ -320,4 +320,13 @@
     <string name="btn_procedi_sostituisci">続行して上書き</string>
     <string name="titolo_errore_import">互換性のないファイル</string>
     <string name="msg_errore_import_file">選択したファイルは有効なScoreCounterバックアップではないか、破損しています。有効な.jsonファイルを選択してください。</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">全体</string>
+    <string name="label_segmento_q1">第1Q</string>
+    <string name="label_segmento_q2">第2Q</string>
+    <string name="label_segmento_q3">第3Q</string>
+    <string name="label_segmento_q4">第4Q</string>
+    <string name="titolo_guida_zoom">🔍 タイムズーム</string>
+    <string name="msg_guida_zoom">1〜3の連続するタイムクォーターをタップして、特定のゲームフェーズにズームインできます！</string>
 </resources>

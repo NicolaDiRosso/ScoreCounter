@@ -291,14 +291,24 @@ fun ResultsScreenLandscape(
                                 ComposeView(ctx).apply {
                                     chartView = this
                                     setContent {
-                                        ScoreChart(players = recordsForChart, modifier = Modifier.fillMaxSize().padding(12.dp))
+                                        ScoreChart(
+                                            players = recordsForChart,
+                                            isDetailed = true,
+                                            showTimeZoom = false, // 🧠 NASCONDE I PULSANTI DELLO ZOOM NEI RISULTATI FINALI IN LANDSCAPE
+                                            modifier = Modifier.fillMaxSize().padding(12.dp)
+                                        )
                                     }
                                 }
                             },
                             modifier = Modifier.fillMaxSize(),
                             update = { view ->
                                 (view as ComposeView).setContent {
-                                    ScoreChart(players = recordsForChart, modifier = Modifier.fillMaxSize().padding(12.dp))
+                                    ScoreChart(
+                                        players = recordsForChart,
+                                        isDetailed = true,
+                                        showTimeZoom = false, // 🧠 NASCONDE I PULSANTI DELLO ZOOM NEI RISULTATI FINALI IN LANDSCAPE
+                                        modifier = Modifier.fillMaxSize().padding(12.dp)
+                                    )
                                 }
                             }
                         )

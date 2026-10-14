@@ -320,4 +320,13 @@
     <string name="btn_procedi_sostituisci">Fortfahren &amp; Überschreiben</string>
     <string name="titolo_errore_import">Inkompatible Datei</string>
     <string name="msg_errore_import_file">Die ausgewählte Datei ist keine gültige ScoreCounter-Sicherung oder ist beschädigt. Bitte wähle eine gültige .json-Datei.</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">Alle</string>
+    <string name="label_segmento_q1">1. Q</string>
+    <string name="label_segmento_q2">2. Q</string>
+    <string name="label_segmento_q3">3. Q</string>
+    <string name="label_segmento_q4">4. Q</string>
+    <string name="titolo_guida_zoom">🔍 Zeit-Zoom</string>
+    <string name="msg_guida_zoom">Tippe auf 1 bis 3 aufeinanderfolgende Zeitquartale, um eine bestimmte Spielphase heranzuzoomen!</string>
 </resources>

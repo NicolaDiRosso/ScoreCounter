@@ -320,4 +320,13 @@
     <string name="btn_procedi_sostituisci">आगे बढ़ें और ओवरराइट करें</string>
     <string name="titolo_errore_import">असंगत फ़ाइल</string>
     <string name="msg_errore_import_file">चयनित फ़ाइल एक मान्य स्कोरकाउंटर बैकअप नहीं है या दूषित है। कृपया एक मान्य .json फ़ाइल चुनें।</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">सभी</string>
+    <string name="label_segmento_q1">1वां भाग</string>
+    <string name="label_segmento_q2">2वां भाग</string>
+    <string name="label_segmento_q3">3वां भाग</string>
+    <string name="label_segmento_q4">4वां भाग</string>
+    <string name="titolo_guida_zoom">🔍 समय ज़ूम</string>
+    <string name="msg_guida_zoom">किसी विशिष्ट खेल चरण पर ज़ूम करने के लिए 1 से 3 लगातार समय तिमाहियों पर टैप करें!</string>
 </resources>

@@ -38,13 +38,14 @@ private data class ChartGuideItem(
 )
 
 /**
- * Lista completa dei 4 punti guida per la lettura del grafico
+ * Lista completa dei 5 punti guida per la lettura del grafico
  */
 private val allChartItems = listOf(
     ChartGuideItem(R.string.titolo_guida_punti, R.string.msg_guida_punti),
     ChartGuideItem(R.string.titolo_guida_tempo, R.string.msg_guida_tempo),
     ChartGuideItem(R.string.titolo_guida_pallini, R.string.msg_guida_pallini),
-    ChartGuideItem(R.string.titolo_guida_sorpassi, R.string.msg_guida_sorpassi)
+    ChartGuideItem(R.string.titolo_guida_sorpassi, R.string.msg_guida_sorpassi),
+    ChartGuideItem(R.string.titolo_guida_zoom, R.string.msg_guida_zoom)
 )
 
 /**

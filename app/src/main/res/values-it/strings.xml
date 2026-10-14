@@ -332,4 +332,13 @@
     <string name="btn_procedi_sostituisci">Procedi e Sovrascrivi</string>
     <string name="titolo_errore_import">File non compatibile</string>
     <string name="msg_errore_import_file">Il file selezionato non è un backup valido di ScoreCounter o risulta corrotto. Seleziona un file di backup .json valido.</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">Tutta</string>
+    <string name="label_segmento_q1">1° Q</string>
+    <string name="label_segmento_q2">2° Q</string>
+    <string name="label_segmento_q3">3° Q</string>
+    <string name="label_segmento_q4">4° Q</string>
+    <string name="titolo_guida_zoom">🔍 Zoom Temporale</string>
+    <string name="msg_guida_zoom">Tocca uno o più quarti temporali consecutivi (fino a 3) per ingrandire una specifica fase della partita!</string>
 </resources>

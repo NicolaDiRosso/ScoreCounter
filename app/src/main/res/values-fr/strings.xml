@@ -320,4 +320,13 @@
     <string name="btn_procedi_sostituisci">Poursuivre et Écraser</string>
     <string name="titolo_errore_import">Fichier non compatible</string>
     <string name="msg_errore_import_file">Le fichier sélectionné n\'est pas une sauvegarde ScoreCounter valide ou est corrompu. Veuillez sélectionner un fichier .json valide.</string>
+
+    <!-- ZOOM TEMPORALE GRAFICO -->
+    <string name="label_segmento_tutta">Toutes</string>
+    <string name="label_segmento_q1">1er T</string>
+    <string name="label_segmento_q2">2e T</string>
+    <string name="label_segmento_q3">3e T</string>
+    <string name="label_segmento_q4">4e T</string>
+    <string name="titolo_guida_zoom">🔍 Zoom Temporel</string>
+    <string name="msg_guida_zoom">Appuyez sur un ou jusqu\'à 3 quarts temporels consécutifs pour faire un zoom sur une phase de jeu spécifique !</string>
 </resources>
