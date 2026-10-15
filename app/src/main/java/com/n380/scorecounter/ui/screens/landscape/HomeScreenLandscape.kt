@@ -97,6 +97,7 @@ fun HomeScreenLandscape(
     onShowDonationDialog: () -> Unit,
     onShowAboutDialog: () -> Unit,
     onShowBackupDialog: () -> Unit,
+    onShowSettingsDialog: () -> Unit,
     expandedMatchIndex: Int,
     onExpandedMatchIndexChange: (Int) -> Unit,
     timeFormatter: SimpleDateFormat,
@@ -187,7 +188,23 @@ fun HomeScreenLandscape(
                     }
 
                     // ------------------------------------------------------------
-                    // CARD AZIONE 2: SOSTIENI SCORHUNTER (DONAZIONE)
+                    // CARD AZIONE 2: IMPOSTAZIONI E PREFERENZE
+                    // ------------------------------------------------------------
+                    HomeLandscapeActionCard(
+                        icon = Icons.Filled.Settings,
+                        title = stringResource(R.string.titolo_impostazioni_dialog),
+                        subtitle = stringResource(R.string.desc_impostazioni_dialog),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        iconBackgroundColor = MaterialTheme.colorScheme.primary,
+                        iconTintColor = MaterialTheme.colorScheme.onPrimary,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onShowSettingsDialog()
+                        }
+                    )
+
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 3: SOSTIENI SCORECOUNTER (DONAZIONE)
                     // ------------------------------------------------------------
                     HomeLandscapeActionCard(
                         icon = Icons.Filled.Favorite,

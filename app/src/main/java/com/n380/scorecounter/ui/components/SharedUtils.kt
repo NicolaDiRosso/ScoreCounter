@@ -503,40 +503,70 @@
                 }
 
                 // --------------------------------------------------------------------
-                // 🧠 5. DISEGNO DEI SENTIERI CON INTERPOLAZIONE E ZOOM FLUIDO
+                // 🧠 5. DISEGNO DEI SENTIERI CON CURVE DI BÉZIER MORBIDE E ZOOM FLUIDO
                 // --------------------------------------------------------------------
+                // NOTA BENE: Questo ciclo analizza SOLO 'visiblePlayers'.
+                // I giocatori spenti sono ignorati, quindi non vengono disegnati!
                 visiblePlayers.forEach { player ->
                     val color = Color(player.color)
                     val path = androidx.compose.ui.graphics.Path()
                     val history = player.scoreHistory ?: emptyList()
 
                     if (history.isNotEmpty()) {
-                        var firstPointDrawn = false
-
-                        history.forEachIndexed { turn, score ->
-                            // Calcolo posizione X interpolata rispetto all'intervallo animato (animStartTurn ... animEndTurn)
+                        // 🧠 ESTRAZIONE COORDINATE CARTESIANE
+                        // Prima raccogliamo tutti i punti (Offset) calcolando le loro X e Y sul Canvas
+                        val points = history.mapIndexed { turn, score ->
                             val normX = (turn.toFloat() - animStartTurn) / turnSpan
                             val x = padX + (normX * drawW)
 
-                            // Calcolo posizione Y interpolata rispetto al range di punteggio animato
                             val normY = (score.toFloat() - animMinScore) / yRange
                             val y = padYTop + drawH - (normY * drawH)
 
-                            // Disegniamo solo i punti presenti nella porzione orizzontale visibile
-                            if (x in (padX - 10f)..(padX + drawW + 10f)) {
-                                if (!firstPointDrawn) {
-                                    path.moveTo(x, y)
-                                    firstPointDrawn = true
-                                } else {
-                                    path.lineTo(x, y)
+                            Offset(x, y)
+                        }
+
+                        if (points.isNotEmpty()) {
+                            // Posizioniamo la penna del Canvas sul primo punto del giocatore
+                            path.moveTo(points[0].x, points[0].y)
+
+                            if (points.size == 1) {
+                                // Se la partita ha un solo punto (inizio), disegna un singolo cerchio
+                                val radius = if (isDetailed) 4.dp.toPx() else 2.dp.toPx()
+                                drawCircle(color, radius, points[0])
+                            } else {
+                                // 🧠 MATEMATICA DELLE CURVE DI BÉZIER CUBICHE (cubicTo):
+                                // Invece di tracciare spigoli acuminati con lineTo, calcoliamo due punti di controllo
+                                // intermedi (controlPoint1 e controlPoint2) posizionati a metà della distanza X.
+                                // Questo crea una tangenza orizzontale morbida che elimina qualsiasi angolo acuto.
+                                for (i in 0 until points.size - 1) {
+                                    val p1 = points[i] // Punto di partenza (es. Turno 1)
+                                    val p2 = points[i + 1] // Punto di arrivo (es. Turno 2)
+
+                                    val dx = p2.x - p1.x // Distanza orizzontale tra i due turni
+                                    // Magnete 1: Parte dall'altezza di p1 ma si sposta a metà strada verso p2
+                                    val controlPoint1 = Offset(p1.x + dx / 2f, p1.y)
+                                    // Magnete 2: Arriva all'altezza di p2 partendo da metà strada
+                                    val controlPoint2 = Offset(p1.x + dx / 2f, p2.y)
+
+                                    path.cubicTo(
+                                        controlPoint1.x, controlPoint1.y,
+                                        controlPoint2.x, controlPoint2.y,
+                                        p2.x, p2.y
+                                    )
                                 }
 
-                                val radius = if (isDetailed) 3.dp.toPx() else 1.dp.toPx()
-                                drawCircle(color, radius, Offset(x, y))
+                                // Disegniamo i pallini decorativi sui singoli punti all'interno dei confini visibili
+                                points.forEach { pt ->
+                                    if (pt.x in (padX - 10f)..(padX + drawW + 10f)) {
+                                        val radius = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx()
+                                        drawCircle(color, radius, pt)
+                                    }
+                                }
                             }
                         }
                     }
 
+                    // Stampa il sentiero morbido (Path) sulla tela con cappucci arrotondati (StrokeCap.Round)
                     drawPath(
                         path = path,
                         color = color,

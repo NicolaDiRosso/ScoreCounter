@@ -321,6 +321,29 @@
     <string name="titolo_errore_import">असंगत फ़ाइल</string>
     <string name="msg_errore_import_file">चयनित फ़ाइल एक मान्य स्कोरकाउंटर बैकअप नहीं है या दूषित है। कृपया एक मान्य .json फ़ाइल चुनें।</string>
 
+    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <string name="titolo_impostazioni_dialog">सेटिंग्स और प्राथमिकताएं</string>
+    <string name="desc_impostazioni_dialog">अपने खेल के लिए उपस्थिति, व्यवहार और डिफ़ॉल्ट विकल्प कस्टमाइज़ करें।</string>
+    <string name="sez_interfaccia_aspetto">📱 इंटरफ़ेस और उपस्थिति</string>
+    <string name="opt_tema_app">ऐप थीम</string>
+    <string name="desc_opt_tema_app">लाइट, डार्क या सिस्टम डिफ़ॉルト</string>
+    <string name="opt_lingua_app">ऐप भाषा</string>
+    <string name="desc_opt_lingua_app">इंटरफ़ेस भाषा चुनें</string>
+    <string name="opt_orientamento_schermo">स्क्रीन ओरिएंटेशन</string>
+    <string name="desc_opt_orientamento_schermo">ऑटो-रोटेट, पोर्ट्रेट या लैंडस्केप</string>
+    <string name="opt_stile_grafico">चार्ट स्टाइल</string>
+    <string name="desc_opt_stile_grafico">सॉफ्ट बेज़ियर कर्व्स या सीधी रेखाएं</string>
+    <string name="sez_schermo_comportamento">💡 स्क्रीन और व्यवहार</string>
+    <string name="opt_schermo_attivo">स्क्रीन हमेशा चालू रखें</string>
+    <string name="desc_opt_schermo_attivo">मैच के दौरान स्क्रीन को सोने से रोकें</string>
+    <string name="opt_conferma_azioni">त्वरित कार्यों की पुष्टि करें</string>
+    <string name="desc_opt_conferma_azioni">स्कोर रीसेट करने से पहले पुष्टि मांगें</string>
+    <string name="sez_personalizzazione_gioco">🎮 गेम कस्टमाइज़ेशन</string>
+    <string name="opt_passo_punteggio">डिफ़ॉल्ट स्कोर चरण</string>
+    <string name="desc_opt_passo_punteggio">डिफ़ॉल्ट त्वरित जोड़ मान सेट करें (+1, +5, +10)</string>
+    <string name="opt_ordinamento_classifica">डायनेमिक रैंकिंग सॉर्टिंग</string>
+    <string name="desc_opt_ordinamento_classifica">स्कोर के आधार पर खिलाड़ियों को स्वचालित रूप से पुनर्व्यवस्थित करें</string>
+
     <!-- ZOOM TEMPORALE GRAFICO -->
     <string name="label_segmento_tutta">सभी</string>
     <string name="label_segmento_q1">1वां भाग</string>

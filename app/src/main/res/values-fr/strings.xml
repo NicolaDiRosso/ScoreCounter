@@ -321,6 +321,29 @@
     <string name="titolo_errore_import">Fichier non compatible</string>
     <string name="msg_errore_import_file">Le fichier sélectionné n\'est pas une sauvegarde ScoreCounter valide ou est corrompu. Veuillez sélectionner un fichier .json valide.</string>
 
+    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <string name="titolo_impostazioni_dialog">Paramètres et Préférences</string>
+    <string name="desc_impostazioni_dialog">Personnalisez l\'apparence, le comportement et les options de votre jeu.</string>
+    <string name="sez_interfaccia_aspetto">📱 Interface et Apparence</string>
+    <string name="opt_tema_app">Thème de l\'application</string>
+    <string name="desc_opt_tema_app">Clair, Sombre ou Défaut système</string>
+    <string name="opt_lingua_app">Langue de l\'application</string>
+    <string name="desc_opt_lingua_app">Choisissez la langue de l\'interface</string>
+    <string name="opt_orientamento_schermo">Orientation de l\'écran</string>
+    <string name="desc_opt_orientamento_schermo">Rotation auto, Portrait ou Paysage</string>
+    <string name="opt_stile_grafico">Style de graphique</string>
+    <string name="desc_opt_stile_grafico">Courbes de Bézier douces ou segments droits</string>
+    <string name="sez_schermo_comportamento">💡 Écran et Comportement</string>
+    <string name="opt_schermo_attivo">Écran toujours allumé</string>
+    <string name="desc_opt_schermo_attivo">Empêcher la mise en veille pendant une partie</string>
+    <string name="opt_conferma_azioni">Confirmer les actions rapides</string>
+    <string name="desc_opt_conferma_azioni">Demander confirmation avant de réinitialiser les scores</string>
+    <string name="sez_personalizzazione_gioco">🎮 Personnalisation du Jeu</string>
+    <string name="opt_passo_punteggio">Pas de score par défaut</string>
+    <string name="desc_opt_passo_punteggio">Définir la valeur d\'ajout rapide (+1, +5, +10)</string>
+    <string name="opt_ordinamento_classifica">Tri dynamique du classement</string>
+    <string name="desc_opt_ordinamento_classifica">Réordonner automatiquement les joueurs selon le score</string>
+
     <!-- ZOOM TEMPORALE GRAFICO -->
     <string name="label_segmento_tutta">Toutes</string>
     <string name="label_segmento_q1">1er T</string>

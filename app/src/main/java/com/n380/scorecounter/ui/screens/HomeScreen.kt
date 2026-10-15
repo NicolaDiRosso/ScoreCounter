@@ -62,7 +62,9 @@ import com.n380.scorecounter.ui.components.AboutAppDialog
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.DonationDialog
 import com.n380.scorecounter.ui.components.BackupRestoreDialog
-import androidx.compose.material.icons.filled.MoreVert
+import com.n380.scorecounter.ui.components.SettingsDialog
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Storage
 import com.n380.scorecounter.ui.components.FilledActionPill
 import com.n380.scorecounter.ui.components.ScoreChart
@@ -127,6 +129,9 @@ fun HomeScreen(
 
     // Stato per la visibilità del dialogo "Informazioni App"
     var showAboutDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Stato per la visibilità del dialogo "Impostazioni e Preferenze"
+    var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
     // Stato per la visibilità del dialogo "Backup e Ripristino Dati"
     var showBackupDialog by rememberSaveable { mutableStateOf(false) }
@@ -304,6 +309,13 @@ fun HomeScreen(
     }
 
     // --------------------------------------------------------------------
+    // DIALOGO MODALE: IMPOSTAZIONI E PREFERENZE
+    // --------------------------------------------------------------------
+    if (showSettingsDialog) {
+        SettingsDialog(onDismiss = { showSettingsDialog = false })
+    }
+
+    // --------------------------------------------------------------------
     // DIALOGO MODALE: MESSAGGIO DEL PROGRAMMATORE (DONAZIONI E SUPPORTO)
     // --------------------------------------------------------------------
     if (showDonationDialog) {
@@ -345,6 +357,7 @@ fun HomeScreen(
             onShowDonationDialog = { showDonationDialog = true },
             onShowAboutDialog = { showAboutDialog = true },
             onShowBackupDialog = { showBackupDialog = true },
+            onShowSettingsDialog = { showSettingsDialog = true },
             expandedMatchIndex = expandedMatchIndex,
             onExpandedMatchIndexChange = { expandedMatchIndex = it },
             timeFormatter = timeFormatter,
@@ -579,7 +592,34 @@ fun HomeScreen(
                                 ),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            // PRIORITÀ 1: BACKUP E RIPRISTINO DATI (Utility critica salvataggi)
+                            // POSIZIONE 1: IMPOSTAZIONI E PREFERENZE (Nuova voce principale)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.titolo_impostazioni_dialog),
+                                        fontWeight = menuItemFontWeight,
+                                        style = menuItemTextStyle
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Settings,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(menuItemIconSize)
+                                    )
+                                },
+                                modifier = if (isTablet) Modifier.padding(vertical = 4.dp) else Modifier,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showTopMenu = false
+                                    showSettingsDialog = true
+                                }
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                            // POSIZIONE 2: BACKUP E RIPRISTINO DATI (Utility critica salvataggi)
                             DropdownMenuItem(
                                 text = {
                                     Text(
@@ -606,7 +646,7 @@ fun HomeScreen(
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 
-                            // PRIORITÀ 2: SOSTIENI SCORECOUNTER (Supporto sviluppatore)
+                            // POSIZIONE 3: SOSTIENI SCORECOUNTER (Supporto sviluppatore)
                             DropdownMenuItem(
                                 text = {
                                     Text(
@@ -633,7 +673,7 @@ fun HomeScreen(
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 
-                            // PRIORITÀ 3: INFORMAZIONI APP (Guida & Feedback)
+                            // POSIZIONE 4: INFORMAZIONI APP (Guida & Feedback)
                             DropdownMenuItem(
                                 text = {
                                     Text(

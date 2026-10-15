@@ -321,6 +321,29 @@
     <string name="titolo_errore_import">互換性のないファイル</string>
     <string name="msg_errore_import_file">選択したファイルは有効なScoreCounterバックアップではないか、破損しています。有効な.jsonファイルを選択してください。</string>
 
+    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <string name="titolo_impostazioni_dialog">設定と環境設定</string>
+    <string name="desc_impostazioni_dialog">ゲームの外観、動作、デフォルトオプションをカスタマイズします。</string>
+    <string name="sez_interfaccia_aspetto">📱 インターフェースと外観</string>
+    <string name="opt_tema_app">アプリのテーマ</string>
+    <string name="desc_opt_tema_app">ライト、ダーク、またはシステムデフォルト</string>
+    <string name="opt_lingua_app">アプリの言語</string>
+    <string name="desc_opt_lingua_app">インターフェース言語を選択</string>
+    <string name="opt_orientamento_schermo">画面の向き</string>
+    <string name="desc_opt_orientamento_schermo">自動回転、縦向き、または横向き</string>
+    <string name="opt_stile_grafico">グラフスタイル</string>
+    <string name="desc_opt_stile_grafico">なめらかなベジェ曲線または直線セグメント</string>
+    <string name="sez_schermo_comportamento">💡 画面と動作</string>
+    <string name="opt_schermo_attivo">画面を常にオン</string>
+    <string name="desc_opt_schermo_attivo">試合中に画面がスリープするのを防ぎます</string>
+    <string name="opt_conferma_azioni">クイックアクションの確認</string>
+    <string name="desc_opt_conferma_azioni">スコアをリセットする前に確認します</string>
+    <string name="sez_personalizzazione_gioco">🎮 ゲームのカスタマイズ</string>
+    <string name="opt_passo_punteggio">デフォルトのスコアステップ</string>
+    <string name="desc_opt_passo_punteggio">デフォルトのクイック加算値を設定 (+1, +5, +10)</string>
+    <string name="opt_ordinamento_classifica">動的なランキングソート</string>
+    <string name="desc_opt_ordinamento_classifica">現在のスコアでプレイヤーを自動並べ替え</string>
+
     <!-- ZOOM TEMPORALE GRAFICO -->
     <string name="label_segmento_tutta">全体</string>
     <string name="label_segmento_q1">第1Q</string>

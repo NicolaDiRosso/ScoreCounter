@@ -332,6 +332,29 @@
     <string name="titolo_errore_import">Incompatible File</string>
     <string name="msg_errore_import_file">The selected file is not a valid ScoreCounter backup or is corrupted. Please select a valid .json backup file.</string>
 
+    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <string name="titolo_impostazioni_dialog">Settings &amp; Preferences</string>
+    <string name="desc_impostazioni_dialog">Customize appearance, behavior, and default options for your game.</string>
+    <string name="sez_interfaccia_aspetto">📱 Interface &amp; Appearance</string>
+    <string name="opt_tema_app">App Theme</string>
+    <string name="desc_opt_tema_app">Light, Dark, or System Default</string>
+    <string name="opt_lingua_app">App Language</string>
+    <string name="desc_opt_lingua_app">Choose device or custom language</string>
+    <string name="opt_orientamento_schermo">Screen Orientation</string>
+    <string name="desc_opt_orientamento_schermo">Auto-rotate, Portrait, or Landscape</string>
+    <string name="opt_stile_grafico">Chart Style</string>
+    <string name="desc_opt_stile_grafico">Bézier curves or sharp line segments</string>
+    <string name="sez_schermo_comportamento">💡 Screen &amp; Behavior</string>
+    <string name="opt_schermo_attivo">Keep Screen On</string>
+    <string name="desc_opt_schermo_attivo">Prevent screen from sleeping during a match</string>
+    <string name="opt_conferma_azioni">Confirm Quick Actions</string>
+    <string name="desc_opt_conferma_azioni">Ask for confirmation before resetting scores</string>
+    <string name="sez_personalizzazione_gioco">🎮 Game Customization</string>
+    <string name="opt_passo_punteggio">Default Score Step</string>
+    <string name="desc_opt_passo_punteggio">Set default quick add value (+1, +5, +10)</string>
+    <string name="opt_ordinamento_classifica">Dynamic Ranking Sorting</string>
+    <string name="desc_opt_ordinamento_classifica">Auto-reorder players by current score</string>
+
     <!-- ZOOM TEMPORALE GRAFICO -->
     <string name="label_segmento_tutta">Full</string>
     <string name="label_segmento_q1">1st Q</string>

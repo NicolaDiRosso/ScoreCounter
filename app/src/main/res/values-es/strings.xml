@@ -321,6 +321,29 @@
     <string name="titolo_errore_import">Archivo no compatible</string>
     <string name="msg_errore_import_file">El archivo seleccionado no es una copia válida de ScoreCounter o está dañado. Selecciona un archivo .json válido.</string>
 
+    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <string name="titolo_impostazioni_dialog">Ajustes y Preferencias</string>
+    <string name="desc_impostazioni_dialog">Personaliza la apariencia, comportamiento y opciones predeterminadas de tu juego.</string>
+    <string name="sez_interfaccia_aspetto">📱 Interfaz y Apariencia</string>
+    <string name="opt_tema_app">Tema de la app</string>
+    <string name="desc_opt_tema_app">Claro, Oscuro o Predeterminado del sistema</string>
+    <string name="opt_lingua_app">Idioma de la app</string>
+    <string name="desc_opt_lingua_app">Elige el idioma de la interfaz</string>
+    <string name="opt_orientamento_schermo">Orientación de pantalla</string>
+    <string name="desc_opt_orientamento_schermo">Rotación automática, Vertical u Horizontal</string>
+    <string name="opt_stile_grafico">Estilo de gráfica</string>
+    <string name="desc_opt_stile_grafico">Curvas Bézier suaves o segmentos rectos</string>
+    <string name="sez_schermo_comportamento">💡 Pantalla y Comportamiento</string>
+    <string name="opt_schermo_attivo">Pantalla siempre encendida</string>
+    <string name="desc_opt_schermo_attivo">Evita que la pantalla se apague durante la partida</string>
+    <string name="opt_conferma_azioni">Confirmar acciones rápidas</string>
+    <string name="desc_opt_conferma_azioni">Pedir confirmación antes de reiniciar puntuaciones</string>
+    <string name="sez_personalizzazione_gioco">🎮 Personalización del Juego</string>
+    <string name="opt_passo_punteggio">Paso predeterminado de puntos</string>
+    <string name="desc_opt_passo_punteggio">Establece el incremento rápido predeterminado (+1, +5, +10)</string>
+    <string name="opt_ordinamento_classifica">Ordenamiento dinámico</string>
+    <string name="desc_opt_ordinamento_classifica">Reordenar jugadores automáticamente por puntos</string>
+
     <!-- ZOOM TEMPORALE GRAFICO -->
     <string name="label_segmento_tutta">Todas</string>
     <string name="label_segmento_q1">1.º T</string>
