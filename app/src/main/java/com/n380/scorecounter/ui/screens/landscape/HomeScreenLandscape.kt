@@ -97,7 +97,7 @@ fun HomeScreenLandscape(
     onShowDonationDialog: () -> Unit,
     onShowAboutDialog: () -> Unit,
     onShowBackupDialog: () -> Unit,
-    onShowSettingsDialog: () -> Unit,
+    //onShowSettingsDialog: () -> Unit,
     expandedMatchIndex: Int,
     onExpandedMatchIndexChange: (Int) -> Unit,
     timeFormatter: SimpleDateFormat,
@@ -187,7 +187,7 @@ fun HomeScreenLandscape(
                         )
                     }
 
-                    // ------------------------------------------------------------
+                    /* ------------------------------------------------------------
                     // CARD AZIONE 2: IMPOSTAZIONI E PREFERENZE
                     // ------------------------------------------------------------
                     HomeLandscapeActionCard(
@@ -201,7 +201,7 @@ fun HomeScreenLandscape(
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             onShowSettingsDialog()
                         }
-                    )
+                    )*/
 
                     // ------------------------------------------------------------
                     // CARD AZIONE 3: SOSTIENI SCORECOUNTER (DONAZIONE)

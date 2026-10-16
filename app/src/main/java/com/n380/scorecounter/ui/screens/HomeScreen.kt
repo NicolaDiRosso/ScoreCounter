@@ -62,7 +62,7 @@ import com.n380.scorecounter.ui.components.AboutAppDialog
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.DonationDialog
 import com.n380.scorecounter.ui.components.BackupRestoreDialog
-import com.n380.scorecounter.ui.components.SettingsDialog
+//import com.n380.scorecounter.ui.components.SettingsDialog
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Storage
@@ -130,8 +130,9 @@ fun HomeScreen(
     // Stato per la visibilità del dialogo "Informazioni App"
     var showAboutDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Stato per la visibilità del dialogo "Impostazioni e Preferenze"
+    /* Stato per la visibilità del dialogo "Impostazioni e Preferenze"
     var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    */
 
     // Stato per la visibilità del dialogo "Backup e Ripristino Dati"
     var showBackupDialog by rememberSaveable { mutableStateOf(false) }
@@ -308,12 +309,12 @@ fun HomeScreen(
         AboutAppDialog(onDismiss = { showAboutDialog = false })
     }
 
-    // --------------------------------------------------------------------
+    /* --------------------------------------------------------------------
     // DIALOGO MODALE: IMPOSTAZIONI E PREFERENZE
     // --------------------------------------------------------------------
     if (showSettingsDialog) {
         SettingsDialog(onDismiss = { showSettingsDialog = false })
-    }
+    }*/
 
     // --------------------------------------------------------------------
     // DIALOGO MODALE: MESSAGGIO DEL PROGRAMMATORE (DONAZIONI E SUPPORTO)
@@ -357,7 +358,7 @@ fun HomeScreen(
             onShowDonationDialog = { showDonationDialog = true },
             onShowAboutDialog = { showAboutDialog = true },
             onShowBackupDialog = { showBackupDialog = true },
-            onShowSettingsDialog = { showSettingsDialog = true },
+            //onShowSettingsDialog = { showSettingsDialog = true },
             expandedMatchIndex = expandedMatchIndex,
             onExpandedMatchIndexChange = { expandedMatchIndex = it },
             timeFormatter = timeFormatter,
@@ -592,7 +593,7 @@ fun HomeScreen(
                                 ),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            // POSIZIONE 1: IMPOSTAZIONI E PREFERENZE (Nuova voce principale)
+                            /* POSIZIONE 1: IMPOSTAZIONI E PREFERENZE (Nuova voce principale)
                             DropdownMenuItem(
                                 text = {
                                     Text(
@@ -618,7 +619,7 @@ fun HomeScreen(
                             )
 
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
+*/
                             // POSIZIONE 2: BACKUP E RIPRISTINO DATI (Utility critica salvataggi)
                             DropdownMenuItem(
                                 text = {

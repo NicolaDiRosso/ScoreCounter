@@ -1,4 +1,4 @@
-package com.n380.scorecounter.ui.components
+/*package com.n380.scorecounter.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
@@ -464,4 +464,4 @@ private fun SettingsRowCard(
             )
         }
     }
-}
+}*/
