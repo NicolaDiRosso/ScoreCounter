@@ -73,7 +73,6 @@ import com.n380.scorecounter.ui.components.launchShareIntent
 import com.n380.scorecounter.ui.components.launchShareIntentWithImage
 import com.n380.scorecounter.ui.screens.landscape.HomeScreenLandscape
 import com.n380.scorecounter.viewmodel.MatchViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // L'annotazione @OptIn serve a sopprimere gli avvisi del compilatore quando si utilizzano
@@ -174,11 +173,13 @@ fun HomeScreen(
     }
 
     // --------------------------------------------------------------------
-    // INTERCETTAZIONE EVENTI DI SISTEMA
+    // INTERCETTAZIONE EVENTI DI SISTEMA (PREDICTIVE BACK DISPATCHER)
     // --------------------------------------------------------------------
-    // BackHandler cattura l'evento "Pulsante Indietro" (fisico o gesture) a livello di sistema.
-    // L'argomento 'enabled' è una condizione booleana: se è false, il BackHandler si disattiva e
-    // cede il controllo ad Android (che chiuderà l'app). Se è true, lo intercetta e spara la sua lambda.
+    // 🧠 SPIEGAZIONE DIDATTICA:
+    // BackHandler si collega all'OnBackInvokedDispatcher di sistema (API 34+).
+    // Quando la card dettagli della partita è espansa (expandedMatch != null), `enabled = true` indica al sistema
+    // che la gesture indietro deve chiudere solo il dettaglio espanso anziché uscire dall'applicazione.
+    // Se la card non è espansa (`enabled = false`), BackHandler si disattiva e cede il controllo al sistema operativo.
     BackHandler(enabled = expandedMatch != null) {
         // Riportando l'indice a -1, inneschiamo una reazione a catena: expandedMatch diventa null,
         // e AnimatedVisibility in fondo al file lancia l'animazione di uscita.
@@ -1340,32 +1341,36 @@ fun HomeScreen(
                                                                 )
                                                             }
 
-                                                            // Logica di Eliminazione con possibilità di annullamento (Undo)
+                                                            // ====================================================================
+                                                            // 🧠 LOGICA DI ELIMINAZIONE OTTIMISTICA CON ANNULLAMENTO (UNDO SNACKBAR)
+                                                            // ====================================================================
+                                                            // Stessa architettura implementata nel dialogo "Gestici giocatori rapidi":
+                                                            // 1. Salviamo l'indice originale `removedIndex` prima dell'eliminazione.
+                                                            // 2. Rimuoviamo la partita dallo stato locale (RAM) e dal DataStore.
+                                                            // 3. Chiudiamo eventuali Snackbar precedenti ed esponiamo la nuova Snackbar
+                                                            //    con messaggio "Partita eliminata", pulsante d'azione "Annulla" e durata Short.
+                                                            // 4. Se l'utente clicca "Annulla" (`SnackbarResult.ActionPerformed`),
+                                                            //    ripristiniamo la partita nella sua esatta posizione iniziale nello storico.
                                                             IconButton(onClick = {
-                                                                haptic.performHapticFeedback(
-                                                                    HapticFeedbackType.LongPress
-                                                                )
-                                                                val removedIndex =
-                                                                    viewModel.history.indexOf(record)
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                val removedIndex = viewModel.history.indexOf(record)
                                                                 viewModel.deleteMatch(record)
 
                                                                 coroutineScope.launch {
-                                                                    launch { delay(2500L); snackbarHostState.currentSnackbarData?.dismiss() }
-                                                                    val result =
-                                                                        snackbarHostState.showSnackbar(context.getString(R.string.msg_partita_eliminata), // Messaggio Snackbar: partita eliminata context.getString(R.string.btn_annulla_undo), // Testo pulsante Snackbar: annulla eliminazione
-                                                                            duration = SnackbarDuration.Indefinite
-                                                                        )
+                                                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                                                    val result = snackbarHostState.showSnackbar(
+                                                                        message = context.getString(R.string.msg_partita_eliminata),
+                                                                        actionLabel = context.getString(R.string.btn_annulla_undo),
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
                                                                     if (result == SnackbarResult.ActionPerformed) {
-                                                                        viewModel.restoreMatch(
-                                                                            removedIndex,
-                                                                            record
-                                                                        )
+                                                                        viewModel.restoreMatch(removedIndex, record)
                                                                     }
                                                                 }
                                                             }) {
                                                                 Icon(
-                                                                    Icons.Filled.Delete,
-                                                                    null,
+                                                                    imageVector = Icons.Filled.Delete,
+                                                                    contentDescription = stringResource(R.string.desc_elimina_icon),
                                                                     tint = MaterialTheme.colorScheme.error
                                                                 )
                                                             }

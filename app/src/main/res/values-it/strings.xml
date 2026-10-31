@@ -105,7 +105,7 @@
     <string name="desc_inizia_icon">Inizia</string>
     <string name="desc_modifica_icon">Modifica</string>
     <string name="desc_elimina_icon">Elimina</string>
-    <string name="desc_gestisci_rapidi_icon">Gestisci Giocatori Rapidi</string>
+    <string name="desc_gestisci_rapidi_icon">Gestici giocatori rapidi</string>
     <string name="btn_gestisci">Gestisci</string>
 
     <!-- TESTO PER IL  FILE DiceComponents-->

@@ -9,6 +9,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -96,9 +102,46 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // LIVELLO 2 (Le Stanze): Il NavHost torna ad avere come 'startDestination' fissa la "home".
-                    // Questo garantisce che la Home sia sempre il pavimento della nostra pila di navigazione.
-                    NavHost(navController = navController, startDestination = "home") {
+                    // LIVELLO 2 (Le Stanze): Il NavHost gestisce il grafo di navigazione con animazioni predittive (Predictive Back).
+                    // 🧠 INTEGRAZIONE PREDICTIVE BACK GESTURE (ANDROID 14+ / API 34+):
+                    // Grazie all'attributo `android:enableOnBackInvokedCallback="true"` nel Manifest e alle transizioni
+                    // configurate qui sotto, il NavHost di Jetpack Compose si collega al `OnBackInvokedDispatcher` di sistema.
+                    // Quando l'utente esegue lo swipe "Indietro" dal bordo del display:
+                    // 1. Android OS cattura e mostra in anteprima la schermata di destinazione sottostante in tempo reale.
+                    // 2. La schermata corrente risponde traslando verso destra (popExitTransition) in coordinazione col movimento del dito.
+                    // 3. Se il gesto viene rilasciato, la navigazione si completa; se viene annullato, la schermata torna al 100%.
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home",
+                        enterTransition = {
+                            // Avanzamento verso nuova schermata: scivola da destra a sinistra (+fullWidth -> 0)
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        exitTransition = {
+                            // Uscita verso nuova schermata: la schermata attuale scivola a sinistra (0 -> -fullWidth/3)
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth / 3 },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(300))
+                        },
+                        popEnterTransition = {
+                            // Predictive Back Rientro: la schermata precedente ricompare da sinistra (-fullWidth/3 -> 0)
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> -fullWidth / 3 },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(300))
+                        },
+                        popExitTransition = {
+                            // Predictive Back Uscita: la schermata corrente scivola a destra (0 -> +fullWidth) svelando l'anteprima
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(300))
+                        }
+                    ) {
 
                         // ROTTA 1: La Home (Storico)
                         composable("home") {
@@ -158,9 +201,10 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             )
-                            // 🛡️ DATA LOSS PREVENTION (Hardware Back Button)
-                            // Se l'utente nei Risultati fa lo "swipe" per tornare indietro,
-                            // intercettiamo il gesto per eseguire la pulizia della RAM prima di uscire.
+                            // 🛡️ DATA LOSS PREVENTION (Hardware Back Button / Predictive Back Gesture)
+                            // 🧠 INTEGRITA' DATI: Se l'utente nei Risultati esegue la gesture "Indietro" predittiva,
+                            // l'evento OnBackInvoked intercetta il completamento del gesto per ripulire la RAM nel
+                            // ViewModel prima di rientrare alla schermata Home.
                             BackHandler {
                                 matchViewModel.clearMatch()
                                 navController.popBackStack("home", inclusive = false)

@@ -800,9 +800,10 @@ private fun HomeHistoryGridTableContent(
                                                     viewModel.deleteMatch(record)
 
                                                     coroutineScope.launch {
+                                                        snackbarHostState.currentSnackbarData?.dismiss()
                                                         val result = snackbarHostState.showSnackbar(
-                                                            context.getString(R.string.msg_partita_eliminata),
-                                                            context.getString(R.string.btn_annulla_undo),
+                                                            message = context.getString(R.string.msg_partita_eliminata),
+                                                            actionLabel = context.getString(R.string.btn_annulla_undo),
                                                             duration = SnackbarDuration.Short
                                                         )
                                                         if (result == SnackbarResult.ActionPerformed) {
@@ -813,8 +814,8 @@ private fun HomeHistoryGridTableContent(
                                                 modifier = Modifier.size(32.dp)
                                             ) {
                                                 Icon(
-                                                    Icons.Filled.Delete,
-                                                    null,
+                                                    imageVector = Icons.Filled.Delete,
+                                                    contentDescription = stringResource(R.string.desc_elimina_icon),
                                                     tint = MaterialTheme.colorScheme.error,
                                                     modifier = Modifier.size(18.dp)
                                                 )

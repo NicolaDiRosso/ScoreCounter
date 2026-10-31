@@ -3,6 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!--
+        ====================================================================
+        CONFIGURAZIONE APPLICAZIONE ANDROID & PREDICTIVE BACK GESTURE (API 34+)
+        ====================================================================
+        🧠 SPIEGAZIONE DIDATTICA E TECNICA:
+        L'attributo `android:enableOnBackInvokedCallback="true"` segnala al sistema operativo Android (API 33+)
+        che l'applicazione gestisce reattivamente le nuove API di navigazione predittiva (Predictive Back Gesture).
+        Abilitando questa flag:
+        1. Android attiva le anteprime visive in tempo reale (Predictive Back Animations) quando l'utente
+           esegue il gesto dello swipe "Indietro" dal bordo dello schermo.
+        2. Il sistema collega il WindowManager nativo al dispatcher di Jetpack Compose,
+           permettendo a NavHost e ai componenti BackHandler di intercettare gli eventi OnBackStarted, OnBackProgressed,
+           OnBackCancelled e OnBackInvoked in modo continuo e fluido.
+    -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,6 +25,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.ScoreCounter">
         <activity
             android:name=".MainActivity"
