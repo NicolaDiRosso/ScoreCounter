@@ -296,7 +296,7 @@
 
     <!-- BACKUP & RIPRISTINO DATI -->
     <string name="titolo_backup_dialog">Datensicherung &amp; Wiederherstellung</string>
-    <string name="desc_backup_dialog">Exportiere deine Spiele nach JSON oder stelle eine vorherige Sicherung wieder her.</string>
+    <string name="desc_backup_dialog">Spiele sichern oder wiederherstellen</string>
     <string name="titolo_esporta_backup">📤 Sicherung exportieren</string>
     <string name="msg_esporta_backup">Speichere alle abgeschlossenen Spiele, Lieblingsspieler und Titel in einer JSON-Datei. Du kannst sie auf Drive, Downloads oder per WhatsApp/E-Mail speichern.</string>
     <string name="btn_esporta_file">In JSON-Datei exportieren</string>

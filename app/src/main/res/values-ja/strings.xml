@@ -296,7 +296,7 @@
 
     <!-- BACKUP & RIPRISTINO DATI -->
     <string name="titolo_backup_dialog">データバックアップと復元</string>
-    <string name="desc_backup_dialog">試合記録をJSON形式で書き出すか、以前のバックアップを安全に復元します。</string>
+    <string name="desc_backup_dialog">試合データを保存・復元</string>
     <string name="titolo_esporta_backup">📤 バックアップのエクスポート</string>
     <string name="msg_esporta_backup">完了したすべての試合、お気に入りプレイヤー、タイトルをJSONファイルに保存します。Drive、ダウンロード、WhatsApp/メールで送信可能です。</string>
     <string name="btn_esporta_file">JSONファイルへ出力</string>

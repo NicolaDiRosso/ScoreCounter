@@ -296,7 +296,7 @@
 
     <!-- BACKUP & RIPRISTINO DATI -->
     <string name="titolo_backup_dialog">डेटा बैकअप और पुनर्प्राप्ति</string>
-    <string name="desc_backup_dialog">अपने मैचों को JSON में निर्यात करें या पिछला बैकअप सुरक्षित रूप से पुनर्प्राप्त करें।</string>
+    <string name="desc_backup_dialog">अपने मैच सहेजें या पुनर्प्राप्त करें</string>
     <string name="titolo_esporta_backup">📤 बैकअप निर्यात करें</string>
     <string name="msg_esporta_backup">सभी पूर्ण मैचों, पसंदीदा खिलाड़ियों और कस्टम शीर्षकों को एक आसान JSON फ़ाइल में सहेजें। आप इसे ड्राइव, डाउनलोड या व्हाट्सएप/ईमेल से भेज सकते हैं।</string>
     <string name="btn_esporta_file">JSON फ़ाइल में निर्यात करें</string>

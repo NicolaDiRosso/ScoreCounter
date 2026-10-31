@@ -296,7 +296,7 @@
 
     <!-- BACKUP & RIPRISTINO DATI -->
     <string name="titolo_backup_dialog">Sauvegarde et Restauration</string>
-    <string name="desc_backup_dialog">Exportez vos parties en JSON ou restaurez une sauvegarde précédente en toute sécurité.</string>
+    <string name="desc_backup_dialog">Sauvegardez ou restaurez vos parties</string>
     <string name="titolo_esporta_backup">📤 Exporter les Sauvegardes</string>
     <string name="msg_esporta_backup">Enregistrez toutes les parties terminées, joueurs favoris et titres personnalisés dans un fichier JSON clair. Enregistrez-le sur Drive, Téléchargements ou envoyez-le par WhatsApp/E-mail.</string>
     <string name="btn_esporta_file">Exporter vers Fichier JSON</string>

@@ -307,7 +307,7 @@
 
     <!-- BACKUP & RIPRISTINO DATI -->
     <string name="titolo_backup_dialog">Data Backup &amp; Restore</string>
-    <string name="desc_backup_dialog">Export your matches to JSON or restore a previous backup safely.</string>
+    <string name="desc_backup_dialog">Save or restore your matches</string>
     <string name="titolo_esporta_backup">📤 Export Backups</string>
     <string name="msg_esporta_backup">Save all completed matches, favorite player names, and custom titles into a human-readable JSON file. You can save it to Drive, Downloads, or send it via WhatsApp/Email before uninstalling.</string>
     <string name="btn_esporta_file">Export to JSON File</string>

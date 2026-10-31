@@ -308,7 +308,7 @@
 
     <!-- BACKUP & RIPRISTINO DATI -->
     <string name="titolo_backup_dialog">Backup e Ripristino Dati</string>
-    <string name="desc_backup_dialog">Esporta le tue partite in JSON o ripristina un backup precedente in sicurezza.</string>
+    <string name="desc_backup_dialog">Salva o ripristina le tue partite</string>
     <string name="titolo_esporta_backup">📤 Esporta Salvataggi</string>
     <string name="msg_esporta_backup">Salva tutte le partite concluse, i giocatori preferiti e i titoli personalizzati in un file JSON in chiaro. Puoi salvarlo su Drive, Downloads o inviarlo via WhatsApp/Email prima di disinstallare l\'app.</string>
     <string name="btn_esporta_file">Esporta su File JSON</string>
