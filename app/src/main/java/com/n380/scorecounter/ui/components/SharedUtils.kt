@@ -32,6 +32,7 @@
     import androidx.compose.ui.unit.Dp
     import androidx.compose.ui.graphics.Brush // Serve per il pallino arcobaleno
     import androidx.compose.ui.graphics.nativeCanvas // PERMETTE DI DISEGNARE TESTI NEL CANVAS
+    import androidx.compose.ui.graphics.drawscope.clipRect
     import androidx.compose.ui.graphics.toArgb
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
     import androidx.compose.ui.platform.LocalHapticFeedback
@@ -507,75 +508,88 @@
                 // --------------------------------------------------------------------
                 // NOTA BENE: Questo ciclo analizza SOLO 'visiblePlayers'.
                 // I giocatori spenti sono ignorati, quindi non vengono disegnati!
-                visiblePlayers.forEach { player ->
-                    val color = Color(player.color)
-                    val path = androidx.compose.ui.graphics.Path()
-                    val history = player.scoreHistory ?: emptyList()
+                // 🛡️ RITAGLIO RIGOROSO AI CONFINI DELLA GRIGLIA (clipRect):
+                // Applichiamo una maschera di ritaglio rettangolare delimitata esattamente dall'area della griglia
+                // [left = padX, top = padYTop, right = padX + drawW, bottom = padYTop + drawH].
+                // In questo modo, quando l'utente seleziona un quarto temporale o applica lo zoom,
+                // i sentieri vettoriali (Path) e i pallini dei punti vengono tagliati di netto ai bordi della griglia
+                // evitando qualsiasi sbavatura o tracimazione verso l'esterno.
+                clipRect(
+                    left = padX,
+                    top = padYTop,
+                    right = padX + drawW,
+                    bottom = padYTop + drawH
+                ) {
+                    visiblePlayers.forEach { player ->
+                        val color = Color(player.color)
+                        val path = androidx.compose.ui.graphics.Path()
+                        val history = player.scoreHistory ?: emptyList()
 
-                    if (history.isNotEmpty()) {
-                        // 🧠 ESTRAZIONE COORDINATE CARTESIANE
-                        // Prima raccogliamo tutti i punti (Offset) calcolando le loro X e Y sul Canvas
-                        val points = history.mapIndexed { turn, score ->
-                            val normX = (turn.toFloat() - animStartTurn) / turnSpan
-                            val x = padX + (normX * drawW)
+                        if (history.isNotEmpty()) {
+                            // 🧠 ESTRAZIONE COORDINATE CARTESIANE
+                            // Prima raccogliamo tutti i punti (Offset) calcolando le loro X e Y sul Canvas
+                            val points = history.mapIndexed { turn, score ->
+                                val normX = (turn.toFloat() - animStartTurn) / turnSpan
+                                val x = padX + (normX * drawW)
 
-                            val normY = (score.toFloat() - animMinScore) / yRange
-                            val y = padYTop + drawH - (normY * drawH)
+                                val normY = (score.toFloat() - animMinScore) / yRange
+                                val y = padYTop + drawH - (normY * drawH)
 
-                            Offset(x, y)
-                        }
+                                Offset(x, y)
+                            }
 
-                        if (points.isNotEmpty()) {
-                            // Posizioniamo la penna del Canvas sul primo punto del giocatore
-                            path.moveTo(points[0].x, points[0].y)
+                            if (points.isNotEmpty()) {
+                                // Posizioniamo la penna del Canvas sul primo punto del giocatore
+                                path.moveTo(points[0].x, points[0].y)
 
-                            if (points.size == 1) {
-                                // Se la partita ha un solo punto (inizio), disegna un singolo cerchio
-                                val radius = if (isDetailed) 4.dp.toPx() else 2.dp.toPx()
-                                drawCircle(color, radius, points[0])
-                            } else {
-                                // 🧠 MATEMATICA DELLE CURVE DI BÉZIER CUBICHE (cubicTo):
-                                // Invece di tracciare spigoli acuminati con lineTo, calcoliamo due punti di controllo
-                                // intermedi (controlPoint1 e controlPoint2) posizionati a metà della distanza X.
-                                // Questo crea una tangenza orizzontale morbida che elimina qualsiasi angolo acuto.
-                                for (i in 0 until points.size - 1) {
-                                    val p1 = points[i] // Punto di partenza (es. Turno 1)
-                                    val p2 = points[i + 1] // Punto di arrivo (es. Turno 2)
+                                if (points.size == 1) {
+                                    // Se la partita ha un solo punto (inizio), disegna un singolo cerchio
+                                    val radius = if (isDetailed) 4.dp.toPx() else 2.dp.toPx()
+                                    drawCircle(color, radius, points[0])
+                                } else {
+                                    // 🧠 MATEMATICA DELLE CURVE DI BÉZIER CUBICHE (cubicTo):
+                                    // Invece di tracciare spigoli acuminati con lineTo, calcoliamo due punti di controllo
+                                    // intermedi (controlPoint1 e controlPoint2) posizionati a metà della distanza X.
+                                    // Questo crea una tangenza orizzontale morbida che elimina qualsiasi angolo acuto.
+                                    for (i in 0 until points.size - 1) {
+                                        val p1 = points[i] // Punto di partenza (es. Turno 1)
+                                        val p2 = points[i + 1] // Punto di arrivo (es. Turno 2)
 
-                                    val dx = p2.x - p1.x // Distanza orizzontale tra i due turni
-                                    // Magnete 1: Parte dall'altezza di p1 ma si sposta a metà strada verso p2
-                                    val controlPoint1 = Offset(p1.x + dx / 2f, p1.y)
-                                    // Magnete 2: Arriva all'altezza di p2 partendo da metà strada
-                                    val controlPoint2 = Offset(p1.x + dx / 2f, p2.y)
+                                        val dx = p2.x - p1.x // Distanza orizzontale tra i due turni
+                                        // Magnete 1: Parte dall'altezza di p1 ma si sposta a metà strada verso p2
+                                        val controlPoint1 = Offset(p1.x + dx / 2f, p1.y)
+                                        // Magnete 2: Arriva all'altezza di p2 partendo da metà strada
+                                        val controlPoint2 = Offset(p1.x + dx / 2f, p2.y)
 
-                                    path.cubicTo(
-                                        controlPoint1.x, controlPoint1.y,
-                                        controlPoint2.x, controlPoint2.y,
-                                        p2.x, p2.y
-                                    )
-                                }
+                                        path.cubicTo(
+                                            controlPoint1.x, controlPoint1.y,
+                                            controlPoint2.x, controlPoint2.y,
+                                            p2.x, p2.y
+                                        )
+                                    }
 
-                                // Disegniamo i pallini decorativi sui singoli punti all'interno dei confini visibili
-                                points.forEach { pt ->
-                                    if (pt.x in (padX - 10f)..(padX + drawW + 10f)) {
-                                        val radius = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx()
-                                        drawCircle(color, radius, pt)
+                                    // Disegniamo i pallini decorativi sui singoli punti all'interno dei confini visibili
+                                    points.forEach { pt ->
+                                        if (pt.x in (padX - 10f)..(padX + drawW + 10f)) {
+                                            val radius = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx()
+                                            drawCircle(color, radius, pt)
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // Stampa il sentiero morbido (Path) sulla tela con cappucci arrotondati (StrokeCap.Round)
-                    drawPath(
-                        path = path,
-                        color = color,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(
-                            width = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx(),
-                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
-                            join = androidx.compose.ui.graphics.StrokeJoin.Round
+                        // Stampa il sentiero morbido (Path) sulla tela con cappucci arrotondati (StrokeCap.Round)
+                        drawPath(
+                            path = path,
+                            color = color,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                width = if (isDetailed) 3.dp.toPx() else 1.5.dp.toPx(),
+                                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                                join = androidx.compose.ui.graphics.StrokeJoin.Round
+                            )
                         )
-                    )
+                    }
                 }
             } // <-- Fine Canvas
 
