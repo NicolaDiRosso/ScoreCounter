@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ==================================================================== -->
+    <!-- SCHERMATA PRINCIPALE: HomeScreen                                    -->
+    <!-- ==================================================================== -->
     <string name="app_name">ScoreCounter</string>
     <string name="desc_ripristina_salvataggio">バックアップを復元</string>
     <string name="titolo_partita_in_sospeso">保留中の試合</string>
     <string name="msg_riprendi_partita">途中の試合があります。\n中断したところから再開しますか？</string>
     <string name="btn_cancella">キャンセル</string>
     <string name="btn_riprendi">再開</string>
+
+    <!-- DIALOGO DONAZIONE IN HomeScreen -->
     <string name="desc_donazione_icon">プロジェクトを支援</string>
     <string name="btn_donazione_paypal">PayPalで寄付</string>
     <string name="titolo_donazione">ScoreCounterを支援する</string>
@@ -15,6 +20,8 @@
     <string name="msg_donazione_scopo">もしよろしければ、少額の寄付（わずか1ユーロでも！）をしていただけると、ScoreCounterをPlayストアに正式に公開するために必要な25ユーロの費用をまかなうことができ、私の励みになります。</string>
     <string name="msg_donazione_grazie">アプリを試してくれたことだけでも、心から感謝します。私にとって大きな意味があります。❤️</string>
     <string name="btn_donazione_chiudi">ありがとう！</string>
+
+    <!-- DIALOGO INFO E FEEDBACK IN HomeScreen -->
     <string name="desc_informazioni_app">カードゲームでも、ボードゲームでも、あるいは誰がピザを一番多く食べられるか競う時でも、このアプリがスコアを記録し、揉め事を防ぎます（あるいはもっと盛り上げるかもしれません😉）。</string>
     <string name="sottotitolo_cosa_puoi_fare">✨ できること：</string>
     <string name="feature_registra_partite">ポイントやコンボを含めた試合の記録。</string>
@@ -26,6 +33,7 @@
     <string name="btn_invia_segnalazione">フィードバックを送信</string>
     <string name="btn_inizia_a_giocare">ゲームを始める！</string>
 
+    <!-- LISTA E AZIONI IN HomeScreen -->
     <string name="btn_nuova_sfida">新しいチャレンジ</string>
     <string name="titolo_storico_sfide">チャレンジ履歴</string>
     <string name="desc_informazioni_app_icon">アプリ情報</string>
@@ -47,10 +55,12 @@
     <string name="btn_annulla_undo">元に戻す</string>
     <string name="testo_copyright">© 2026 Created by NicolA380✈️\nAll rights reserved.</string>
 
+    <!-- ==================================================================== -->
+    <!-- CONDIVISIONE RISULTATI: ShareUtils                                   -->
+    <!-- ==================================================================== -->
     <string name="label_chart_inizio">開始</string>
     <string name="label_chart_meta">中間</string>
     <string name="label_chart_fine">終了</string>
-
     <string name="share_title_prefix">結果：</string>
     <string name="share_duration_prefix">プレイ時間：</string>
     <string name="share_date_prefix">日時：</string>
@@ -64,6 +74,9 @@
     <string name="share_footer_generated">Generated with ScoreCounter 🎮</string>
     <string name="share_intent_chooser">順位を共有</string>
 
+    <!-- ==================================================================== -->
+    <!-- CREAZIONE PARTITA: CreateMatchScreen                                 -->
+    <!-- ==================================================================== -->
     <string name="titolo_nuova_sfida">新しいチャレンジ</string>
     <string name="titolo_regole_gioco">ゲームのルール</string>
     <string name="desc_dado_icon">サイコロ</string>
@@ -105,6 +118,9 @@
     <string name="desc_gestisci_rapidi_icon">クイックプレイヤーを管理</string>
     <string name="btn_gestisci">管理</string>
 
+    <!-- ==================================================================== -->
+    <!-- DADO E COMPONENTI: DiceComponents                                    -->
+    <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">タイブレークサイコロ 🎲</string>
     <string name="desc_impostazioni_dado">試合中に振ることができるサイコロを設定します。先攻を決めたり、同点を解消したりするのに使えます。</string>
     <string name="label_scegli_formato_dado">クイックフォーマットを選択するか、カスタム作成してください：</string>
@@ -115,6 +131,9 @@
     <string name="titolo_lancio_dado">サイコロを振る</string>
     <string name="btn_rilancia">もう一度振る</string>
 
+    <!-- ==================================================================== -->
+    <!-- CONTATORE PUNTI E DIALOGHI: CounterScreen                            -->
+    <!-- ==================================================================== -->
     <string name="btn_azzera">リセット</string>
     <string name="btn_fine_match">終了</string>
     <string name="titolo_sfida_default">チャレンジ</string>
@@ -149,12 +168,17 @@
     <string name="msg_conferma_fine">チャレンジを終了してもよろしいですか？\nこの操作はやり直すことができず、結果は自動的に履歴に保存されます。</string>
     <string name="btn_concludi">終了</string>
 
+    <!-- ==================================================================== -->
+    <!-- TIMER E PRESET: TimerComponents                                      -->
+    <!-- ==================================================================== -->
     <string name="titolo_timer_sfida">⏱️ チャレンジタイマー</string>
     <string name="btn_ferma_timer">タイマー停止</string>
     <string name="btn_avvia_timer">タイマー開始</string>
     <string name="btn_chiudi">閉じる</string>
 
-    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <!-- ==================================================================== -->
+    <!-- HOME SCREEN ORIZZONTALE: HomeScreenLandscape                         -->
+    <!-- ==================================================================== -->
     <string name="title_statistiche_landscape">統計</string>
     <string name="subtitle_statistiche_landscape">記録を確認</string>
     <string name="title_sostieni_landscape">ScoreCounterを応援</string>
@@ -162,6 +186,9 @@
     <string name="title_info_landscape">アプリ情報</string>
     <string name="subtitle_info_landscape">アプリ紹介・フィードバック</string>
 
+    <!-- ==================================================================== -->
+    <!-- SCHERMATA RISULTATI E PREMI: ResultsScreen                           -->
+    <!-- ==================================================================== -->
     <string name="sfida_senza_nome">名無しのチャレンジ</string>
     <string name="desc_condividi">共有</string>
     <string name="btn_condividi_risultati">結果を共有</string>
@@ -188,10 +215,40 @@
     <string name="msg_fenice">最も低い時点のスコアと最終スコアの差が最大だった、最も見事な逆転劇を演じた人に贈られます。</string>
     <string name="premio_fenice">フェニックス</string>
 
+    <string name="titolo_dittatore_guida">👑 独裁者</string>
+    <string name="msg_dittatore">1位の位置で最も多くのターンを過ごしたプレイヤーに贈られます（同点の場合は最終スコアが最も高いプレイヤー）。</string>
+    <string name="premio_dittatore">独裁者</string>
+
+    <string name="titolo_predatore_guida">🐺 捕食者</string>
+    <string name="msg_predatore">ランキングで最も多くの追い抜きを行ったプレイヤーに贈られます。</string>
+    <string name="premio_predatore">捕食者</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 互角の勝負</string>
+    <string name="msg_testa_a_testa">共有賞！最終スコアの差が1ポイント以下の共有1位・2位に贈られます。</string>
+    <string name="premio_testa_a_testa">互角の勝負</string>
+
+    <string name="titolo_lumaca_guida">🐌 カタツムリ</string>
+    <string name="msg_lumaca">スコアの変動が最も少ない、または最も長く停滞していたプレイヤーに贈られます。</string>
+    <string name="premio_lumaca">カタツムリ</string>
+
+    <string name="titolo_diesel_guida">🚂 ディーゼル</string>
+    <string name="msg_diesel">ゲームの後半で獲得ポイントの75%以上を獲得したプレイヤーに贈られます。</string>
+    <string name="premio_diesel">ディーゼル</string>
+
+    <string name="desc_guida_premi">試合終了時に自動的に与えられるすべての特別賞をご覧ください！</string>
+
     <string name="label_punti_positivi">+%d 点</string>
     <string name="label_punti_negativi">-%d 点</string>
     <string name="label_combo">x%d</string>
+    <string name="label_turni">%d ターン</string>
+    <string name="label_sorpassi">%d 回追い抜き</string>
+    <string name="label_variazioni">%d 回変動</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
 
+    <!-- ==================================================================== -->
+    <!-- OVERLAY ANALISI GRAFICO: MatchAnalysisOverlay                        -->
+    <!-- ==================================================================== -->
     <string name="titolo_analisi_partita">試合分析</string>
     <string name="label_vinta_da_con_punti">🏆 %1$s が %2$d 点で勝利</string>
     <string name="desc_info_grafico">グラフ情報</string>
@@ -208,6 +265,9 @@
     <string name="label_durata_totale">合計時間: %s</string>
     <string name="btn_chiudi_analisi">分析を閉じる</string>
 
+    <!-- ==================================================================== -->
+    <!-- STATISTICHE GLOBALI: GlobalStatsScreen                               -->
+    <!-- ==================================================================== -->
     <string name="btn_chiudi_statistiche">統計を閉じる</string>
     <string name="titolo_statistiche_partite">試合統計</string>
     <string name="titolo_campione_assoluto">絶対的王者</string>
@@ -250,41 +310,13 @@
     <string name="titolo_fenice_suprema">🦅 至高のフェニックス</string>
     <string name="desc_fenice_suprema">最下位からの最も伝説的な逆転劇</string>
 
-    <string name="titolo_dittatore_guida">👑 独裁者</string>
-    <string name="msg_dittatore">1位の位置で最も多くのターンを過ごしたプレイヤーに贈られます（同点の場合は最終スコアが最も高いプレイヤー）。</string>
-    <string name="premio_dittatore">独裁者</string>
-
-    <string name="titolo_predatore_guida">🐺 捕食者</string>
-    <string name="msg_predatore">ランキングで最も多くの追い抜きを行ったプレイヤーに贈られます。</string>
-    <string name="premio_predatore">捕食者</string>
-
-    <string name="titolo_testa_a_testa_guida">🤝 互角の勝負</string>
-    <string name="msg_testa_a_testa">共有賞！最終スコアの差が1ポイント以下の共有1位・2位に贈られます。</string>
-    <string name="premio_testa_a_testa">互角の勝負</string>
-
-    <string name="titolo_lumaca_guida">🐌 カタツムリ</string>
-    <string name="msg_lumaca">スコアの変動が最も少ない、または最も長く停滞していたプレイヤーに贈られます。</string>
-    <string name="premio_lumaca">カタツムリ</string>
-
-    <string name="titolo_diesel_guida">🚂 ディーゼル</string>
-    <string name="msg_diesel">ゲームの後半で獲得ポイントの75%以上を獲得したプレイヤーに贈られます。</string>
-    <string name="premio_diesel">ディーゼル</string>
-
-    <string name="desc_guida_premi">試合終了時に自動的に与えられるすべての特別賞をご覧ください！</string>
-
-    <string name="label_turni">%d ターン</string>
-    <string name="label_sorpassi">%d 回追い抜き</string>
-    <string name="label_variazioni">%d 回変動</string>
-    <string name="label_percentuale">%d%%</string>
-    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
-
     <string name="titolo_dittatore_assoluto">👑 絶対的独裁者</string>
     <string name="desc_dittatore_assoluto">1位を維持したターンの最多記録</string>
 
     <string name="titolo_predatore_alfa">🐺 アルファ・プレデター</string>
     <string name="desc_predatore_alfa">1試合における最多追い抜き回数</string>
 
-    <string name="titolo_lumaca_d_oro">🐌 黄金のカツムリ</string>
+    <string name="titolo_lumaca_d_oro">🐌 黄金のカタツムリ</string>
     <string name="desc_lumaca_d_oro">1試合を通じたスコア変動の最小記録</string>
 
     <string name="titolo_motore_diesel">🚂 ディーゼルエンジン</string>
@@ -293,17 +325,22 @@
     <string name="titolo_testa_a_testa_epico">🤝 伝説の接戦</string>
     <string name="desc_testa_a_testa_epico">1ポイント差以内で決着した最高スコア試合</string>
 
+    <!-- ==================================================================== -->
+    <!-- WIDGET SCHERMATA HOME: ScoreWidget                                   -->
+    <!-- ==================================================================== -->
     <string name="desc_logo_app">アプリのロゴ</string>
     <string name="widget_btn_nuova_sfida">+ 新しいチャレンジ</string>
 
-    <!-- BACKUP & RIPRISTINO DATI -->
+    <!-- ==================================================================== -->
+    <!-- BACKUP E RIPRISTINO DATI: BackupRestoreDialog                        -->
+    <!-- ==================================================================== -->
     <string name="titolo_backup_dialog">データバックアップと復元</string>
     <string name="desc_backup_dialog">試合データを保存・復元</string>
     <string name="titolo_esporta_backup">📤 バックアップのエクスポート</string>
-    <string name="msg_esporta_backup">完了したすべての試合、お気に入りプレイヤー、タイトルをJSONファイルに保存します。Drive、ダウンロード、WhatsApp/メールで送信可能です。</string>
+    <string name="msg_esporta_backup">完了したすべての試合、お気に入りプレイヤー、カスタムタイトル、タイマープリセットをJSONファイルに保存します。Drive、ダウンロード、WhatsApp/メールで送信可能です。</string>
     <string name="btn_esporta_file">JSONファイルへ出力</string>
     <string name="titolo_importa_backup">📥 バックアップのインポート</string>
-    <string name="msg_importa_backup">以前エクスポートした.jsonバックアップファイルを選択して、試合履歴とお気に入りプレイヤーを復元します。</string>
+    <string name="msg_importa_backup">以前エクスポートした.jsonバックアップファイルを選択して、試合履歴、お気に入りプレイヤー、タイマープリセットを復元します。</string>
     <string name="btn_importa_file">ファイルから取り込み</string>
     <string name="titolo_privacy_backup">🔒 透明性の高い非暗号化フォーマット</string>
     <string name="msg_privacy_backup">バックアップファイルはテキスト形式のJSONで保存され、データに対する完全な所有権を維持できます。</string>
@@ -323,7 +360,9 @@
     <string name="titolo_errore_import">互換性のないファイル</string>
     <string name="msg_errore_import_file">選択したファイルは有効なScoreCounterバックアップではないか、破損しています。有効な.jsonファイルを選択してください。</string>
 
-    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsDialog                            -->
+    <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dialog">設定と環境設定</string>
     <string name="desc_impostazioni_dialog">ゲームの外観、動作、デフォルトオプションをカスタマイズします。</string>
     <string name="sez_interfaccia_aspetto">📱 インターフェースと外観</string>
@@ -346,7 +385,9 @@
     <string name="opt_ordinamento_classifica">動的なランキングソート</string>
     <string name="desc_opt_ordinamento_classifica">現在のスコアでプレイヤーを自動並べ替え</string>
 
-    <!-- ZOOM TEMPORALE GRAFICO -->
+    <!-- ==================================================================== -->
+    <!-- ZOOM TEMPORALE GRAFICO: ChartZoom                                    -->
+    <!-- ==================================================================== -->
     <string name="label_segmento_tutta">全体</string>
     <string name="label_segmento_q1">第1Q</string>
     <string name="label_segmento_q2">第2Q</string>

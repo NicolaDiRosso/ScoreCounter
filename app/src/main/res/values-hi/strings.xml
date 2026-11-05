@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ==================================================================== -->
+    <!-- SCHERMATA PRINCIPALE: HomeScreen                                    -->
+    <!-- ==================================================================== -->
     <string name="app_name">ScoreCounter</string>
     <string name="desc_ripristina_salvataggio">बैकअप पुनर्स्थापित करें</string>
     <string name="titolo_partita_in_sospeso">लंबित मैच</string>
     <string name="msg_riprendi_partita">आपने एक मैच अधूरा छोड़ दिया था।\nक्या आप वहीं से शुरू करना चाहते हैं जहाँ छोड़ा था?</string>
     <string name="btn_cancella">रद्द करें</string>
     <string name="btn_riprendi">फिर से शुरू करें</string>
+
+    <!-- DIALOGO DONAZIONE IN HomeScreen -->
     <string name="desc_donazione_icon">परियोजना का समर्थन करें</string>
     <string name="btn_donazione_paypal">PayPal के साथ दान करें</string>
     <string name="titolo_donazione">ScoreCounter का समर्थन करें</string>
@@ -15,6 +20,8 @@
     <string name="msg_donazione_scopo">यदि आप एक छोटा सा दान (भले ही सिर्फ €1!) करना चाहते हैं, तो आप मुझे Play स्टोर पर आधिकारिक तौर पर ScoreCounter प्रकाशित करने के लिए आवश्यक €25 शुल्क तक पहुँचने में मदद करेंगे और मुझे बताएंगे कि आप मेरे काम की सराहना करते हैं।</string>
     <string name="msg_donazione_grazie">मेरे ऐप को एक मौका देने के लिए ही आपका तहे दिल से शुक्रिया। यह मेरे लिए बहुत मायने रखता है। ❤️</string>
     <string name="btn_donazione_chiudi">धन्यवाद!</string>
+
+    <!-- DIALOGO INFO E FEEDBACK IN HomeScreen -->
     <string name="desc_informazioni_app">चाहे आप ताश खेल रहे हों, कोई बोर्ड गेम खेल रहे हों, या यह देख रहे हों कि कौन सबसे अधिक पिज्जा स्लाइस खा सकता है, यह ऐप स्कोर रखने और बहस से बचने के लिए (या शायद बहस को बढ़ावा देने के लिए 😉) यहाँ है।</string>
     <string name="sottotitolo_cosa_puoi_fare">✨ आप क्या कर सकते हैं:</string>
     <string name="feature_registra_partite">अंकों और कॉम्बो के साथ मैचों को रिकॉर्ड करना।</string>
@@ -23,9 +30,10 @@
     <string name="msg_vinca_il_migliore">क्या कुछ काम नहीं कर रहा है?</string>
     <string name="msg_segnalazione_bug">यदि आप बग रिपोर्ट करना चाहते हैं या सुझाव भेजना चाहते हैं, तो "फ़ीडबैक भेजें" बटन दबाएं और मुझे एक ईमेल भेजें 😊</string>
     <string name="oggetto_email_feedback">ScoreCounter: फीडबैक/बग रिपोर्ट</string>
-    <string name="btn_invia_segnalazione">फीडबैक भेजें</string>
+    <string name="btn_invia_segnalazione">फ़ीडबैक भेजें</string>
     <string name="btn_inizia_a_giocare">खेलना शुरू करें!</string>
 
+    <!-- LISTA E AZIONI IN HomeScreen -->
     <string name="btn_nuova_sfida">नयी चुनौती</string>
     <string name="titolo_storico_sfide">चुनौतियों का इतिहास</string>
     <string name="desc_informazioni_app_icon">ऐप की जानकारी</string>
@@ -47,10 +55,12 @@
     <string name="btn_annulla_undo">पूर्ववत करें</string>
     <string name="testo_copyright">© 2026 NicolA380✈️ द्वारा निर्मित\nसर्वाधिकार सुरक्षित।</string>
 
+    <!-- ==================================================================== -->
+    <!-- CONDIVISIONE RISULTATI: ShareUtils                                   -->
+    <!-- ==================================================================== -->
     <string name="label_chart_inizio">शुरुआत</string>
     <string name="label_chart_meta">मध्य</string>
     <string name="label_chart_fine">अंत</string>
-
     <string name="share_title_prefix">परिणाम:</string>
     <string name="share_duration_prefix">अवधि:</string>
     <string name="share_date_prefix">तिथि:</string>
@@ -64,6 +74,9 @@
     <string name="share_footer_generated">ScoreCounter के साथ उत्पन्न 🎮</string>
     <string name="share_intent_chooser">रैंकिंग साझा करें</string>
 
+    <!-- ==================================================================== -->
+    <!-- CREAZIONE PARTITA: CreateMatchScreen                                 -->
+    <!-- ==================================================================== -->
     <string name="titolo_nuova_sfida">नयी चुनौती</string>
     <string name="titolo_regole_gioco">खेल के नियम</string>
     <string name="desc_dado_icon">पासा</string>
@@ -92,7 +105,7 @@
     <string name="btn_annulla">रद्द करें</string>
     <string name="titolo_giocatori_rapidi_sheet">त्वरित खिलाड़ी</string>
     <string name="msg_rapido_rimosso">%s को त्वरित खिलाड़ियों से हटा दिया गया</string>
-    <string name="btn_chiudi_gestione">बंद करेंं</string>
+    <string name="btn_chiudi_gestione">बंद करें</string>
     <string name="desc_chiudi_icon">बंद करें</string>
     <string name="titolo_modifica_nome_rapido">त्वरित नाम संपादित करें</string>
     <string name="btn_inizia_sfida">चुनौती शुरू करें</string>
@@ -105,6 +118,9 @@
     <string name="desc_gestisci_rapidi_icon">त्वरित खिलाड़ी प्रबंधित करें</string>
     <string name="btn_gestisci">प्रबंधित करें</string>
 
+    <!-- ==================================================================== -->
+    <!-- DADO E COMPONENTI: DiceComponents                                    -->
+    <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">टाई-ब्रेकर पासा 🎲</string>
     <string name="desc_impostazioni_dado">वह पासा सेट करें जिसे आप मैच के दौरान यह तय करने के लिए फेंक सकते हैं कि कौन शुरू करेगा या टाई को तोड़ने के लिए।</string>
     <string name="label_scegli_formato_dado">एक त्वरित प्रारूप चुनें या अपना खुद का बनाएं:</string>
@@ -115,6 +131,9 @@
     <string name="titolo_lancio_dado">पासा फेंकना</string>
     <string name="btn_rilancia">फिर से फेंकें</string>
 
+    <!-- ==================================================================== -->
+    <!-- CONTATORE PUNTI E DIALOGHI: CounterScreen                            -->
+    <!-- ==================================================================== -->
     <string name="btn_azzera">रिसेट करें</string>
     <string name="btn_fine_match">समाप्त</string>
     <string name="titolo_sfida_default">चुनौती</string>
@@ -149,12 +168,17 @@
     <string name="msg_conferma_fine">क्या आप वाकई चुनौती को समाप्त करना चाहते हैं?\nयह कार्रवाई अपरिवर्तनीय है और परिणाम स्वचालित रूप से इतिहास में सहेजे जाएंगे।</string>
     <string name="btn_concludi">समाप्त</string>
 
+    <!-- ==================================================================== -->
+    <!-- TIMER E PRESET: TimerComponents                                      -->
+    <!-- ==================================================================== -->
     <string name="titolo_timer_sfida">⏱️ चुनौती का टाइमर</string>
     <string name="btn_ferma_timer">टाइमर रोकें</string>
     <string name="btn_avvia_timer">टाइमर शुरू करें</string>
     <string name="btn_chiudi">बंद करें</string>
 
-    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <!-- ==================================================================== -->
+    <!-- HOME SCREEN ORIZZONTALE: HomeScreenLandscape                         -->
+    <!-- ==================================================================== -->
     <string name="title_statistiche_landscape">आँकड़े</string>
     <string name="subtitle_statistiche_landscape">अपने रिकॉर्ड खोजें</string>
     <string name="title_sostieni_landscape">ScoreCounter का समर्थन करें</string>
@@ -162,6 +186,9 @@
     <string name="title_info_landscape">जानकारी</string>
     <string name="subtitle_info_landscape">ऐप देखें और फ़ीडबैक भेजें</string>
 
+    <!-- ==================================================================== -->
+    <!-- SCHERMATA RISULTATI E PREMI: ResultsScreen                           -->
+    <!-- ==================================================================== -->
     <string name="sfida_senza_nome">बिना नाम की चुनौती</string>
     <string name="desc_condividi">साझा करें</string>
     <string name="btn_condividi_risultati">परिणाम साझा करें</string>
@@ -188,10 +215,40 @@
     <string name="msg_fenice">सबसे शानदार वापसी करने वाले खिलाड़ी को दिया जाता है, जिसकी गणना उसके सबसे कम अंक और अंतिम स्कोर के बीच की जाती है।</string>
     <string name="premio_fenice">फिनिक्स</string>
 
+    <string name="titolo_dittatore_guida">👑 तानाशाह</string>
+    <string name="msg_dittatore">उस खिलाड़ी को दिया जाता है जो प्रथम स्थान पर सबसे अधिक मोड़ बिताता है (टाई के मामले में, उच्चतम अंतिम स्कोर वाला)।</string>
+    <string name="premio_dittatore">तानाशाह</string>
+
+    <string name="titolo_predatore_guida">🐺 शिकारी</string>
+    <string name="msg_predatore">रैंकिंग में सबसे अधिक ओवरटेक करने वाले खिलाड़ी को दिया जाता है।</string>
+    <string name="premio_predatore">शिकारी</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 कांटे की टक्कर</string>
+    <string name="msg_testa_a_testa">साझा पुरस्कार! प्रथम और द्वितीय स्थान वाले खिलाड़ियों को दिया जाता है यदि अंतिम अंतर 1 अंक या उससे कम है।</string>
+    <string name="premio_testa_a_testa">कांटे की टक्कर</string>
+
+    <string name="titolo_lumaca_guida">🐌 घोंघा</string>
+    <string name="msg_lumaca">सबसे कम स्कोर भिन्नता या बिना किसी बदलाव के सबसे लंबे समय तक रहने वाले खिलाड़ी को दिया जाता है।</string>
+    <string name="premio_lumaca">घोंघा</string>
+
+    <string name="titolo_diesel_guida">🚂 डीजल</string>
+    <string name="msg_diesel">खेल के दूसरे भाग में अपने कुल अंकों का कम से कम 75% हासिल करने वाले खिलाड़ी को दिया जाता है।</string>
+    <string name="premio_diesel">डीजल</string>
+
+    <string name="desc_guida_premi">हर मैच के अंत में स्वचालित रूप से दिए जाने वाले सभी विशेष पुरस्कारों की खोज करें!</string>
+
     <string name="label_punti_positivi">+%d अंक</string>
     <string name="label_punti_negativi">-%d अंक</string>
     <string name="label_combo">x%d</string>
+    <string name="label_turni">%d बारी</string>
+    <string name="label_sorpassi">%d ओवरटेक</string>
+    <string name="label_variazioni">%d बदलाव</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s और %2$s</string>
 
+    <!-- ==================================================================== -->
+    <!-- OVERLAY ANALISI GRAFICO: MatchAnalysisOverlay                        -->
+    <!-- ==================================================================== -->
     <string name="titolo_analisi_partita">मैच का विश्लेषण</string>
     <string name="label_vinta_da_con_punti">🏆 %1$s द्वारा %2$d अंकों के साथ जीता गया</string>
     <string name="desc_info_grafico">चार्ट की जानकारी</string>
@@ -208,6 +265,9 @@
     <string name="label_durata_totale">कुल अवधि: %s</string>
     <string name="btn_chiudi_analisi">विश्लेषण बंद करें</string>
 
+    <!-- ==================================================================== -->
+    <!-- STATISTICHE GLOBALI: GlobalStatsScreen                               -->
+    <!-- ==================================================================== -->
     <string name="btn_chiudi_statistiche">आँकड़े बंद करें</string>
     <string name="titolo_statistiche_partite">मैचों के आँकड़े</string>
     <string name="titolo_campione_assoluto">परम चैंपियन</string>
@@ -250,34 +310,6 @@
     <string name="titolo_fenice_suprema">🦅 सर्वोच्च फिनिक्स</string>
     <string name="desc_fenice_suprema">अंतिम स्थान से सबसे ऐतिहासिक वापसी</string>
 
-    <string name="titolo_dittatore_guida">👑 तानाशाह</string>
-    <string name="msg_dittatore">उस खिलाड़ी को दिया जाता है जो प्रथम स्थान पर सबसे अधिक मोड़ बिताता है (टाई के मामले में, उच्चतम अंतिम स्कोर वाला)।</string>
-    <string name="premio_dittatore">तानाशाह</string>
-
-    <string name="titolo_predatore_guida">🐺 शिकारी</string>
-    <string name="msg_predatore">रैंकिंग में सबसे अधिक ओवरटेक करने वाले खिलाड़ी को दिया जाता है।</string>
-    <string name="premio_predatore">शिकारी</string>
-
-    <string name="titolo_testa_a_testa_guida">🤝 कांटे की टक्कर</string>
-    <string name="msg_testa_a_testa">साझा पुरस्कार! प्रथम और द्वितीय स्थान वाले खिलाड़ियों को दिया जाता है यदि अंतिम अंतर 1 अंक या उससे कम है।</string>
-    <string name="premio_testa_a_testa">कांटे की टक्कर</string>
-
-    <string name="titolo_lumaca_guida">🐌 घोंघा</string>
-    <string name="msg_lumaca">सबसे कम स्कोर भिन्नता या बिना किसी बदलाव के सबसे लंबे समय तक रहने वाले खिलाड़ी को दिया जाता है।</string>
-    <string name="premio_lumaca">घोंघा</string>
-
-    <string name="titolo_diesel_guida">🚂 डीजल</string>
-    <string name="msg_diesel">खेल के दूसरे भाग में अपने कुल अंकों का कम से कम 75% हासिल करने वाले खिलाड़ी को दिया जाता है।</string>
-    <string name="premio_diesel">डीजल</string>
-
-    <string name="desc_guida_premi">हर मैच के अंत में स्वचालित रूप से दिए जाने वाले सभी विशेष पुरस्कारों की खोज करें!</string>
-
-    <string name="label_turni">%d बारी</string>
-    <string name="label_sorpassi">%d ओवरटेक</string>
-    <string name="label_variazioni">%d बदलाव</string>
-    <string name="label_percentuale">%d%%</string>
-    <string name="label_testa_a_testa_valore">%1$s और %2$s</string>
-
     <string name="titolo_dittatore_assoluto">👑 पूर्ण तानाशाह</string>
     <string name="desc_dittatore_assoluto">प्रथम स्थान पर बिताए गए मोड़ों की उच्चतम संख्या</string>
 
@@ -293,17 +325,22 @@
     <string name="titolo_testa_a_testa_epico">🤝 महाकाव्य कांटे की टक्कर</string>
     <string name="desc_testa_a_testa_epico">1 अंक या उससे कम अंतर से तय हुआ उच्चतम स्कोरिंग मैच</string>
 
+    <!-- ==================================================================== -->
+    <!-- WIDGET SCHERMATA HOME: ScoreWidget                                   -->
+    <!-- ==================================================================== -->
     <string name="desc_logo_app">ऐप का लोगो</string>
     <string name="widget_btn_nuova_sfida">+ नयी चुनौती</string>
 
-    <!-- BACKUP & RIPRISTINO DATI -->
+    <!-- ==================================================================== -->
+    <!-- BACKUP E RIPRISTINO DATI: BackupRestoreDialog                        -->
+    <!-- ==================================================================== -->
     <string name="titolo_backup_dialog">डेटा बैकअप और पुनर्प्राप्ति</string>
     <string name="desc_backup_dialog">अपने मैच सहेजें या पुनर्प्राप्त करें</string>
     <string name="titolo_esporta_backup">📤 बैकअप निर्यात करें</string>
-    <string name="msg_esporta_backup">सभी पूर्ण मैचों, पसंदीदा खिलाड़ियों और कस्टम शीर्षकों को एक आसान JSON फ़ाइल में सहेजें। आप इसे ड्राइव, डाउनलोड या व्हाट्सएप/ईमेल से भेज सकते हैं।</string>
+    <string name="msg_esporta_backup">सभी पूर्ण मैचों, पसंदीदा खिलाड़ियों, कस्टम शीर्षकों और टाइमर प्रीसेट को एक आसान JSON फ़ाइल में सहेजें। आप इसे ड्राइव, डाउनलोड या व्हाट्सएप/ईमेल से भेज सकते हैं।</string>
     <string name="btn_esporta_file">JSON फ़ाइल में निर्यात करें</string>
     <string name="titolo_importa_backup">📥 बैकअप आयात करें</string>
-    <string name="msg_importa_backup">अपने मैच इतिहास और पसंदीदा खिलाड़ियों को पुनर्प्राप्त करने के लिए पहले से निर्यात की गई .json बैकअप फ़ाइल चुनें।</string>
+    <string name="msg_importa_backup">अपने मैच इतिहास, पसंदीदा खिलाड़ियों और टाइमर प्रीसेट को पुनर्प्राप्त करने के लिए पहले से निर्यात की गई .json बैकअप फ़ाइल चुनें।</string>
     <string name="btn_importa_file">फ़ाइल से आयात करें</string>
     <string name="titolo_privacy_backup">🔒 खुला और पारदर्शी प्रारूप</string>
     <string name="msg_privacy_backup">बैकअप फ़ाइलें स्पष्ट JSON प्रारूप में सहेजी जाती हैं, जिससे आपको अपने डेटा पर पूरा नियंत्रण मिलता है।</string>
@@ -321,14 +358,16 @@
     <string name="msg_warning_sostituisci">सभी डेटा को बदलने से ऐप में वर्तमान में सहेजे गए सभी मैच और पसंदीदा खिलाड़ी स्थायी रूप से हटा दिए जाएंगे। क्या आप वाकई आगे बढ़ना चाहते हैं?</string>
     <string name="btn_procedi_sostituisci">आगे बढ़ें और ओवरराइट करें</string>
     <string name="titolo_errore_import">असंगत फ़ाइल</string>
-    <string name="msg_errore_import_file">चयनित फ़ाइल एक मान्य स्कोरकाउंटर बैकअप नहीं है या दूषित है। कृपया एक मान्य .json फ़ाइल चुनें।</string>
+    <string name="msg_errore_import_file">चयनित फ़ाइल एक मान्य ScoreCounter बैकअप नहीं है या दूषित है। कृपया एक मान्य .json फ़ाइल चुनें।</string>
 
-    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsDialog                            -->
+    <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dialog">सेटिंग्स और प्राथमिकताएं</string>
     <string name="desc_impostazioni_dialog">अपने खेल के लिए उपस्थिति, व्यवहार और डिफ़ॉल्ट विकल्प कस्टमाइज़ करें।</string>
     <string name="sez_interfaccia_aspetto">📱 इंटरफ़ेस और उपस्थिति</string>
     <string name="opt_tema_app">ऐप थीम</string>
-    <string name="desc_opt_tema_app">लाइट, डार्क या सिस्टम डिफ़ॉルト</string>
+    <string name="desc_opt_tema_app">लाइट, डार्क या सिस्टम डिफ़ॉल्ट</string>
     <string name="opt_lingua_app">ऐप भाषा</string>
     <string name="desc_opt_lingua_app">इंटरफ़ेस भाषा चुनें</string>
     <string name="opt_orientamento_schermo">स्क्रीन ओरिएंटेशन</string>
@@ -346,7 +385,9 @@
     <string name="opt_ordinamento_classifica">डायनेमिक रैंकिंग सॉर्टिंग</string>
     <string name="desc_opt_ordinamento_classifica">स्कोर के आधार पर खिलाड़ियों को स्वचालित रूप से पुनर्व्यवस्थित करें</string>
 
-    <!-- ZOOM TEMPORALE GRAFICO -->
+    <!-- ==================================================================== -->
+    <!-- ZOOM TEMPORALE GRAFICO: ChartZoom                                    -->
+    <!-- ==================================================================== -->
     <string name="label_segmento_tutta">सभी</string>
     <string name="label_segmento_q1">1वां भाग</string>
     <string name="label_segmento_q2">2वां भाग</string>

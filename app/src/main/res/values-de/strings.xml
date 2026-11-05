@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ==================================================================== -->
+    <!-- SCHERMATA PRINCIPALE: HomeScreen                                    -->
+    <!-- ==================================================================== -->
     <string name="app_name">ScoreCounter</string>
     <string name="desc_ripristina_salvataggio">Backup wiederherstellen</string>
     <string name="titolo_partita_in_sospeso">Ausstehendes Spiel</string>
     <string name="msg_riprendi_partita">Du hast ein laufendes Spiel abgebrochen.\nMöchtest du es dort fortsetzen, wo du aufgehört hast?</string>
     <string name="btn_cancella">Abbrechen</string>
     <string name="btn_riprendi">Fortsetzen</string>
+
+    <!-- DIALOGO DONAZIONE IN HomeScreen -->
     <string name="desc_donazione_icon">Projekt unterstützen</string>
     <string name="btn_donazione_paypal">Mit PayPal spenden</string>
     <string name="titolo_donazione">ScoreCounter unterstützen</string>
@@ -15,6 +20,8 @@
     <string name="msg_donazione_scopo">Wenn du eine kleine Spende machen möchtest (sogar nur 1 €!), hilfst du mir, die 25 € Gebühr zu erreichen, die für die offizielle Veröffentlichung von ScoreCounter im Play Store erforderlich ist, und zeigst mir, dass du meine Arbeit schätzt.</string>
     <string name="msg_donazione_grazie">Vielen Dank von ganzem Herzen, dass du meiner App eine Chance gibst. Das bedeutet mir sehr viel. ❤️</string>
     <string name="btn_donazione_chiudi">Danke!</string>
+
+    <!-- DIALOGO INFO E FEEDBACK IN HomeScreen -->
     <string name="desc_informazioni_app">Egal, ob du Karten spielst, ein Brettspiel spielst oder schaust, wer die meisten Pizzastücke essen kann – diese App ist da, um den Punktestand zu halten und Streitigkeiten zu vermeiden (oder sie vielleicht anzuregen 😉).</string>
     <string name="sottotitolo_cosa_puoi_fare">✨ Was du tun kannst:</string>
     <string name="feature_registra_partite">Spiele mit Punkten und Combos aufzeichnen.</string>
@@ -26,6 +33,7 @@
     <string name="btn_invia_segnalazione">Feedback senden</string>
     <string name="btn_inizia_a_giocare">Jetzt spielen!</string>
 
+    <!-- LISTA E AZIONI IN HomeScreen -->
     <string name="btn_nuova_sfida">Neue Herausforderung</string>
     <string name="titolo_storico_sfide">Verlauf der Herausforderungen</string>
     <string name="desc_informazioni_app_icon">App-Informationen</string>
@@ -47,10 +55,12 @@
     <string name="btn_annulla_undo">RÜCKGÄNGIG</string>
     <string name="testo_copyright">© 2026 Erstellt von NicolA380✈️\nAlle Rechte vorbehalten.</string>
 
+    <!-- ==================================================================== -->
+    <!-- CONDIVISIONE RISULTATI: ShareUtils                                   -->
+    <!-- ==================================================================== -->
     <string name="label_chart_inizio">Start</string>
     <string name="label_chart_meta">Mitte</string>
     <string name="label_chart_fine">Ende</string>
-
     <string name="share_title_prefix">Ergebnisse:</string>
     <string name="share_duration_prefix">Dauer:</string>
     <string name="share_date_prefix">Datum:</string>
@@ -64,6 +74,9 @@
     <string name="share_footer_generated">Generiert mit ScoreCounter 🎮</string>
     <string name="share_intent_chooser">Rangliste teilen</string>
 
+    <!-- ==================================================================== -->
+    <!-- CREAZIONE PARTITA: CreateMatchScreen                                 -->
+    <!-- ==================================================================== -->
     <string name="titolo_nuova_sfida">Neue Herausforderung</string>
     <string name="titolo_regole_gioco">Spielregeln</string>
     <string name="desc_dado_icon">Würfel</string>
@@ -71,7 +84,7 @@
     <string name="hint_nome_sfida">Name der Herausforderung</string>
     <string name="err_nome_sfida_obbligatorio">Der Name der Herausforderung ist erforderlich</string>
     <string name="label_titoli_recenti">Letzte Titel:</string>
-    <string name="hint_traguardo">Ziel (Optional)</string>
+    <string name="hint_traguardo">Ziel (optional)</string>
     <string name="titolo_gestione_partecipanti">Teilnehmerverwaltung</string>
     <string name="label_giocatori_rapidi">Schnelle Spieler:</string>
     <string name="msg_nessun_giocatore_rapido">Keine schnellen Spieler gespeichert.</string>
@@ -105,6 +118,9 @@
     <string name="desc_gestisci_rapidi_icon">Schnelle Spieler verwalten</string>
     <string name="btn_gestisci">Verwalten</string>
 
+    <!-- ==================================================================== -->
+    <!-- DADO E COMPONENTI: DiceComponents                                    -->
+    <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">Stechwürfel 🎲</string>
     <string name="desc_impostazioni_dado">Stelle den Würfel ein, den du während des Spiels werfen kannst, um zu entscheiden, wer beginnt, oder um Gleichstände zu lösen.</string>
     <string name="label_scegli_formato_dado">Wähle ein Schnellformat oder erstelle dein eigenes:</string>
@@ -115,6 +131,9 @@
     <string name="titolo_lancio_dado">Würfelwurf</string>
     <string name="btn_rilancia">Nochmal würfeln</string>
 
+    <!-- ==================================================================== -->
+    <!-- CONTATORE PUNTI E DIALOGHI: CounterScreen                            -->
+    <!-- ==================================================================== -->
     <string name="btn_azzera">Zurücksetzen</string>
     <string name="btn_fine_match">Abschließen</string>
     <string name="titolo_sfida_default">Herausforderung</string>
@@ -149,12 +168,17 @@
     <string name="msg_conferma_fine">Bist du sicher, dass du die Herausforderung beenden möchtest?\nDiese Aktion ist unumkehrbar und die Ergebnisse werden automatisch im Verlauf gespeichert.</string>
     <string name="btn_concludi">Abschließen</string>
 
+    <!-- ==================================================================== -->
+    <!-- TIMER E PRESET: TimerComponents                                      -->
+    <!-- ==================================================================== -->
     <string name="titolo_timer_sfida">⏱️ Herausforderungs-Timer</string>
     <string name="btn_ferma_timer">TIMER STOPPEN</string>
     <string name="btn_avvia_timer">TIMER STARTEN</string>
     <string name="btn_chiudi">SCHLIESSEN</string>
 
-    <!-- TESTO TRADOTTO PER HOMESCREEN LANDSCAPE -->
+    <!-- ==================================================================== -->
+    <!-- HOME SCREEN ORIZZONTALE: HomeScreenLandscape                         -->
+    <!-- ==================================================================== -->
     <string name="title_statistiche_landscape">Statistiken</string>
     <string name="subtitle_statistiche_landscape">Entdecke deine Rekorde</string>
     <string name="title_sostieni_landscape">ScoreCounter unterstützen</string>
@@ -162,6 +186,9 @@
     <string name="title_info_landscape">Info</string>
     <string name="subtitle_info_landscape">App entdecken &amp; Feedback senden</string>
 
+    <!-- ==================================================================== -->
+    <!-- SCHERMATA RISULTATI E PREMI: ResultsScreen                           -->
+    <!-- ==================================================================== -->
     <string name="sfida_senza_nome">Namenslose Herausforderung</string>
     <string name="desc_condividi">Teilen</string>
     <string name="btn_condividi_risultati">Ergebnisse teilen</string>
@@ -188,18 +215,48 @@
     <string name="msg_fenice">Wird dem Spieler mit der epischsten Aufholjagd verliehen, berechnet zwischen seinem niedrigsten Punkt und dem Endpunktestand.</string>
     <string name="premio_fenice">Der Phönix</string>
 
+    <string name="titolo_dittatore_guida">👑 Der Diktator</string>
+    <string name="msg_dittatore">Wird dem Spieler verliehen, der die meisten Runden auf dem 1. Platz verbringt (bei Gleichstand derjenige mit der höchsten Endpunktzahl).</string>
+    <string name="premio_dittatore">Der Diktator</string>
+
+    <string name="titolo_predatore_guida">🐺 Das Raubtier</string>
+    <string name="msg_predatore">Wird dem Spieler verliehen, der die meisten Überholmanöver in der Rangliste durchführt.</string>
+    <string name="premio_predatore">Das Raubtier</string>
+
+    <string name="titolo_testa_a_testa_guida">🤝 Kopf-an-Kopf</string>
+    <string name="msg_testa_a_testa">Geteilter Preis! Wird dem 1. und 2. Platz verliehen, wenn der Abstand 1 Punkt oder weniger beträgt.</string>
+    <string name="premio_testa_a_testa">Kopf-an-Kopf</string>
+
+    <string name="titolo_lumaca_guida">🐌 Die Schnecke</string>
+    <string name="msg_lumaca">Wird dem Spieler mit den wenigsten Punktevariationen oder der längsten Serie ohne Änderungen verliehen.</string>
+    <string name="premio_lumaca">Die Schnecke</string>
+
+    <string name="titolo_diesel_guida">🚂 Der Diesel</string>
+    <string name="msg_diesel">Wird dem Spieler verliehen, der mindestens 75 % seiner Punkte in der zweiten Spielhälfte erzielt hat.</string>
+    <string name="premio_diesel">Der Diesel</string>
+
+    <string name="desc_guida_premi">Entdecke alle Spezialpreise, die am Ende jedes Spiels automatisch vergeben werden!</string>
+
     <string name="label_punti_positivi">+%d Pkt.</string>
     <string name="label_punti_negativi">-%d Pkt.</string>
     <string name="label_combo">x%d</string>
+    <string name="label_turni">%d Runden</string>
+    <string name="label_sorpassi">%d Überholmanöver</string>
+    <string name="label_variazioni">%d Variationen</string>
+    <string name="label_percentuale">%d%%</string>
+    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
 
+    <!-- ==================================================================== -->
+    <!-- OVERLAY ANALISI GRAFICO: MatchAnalysisOverlay                        -->
+    <!-- ==================================================================== -->
     <string name="titolo_analisi_partita">Spielanalyse</string>
     <string name="label_vinta_da_con_punti">🏆 Gewonnen von %1$s mit %2$d Pkt.</string>
     <string name="desc_info_grafico">Diagramm-Infos</string>
     <string name="titolo_guida_grafico">So liest du das Diagramm</string>
     <string name="desc_guida_grafico">Lerne, wie du Linien, Punkte und Überholmanöver im Spiel interpretierst!</string>
-    <string name="titolo_guida_punti">📈 Punkte (Vertikale Achse)</string>
+    <string name="titolo_guida_punti">📈 Punkte (vertikale Achse)</string>
     <string name="msg_guida_punti">Je höher die Linie steigt, desto höher ist der Punktestand des Spielers.</string>
-    <string name="titolo_guida_tempo">⏱️ Zeit (Horizontale Achse)</string>
+    <string name="titolo_guida_tempo">⏱️ Zeit (horizontale Achse)</string>
     <string name="msg_guida_tempo">Zeigt den Verlauf des Spiels von Anfang (links) bis Ende (rechts).</string>
     <string name="titolo_guida_pallini">🔵 Punkte und flache Linien</string>
     <string name="msg_guida_pallini">Jeder Punkt ist ein erzielter Treffer. Wenn die Linie flach verläuft, bedeutet das, dass in dieser Zeit niemand gepunktet hat.</string>
@@ -208,6 +265,9 @@
     <string name="label_durata_totale">Gesamtdauer: %s</string>
     <string name="btn_chiudi_analisi">Analyse schließen</string>
 
+    <!-- ==================================================================== -->
+    <!-- STATISTICHE GLOBALI: GlobalStatsScreen                               -->
+    <!-- ==================================================================== -->
     <string name="btn_chiudi_statistiche">Statistiken schließen</string>
     <string name="titolo_statistiche_partite">Spielstatistiken</string>
     <string name="titolo_campione_assoluto">ABSOLUTER CHAMPION</string>
@@ -250,34 +310,6 @@
     <string name="titolo_fenice_suprema">🦅 Supreme Phönix</string>
     <string name="desc_fenice_suprema">Die legendärste Aufholjagd vom letzten Platz</string>
 
-    <string name="titolo_dittatore_guida">👑 Der Diktator</string>
-    <string name="msg_dittatore">Wird dem Spieler verliehen, der die meisten Runden auf dem 1. Platz verbringt (bei Gleichstand derjenige mit der höchsten Endpunktzahl).</string>
-    <string name="premio_dittatore">Der Diktator</string>
-
-    <string name="titolo_predatore_guida">🐺 Das Raubtier</string>
-    <string name="msg_predatore">Wird dem Spieler verliehen, der die meisten Überholmanöver in der Rangliste durchführt.</string>
-    <string name="premio_predatore">Das Raubtier</string>
-
-    <string name="titolo_testa_a_testa_guida">🤝 Kopf-an-Kopf</string>
-    <string name="msg_testa_a_testa">Geteilter Preis! Wird dem 1. und 2. Platz verliehen, wenn der Abstand 1 Punkt oder weniger beträgt.</string>
-    <string name="premio_testa_a_testa">Kopf-an-Kopf</string>
-
-    <string name="titolo_lumaca_guida">🐌 Die Schnecke</string>
-    <string name="msg_lumaca">Wird dem Spieler mit den wenigsten Punktevariationen oder der längsten Serie ohne Änderungen verliehen.</string>
-    <string name="premio_lumaca">Die Schnecke</string>
-
-    <string name="titolo_diesel_guida">🚂 Der Diesel</string>
-    <string name="msg_diesel">Wird dem Spieler verliehen, der mindestens 75 % seiner Punkte in der zweiten Spielhälfte erzielt hat.</string>
-    <string name="premio_diesel">Der Diesel</string>
-
-    <string name="desc_guida_premi">Entdecke alle Spezialpreise, die am Ende jedes Spiels automatisch vergeben werden!</string>
-
-    <string name="label_turni">%d Runden</string>
-    <string name="label_sorpassi">%d Überholmanöver</string>
-    <string name="label_variazioni">%d Variationen</string>
-    <string name="label_percentuale">%d%%</string>
-    <string name="label_testa_a_testa_valore">%1$s &amp; %2$s</string>
-
     <string name="titolo_dittatore_assoluto">👑 Absoluter Diktator</string>
     <string name="desc_dittatore_assoluto">Höchste Anzahl von Runden auf dem 1. Platz</string>
 
@@ -293,19 +325,24 @@
     <string name="titolo_testa_a_testa_epico">🤝 Episches Kopf-an-Kopf</string>
     <string name="desc_testa_a_testa_epico">Spiel mit der höchsten Punktzahl, entschieden durch 1 Punkt oder weniger</string>
 
+    <!-- ==================================================================== -->
+    <!-- WIDGET SCHERMATA HOME: ScoreWidget                                   -->
+    <!-- ==================================================================== -->
     <string name="desc_logo_app">App-Logo</string>
     <string name="widget_btn_nuova_sfida">+ Neue Herausforderung</string>
 
-    <!-- BACKUP & RIPRISTINO DATI -->
+    <!-- ==================================================================== -->
+    <!-- BACKUP E RIPRISTINO DATI: BackupRestoreDialog                        -->
+    <!-- ==================================================================== -->
     <string name="titolo_backup_dialog">Datensicherung &amp; Wiederherstellung</string>
     <string name="desc_backup_dialog">Spiele sichern oder wiederherstellen</string>
     <string name="titolo_esporta_backup">📤 Sicherung exportieren</string>
-    <string name="msg_esporta_backup">Speichere alle abgeschlossenen Spiele, Lieblingsspieler und Titel in einer JSON-Datei. Du kannst sie auf Drive, Downloads oder per WhatsApp/E-Mail speichern.</string>
+    <string name="msg_esporta_backup">Speichere alle abgeschlossenen Spiele, Lieblingsspieler, benutzerdefinierte Titel und Timer-Voreinstellungen in einer Klartext-JSON-Datei. Du kannst sie auf Drive, Downloads oder per WhatsApp/E-Mail speichern, bevor du die App deinstallierst.</string>
     <string name="btn_esporta_file">In JSON-Datei exportieren</string>
     <string name="titolo_importa_backup">📥 Sicherung importieren</string>
-    <string name="msg_importa_backup">Wähle eine zuvor exportierte .json-Sicherungsdatei aus, um deine Spielhistorie und Lieblingsspieler wiederherzustellen.</string>
+    <string name="msg_importa_backup">Wähle eine zuvor exportierte .json-Sicherungsdatei aus ScoreCounter aus, um deine Spielhistorie, Lieblingsspieler und Timer-Voreinstellungen wiederherzustellen.</string>
     <string name="btn_importa_file">Aus Datei importieren</string>
-    <string name="titolo_privacy_backup">🔒 Offenes &amp; Unverschlüsseltes Format</string>
+    <string name="titolo_privacy_backup">🔒 Offenes &amp; unverschlüsseltes Format</string>
     <string name="msg_privacy_backup">Sicherungsdateien werden im Klartext-JSON-Format gespeichert, damit du die volle Kontrolle über deine Daten hast.</string>
     <string name="titolo_conferma_import">Wiederherstellungsmodus</string>
     <string name="desc_dettagliata_import">Wähle, wie die Spiele und Spieler aus der Sicherungsdatei angewendet werden sollen:</string>
@@ -319,16 +356,18 @@
     <string name="desc_menu_opzioni">Weitere Optionen</string>
     <string name="titolo_warning_sostituisci">⚠️ Warnung: Daten überschreiben</string>
     <string name="msg_warning_sostituisci">Das Ersetzen aller Daten löscht und überschreibt alle aktuell in der App gespeicherten Spiele und Lieblingsspieler dauerhaft. Möchtest du wirklich fortfahren?</string>
-    <string name="btn_procedi_sostituisci">Fortfahren &amp; Überschreiben</string>
+    <string name="btn_procedi_sostituisci">Fortfahren &amp; überschreiben</string>
     <string name="titolo_errore_import">Inkompatible Datei</string>
     <string name="msg_errore_import_file">Die ausgewählte Datei ist keine gültige ScoreCounter-Sicherung oder ist beschädigt. Bitte wähle eine gültige .json-Datei.</string>
 
-    <!-- IMPOSTAZIONI E PREFERENZE -->
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsDialog                            -->
+    <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dialog">Einstellungen &amp; Präferenzen</string>
     <string name="desc_impostazioni_dialog">Passe Erscheinungsbild, Verhalten und Optionen für dein Spiel an.</string>
     <string name="sez_interfaccia_aspetto">📱 Benutzeroberfläche &amp; Erscheinungsbild</string>
     <string name="opt_tema_app">App-Design</string>
-    <string name="desc_opt_tema_app">Hell, Dunkel oder Systemstandard</string>
+    <string name="desc_opt_tema_app">Hell, dunkel oder Systemstandard</string>
     <string name="opt_lingua_app">App-Sprache</string>
     <string name="desc_opt_lingua_app">Wähle die Sprache der Benutzeroberfläche</string>
     <string name="opt_orientamento_schermo">Bildschirmausrichtung</string>
@@ -346,7 +385,9 @@
     <string name="opt_ordinamento_classifica">Dynamische Ranglistensortierung</string>
     <string name="desc_opt_ordinamento_classifica">Spieler automatisch nach Punkten sortieren</string>
 
-    <!-- ZOOM TEMPORALE GRAFICO -->
+    <!-- ==================================================================== -->
+    <!-- ZOOM TEMPORALE GRAFICO: ChartZoom                                    -->
+    <!-- ==================================================================== -->
     <string name="label_segmento_tutta">Alle</string>
     <string name="label_segmento_q1">1. Q</string>
     <string name="label_segmento_q2">2. Q</string>
