@@ -1134,6 +1134,8 @@
         onClick: () -> Unit,
         leadingIcon: ImageVector? = null
     ) {
+        val haptic = LocalHapticFeedback.current
+
         // ====================================================================================
         // 🧠 FIX UI: SURFACE WRAPPER PER L'EFFETTO "SOLLEVATO"
         // ====================================================================
@@ -1161,7 +1163,11 @@
                 selected = isSelected,
 
                 // Colleghiamo l'evento di pressione fisica dello schermo alla Lambda ricevuta dall'esterno.
-                onClick = onClick,
+                // 🧠 FEEDBACK APTICO NATIVO: Eseguiamo la vibrazione al tocco prima di lanciare la callback di business logic.
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                    onClick()
+                },
 
                 // Specifichiamo una dimensione minima verticale di 48.dp. Questa misura rispetta le regole
                 // globali di accessibilità Android (Touch Target) per garantire una pressione comoda con il pollice.

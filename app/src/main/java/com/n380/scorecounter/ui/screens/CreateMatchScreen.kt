@@ -1259,27 +1259,51 @@ fun CreateMatchScreen(
                                                     .padding(horizontal = 12.dp, vertical = 6.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                // Tasti Ordinamento Su/Giù
-                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    IconButton(
+                                                // Tasti Ordinamento Su/Giù Stilizzati (Surface con bordo arrotondato e coerenza M3)
+                                                Column(
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                                                ) {
+                                                    Surface(
                                                         onClick = {
                                                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                             viewModel.moveFavorite(index, index - 1)
                                                         },
                                                         enabled = index > 0,
-                                                        modifier = Modifier.size(24.dp)
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                                        modifier = Modifier.size(26.dp)
                                                     ) {
-                                                        Icon(Icons.Filled.KeyboardArrowUp, null, tint = MaterialTheme.colorScheme.onSurface)
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(
+                                                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                                                contentDescription = "Sposta su",
+                                                                tint = if (index > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
                                                     }
-                                                    IconButton(
+
+                                                    Surface(
                                                         onClick = {
                                                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                             viewModel.moveFavorite(index, index + 1)
                                                         },
                                                         enabled = index < viewModel.favoriteNames.size - 1,
-                                                        modifier = Modifier.size(24.dp)
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                                        modifier = Modifier.size(26.dp)
                                                     ) {
-                                                        Icon(Icons.Filled.KeyboardArrowDown, null, tint = MaterialTheme.colorScheme.onSurface)
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(
+                                                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                                                contentDescription = "Sposta giù",
+                                                                tint = if (index < viewModel.favoriteNames.size - 1) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
                                                     }
                                                 }
 
@@ -1457,39 +1481,50 @@ fun CreateMatchScreen(
                                                     .padding(horizontal = 16.dp, vertical = 8.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    IconButton(
+                                                Column(
+                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                                                ) {
+                                                    Surface(
                                                         onClick = {
-                                                            haptic.performHapticFeedback(
-                                                                HapticFeedbackType.TextHandleMove
-                                                            )
+                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                             viewModel.moveFavorite(index, index - 1)
                                                         },
                                                         enabled = index > 0,
-                                                        modifier = Modifier.size(28.dp)
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                                        modifier = Modifier.size(26.dp)
                                                     ) {
-                                                        Icon(
-                                                            Icons.Filled.KeyboardArrowUp,
-                                                            null,
-                                                            tint = MaterialTheme.colorScheme.onSurface
-                                                        )
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(
+                                                                imageVector = Icons.Filled.KeyboardArrowUp,
+                                                                contentDescription = "Sposta su",
+                                                                tint = if (index > 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
                                                     }
 
-                                                    IconButton(
+                                                    Surface(
                                                         onClick = {
-                                                            haptic.performHapticFeedback(
-                                                                HapticFeedbackType.TextHandleMove
-                                                            )
+                                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                             viewModel.moveFavorite(index, index + 1)
                                                         },
                                                         enabled = index < viewModel.favoriteNames.size - 1,
-                                                        modifier = Modifier.size(28.dp)
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                                        modifier = Modifier.size(26.dp)
                                                     ) {
-                                                        Icon(
-                                                            Icons.Filled.KeyboardArrowDown,
-                                                            null,
-                                                            tint = MaterialTheme.colorScheme.onSurface
-                                                        )
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(
+                                                                imageVector = Icons.Filled.KeyboardArrowDown,
+                                                                contentDescription = "Sposta giù",
+                                                                tint = if (index < viewModel.favoriteNames.size - 1) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                                                modifier = Modifier.size(16.dp)
+                                                            )
+                                                        }
                                                     }
                                                 }
 
