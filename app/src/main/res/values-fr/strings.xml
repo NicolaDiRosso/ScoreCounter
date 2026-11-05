@@ -87,6 +87,8 @@
     <string name="label_nuovo_colore">Choisir une nouvelle couleur :</string>
     <string name="hint_nuovo_nome">Nouveau nom</string>
     <string name="btn_salva">Sauvegarder</string>
+    <string name="titolo_preset_rapidi">Préréglages rapides</string>
+    <string name="titolo_modifica_preset">Modifier le préréglage</string>
     <string name="btn_annulla">Annuler</string>
     <string name="titolo_giocatori_rapidi_sheet">Joueurs Rapides</string>
     <string name="msg_rapido_rimosso">%s supprimé des joueurs rapides</string>

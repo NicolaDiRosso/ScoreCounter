@@ -87,6 +87,8 @@
     <string name="label_nuovo_colore">新しい色を選択：</string>
     <string name="hint_nuovo_nome">新しい名前</string>
     <string name="btn_salva">保存</string>
+    <string name="titolo_preset_rapidi">クイックプリセット</string>
+    <string name="titolo_modifica_preset">タイマープリセットを編集</string>
     <string name="btn_annulla">キャンセル</string>
     <string name="titolo_giocatori_rapidi_sheet">クイックプレイヤー</string>
     <string name="msg_rapido_rimosso">クイックプレイヤーから %s を削除しました</string>

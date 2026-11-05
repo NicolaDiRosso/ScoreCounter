@@ -91,6 +91,8 @@
     <string name="label_nuovo_colore">Choose a new color:</string>
     <string name="hint_nuovo_nome">New name</string>
     <string name="btn_salva">Save</string>
+    <string name="titolo_preset_rapidi">Quick Presets</string>
+    <string name="titolo_modifica_preset">Edit Timer Preset</string>
     <string name="btn_annulla">Cancel</string>
     <string name="titolo_giocatori_rapidi_sheet">Quick Players</string>
     <string name="msg_rapido_rimosso">%s removed from quick players</string>

@@ -19,17 +19,15 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -57,21 +55,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.n380.scorecounter.R
-import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
+import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 /**
+ * FUNZIONE D'AIUTO PER FORMATTARE IL TESTO GREZZO DEL TIMER IN FORMATO MM:SS
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Prende una stringa di cifre (es. "0030" o "0500"), ne assicura il padding a 4 cifre
+ * e la separa con i due punti per la visualizzazione grafica ("00:30", "05:00").
+ */
+private fun formatRawTimeToMMSS(raw: String): String {
+    val padded = raw.padStart(4, '0')
+    val m = padded.substring(0, 2)
+    val s = padded.substring(2, 4)
+    return "$m:$s"
+}
+
+/**
  * ====================================================================
- * COMPONENTE: TimerSettingsDialog (Versione Definitiva Audio/Vibrazione & Responsive)
+ * COMPONENTE: TimerSettingsDialog (Versione con 4 Preset Personalizzabili)
  * ====================================================================
  */
 @Composable
 fun TimerSettingsDialog(
     initialRawInput: String,
     onInputChanged: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: MatchViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -85,6 +98,13 @@ fun TimerSettingsDialog(
     var timeLeft by remember { mutableLongStateOf(0L) }
     var activeRingtone by remember { mutableStateOf<Ringtone?>(null) }
     var rawInput by remember { mutableStateOf(initialRawInput) }
+
+    // Lista dei 4 preset caricata reattivamente dal ViewModel
+    val presets = viewModel.timerPresets
+
+    // Stato per la gestione del popup di modifica del singolo preset
+    var presetToEditIndex by remember { mutableStateOf<Int?>(null) }
+    var editingRawValue by remember { mutableStateOf("") }
 
     LaunchedEffect(rawInput) {
         onInputChanged(rawInput)
@@ -128,28 +148,104 @@ fun TimerSettingsDialog(
         label = "ColorAnimation"
     )
 
-    // Lista unificata dei 6 Preset Rapidi del Timer
-    val quickPresets = listOf(
-        Pair("00:30", "30"),
-        Pair("01:00", "100"),
-        Pair("02:00", "200"),
-        Pair("05:00", "500"),
-        Pair("10:00", "1000"), // 10 Minuti (Nuovo!)
-        Pair("15:00", "1500")  // 15 Minuti (Nuovo!)
-    )
+    // ====================================================================
+    // DIALOGO MODALE DI MODIFICA DEL SINGOLO PRESET TIMER
+    // ====================================================================
+    if (presetToEditIndex != null) {
+        AlertDialog(
+            onDismissRequest = { presetToEditIndex = null },
+            title = {
+                Text(
+                    text = stringResource(R.string.titolo_modifica_preset),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val padded = editingRawValue.padStart(4, '0')
+                    val formattedDisplay = "${padded.substring(0, 2)}:${padded.substring(2, 4)}"
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BasicTextField(
+                            value = editingRawValue,
+                            onValueChange = { newValue ->
+                                val digits = newValue.filter { it.isDigit() }
+                                editingRawValue = digits.takeLast(4)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                            textStyle = TextStyle(color = Color.Transparent),
+                            cursorBrush = SolidColor(Color.Transparent),
+                            decorationBox = {
+                                Text(
+                                    text = formattedDisplay,
+                                    style = MaterialTheme.typography.displayMedium.copy(
+                                        fontSize = 42.sp,
+                                        fontWeight = FontWeight.Black,
+                                        color = MaterialTheme.colorScheme.primary
+                                    ),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        presetToEditIndex?.let { index ->
+                            viewModel.updateTimerPreset(index, editingRawValue)
+                        }
+                        presetToEditIndex = null
+                    },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        presetToEditIndex = null
+                    },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(stringResource(R.string.btn_annulla), fontWeight = FontWeight.Bold)
+                }
+            }
+        )
+    }
 
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     if (isLandscape) {
         // ====================================================================
-        // 🧠 LEZIONE TEORICA ORIZZONTALE: 2-Column Split Dialog per Timer
+        // ORIENTAMENTO ORIZZONTALE (2-Column Split Dialog per Timer)
         // ====================================================================
-        // 1. MOTIVAZIONE UX: Nello smartphone in orizzontale l'altezza è ridotta (~360dp).
-        //    Un AlertDialog standard impila titolo, display, preset e bottoni in verticale,
-        //    nascondendo o tagliando i preset rapidi del timer sotto i bottoni!
-        // 2. DISPOSIZIONE A 2 COLONNE (75% Larghezza, 85% Altezza):
-        //    - Sinistra (48%): Titolo, Display Digitale del tempo ("00:00") e Pulsanti d'Azione.
-        //    - Destra (52%): Griglia 2x3 a TUTTA ALTEZZA con i 6 Preset Rapidi (00:30 fino a 15:00).
         Dialog(
             onDismissRequest = { },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -344,7 +440,7 @@ fun TimerSettingsDialog(
                         }
                     }
 
-                    // COLONNA DESTRA (52%): 6 PRESET RAPIDI ADATTIVI A TUTTA ALTEZZA (SENZA SPAZI VUOTI!)
+                    // COLONNA DESTRA (52%): 4 PRESET RAPIDI EDITABILI IN GRIGLIA 2x2
                     Column(
                         modifier = Modifier
                             .weight(0.52f)
@@ -352,7 +448,7 @@ fun TimerSettingsDialog(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Preset Rapidi",
+                            text = stringResource(R.string.titolo_preset_rapidi),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -365,18 +461,22 @@ fun TimerSettingsDialog(
                                 .weight(1f),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            quickPresets.chunked(2).forEach { rowItems ->
+                            val rows = presets.chunked(2)
+                            rows.forEachIndexed { rowIndex, rowItems ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .weight(1f), // 🌟 Ogni riga prende 1/3 dell'altezza totale!
+                                        .weight(1f),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    rowItems.forEach { preset ->
+                                    rowItems.forEachIndexed { colIndex, rawPreset ->
+                                        val actualIndex = rowIndex * 2 + colIndex
+                                        val formattedText = formatRawTimeToMMSS(rawPreset)
+
                                         Surface(
                                             onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                rawInput = preset.second
+                                                rawInput = rawPreset
                                             },
                                             modifier = Modifier
                                                 .weight(1f)
@@ -385,13 +485,38 @@ fun TimerSettingsDialog(
                                             color = MaterialTheme.colorScheme.surfaceVariant,
                                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                                         ) {
-                                            Box(contentAlignment = Alignment.Center) {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
                                                 Text(
-                                                    text = preset.first,
+                                                    text = formattedText,
                                                     fontWeight = FontWeight.Bold,
                                                     style = MaterialTheme.typography.titleMedium,
                                                     color = MaterialTheme.colorScheme.primary
                                                 )
+
+                                                // TASTO MATITA IN ALTO A DESTRA PER MODIFICARE IL PRESET
+                                                // size 28.dp per impostare la dimensione del pulsante di modifica
+                                                IconButton(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        presetToEditIndex = actualIndex
+                                                        editingRawValue = rawPreset
+                                                    },
+                                                    modifier = Modifier
+                                                        .align(Alignment.TopEnd)
+                                                        .size(28.dp)
+                                                        .padding(2.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Edit,
+                                                        contentDescription = stringResource(R.string.desc_modifica_icon),
+                                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                                        // size 16.dp per impostare la dimensione dell'icona della matita
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -420,7 +545,7 @@ fun TimerSettingsDialog(
             text = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Box(
@@ -435,7 +560,7 @@ fun TimerSettingsDialog(
                                     BorderStroke(0.dp, Color.Transparent),
                                 shape = RoundedCornerShape(20.dp)
                             )
-                            .padding(vertical = 24.dp),
+                            .padding(vertical = 20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         if (isRunning || isPaused) {
@@ -447,7 +572,7 @@ fun TimerSettingsDialog(
                             Text(
                                 text = "$sign%02d:%02d".format(m, s),
                                 style = MaterialTheme.typography.displayLarge.copy(
-                                    fontSize = 60.sp,
+                                    fontSize = 52.sp,
                                     fontWeight = FontWeight.Black,
                                     color = displayColor
                                 )
@@ -478,7 +603,7 @@ fun TimerSettingsDialog(
                                     Text(
                                         text = formattedDisplay,
                                         style = MaterialTheme.typography.displayLarge.copy(
-                                            fontSize = 60.sp,
+                                            fontSize = 52.sp,
                                             fontWeight = FontWeight.Black,
                                             color = if (isTextFieldFocused) displayColor else displayColor.copy(alpha = 0.6f)
                                         ),
@@ -491,41 +616,77 @@ fun TimerSettingsDialog(
                     }
 
                     if (!isRunning && !isPaused) {
-                        // 🧠 LEZIONE TEORICA VERTICALE: FadedRightEdgeWrapper + LazyRow
-                        // Avvolgiamo i 6 preset in un 'FadedRightEdgeWrapper' con scorrimento orizzontale LazyRow.
-                        // Usiamo contentPadding(end = 40.dp) così l'ultimo chip (15:00) scivola DEL TUTTO oltre la sfumatura quando si arriva in fondo!
-                        FadedRightEdgeWrapper(
+                        // 🧠 GRIGLIA 2x2 DEI 4 PRESET TIMER EDITABILI (TUTTI VISIBILI SENZA CAROSELLO O SFUMATURE)
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            fadeColor = MaterialTheme.colorScheme.surface
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            LazyRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(end = 40.dp) // 🧠 UX FIX: Abbondante margine finale per far scorrere l'ultimo chip oltre la sfumatura
-                            ) {
-                                items(quickPresets) { preset ->
-                                    Surface(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            rawInput = preset.second
-                                        },
-                                        modifier = Modifier
-                                            .width(88.dp)
-                                            .height(44.dp),
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
-                                        border = BorderStroke(
-                                            1.dp,
-                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                                        )
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Text(
-                                                text = preset.first,
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.primary
+                            Text(
+                                text = stringResource(R.string.titolo_preset_rapidi),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 2.dp)
+                            )
+
+                            val rows = presets.chunked(2)
+                            rows.forEachIndexed { rowIndex, rowItems ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    rowItems.forEachIndexed { colIndex, rawPreset ->
+                                        val actualIndex = rowIndex * 2 + colIndex
+                                        val formattedText = formatRawTimeToMMSS(rawPreset)
+
+                                        Surface(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                rawInput = rawPreset
+                                            },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(48.dp),
+                                            shape = RoundedCornerShape(14.dp),
+                                            color = MaterialTheme.colorScheme.surfaceVariant,
+                                            border = BorderStroke(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                                             )
+                                        ) {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = formattedText,
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+
+                                                // TASTO MATITA IN ALTO A DESTRA PER MODIFICARE IL PRESET
+                                                // size 28.dp per impostare la dimensione del pulsante di modifica
+                                                IconButton(
+                                                    onClick = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                        presetToEditIndex = actualIndex
+                                                        editingRawValue = rawPreset
+                                                    },
+                                                    modifier = Modifier
+                                                        .align(Alignment.TopEnd)
+                                                        .size(28.dp)
+                                                        .padding(2.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Edit,
+                                                        contentDescription = stringResource(R.string.desc_modifica_icon),
+                                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                                        // size 16.dp per impostare la dimensione dell'icona della matita
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -567,7 +728,7 @@ fun TimerSettingsDialog(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(56.dp),
+                                        .height(52.dp),
                                     shape = RoundedCornerShape(20.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = if (isRunning) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
@@ -576,7 +737,7 @@ fun TimerSettingsDialog(
                                     Icon(
                                         imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                                         contentDescription = null,
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(28.dp)
                                     )
                                 }
                             }
@@ -590,7 +751,7 @@ fun TimerSettingsDialog(
                                 },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(56.dp),
+                                    .height(52.dp),
                                 shape = RoundedCornerShape(20.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error
@@ -599,7 +760,7 @@ fun TimerSettingsDialog(
                                 Icon(
                                     imageVector = Icons.Filled.Stop,
                                     contentDescription = null,
-                                    modifier = Modifier.size(if (timeLeft > 0) 32.dp else 24.dp)
+                                    modifier = Modifier.size(if (timeLeft > 0) 28.dp else 24.dp)
                                 )
                                 AnimatedVisibility(
                                     visible = timeLeft <= 0,
@@ -635,7 +796,7 @@ fun TimerSettingsDialog(
                                     isPaused = false
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
@@ -656,7 +817,7 @@ fun TimerSettingsDialog(
                             stopAllAlarms()
                             onDismiss()
                         },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         Icon(

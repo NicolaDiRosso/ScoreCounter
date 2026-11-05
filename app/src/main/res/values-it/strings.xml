@@ -92,6 +92,8 @@
     <string name="label_nuovo_colore">Scegli un nuovo colore:</string>
     <string name="hint_nuovo_nome">Nuovo nome</string>
     <string name="btn_salva">Salva</string>
+    <string name="titolo_preset_rapidi">Preset Rapidi</string>
+    <string name="titolo_modifica_preset">Modifica Preset Timer</string>
     <string name="btn_annulla">Annulla</string>
     <string name="titolo_giocatori_rapidi_sheet">Giocatori Rapidi</string>
     <string name="msg_rapido_rimosso">%s rimosso dai rapidi</string>

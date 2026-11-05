@@ -87,6 +87,8 @@
     <string name="label_nuovo_colore">Elige un nuevo color:</string>
     <string name="hint_nuovo_nome">Nuevo nombre</string>
     <string name="btn_salva">Guardar</string>
+    <string name="titolo_preset_rapidi">Ajustes rápidos</string>
+    <string name="titolo_modifica_preset">Editar ajuste del temporizador</string>
     <string name="btn_annulla">Cancelar</string>
     <string name="titolo_giocatori_rapidi_sheet">Jugadores Rápidos</string>
     <string name="msg_rapido_rimosso">%s eliminado de jugadores rápidos</string>

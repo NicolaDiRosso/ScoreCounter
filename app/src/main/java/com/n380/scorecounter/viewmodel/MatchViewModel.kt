@@ -92,6 +92,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // ---> NUOVA CHIAVE DATABASE PER IL BACKUP <---
     private val backupKey = stringPreferencesKey("current_match_backup")
 
+    // ---> CHIAVE DATABASE PER I PRESET CUSTOM DEL TIMER <---
+    private val timerPresetsKey = stringPreferencesKey("custom_timer_presets")
+
+    // Lista reattiva dei 4 preset per il timer (di default: "0030" [30 sec], "0100" [1 min], "0500" [5 min], "1000" [10 min])
+    val timerPresets = mutableStateListOf("0030", "0100", "0500", "1000")
+
     // Gson è il traduttore. Trasforma array, oggetti complessi e liste in lunghissime stringhe di testo (JSON) e viceversa per poterle salvare.
     private val gson = Gson()
 
@@ -145,6 +151,34 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 // Se abbiamo trovato un backup non vuoto, "accendiamo" la variabile per mostrare il popup in Home!
                 if (pendingBackup != null && pendingBackup!!.players.isNotEmpty()) {
                     showResumeMatchDialog = true
+                }
+            }
+
+            // CARICAMENTO PRESET TIMER PERSONALIZZATI
+            val jsonPresetsString = preferences[timerPresetsKey]
+            if (jsonPresetsString != null) {
+                val type = object : TypeToken<List<String>>() {}.type
+                val savedPresets: List<String> = gson.fromJson(jsonPresetsString, type)
+                if (savedPresets.size == 4) {
+                    timerPresets.clear()
+                    timerPresets.addAll(savedPresets)
+                }
+            }
+        }
+    }
+
+    /**
+     * AGGIORNAMENTO E PERSISTENZA PRESET TIMER
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Aggiorna il valore grezzo (es. "0300" per 3 minuti) del preset all'indice specificato (0..3)
+     * e salva asincronamente la nuova lista in formato JSON nel DataStore del dispositivo.
+     */
+    fun updateTimerPreset(index: Int, newRawValue: String) {
+        if (index in 0 until timerPresets.size) {
+            timerPresets[index] = newRawValue
+            viewModelScope.launch {
+                getApplication<Application>().dataStore.edit { prefs ->
+                    prefs[timerPresetsKey] = gson.toJson(timerPresets.toList())
                 }
             }
         }

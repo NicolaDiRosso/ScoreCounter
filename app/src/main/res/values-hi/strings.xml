@@ -87,6 +87,8 @@
     <string name="label_nuovo_colore">एक नया रंग चुनें:</string>
     <string name="hint_nuovo_nome">नया नाम</string>
     <string name="btn_salva">सहेजें</string>
+    <string name="titolo_preset_rapidi">त्वरित प्रीसेट</string>
+    <string name="titolo_modifica_preset">टाइमर प्रीसेट संपादित करें</string>
     <string name="btn_annulla">रद्द करें</string>
     <string name="titolo_giocatori_rapidi_sheet">त्वरित खिलाड़ी</string>
     <string name="msg_rapido_rimosso">%s को त्वरित खिलाड़ियों से हटा दिया गया</string>
