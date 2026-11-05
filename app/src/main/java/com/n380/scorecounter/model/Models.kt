@@ -74,13 +74,14 @@ package com.n380.scorecounter.model
     // 🧠 SPIEGAZIONE DIDATTICA:
     // Questa data class racchiude l'intera memoria dell'applicazione in un unico contenitore.
     // Viene usata sia per generare il file di backup .json leggibile esternamente, sia per ripristinare
-    // lo storico completo, i giocatori preferiti e i titoli personalizzati quando si reinstalla l'app.
+    // lo storico completo, i giocatori preferiti, i titoli personalizzati e i preset del timer quando si reinstalla l'app.
     data class ScoreCounterBackup(
         val version: Int = 1,                             // Versione del formato per controlli di compatibilità
         val timestamp: Long = System.currentTimeMillis(), // Millisecondi al momento della creazione del backup
         val history: List<MatchRecord> = emptyList(),    // Lista di tutte le partite storiche concluse
         val favoriteNames: List<String> = emptyList(),   // Lista dei nomi dei giocatori salvati tra i preferiti
-        val matchTitleHistory: List<String> = emptyList()// Lista dei titoli delle sfide usati di frequente
+        val matchTitleHistory: List<String> = emptyList(),// Lista dei titoli delle sfide usati di frequente
+        val timerPresets: List<String>? = emptyList()     // Lista dei 4 preset personalizzati del timer
     )
 
     // ====================================================================

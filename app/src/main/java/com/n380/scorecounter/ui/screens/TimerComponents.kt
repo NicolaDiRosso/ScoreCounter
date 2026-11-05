@@ -36,6 +36,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -44,6 +46,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +60,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.n380.scorecounter.R
+import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -152,15 +156,36 @@ fun TimerSettingsDialog(
     // DIALOGO MODALE DI MODIFICA DEL SINGOLO PRESET TIMER
     // ====================================================================
     if (presetToEditIndex != null) {
+        // 🧠 FOCUS E TASTIERA AUTOMATICA (Architettura del Focus in Jetpack Compose):
+        // 1. 'FocusRequester' funge da "bersaglio" programmabile per indirizzare il focus del sistema
+        //    direttamente sul campo di testo non appena il componente viene montato a schermo.
+        // 2. 'LocalSoftwareKeyboardController' fornisce l'interfaccia con l'Input Method Framework (IMF)
+        //    di sistema di Android, consentendo di forzare l'innalzamento programmatico della tastiera.
+        val focusRequesterPreset = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
+
+        // 🧠 SIDE EFFECT DIDATTICO (Gestione Ciclo di Vita della Vista):
+        // Usiamo LaunchedEffect(Unit) per attivare una Coroutine esattamente nel momento in cui il dialogo
+        // entra nella composizione. Il ritardo di 150ms è indispensabile perché l'AlertDialog ha un'animazione
+        // di ingresso nativa (fade/scale); richiedere il focus prima che il nodo sia misurato e renderizzato
+        // porterebbe il sistema a ignorare la richiesta (Dropping Focus Event).
+        LaunchedEffect(Unit) {
+            delay(150)
+            focusRequesterPreset.requestFocus()
+            keyboardController?.show()
+        }
+
         AlertDialog(
             onDismissRequest = { presetToEditIndex = null },
             title = {
-                Text(
+                // 🧠 AUTO-ADAPTIVE TEXT (AutoResizedText):
+                // Utilizziamo il componente custom condiviso 'AutoResizedText' per evitare qualsiasi troncamento
+                // del titolo del dialogo su schermi a risoluzione ridotta o con font di sistema ingranditi.
+                AutoResizedText(
                     text = stringResource(R.string.titolo_modifica_preset),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
             },
@@ -188,12 +213,22 @@ fun TimerSettingsDialog(
                                 val digits = newValue.filter { it.isDigit() }
                                 editingRawValue = digits.takeLast(4)
                             },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                // 🎯 Agganciamo il puntatore FocusRequester al campo per catturare il focus all'apertura
+                                .focusRequester(focusRequesterPreset),
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number,
                                 imeAction = ImeAction.Done
                             ),
-                            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                            keyboardActions = KeyboardActions(onDone = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                presetToEditIndex?.let { index ->
+                                    val sanitized = editingRawValue.filter { it.isDigit() }.padStart(4, '0').takeLast(4)
+                                    viewModel.updateTimerPreset(index, sanitized)
+                                }
+                                presetToEditIndex = null
+                            }),
                             textStyle = TextStyle(color = Color.Transparent),
                             cursorBrush = SolidColor(Color.Transparent),
                             decorationBox = {
@@ -212,31 +247,58 @@ fun TimerSettingsDialog(
                     }
                 }
             },
+            // 🧠 SIMMETRIA GEOMETRICA E CONTROLLO TOTALE DELLO SPAZIO:
+            // Material 3 AlertDialog posiziona i pulsanti in basso a destra.
+            // Per aggirare questo comportamento e renderli entrambi simmetrici al 50% di larghezza ciascuno,
+            // iniettiamo una Row con 'fillMaxWidth()' all'interno di 'confirmButton' e impostiamo 'dismissButton = null'.
+            // In questo modo i pulsanti sfruttano 'weight(1f)' per dividersi equamente l'intera ampiezza del dialogo.
             confirmButton = {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        presetToEditIndex?.let { index ->
-                            viewModel.updateTimerPreset(index, editingRawValue)
-                        }
-                        presetToEditIndex = null
-                    },
-                    shape = RoundedCornerShape(14.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(stringResource(R.string.btn_salva), fontWeight = FontWeight.Bold)
+                    // Pulsante Secondario: ANNULLA (OutlinedButton con bordo)
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            presetToEditIndex = null
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        AutoResizedText(
+                            text = stringResource(R.string.btn_annulla),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Pulsante Primario: SALVA (Filled Button)
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            presetToEditIndex?.let { index ->
+                                val sanitized = editingRawValue.filter { it.isDigit() }.padStart(4, '0').takeLast(4)
+                                viewModel.updateTimerPreset(index, sanitized)
+                            }
+                            presetToEditIndex = null
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        AutoResizedText(
+                            text = stringResource(R.string.btn_salva),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        presetToEditIndex = null
-                    },
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(stringResource(R.string.btn_annulla), fontWeight = FontWeight.Bold)
-                }
-            }
+            dismissButton = null
         )
     }
 
@@ -447,7 +509,7 @@ fun TimerSettingsDialog(
                             .fillMaxHeight(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
+                        AutoResizedText(
                             text = stringResource(R.string.titolo_preset_rapidi),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
@@ -489,7 +551,7 @@ fun TimerSettingsDialog(
                                                 modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Text(
+                                                AutoResizedText(
                                                     text = formattedText,
                                                     fontWeight = FontWeight.Bold,
                                                     style = MaterialTheme.typography.titleMedium,
@@ -621,7 +683,7 @@ fun TimerSettingsDialog(
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
+                            AutoResizedText(
                                 text = stringResource(R.string.titolo_preset_rapidi),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
@@ -658,7 +720,7 @@ fun TimerSettingsDialog(
                                                 modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Text(
+                                                AutoResizedText(
                                                     text = formattedText,
                                                     fontWeight = FontWeight.Bold,
                                                     style = MaterialTheme.typography.titleMedium,

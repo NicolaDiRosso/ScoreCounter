@@ -54,10 +54,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     // 🧠 CONTROLLO DATI SALVATI LOCALI
     // Questa proprietà controlla se l'applicazione contiene già dei dati salvati in memoria
-    // (partite concluse nello storico, giocatori salvati nei preferiti o titoli personalizzati).
+    // (partite concluse nello storico, giocatori salvati nei preferiti, titoli personalizzati o preset timer modificati).
     // Usata per mostrare un avviso prima di sovrascrivere tutto durante l'importazione.
     val hasSavedData: Boolean
-        get() = history.isNotEmpty() || favoriteNames.isNotEmpty() || matchTitleHistory.isNotEmpty()
+        get() = history.isNotEmpty() || favoriteNames.isNotEmpty() || matchTitleHistory.isNotEmpty() || timerPresets.toList() != defaultTimerPresets
 
     val players = mutableStateListOf<Player>()
     val history = mutableStateListOf<MatchRecord>()
@@ -94,6 +94,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     // ---> CHIAVE DATABASE PER I PRESET CUSTOM DEL TIMER <---
     private val timerPresetsKey = stringPreferencesKey("custom_timer_presets")
+
+    // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
+    private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
     // Lista reattiva dei 4 preset per il timer (di default: "0030" [30 sec], "0100" [1 min], "0500" [5 min], "1000" [10 min])
     val timerPresets = mutableStateListOf("0030", "0100", "0500", "1000")
@@ -172,10 +175,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * 🧠 SPIEGAZIONE DIDATTICA:
      * Aggiorna il valore grezzo (es. "0300" per 3 minuti) del preset all'indice specificato (0..3)
      * e salva asincronamente la nuova lista in formato JSON nel DataStore del dispositivo.
+     * Applichiamo una sanitizzazione a 4 cifre numeriche (padStart/takeLast) per garantire integrità formale.
      */
     fun updateTimerPreset(index: Int, newRawValue: String) {
         if (index in 0 until timerPresets.size) {
-            timerPresets[index] = newRawValue
+            val sanitized = newRawValue.filter { it.isDigit() }.padStart(4, '0').takeLast(4)
+            timerPresets[index] = sanitized
             viewModelScope.launch {
                 getApplication<Application>().dataStore.edit { prefs ->
                     prefs[timerPresetsKey] = gson.toJson(timerPresets.toList())
@@ -1073,7 +1078,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * ====================================================================
      * 🧠 SPIEGAZIONE DIDATTICA:
      * Questa funzione scrive in modo asincrono nel DataStore di Android sia lo storico delle partite,
-     * sia la lista dei giocatori preferiti, sia la cronologia dei titoli personalizzati.
+     * sia la lista dei giocatori preferiti, sia la cronologia dei titoli personalizzati,
+     * sia i preset personalizzati del timer.
      * Viene chiamata subito dopo un'importazione da file di backup per garantire la persistenza locale.
      */
     private fun saveAllToDataStore() {
@@ -1081,11 +1087,13 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             val historyJson = gson.toJson(history)
             val favsJson = gson.toJson(favoriteNames)
             val titlesJson = gson.toJson(matchTitleHistory)
+            val presetsJson = gson.toJson(timerPresets.toList())
 
             getApplication<Application>().dataStore.edit { prefs ->
                 prefs[historyKey] = historyJson
                 prefs[favoritesKey] = favsJson
                 prefs[titleHistoryKey] = titlesJson
+                prefs[timerPresetsKey] = presetsJson
             }
         }
     }
@@ -1095,7 +1103,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * ESPORTAZIONE SALVATAGGI IN FILE JSON ESTERNO
      * ====================================================================
      * 🧠 SPIEGAZIONE DIDATTICA:
-     * Questa funzione raccoglie l'intera memoria dell'app (storico partite, preferiti, titoli)
+     * Questa funzione raccoglie l'intera memoria dell'app (storico partite, preferiti, titoli, preset timer)
      * e la trasforma in un file di testo JSON in chiaro e formattato con rientri (Pretty-Printing).
      *
      * @param context Il contesto Android per accedere al ContentResolver di sistema.
@@ -1109,16 +1117,26 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
+        // 🧠 FOTOGRAFIA STATO SUL MAIN THREAD (Snapshot State Isolation):
+        // Catturiamo gli elementi delle SnapshotStateList sul thread principale prima di
+        // passare al thread I/O. Questo garantisce che le modifiche più recenti (come i preset)
+        // siano lette in modo coerente e sicuro senza problemi di concorrenza tra thread.
+        val currentHistory = history.toList()
+        val currentFavorites = favoriteNames.toList()
+        val currentTitles = matchTitleHistory.toList()
+        val currentPresets = timerPresets.toList()
+
         // Avviamo una coroutine sul thread I/O per non bloccare l'interfaccia grafica durante la scrittura su disco
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // 1. Creiamo l'oggetto contenitore del backup
+                // 1. Creiamo l'oggetto contenitore del backup con i dati congelati dal Main thread
                 val backupData = ScoreCounterBackup(
                     version = 1,
                     timestamp = System.currentTimeMillis(),
-                    history = history.toList(),
-                    favoriteNames = favoriteNames.toList(),
-                    matchTitleHistory = matchTitleHistory.toList()
+                    history = currentHistory,
+                    favoriteNames = currentFavorites,
+                    matchTitleHistory = currentTitles,
+                    timerPresets = currentPresets
                 )
 
                 // 2. Usiamo GsonBuilder con PrettyPrinting per creare un file JSON leggibile e pulito
@@ -1209,6 +1227,17 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                                 matchTitleHistory.add(cleanTitle)
                             }
                         }
+
+                        // Uniamo/Ripristiniamo i preset personalizzati del timer se presenti nel backup
+                        backupData.timerPresets?.let { importedPresets ->
+                            if (importedPresets.size == 4) {
+                                // Se i preset attuali sono quelli di default oppure se il backup ha preset personalizzati
+                                if (timerPresets.toList() == defaultTimerPresets || importedPresets != defaultTimerPresets) {
+                                    timerPresets.clear()
+                                    timerPresets.addAll(importedPresets)
+                                }
+                            }
+                        }
                     } else {
                         // SOSTITUZIONE COMPLETA (REPLACE)
                         history.clear()
@@ -1219,6 +1248,15 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
                         matchTitleHistory.clear()
                         matchTitleHistory.addAll(backupData.matchTitleHistory)
+
+                        // Sostituiamo i preset del timer con quelli del file, o ripristiniamo i default se assenti
+                        if (backupData.timerPresets != null && backupData.timerPresets.size == 4) {
+                            timerPresets.clear()
+                            timerPresets.addAll(backupData.timerPresets)
+                        } else {
+                            timerPresets.clear()
+                            timerPresets.addAll(defaultTimerPresets)
+                        }
 
                         newMatchesCount = backupData.history.size
                     }

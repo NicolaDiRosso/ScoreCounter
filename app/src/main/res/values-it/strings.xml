@@ -312,10 +312,10 @@
     <string name="titolo_backup_dialog">Backup e Ripristino Dati</string>
     <string name="desc_backup_dialog">Salva o ripristina le tue partite</string>
     <string name="titolo_esporta_backup">📤 Esporta Salvataggi</string>
-    <string name="msg_esporta_backup">Salva tutte le partite concluse, i giocatori preferiti e i titoli personalizzati in un file JSON in chiaro. Puoi salvarlo su Drive, Downloads o inviarlo via WhatsApp/Email prima di disinstallare l\'app.</string>
+    <string name="msg_esporta_backup">Salva tutte le partite concluse, i giocatori preferiti, i titoli personalizzati e i preset del timer in un file JSON in chiaro. Puoi salvarlo su Drive, Downloads o inviarlo via WhatsApp/Email prima di disinstallare l\'app.</string>
     <string name="btn_esporta_file">Esporta su File JSON</string>
     <string name="titolo_importa_backup">📥 Importa Salvataggi</string>
-    <string name="msg_importa_backup">Seleziona un file di backup .json precedentemente esportato da ScoreCounter per ripristinare la cronologia delle tue partite e i giocatori preferiti.</string>
+    <string name="msg_importa_backup">Seleziona un file di backup .json precedentemente esportato da ScoreCounter per ripristinare la cronologia delle tue partite, i giocatori preferiti e i preset del timer.</string>
     <string name="btn_importa_file">Importa da File</string>
     <string name="titolo_privacy_backup">🔒 Formato Libero e Trasparente</string>
     <string name="msg_privacy_backup">I file di backup sono salvati in formato JSON chiaro e non cifrato, lasciandoti il pieno controllo e la proprietà dei tuoi dati senza vincoli.</string>

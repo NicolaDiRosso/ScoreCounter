@@ -1176,7 +1176,13 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
 
                 onDismiss = {
                     showTimerDialog = false
-                }
+                },
+
+                // 🧠 CONDIVISIONE DELLO STATO (Single Source of Truth):
+                // Passiamo esplicitamente l'istanza condivisa di MatchViewModel. In questo modo
+                // i preset del timer modificati nel dialogo aggiornano la memoria dell'app
+                // e vengono inclusi immediatamente nell'esportazione del file di backup JSON.
+                viewModel = viewModel
             )
         }
     }

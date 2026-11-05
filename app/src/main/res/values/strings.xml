@@ -311,10 +311,10 @@
     <string name="titolo_backup_dialog">Data Backup &amp; Restore</string>
     <string name="desc_backup_dialog">Save or restore your matches</string>
     <string name="titolo_esporta_backup">📤 Export Backups</string>
-    <string name="msg_esporta_backup">Save all completed matches, favorite player names, and custom titles into a human-readable JSON file. You can save it to Drive, Downloads, or send it via WhatsApp/Email before uninstalling.</string>
+    <string name="msg_esporta_backup">Save all completed matches, favorite player names, custom titles, and timer presets into a human-readable JSON file. You can save it to Drive, Downloads, or send it via WhatsApp/Email before uninstalling.</string>
     <string name="btn_esporta_file">Export to JSON File</string>
     <string name="titolo_importa_backup">📥 Import Backups</string>
-    <string name="msg_importa_backup">Select a previously exported .json backup file from ScoreCounter to restore your match history and favorite players onto your device.</string>
+    <string name="msg_importa_backup">Select a previously exported .json backup file from ScoreCounter to restore your match history, favorite players, and timer presets onto your device.</string>
     <string name="btn_importa_file">Import from File</string>
     <string name="titolo_privacy_backup">🔒 Open &amp; Unencrypted Format</string>
     <string name="msg_privacy_backup">Backup files are saved in clear, unencrypted JSON format, giving you full control and ownership over your data without proprietary lock-in.</string>
