@@ -1003,11 +1003,13 @@ private fun GlobalStatCardClean(
     onToggleExpand: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .then(
                 if (onToggleExpand != null) Modifier.clickable {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onToggleExpand()
                 } else Modifier
             ),

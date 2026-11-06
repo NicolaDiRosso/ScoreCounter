@@ -1056,7 +1056,10 @@ fun GlobalStatsScreen(
                             if (globalSniper != null) {
                                 // Niente più padding(top = 16.dp) qui, perché ci pensa già la Column esterna!
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpSniper = !isExpSniper },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpSniper = !isExpSniper
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1123,7 +1126,10 @@ fun GlobalStatsScreen(
                             // 🦞 IL RE DEI GAMBERI (Record negativo assoluto)
                             if (globalCrab != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpCrab = !isExpCrab },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpCrab = !isExpCrab
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1189,7 +1195,10 @@ fun GlobalStatsScreen(
                             // 🦅 LA FENICE SUPREMA (Miglior recupero di sempre)
                             if (globalPhoenix != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpPhoenix = !isExpPhoenix },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpPhoenix = !isExpPhoenix
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1255,7 +1264,10 @@ fun GlobalStatsScreen(
                             // 👑 DITTATORE ASSOLUTO
                             if (globalDictator != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpDictator = !isExpDictator },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpDictator = !isExpDictator
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1321,7 +1333,10 @@ fun GlobalStatsScreen(
                             // 🐺 PREDATORE ALFA
                             if (globalPredator != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpPredator = !isExpPredator },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpPredator = !isExpPredator
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1387,7 +1402,10 @@ fun GlobalStatsScreen(
                             // 🐌 LUMACA D'ORO
                             if (globalSnail != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpSnail = !isExpSnail },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpSnail = !isExpSnail
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1453,7 +1471,10 @@ fun GlobalStatsScreen(
                             // 🚂 MOTORE DIESEL
                             if (globalDiesel != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpDiesel = !isExpDiesel },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpDiesel = !isExpDiesel
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
@@ -1519,7 +1540,10 @@ fun GlobalStatsScreen(
                             // 🤝 TESTA A TESTA PIU' EPICO (Punteggio più alto con scarto <= 1)
                             if (globalNeckAndNeck != null) {
                                 Card(
-                                    modifier = Modifier.fillMaxWidth().clickable { isExpNeckAndNeck = !isExpNeckAndNeck },
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        isExpNeckAndNeck = !isExpNeckAndNeck
+                                    },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
