@@ -17,7 +17,7 @@
     <string name="msg_donazione_saluto">Salut, je suis Nicola! 👋</string>
     <string name="msg_donazione_intro">Je suis étudiant en ingénierie informatique. J\'ai créé cette application pendant mon temps libre pour compter les scores avec mes amis de manière simple, belle et propre. C\'était au départ un petit projet personnel, mais j\'ai décidé de la publier pour la partager avec tout le monde.</string>
     <string name="msg_donazione_promessa">L\'application est et restera toujours sans publicité !</string>
-    <string name="msg_donazione_scopo">Si vous souhaitez faire un petit don (même seulement 1 € !), vous m\'aiderez à atteindre les 25 € de frais nécessaires pour publier ScoreCounter officiellement sur le Play Store et me ferez savoir que vous appréciez mon travail.</string>
+    <string name="msg_donazione_scopo">Si vous aimez l\'application et souhaitez soutenir le développement de ScoreCounter, un petit don (même juste un café ☕) est un merveilleux moyen de montrer votre soutien !</string>
     <string name="msg_donazione_grazie">Merci du fond du cœur d\'avoir donné une chance à mon application. Cela compte énormément pour moi. ❤️</string>
     <string name="btn_donazione_chiudi">Merci !</string>
 

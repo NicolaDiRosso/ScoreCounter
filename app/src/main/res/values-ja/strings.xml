@@ -17,7 +17,7 @@
     <string name="msg_donazione_saluto">こんにちは、ニコラです！👋</string>
     <string name="msg_donazione_intro">私は情報工学を学ぶ学生です。暇な時間を利用して、友達とシンプルかつクリーンにスコアを記録できるこのアプリを作りました。最初は小さな個人プロジェクトとして始まりましたが、みんなと共有するために公開することにしました。</string>
     <string name="msg_donazione_promessa">このアプリは今後もずっと広告なしで利用できます！</string>
-    <string name="msg_donazione_scopo">もしよろしければ、少額の寄付（わずか1ユーロでも！）をしていただけると、ScoreCounterをPlayストアに正式に公開するために必要な25ユーロの費用をまかなうことができ、私の励みになります。</string>
+    <string name="msg_donazione_scopo">アプリを気に入っていただけてScoreCounterの開発を応援したい場合、少額の寄付（コーヒー1杯分程度 ☕）は開発へのサポートを示す素晴らしい方法になります！</string>
     <string name="msg_donazione_grazie">アプリを試してくれたことだけでも、心から感謝します。私にとって大きな意味があります。❤️</string>
     <string name="btn_donazione_chiudi">ありがとう！</string>
 
