@@ -1,30 +1,36 @@
-# 🎮 ScoreCounter - Il segnapunti che mancava
+# 🎮 ScoreCounter
 
-ScoreCounter è un'applicazione Android, sviluppata nativamente in Kotlin con Jetpack Compose. Progettata con un estetica in Material You che quindi cambia con i colori di sistema del proprio smarphone, l'app trasforma il modo in cui gestisci i punteggi di giochi da tavolo, tornei di carte o sfide amichevoli, eliminando carta, penna e calcoli errati.
+> Un segnapunti universale, trasparente e in perfetto stile Material You.
 
-## ✨ Caratteristiche Principali
-- 💎 **Design System "Table-First":** Un'interfaccia coerente e moderna basata su una gerarchia visiva pulita, angoli stondati armonizzati (24dp/20dp) e un dock comandi ergonomico sempre a portata di pollice.
-- 👑 **Corona del Leader & Hall of Fame:** Identificazione istantanea del vincitore in tempo reale con icone dinamiche e un effetto "Shimmer" (riflesso di luce) sulla card del campione a fine partita.
-- 📈 **Analisi Vettoriale dei Punteggi:** Grafici lineari dinamici (ScoreChart) che mostrano l'andamento della sfida dallo 0% al 100% della durata, permettendo di visualizzare sorpassi e rimonte epiche.
-- 🏅 **Sistema Premi Speciali:** L'engine di analisi assegna automaticamente titoli leggendari come:
-  - 🎯 **Il Cecchino:** Per il colpo più letale (salto di punti maggiore).
-  - 🔥 **L'Inarrestabile:** Per la striscia di punti consecutivi più lunga.
-  - 🦞 **Il Gambero:** Per chi ha subito il maggior numero di penalità.
-  - 🦅 **La Fenice:** Per la rimonta più incredibile dal punto più basso.
-- 🎲 **Motore Dadi Universale:** Non un semplice D6. Configura il tuo dado virtuale (D6, D20, D100 o facce personalizzate) per spareggi o per decidere chi inizia.
-- 📏 **Tipografia Adattiva (DPI-Ready):** Grazie alla tecnologia AutoResizedText, ogni titolo e punteggio si adatta matematicamente alla larghezza dello schermo, garantendo una leggibilità perfetta su qualsiasi dispositivo, indipendentemente dai DPI o dalle impostazioni dei font di sistema.
-- 📊 **Statistiche Globali:** Una sezione dedicata ai record storici con card espandibili per analizzare ogni singola sessione passata nei minimi dettagli.
-- ⏱️ **Cronometro Intelligente:** Tracciamento preciso della durata, con pausa automatica intelligente quando l'app va in background per preservare la batteria e l'integrità dei dati.
-- 🛡️ **Affidabilità & UX Fluida:**
-  - **Atomic Navigation Guard:** Protezione contro i click accidentali per evitare l'avvio di partite senza giocatori.
-  - **Gestione Preferiti:** Pannello di gestione rapida dei giocatori con salvataggio persistente e blocco delle gesture per prevenire chiusure accidentali.
-  - **Universal Undo:** Ripristino istantaneo di punteggi azzerati o giocatori rimossi per errore.
+ScoreCounter nasce con una filosofia chiara: offrire uno strumento universale, rapido e senza fronzoli per tenere traccia dei punteggi di qualsiasi gioco da tavolo, torneo di carte o sfida in compagnia. L'obiettivo è permetterti di concentrarti sulla partita, delegando i calcoli a un'interfaccia progettata per essere immediata e intuitiva. 
 
-## 🛠️ Tecnologie Utilizzate
-- **Linguaggio:** [Kotlin](https://kotlinlang.org/)
-- **UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) (Material 3 Design)
-- **Persistence:** [DataStore](https://developer.android.com/topic/libraries/architecture/datastore) & [Gson](https://github.com/google/gson)
-- **Grafica:** Canvas API per i coriandoli e le statistiche.
+Interamente sviluppata seguendo le linee guida del **Material Design 3 (Material You)**, l'app si adatta dinamicamente ai colori di sistema del tuo dispositivo, garantendo un'esperienza visiva coerente, moderna e arricchita da feedback aptici (vibrazioni) per ogni interazione.
+
+## 🎯 Esperienza di Gioco
+L'applicazione evita l'inserimento di opzioni superflue che potrebbero distrarre dal gioco, offrendo esattamente ciò che serve quando serve:
+* **Gestione Flessibile:** Che sia una partita a due o un torneo di gruppo, puoi aggiungere un numero illimitato di giocatori. È possibile richiamare istantaneamente i giocatori già salvati in rubrica o crearne di nuovi sul momento, assegnando punteggi senza alcun limite numerico.
+* **Strumenti al Tavolo:** Durante la partita, hai a disposizione strumenti essenziali e non invasivi, come un **timer personalizzabile** per gestire i turni e un **dado virtuale** (anch'esso configurabile) per risolvere spareggi o decidere chi inizia. 
+* **Tutto Sotto Controllo:** L'interfaccia principale è studiata per permettere tocchi rapidi e sicuri, riducendo al minimo gli errori di digitazione durante le fasi più concitate.
+
+## 📊 Analisi e Condivisione
+Alla fine della partita, ScoreCounter trasforma i semplici numeri in un vero e proprio resoconto sportivo:
+* **Grafici Interattivi:** Analizza l'andamento della sfida attraverso un grafico vettoriale dettagliato. La funzione di zoom temporale permette di ingrandire e analizzare quarti specifici della partita per studiare rimonte e sorpassi.
+* **Assegnazione Premi:** Il motore interno valuta matematicamente la partita e assegna automaticamente titoli divertenti in base alle prestazioni reali (es. il colpo più alto, la striscia positiva, la rimonta più grande).
+* **Statistiche Globali:** Una sezione dedicata permette di consultare lo storico di tutte le partite passate e visualizzare le statistiche generali accumulate nel tempo.
+* **Condivisione:** I risultati finali, i premi e l'andamento della partita possono essere condivisi facilmente con gli amici al termine della sfida.
+
+## 🛡️ Etica, Privacy e Trasparenza
+ScoreCounter è costruita attorno al rispetto assoluto per l'utente. 
+* **100% Offline e Privata:** L'app non richiede permessi di rete, non utilizza cookie di terze parti e non effettua alcun tracciamento. I tuoi dati rimangono esclusivamente sul tuo dispositivo.
+* **Zero Pubblicità, per sempre:** Non sono presenti banner, pop-up o inserzioni pubblicitarie di alcun tipo.
+* **Backup Trasparenti:** In linea con la filosofia open, il sistema di salvataggio permette di esportare un backup completo dei propri dati sotto forma di file **JSON locale**. I file non sono criptati e risultano completamente leggibili, garantendo la massima trasparenza su quali dati l'app sta effettivamente salvando.
+
+## 🛠️ Architettura Tecnica
+Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moderna e solida:
+* **Linguaggio:** [Kotlin](https://kotlinlang.org/)
+* **UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) nativo (No XML).
+* **Persistenza:** DataStore e Gson per una gestione snella e affidabile dello stato.
+* **Filesystem:** Storage Access Framework (SAF) per l'esportazione sicura dei backup JSON.
 
 ## 📸 Galleria dell'Applicazione
 
