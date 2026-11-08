@@ -32,14 +32,14 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
 * **Persistenza:** DataStore e Gson per una gestione snella e affidabile dello stato.
 * **Filesystem:** Storage Access Framework (SAF) per l'esportazione sicura dei backup JSON.
 
-## 📸 Galleria dell'Applicazione
+## 📸 Galleria dell'applicazione
 
-### 🏠 1. Home e Storico
+### 🏠 1. Home e storico
 *Il centro di comando: avvia sfide rapide con un tocco o rivivi le glorie passate esplorando la tua Hall of Fame personale.*
 <table>
   <tr>
     <td align="center">
-      <b>Homepage con storico</b><br>
+      <b>Home page con storico</b><br>
       <img src="https://github.com/user-attachments/assets/b44950ca-88a9-4a41-8a04-b12302891a9e" width="250" alt="Home Screen con sfide rapide"/>
     </td>
      <td align="center">
@@ -48,13 +48,13 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
     </td>
     <td align="center">
       <b>Statistiche globali</b><br>
-      <img src="https://github.com/user-attachments/assets/b3d643d4-c0c9-413c-9e8a-e4f36ff28b01" width="250" alt="Storico partite e record assoluti"/>
+      <img src="https://github.com/user-attachments/assets/b3d643d4-c0c9-413c-9e8a-e4f36ff28b01" width="250" alt="Statistiche globali e record"/>
     </td>
   </tr>
 </table>
 
 ### ⚙️ 2. Creazione della sfida
-*Aggiungi il nome della sfida (anche con il completamento automatico), scegli le tue regole, poi inserisci i giocatori e scegli i colori.*
+*Aggiungi il nome della sfida, imposta le tue regole, inserisci i giocatori e personalizza i loro colori.*
 <table>
   <tr>
     <td align="center">
@@ -62,18 +62,18 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
       <img src="https://github.com/user-attachments/assets/1c6c53cb-6970-4330-a173-8cca3ec6de0c" width="250" alt="Schermata di creazione match"/>
     </td>
     <td align="center">
-      <b>Personalizza ogni giocatore</b><br>
-      <img src="https://github.com/user-attachments/assets/3ab525cf-1d63-4a7a-96bf-a5cc16bf1d29" width="250" alt="Storico partite e record assoluti"/>
+      <b>Personalizza i giocatori</b><br>
+      <img src="https://github.com/user-attachments/assets/3ab525cf-1d63-4a7a-96bf-a5cc16bf1d29" width="250" alt="Personalizzazione giocatore"/>
     </td>
     <td align="center">
-      <b>Gestisci i giocatori salvati</b><br>
+      <b>Gestisci i preferiti</b><br>
       <img src="https://github.com/user-attachments/assets/6c345fdb-e0a2-46e6-9bb1-f0814dd4f445" width="250" alt="Pannello gestione giocatori preferiti"/>
     </td>
   </tr>
 </table>
 
-### 🎲 3. La Sfida (Contatore)
-*Design "Table-First" per non perdere mai il focus: tieni i punti con ergonomia, tieni d'occhio le combo e usa gli strumenti integrati.*
+### 🎲 3. La sfida (contatore)
+*Design "Table-First" per non perdere mai il focus: gestisci i punti con ergonomia e usa gli strumenti integrati.*
 <table>
   <tr>
     <td align="center">
@@ -81,33 +81,53 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
       <img src="https://github.com/user-attachments/assets/f715bbae-0cb8-4657-b3d7-e80fa3af5c2a" width="250" alt="Match in corso con effetto On Fire"/>
     </td>
     <td align="center">
-      <b>Metti pressione con il timer</b><br>
-      <img src="https://github.com/user-attachments/assets/e907778b-5c94-4e69-aa69-34ff862fc59b" width="250" alt="Popup del dado" />
+      <b>Gestisci i tempi di gioco</b><br>
+      <img src="https://github.com/user-attachments/assets/e907778b-5c94-4e69-aa69-34ff862fc59b" width="250" alt="Impostazione del timer" />
     </td>
   <td align="center">
-      <b>Risolvi le dispute con il dado</b><br>
-      <img src="https://github.com/user-attachments/assets/1c88bbe4-e734-4e55-ad4a-4a4c03d19b09" width="250" alt="Popup del dado" />
+      <b>Risolvi le dispute</b><br>
+      <img src="https://github.com/user-attachments/assets/1c88bbe4-e734-4e55-ad4a-4a4c03d19b09" width="250" alt="Popup del dado virtuale" />
     </td>
   </tr>
 </table>
 
-### 🏆 4. Risultati e Analisi
-*Molto più di un semplice punteggio: scopri chi si aggiudica i premi speciali e analizza l'andamento della gara sul grafico temporale e condividilo con gli amici.*
+### 🏆 4. Risultati e analisi
+*Molto più di un semplice punteggio: scopri i premi speciali, analizza l'andamento sul grafico temporale e condividi l'esito.*
 <table>
   <tr>
     <td align="center">
-      <b>Osserva la i risultati con il grafico della partita</b><br>
+      <b>Analizza il grafico della partita</b><br>
       <img src="https://github.com/user-attachments/assets/b2a1f603-88b2-444a-a206-5ec46777c449" width="250" alt="Classifica finale con grafico della partita"/>
     </td>
     <td align="center">
-      <b>Gratification con medaglie scherzose</b><br>
-      <img src="https://github.com/user-attachments/assets/9b057635-275f-43ff-b18a-307d49fb62a3" width="250" alt="Gratification con medaglie scherzose"/>
+      <b>Scopri le medaglie assegnate</b><br>
+      <img src="https://github.com/user-attachments/assets/9b057635-275f-43ff-b18a-307d49fb62a3" width="250" alt="Premi speciali e medaglie"/>
     </td>
   <td align="center">
-      <b>Comprendi le medaglie</b><br>
-      <img src="https://github.com/user-attachments/assets/0162adee-4cae-4db4-9292-2442d4148da2" width="250" alt="Gratification con medaglie scherzose"/>
+      <b>Comprendi i riconoscimenti</b><br>
+      <img src="https://github.com/user-attachments/assets/0162adee-4cae-4db4-9292-2442d4148da2" width="250" alt="Dettaglio dei premi assegnati"/>
     </td>
   </tr>
 </table>
 
-© 2026 Creato da NicolA380
+### 🖥️ 5. Layout orizzontale e tablet
+*Interfaccia completamente adattiva che sfrutta griglie e split-screen per massimizzare lo spazio in modalità landscape.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Home in orizzontale</b><br>
+      <img src="https://github.com/user-attachments/assets/dc987757-c633-4e29-90f6-ab34a87d1f6a" width="300" alt="Home in landscape"/>
+    </td>
+    <td align="center">
+      <b>Contatore in orizzontale</b><br>
+      <img src="https://github.com/user-attachments/assets/c0c63d81-5334-46f1-bbf6-c1bc380e7460" width="300" alt="Sfida in landscape"/>
+    </td>
+  <td align="center">
+      <b>Grafico espanso</b><br>
+      <img src="https://github.com/user-attachments/assets/786c89bc-74ca-42b8-b25d-5e46124987a0" width="300" alt="Risultati in landscape"/>
+    </td>
+  </tr>
+</table>
+
+<br>
+<p align="center">© 2026 Creato da NicolA380</p>
