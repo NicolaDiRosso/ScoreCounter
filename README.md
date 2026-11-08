@@ -40,15 +40,15 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
   <tr>
     <td align="center">
       <b>Home page con storico</b><br>
-      <img src="https://github.com/user-attachments/assets/b44950ca-88a9-4a41-8a04-b12302891a9e" width="250" alt="Home Screen con sfide rapide"/>
+      <img src="https://github.com/user-attachments/assets/cd9057bb-efcb-414f-966a-9e37c65829f7" width="250" alt="Home Screen con sfide rapide"/>
     </td>
      <td align="center">
       <b>Storico per ogni partita</b><br>
-      <img src="https://github.com/user-attachments/assets/7e1b3ab3-dee8-4dbe-8bdb-303f9e445b4f" width="250" alt="Storico partite e record assoluti"/>
+      <img src="https://github.com/user-attachments/assets/7a0413c3-8c18-44c7-b6cf-585b07665362" width="250" alt="Storico partite e record assoluti"/>
     </td>
     <td align="center">
       <b>Statistiche globali</b><br>
-      <img src="https://github.com/user-attachments/assets/b3d643d4-c0c9-413c-9e8a-e4f36ff28b01" width="250" alt="Statistiche globali e record"/>
+      <img src="https://github.com/user-attachments/assets/93c887f7-6208-4e8b-a6e9-89f9de038c69" width="250" alt="Statistiche globali e record"/>
     </td>
   </tr>
 </table>
@@ -67,7 +67,7 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
     </td>
     <td align="center">
       <b>Gestisci i preferiti</b><br>
-      <img src="https://github.com/user-attachments/assets/6c345fdb-e0a2-46e6-9bb1-f0814dd4f445" width="250" alt="Pannello gestione giocatori preferiti"/>
+      <img src="https://github.com/user-attachments/assets/cf836352-8d5d-4357-b00d-951c03e24f72" width="250" alt="Pannello gestione giocatori preferiti"/>
     </td>
   </tr>
 </table>
@@ -78,11 +78,11 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
   <tr>
     <td align="center">
       <b>Tieni il conto dei punti</b><br>
-      <img src="https://github.com/user-attachments/assets/f715bbae-0cb8-4657-b3d7-e80fa3af5c2a" width="250" alt="Match in corso con effetto On Fire"/>
+      <img src="https://github.com/user-attachments/assets/d4042687-c7ca-4792-8352-abb2a27ffe4c" width="250" alt="Match in corso con effetto On Fire"/>
     </td>
     <td align="center">
       <b>Gestisci i tempi di gioco</b><br>
-      <img src="https://github.com/user-attachments/assets/e907778b-5c94-4e69-aa69-34ff862fc59b" width="250" alt="Impostazione del timer" />
+      <img src="https://github.com/user-attachments/assets/ca8f31bb-49e9-45f7-a476-7bca8d4cb653" width="250" alt="Impostazione del timer" />
     </td>
   <td align="center">
       <b>Risolvi le dispute</b><br>
@@ -105,7 +105,7 @@ Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moder
     </td>
   <td align="center">
       <b>Comprendi i riconoscimenti</b><br>
-      <img src="https://github.com/user-attachments/assets/0162adee-4cae-4db4-9292-2442d4148da2" width="250" alt="Dettaglio dei premi assegnati"/>
+      <img src="https://github.com/user-attachments/assets/cc8ef7f8-f9ba-4865-95cd-178c60d16221" width="250" alt="Dettaglio dei premi assegnati"/>
     </td>
   </tr>
 </table>
