@@ -129,12 +129,28 @@ fun TimerSettingsDialog(
 
     LaunchedEffect(isRunning, timeLeft) {
         if (isRunning) {
-            delay(1000L)
-            if (!isRunning) return@LaunchedEffect
+            delay(1000L) // Attende esattamente 1 secondo (1000 millisecondi)
+            if (!isRunning) return@LaunchedEffect // Se nel frattempo il timer è stato stoppato, interrompe l'esecuzione
 
-            timeLeft -= 1
+            timeLeft -= 1 // Decrementa il tempo rimanente di un secondo
 
-            if (timeLeft <= 0 && activeRingtone == null) {
+            // 🧠 GESTIONE CONTO ALLA ROVESCIA E VIBRAZIONE CRESCENTE (Crescendo Haptic Feedback):
+            // Ottimizzato sugli ultimi 3 secondi (3, 2, 1) per mantenere intatta la suspense 
+            // evitando al contempo qualsiasi affaticamento aptico nei turni ripetuti.
+            // L'ampiezza (amplitude) cresce da un sussurro a una vibrazione decisa.
+            if (timeLeft in 1..3 && activeRingtone == null) {
+                // Calcolo dinamico dell'intensità (da 60 = sussurro aptico a 255 = massima intensità)
+                val amplitude = when (timeLeft) {
+                    3L -> 60  // Sussurro iniziale (delicato)
+                    2L -> 140 // Avviso medio (crescente)
+                    1L -> 255 // Impatto finale (massima potenza prima dello zero)
+                    else -> 255
+                }
+
+                // Emettiamo la vibrazione scalata tramite VibrationEffect
+                vibrator.vibrate(VibrationEffect.createOneShot(180L, amplitude))
+            } else if (timeLeft <= 0 && activeRingtone == null) {
+                // Quando il timer arriva a zero, attiva la sveglia continua e riproduce il suono di allarme
                 triggerContinuousAlarm(vibrator)
                 activeRingtone = riproduciSuonoTimer(context)
             }
