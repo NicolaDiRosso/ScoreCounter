@@ -122,8 +122,8 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">タイブレークサイコロ 🎲</string>
-    <string name="desc_impostazioni_dado">試合中に振ることができるサイコロを設定します。先攻を決めたり、同点を解消したりするのに使えます。</string>
-    <string name="label_scegli_formato_dado">クイックフォーマットを選択するか、カスタム作成してください：</string>
+    <string name="desc_impostazioni_dado">振るサイコロの面数を選択してください。</string>
+    <string name="label_scegli_formato_dado">クイックフォーマット：</string>
     <string name="label_inserimento_manuale">手動入力：</string>
     <string name="hint_es_facce_dado">例: 380</string>
     <string name="hint_n_facce">面の数</string>

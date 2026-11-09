@@ -122,8 +122,8 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">Stechwürfel 🎲</string>
-    <string name="desc_impostazioni_dado">Stelle den Würfel ein, den du während des Spiels werfen kannst, um zu entscheiden, wer beginnt, oder um Gleichstände zu lösen.</string>
-    <string name="label_scegli_formato_dado">Wähle ein Schnellformat oder erstelle dein eigenes:</string>
+    <string name="desc_impostazioni_dado">Wähle die Anzahl der Würfelseiten zum Werfen.</string>
+    <string name="label_scegli_formato_dado">Schnellformat:</string>
     <string name="label_inserimento_manuale">Manuelle Eingabe:</string>
     <string name="hint_es_facce_dado">Z.B. 380</string>
     <string name="hint_n_facce">Anzahl der Seiten</string>

@@ -239,7 +239,12 @@ fun DiceSettingsDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Text(stringResource(R.string.label_scegli_formato_dado), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(R.string.label_scegli_formato_dado),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
 
                     val diceOptions = listOf(6, 10, 20, 100)
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -122,8 +122,8 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">टाई-ब्रेकर पासा 🎲</string>
-    <string name="desc_impostazioni_dado">वह पासा सेट करें जिसे आप मैच के दौरान यह तय करने के लिए फेंक सकते हैं कि कौन शुरू करेगा या टाई को तोड़ने के लिए।</string>
-    <string name="label_scegli_formato_dado">एक त्वरित प्रारूप चुनें या अपना खुद का बनाएं:</string>
+    <string name="desc_impostazioni_dado">फेंकने के लिए पासे के चेहरों की संख्या चुनें।</string>
+    <string name="label_scegli_formato_dado">त्वरित प्रारूप:</string>
     <string name="label_inserimento_manuale">मैन्युअल प्रविष्टि:</string>
     <string name="hint_es_facce_dado">उदा. 380</string>
     <string name="hint_n_facce">फलकों की संख्या (Faces)</string>

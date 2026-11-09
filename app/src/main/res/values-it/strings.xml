@@ -122,8 +122,8 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">Dado spareggio 🎲</string>
-    <string name="desc_impostazioni_dado">Imposta il dado che potrai lanciare durante la partita per decidere chi inizia o per risolvere i pareggi.</string>
-    <string name="label_scegli_formato_dado">Scegli un formato rapido o creane uno tuo:</string>
+    <string name="desc_impostazioni_dado">Scegli il numero di facce del dado da lanciare.</string>
+    <string name="label_scegli_formato_dado">Formato rapido:</string>
     <string name="label_inserimento_manuale">Inserimento manuale:</string>
     <string name="hint_es_facce_dado">Es. 380</string>
     <string name="hint_n_facce">N° facce</string>

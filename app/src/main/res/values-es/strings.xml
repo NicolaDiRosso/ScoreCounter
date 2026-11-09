@@ -122,8 +122,8 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">Dado de desempate 🎲</string>
-    <string name="desc_impostazioni_dado">Configura el dado que podrás lanzar durante la partida para decidir quién empieza o para resolver empates.</string>
-    <string name="label_scegli_formato_dado">Elige un formato rápido o crea uno propio:</string>
+    <string name="desc_impostazioni_dado">Elige el número de caras del dado para lanzar.</string>
+    <string name="label_scegli_formato_dado">Formato rápido:</string>
     <string name="label_inserimento_manuale">Inserción manual:</string>
     <string name="hint_es_facce_dado">Ej. 380</string>
     <string name="hint_n_facce">N.º de caras</string>

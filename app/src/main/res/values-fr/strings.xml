@@ -122,8 +122,8 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">Dé de départage 🎲</string>
-    <string name="desc_impostazioni_dado">Configurez le dé que vous pourrez lancer pendant le match pour décider qui commence ou pour résoudre les égalités.</string>
-    <string name="label_scegli_formato_dado">Choisissez un format rapide ou créez le vôtre :</string>
+    <string name="desc_impostazioni_dado">Choisissez le nombre de faces du dé à lancer.</string>
+    <string name="label_scegli_formato_dado">Format rapide :</string>
     <string name="label_inserimento_manuale">Saisie manuelle :</string>
     <string name="hint_es_facce_dado">Ex. 380</string>
     <string name="hint_n_facce">N° de faces</string>

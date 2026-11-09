@@ -122,11 +122,11 @@
     <!-- DADO E COMPONENTI: DiceComponents                                    -->
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni_dado">Tie-breaker dice 🎲</string>
-    <string name="desc_impostazioni_dado">Set the die you can roll during the match to decide who starts or to break ties.</string>
-    <string name="label_scegli_formato_dado">Choose a quick format or create your own:</string>
-    <string name="label_inserimento_manuale">Manual entry:</string>
+    <string name="desc_impostazioni_dado">Choose the number of dice faces to roll.</string>
+    <string name="label_scegli_formato_dado">Quick format:</string>
+    <string name="label_inserimento_manuale">Manual input:</string>
     <string name="hint_es_facce_dado">Ex. 380</string>
-    <string name="hint_n_facce">N° of faces</string>
+    <string name="hint_n_facce">N° faces</string>
     <string name="btn_applica">Apply</string>
     <string name="titolo_lancio_dado">Dice roll</string>
     <string name="btn_rilancia">Roll again</string>
