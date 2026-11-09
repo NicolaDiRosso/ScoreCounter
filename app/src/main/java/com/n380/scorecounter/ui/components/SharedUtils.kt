@@ -2,8 +2,10 @@
 
     import android.content.Context
     import android.content.Intent
+    import androidx.compose.animation.animateColorAsState
     import androidx.compose.animation.core.*
     import androidx.compose.foundation.BorderStroke
+    import androidx.compose.ui.graphics.graphicsLayer
     import androidx.compose.ui.graphics.vector.ImageVector
     import androidx.compose.foundation.Canvas
     import androidx.compose.foundation.background
@@ -1134,7 +1136,7 @@
         onClick: () -> Unit,
         leadingIcon: ImageVector? = null
     ) {
-        val haptic = LocalHapticFeedback.current
+         val haptic = LocalHapticFeedback.current
 
         // ====================================================================================
         // 🧠 FIX UI: SURFACE WRAPPER PER L'EFFETTO "SOLLEVATO"
@@ -1219,3 +1221,100 @@
             )
         }
     }
+
+/**
+ * ====================================================================
+ * COMPONENTE ANIMATO RIUTILIZZABILE: AnimatedSelectableChip
+ * ====================================================================
+ * 🧠 SPIEGAZIONE TEORICA E TECNICA DETTAGLIATA:
+ * Questo composable implementa un chip di selezione con animazioni fluide in stile Material You.
+ * Quando lo stato `isSelected` passa da false a true (o viceversa):
+ * 1. `animateFloatAsState` (Scale Bounce): Varia la scala geometrica della card da 1.0f a 1.04f (4% di ingrandimento)
+ *    applicando una fisica a molla elastica (`spring(dampingRatio = Spring.DampingRatioMediumBouncy)`).
+ * 2. `animateColorAsState` (Colore Sfondo): Transizione cromatica fluida dal colore neutro di superficie (`surfaceVariant`)
+ *    al colore primario in evidenza (`primaryContainer`).
+ * 3. `animateColorAsState` (Colore Bordo): Transizione cromatica del contorno perimetrale tra il contorno di default
+ *    e il colore primario dell'app.
+ * 4. `animateDpAsState` (Spessore Bordo): Modifica lo spessore del tratto del bordo da 1.dp a 2.dp quando selezionato.
+ * 5. `AutoResizedText`: Componente tipografico intelligente che scala automaticamente il testo per impedire
+ *    qualsiasi troncamento o overflow su schermi di dimensioni differenti.
+ */
+@Composable
+fun AnimatedSelectableChip(
+    text: String,                 // Il testo o etichetta da visualizzare all'interno del chip
+    isSelected: Boolean,          // Stato booleano che indica se questo specifico chip è attualmente attivo/selezionato
+    onClick: () -> Unit,          // Callback lambda eseguita quando l'utente tocca il chip
+    modifier: Modifier = Modifier,// Modificatore Compose per personalizzare layout, padding o larghezza esterna
+    height: Dp = 46.dp,           // Altezza fissa predefinita del chip (default 46.dp)
+    shapeRadius: Dp = 16.dp       // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
+) {
+    // Otteniamo il riferimento al servizio di vibrazione aptica del sistema
+    val haptic = LocalHapticFeedback.current
+
+    // 🧠 ANIMATE FLOAT AS STATE: Anima il fattore di scala (zoom) con una molla elastica
+    val cardScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.04f else 1.0f, // 1.04f = ingrandimento del 4% se selezionato, 1.0f = dimensione normale
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy, // Rigidità dello smorzamento elastico (effetto rimbalzo gradevole)
+            stiffness = Spring.StiffnessLow                 // Rigidità bassa per un movimento morbido e fluido
+        ),
+        label = "AnimatedChipScale"
+    )
+
+    // 🧠 ANIMATE COLOR AS STATE: Anima il colore dello sfondo in modo fluido (tween di 250ms)
+    val animatedBgColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+        animationSpec = tween(durationMillis = 250),
+        label = "AnimatedChipBgColor"
+    )
+
+    // 🧠 ANIMATE COLOR AS STATE: Anima il colore del bordo perimetrale
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+        animationSpec = tween(durationMillis = 250),
+        label = "AnimatedChipBorderColor"
+    )
+
+    // 🧠 ANIMATE DP AS STATE: Anima lo spessore del bordo (1dp inattivo, 2dp attivo)
+    val animatedBorderWidth by animateDpAsState(
+        targetValue = if (isSelected) 2.dp else 1.dp,
+        animationSpec = tween(durationMillis = 250),
+        label = "AnimatedChipBorderWidth"
+    )
+
+    // Superficie interattiva di Material 3 con forma e colori dinamici
+    Surface(
+        onClick = {
+            // Esegue un feedback aptico di conferma al tocco
+            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+            // Esegue l'azione di click passata dall'esterno
+            onClick()
+        },
+        modifier = modifier
+            .height(height) // Imposta l'altezza definita
+            .graphicsLayer {
+                // Applica l'effetto di scala calcolato da animateFloatAsState
+                scaleX = cardScale
+                scaleY = cardScale
+            },
+        shape = RoundedCornerShape(shapeRadius), // Arrotondamento degli angoli
+        color = animatedBgColor,                // Colore di sfondo animato
+        border = BorderStroke(width = animatedBorderWidth, color = animatedBorderColor) // Bordo animato
+    ) {
+        // Contenitore interno centrato per il testo
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+            // Testo intelligente che si adatta automaticamente per evitare tagli
+            AutoResizedText(
+                text = text,
+                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium, // Grassetto marcato se selezionato
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
+    }
+}

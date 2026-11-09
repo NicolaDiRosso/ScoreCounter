@@ -717,6 +717,43 @@ fun TimerSettingsDialog(
                                         val actualIndex = rowIndex * 2 + colIndex
                                         val formattedText = formatRawTimeToMMSS(rawPreset)
 
+                                        // 🧠 SPEGNIMENTO AUTOMATICO PRESET:
+                                        // Il pulsante del preset è attivo ('isPresetSelected = true') solo se 'rawInput'
+                                        // corrisponde esattamente a 'rawPreset'. Se l'utente digita o cambia il tempo manualmente,
+                                        // 'rawInput' cambia valore e non corrisponde più al preset, SPEGNENDO automaticamente il pulsante!
+                                        val isPresetSelected = (rawInput == rawPreset)
+
+                                        // Animazione elastica di scala (Bounce Effect)
+                                        val cardScale by animateFloatAsState(
+                                            targetValue = if (isPresetSelected) 1.04f else 1.0f,
+                                            animationSpec = spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessLow
+                                            ),
+                                            label = "TimerChipScale"
+                                        )
+
+                                        // Animazione cromatica dello sfondo
+                                        val animatedBgColor by animateColorAsState(
+                                            targetValue = if (isPresetSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                            animationSpec = tween(durationMillis = 220),
+                                            label = "TimerChipBg"
+                                        )
+
+                                        // Animazione cromatica del bordo
+                                        val animatedBorderColor by animateColorAsState(
+                                            targetValue = if (isPresetSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                            animationSpec = tween(durationMillis = 220),
+                                            label = "TimerChipBorderColor"
+                                        )
+
+                                        // Animazione dello spessore del bordo
+                                        val animatedBorderWidth by animateDpAsState(
+                                            targetValue = if (isPresetSelected) 2.dp else 1.dp,
+                                            animationSpec = tween(durationMillis = 220),
+                                            label = "TimerChipBorderWidth"
+                                        )
+
                                         Surface(
                                             onClick = {
                                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -725,12 +762,9 @@ fun TimerSettingsDialog(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .height(48.dp),
-                                            shape = RoundedCornerShape(14.dp),
-                                            color = MaterialTheme.colorScheme.surfaceVariant,
-                                            border = BorderStroke(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                                            )
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = animatedBgColor,
+                                            border = BorderStroke(width = animatedBorderWidth, color = animatedBorderColor)
                                         ) {
                                             Box(
                                                 modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
@@ -738,13 +772,12 @@ fun TimerSettingsDialog(
                                             ) {
                                                 AutoResizedText(
                                                     text = formattedText,
-                                                    fontWeight = FontWeight.Bold,
+                                                    fontWeight = if (isPresetSelected) FontWeight.ExtraBold else FontWeight.Medium,
                                                     style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.primary
+                                                    color = if (isPresetSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
 
                                                 // TASTO MATITA IN ALTO A DESTRA PER MODIFICARE IL PRESET
-                                                // size 28.dp per impostare la dimensione del pulsante di modifica
                                                 IconButton(
                                                     onClick = {
                                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -759,8 +792,7 @@ fun TimerSettingsDialog(
                                                     Icon(
                                                         imageVector = Icons.Filled.Edit,
                                                         contentDescription = stringResource(R.string.desc_modifica_icon),
-                                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                                        // size 16.dp per impostare la dimensione dell'icona della matita
+                                                        tint = if (isPresetSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                                                         modifier = Modifier.size(16.dp)
                                                     )
                                                 }

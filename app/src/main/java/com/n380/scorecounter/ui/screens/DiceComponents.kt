@@ -40,6 +40,7 @@ import androidx.compose.ui.window.Dialog // Componente per creare finestre sovra
 import androidx.compose.ui.window.DialogProperties // Proprietà avanzate per configurare il comportamento del Dialog
 import com.n380.scorecounter.R // Riferimento generato agli ID delle risorse del progetto
 import com.n380.scorecounter.ui.components.AutoResizedText // Componente custom dell'app che scala il testo per non farlo uscire dai bordi
+import com.n380.scorecounter.ui.components.AnimatedSelectableChip // Componente animato riutilizzabile per i preset di selezione rapida
 import kotlinx.coroutines.delay // Funzione di sospensione per mettere in pausa la coroutine per X millisecondi
 import kotlinx.coroutines.launch // Innesca l'esecuzione concorrente di un blocco di codice in background
 
@@ -183,31 +184,16 @@ fun DiceSettingsDialog(
                                 ) {
                                     rowItems.forEach { sides ->
                                         val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
-                                        Card(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .height(52.dp)
-                                                .clickable {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                    pendingDiceSides = sides
-                                                    customDiceInput = ""
-                                                },
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                                            ),
-                                            shape = RoundedCornerShape(16.dp),
-                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                                // 🧠 UX FIX: Padding orizzontale da 12dp per evitare che il testo "Dado (D6)" tocchi i bordi
-                                                AutoResizedText(
-                                                    stringResource(R.string.label_dado, sides),
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                                                )
-                                            }
-                                        }
+                                        AnimatedSelectableChip(
+                                            text = stringResource(R.string.label_dado, sides),
+                                            isSelected = isSelected,
+                                            onClick = {
+                                                pendingDiceSides = sides
+                                                customDiceInput = ""
+                                            },
+                                            height = 40.dp,
+                                            modifier = Modifier.weight(1f)
+                                        )
                                     }
                                 }
                             }
@@ -256,33 +242,24 @@ fun DiceSettingsDialog(
                     Text(stringResource(R.string.label_scegli_formato_dado), style = MaterialTheme.typography.bodyMedium)
 
                     val diceOptions = listOf(6, 10, 20, 100)
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         diceOptions.chunked(2).forEach { rowItems ->
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 rowItems.forEach { sides ->
                                     val isSelected = pendingDiceSides == sides && customDiceInput.isEmpty()
-                                    Card(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .height(60.dp)
-                                            .clickable {
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                pendingDiceSides = sides
-                                                customDiceInput = ""
-                                            },
-                                        colors = CardDefaults.cardColors(containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant),
-                                        shape = RoundedCornerShape(20.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-                                    ) {
-                                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                            AutoResizedText(
-                                                stringResource(R.string.label_dado, sides),
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                                            )
-                                        }
-                                    }
+                                    AnimatedSelectableChip(
+                                        text = stringResource(R.string.label_dado, sides),
+                                        isSelected = isSelected,
+                                        onClick = {
+                                            pendingDiceSides = sides
+                                            customDiceInput = ""
+                                        },
+                                        height = 44.dp,
+                                        modifier = Modifier.weight(1f)
+                                    )
                                 }
                             }
                         }
