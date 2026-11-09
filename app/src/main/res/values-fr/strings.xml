@@ -160,7 +160,7 @@
     <string name="titolo_info_manuale">⌨️ Modification manuelle</string>
     <string name="msg_info_manuale">Cliquez directement sur le nombre du score pour ouvrir le clavier et entrer la valeur exacte de votre choix.</string>
     <string name="titolo_info_dado">🎲 Dé de la chance</string>
-    <string name="msg_info_dado">Utilisez le bouton \'Dé\' pour générer un nombre aléatoire et décider qui commence ou résoudre les disputes entre amis.</string>
+    <string name="msg_info_dado">Utilisez le bouton \'Dé\' pour générer un nombre aléatoire et décider qui commence ou régler des différends. Pour modifier les faces du dé, touchez le bouton en haut à droite dans la boîte de dialogue (ex. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Minuteur personnalisé</string>
     <string name="msg_info_timer">Utilisez le bouton \'Minuteur\' pour configurer un compte à rebours. L\'application vous avertira par une vibration et un son à la fin du temps.</string>
     <string name="btn_ho_capito">J\'ai compris</string>
@@ -359,31 +359,6 @@
     <string name="btn_procedi_sostituisci">Poursuivre et écraser</string>
     <string name="titolo_errore_import">Fichier non compatible</string>
     <string name="msg_errore_import_file">Le fichier sélectionné n\'est pas une sauvegarde ScoreCounter valide ou est corrompu. Veuillez sélectionner un fichier .json valide.</string>
-
-    <!-- ==================================================================== -->
-    <!-- IMPOSTAZIONI E PREFERENZE: SettingsDialog                            -->
-    <!-- ==================================================================== -->
-    <string name="titolo_impostazioni_dialog">Paramètres et préférences</string>
-    <string name="desc_impostazioni_dialog">Personnalisez l\'apparence, le comportement et les options de votre jeu.</string>
-    <string name="sez_interfaccia_aspetto">📱 Interface et apparence</string>
-    <string name="opt_tema_app">Thème de l\'application</string>
-    <string name="desc_opt_tema_app">Clair, sombre ou défaut système</string>
-    <string name="opt_lingua_app">Langue de l\'application</string>
-    <string name="desc_opt_lingua_app">Choisissez la langue de l\'interface</string>
-    <string name="opt_orientamento_schermo">Orientation de l\'écran</string>
-    <string name="desc_opt_orientamento_schermo">Rotation auto, portrait ou paysage</string>
-    <string name="opt_stile_grafico">Style de graphique</string>
-    <string name="desc_opt_stile_grafico">Courbes de Bézier douces ou segments droits</string>
-    <string name="sez_schermo_comportamento">💡 Écran et comportement</string>
-    <string name="opt_schermo_attivo">Écran toujours allumé</string>
-    <string name="desc_opt_schermo_attivo">Empêcher la mise en veille pendant une partie</string>
-    <string name="opt_conferma_azioni">Confirmer les actions rapides</string>
-    <string name="desc_opt_conferma_azioni">Demander confirmation avant de réinitialiser les scores</string>
-    <string name="sez_personalizzazione_gioco">🎮 Personnalisation du jeu</string>
-    <string name="opt_passo_punteggio">Pas de score par défaut</string>
-    <string name="desc_opt_passo_punteggio">Définir la valeur d\'ajout rapide (+1, +5, +10)</string>
-    <string name="opt_ordinamento_classifica">Tri dynamique du classement</string>
-    <string name="desc_opt_ordinamento_classifica">Réordonner automatiquement les joueurs selon le score</string>
 
     <!-- ==================================================================== -->
     <!-- ZOOM TEMPORALE GRAFICO: ChartZoom                                    -->

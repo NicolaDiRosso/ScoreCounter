@@ -160,7 +160,7 @@
     <string name="titolo_info_manuale">⌨️ Manual edit</string>
     <string name="msg_info_manuale">Tap directly on the score number to open the keyboard and enter an exact value.</string>
     <string name="titolo_info_dado">🎲 Lucky dice</string>
-    <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes.</string>
+    <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes. To change the number of dice faces, tap the button in the top right of the roll dialog (e.g. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Custom timer</string>
     <string name="msg_info_timer">Use the \'Timer\' button to set a countdown. The app will notify you with a vibration and sound when time is up.</string>
     <string name="btn_ho_capito">Got it</string>
@@ -359,31 +359,6 @@
     <string name="btn_procedi_sostituisci">Proceed &amp; overwrite</string>
     <string name="titolo_errore_import">Incompatible file</string>
     <string name="msg_errore_import_file">The selected file is not a valid ScoreCounter backup or is corrupted. Please select a valid .json backup file.</string>
-
-    <!-- ==================================================================== -->
-    <!-- IMPOSTAZIONI E PREFERENZE: SettingsDialog                            -->
-    <!-- ==================================================================== -->
-    <string name="titolo_impostazioni_dialog">Settings &amp; preferences</string>
-    <string name="desc_impostazioni_dialog">Customize appearance, behavior, and default options for your game.</string>
-    <string name="sez_interfaccia_aspetto">📱 Interface &amp; appearance</string>
-    <string name="opt_tema_app">App theme</string>
-    <string name="desc_opt_tema_app">Light, dark, or system default</string>
-    <string name="opt_lingua_app">App language</string>
-    <string name="desc_opt_lingua_app">Choose device or custom language</string>
-    <string name="opt_orientamento_schermo">Screen orientation</string>
-    <string name="desc_opt_orientamento_schermo">Auto-rotate, portrait, or landscape</string>
-    <string name="opt_stile_grafico">Chart style</string>
-    <string name="desc_opt_stile_grafico">Bézier curves or sharp line segments</string>
-    <string name="sez_schermo_comportamento">💡 Screen &amp; behavior</string>
-    <string name="opt_schermo_attivo">Keep screen on</string>
-    <string name="desc_opt_schermo_attivo">Prevent screen from sleeping during a match</string>
-    <string name="opt_conferma_azioni">Confirm quick actions</string>
-    <string name="desc_opt_conferma_azioni">Ask for confirmation before resetting scores</string>
-    <string name="sez_personalizzazione_gioco">🎮 Game customization</string>
-    <string name="opt_passo_punteggio">Default score step</string>
-    <string name="desc_opt_passo_punteggio">Set default quick add value (+1, +5, +10)</string>
-    <string name="opt_ordinamento_classifica">Dynamic ranking sorting</string>
-    <string name="desc_opt_ordinamento_classifica">Auto-reorder players by current score</string>
 
     <!-- ==================================================================== -->
     <!-- ZOOM TEMPORALE GRAFICO: ChartZoom                                    -->

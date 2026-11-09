@@ -160,7 +160,7 @@
     <string name="titolo_info_manuale">⌨️ Modifica manuale</string>
     <string name="msg_info_manuale">Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.</string>
     <string name="titolo_info_dado">🎲 Dado fortunato</string>
-    <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici.</string>
+    <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici. Per modificare le facce del dado, premi il pulsante in alto a destra nel dialogo di lancio (es. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Timer personalizzato</string>
     <string name="msg_info_timer">Usa il tasto \'Timer\' per impostare un conto alla rovescia. L\'app ti avviserà con una vibrazione e un suono al termine del tempo.</string>
     <string name="btn_ho_capito">Ho capito</string>
@@ -359,31 +359,6 @@
     <string name="btn_procedi_sostituisci">Procedi e sovrascrivi</string>
     <string name="titolo_errore_import">File non compatibile</string>
     <string name="msg_errore_import_file">Il file selezionato non è un backup valido di ScoreCounter o risulta corrotto. Seleziona un file di backup .json valido.</string>
-
-    <!-- ==================================================================== -->
-    <!-- IMPOSTAZIONI E PREFERENZE: SettingsDialog                            -->
-    <!-- ==================================================================== -->
-    <string name="titolo_impostazioni_dialog">Impostazioni e preferenze</string>
-    <string name="desc_impostazioni_dialog">Personalizza l\'aspetto, il comportamento e le opzioni predefinite per il tuo gioco.</string>
-    <string name="sez_interfaccia_aspetto">📱 Interfaccia e aspetto</string>
-    <string name="opt_tema_app">Tema app</string>
-    <string name="desc_opt_tema_app">Chiaro, scuro o predefinito di sistema</string>
-    <string name="opt_lingua_app">Lingua app</string>
-    <string name="desc_opt_lingua_app">Scegli la lingua dell\'interfaccia</string>
-    <string name="opt_orientamento_schermo">Orientamento schermo</string>
-    <string name="desc_opt_orientamento_schermo">Rotazione automatica, verticale o orizzontale</string>
-    <string name="opt_stile_grafico">Stile del grafico</string>
-    <string name="desc_opt_stile_grafico">Curve di Bézier morbide o segmenti retti</string>
-    <string name="sez_schermo_comportamento">💡 Schermo e comportamento</string>
-    <string name="opt_schermo_attivo">Schermo sempre attivo</string>
-    <string name="desc_opt_schermo_attivo">Impedisci lo spegnimento dello schermo durante la partita</string>
-    <string name="opt_conferma_azioni">Conferma azioni rapide</string>
-    <string name="desc_opt_conferma_azioni">Richiedi conferma prima di azzerare i punteggi</string>
-    <string name="sez_personalizzazione_gioco">🎮 Personalizzazione gioco</string>
-    <string name="opt_passo_punteggio">Passo predefinito del punteggio</string>
-    <string name="desc_opt_passo_punteggio">Imposta l\'incremento rapido base (+1, +5, +10)</string>
-    <string name="opt_ordinamento_classifica">Ordinamento dinamico della classifica</string>
-    <string name="desc_opt_ordinamento_classifica">Riordina automaticamente i giocatori in base ai punti</string>
 
     <!-- ==================================================================== -->
     <!-- ZOOM TEMPORALE GRAFICO: ChartZoom                                    -->
