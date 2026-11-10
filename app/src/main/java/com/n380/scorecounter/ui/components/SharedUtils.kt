@@ -1245,9 +1245,9 @@ fun AnimatedSelectableChip(
     isSelected: Boolean,                              // Stato booleano che indica se questo specifico chip è attualmente attivo/selezionato
     onClick: () -> Unit,                              // Callback lambda eseguita quando l'utente tocca il chip
     modifier: Modifier = Modifier,                    // Modificatore Compose per personalizzare layout, padding o larghezza esterna
-    height: Dp = 46.dp,                               // Altezza fissa predefinita del chip (default 46.dp)
+    height: Dp? = 46.dp,                              // Altezza fissa opzionale del chip (null per consentire fillMaxHeight in landscape)
     shapeRadius: Dp = 16.dp,                          // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
-    textStyle: TextStyle = TextStyle.Default,          // Stile tipografico del testo
+    textStyle: TextStyle = TextStyle.Default,         // Stile tipografico del testo
     trailingContent: @Composable (() -> Unit)? = null // Slot opzionale in alto a destra per elementi aggiuntivi (es. tasto matita)
 ) {
     // Otteniamo il riferimento al servizio di vibrazione aptica del sistema
@@ -1293,7 +1293,7 @@ fun AnimatedSelectableChip(
             onClick()
         },
         modifier = modifier
-            .height(height) // Imposta l'altezza definita
+            .run { if (height != null) height(height) else this } // Imposta l'altezza fissa solo se specificata
             .graphicsLayer {
                 // Applica l'effetto di scala calcolato da animateFloatAsState
                 scaleX = cardScale

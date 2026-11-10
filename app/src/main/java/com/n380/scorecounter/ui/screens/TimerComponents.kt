@@ -552,31 +552,23 @@ fun TimerSettingsDialog(
                                         val actualIndex = rowIndex * 2 + colIndex
                                         val formattedText = formatRawTimeToMMSS(rawPreset)
 
-                                        Surface(
+                                        // 🧠 SPEGNIMENTO AUTOMATICO E EREDITARIETÀ (Landscape):
+                                        val isPresetSelected = (rawInput == rawPreset)
+
+                                        AnimatedSelectableChip(
+                                            text = formattedText,
+                                            isSelected = isPresetSelected,
                                             onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                                 rawInput = rawPreset
                                             },
+                                            height = null, // Consente a fillMaxHeight di estendere la card in altezza
+                                            shapeRadius = 14.dp,
+                                            textStyle = MaterialTheme.typography.titleMedium,
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .fillMaxHeight(), // 🌟 La card si allunga per riempire la riga!
-                                            shape = RoundedCornerShape(14.dp),
-                                            color = MaterialTheme.colorScheme.surfaceVariant,
-                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                        ) {
-                                            Box(
-                                                modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                AutoResizedText(
-                                                    text = formattedText,
-                                                    fontWeight = FontWeight.Bold,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-
+                                                .fillMaxHeight(),
+                                            trailingContent = {
                                                 // TASTO MATITA IN ALTO A DESTRA PER MODIFICARE IL PRESET
-                                                // size 28.dp per impostare la dimensione del pulsante di modifica
                                                 IconButton(
                                                     onClick = {
                                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -584,20 +576,18 @@ fun TimerSettingsDialog(
                                                         editingRawValue = rawPreset
                                                     },
                                                     modifier = Modifier
-                                                        .align(Alignment.TopEnd)
                                                         .size(28.dp)
                                                         .padding(2.dp)
                                                 ) {
                                                     Icon(
                                                         imageVector = Icons.Filled.Edit,
                                                         contentDescription = stringResource(R.string.desc_modifica_icon),
-                                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                                                        // size 16.dp per impostare la dimensione dell'icona della matita
+                                                        tint = if (isPresetSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                                                         modifier = Modifier.size(16.dp)
                                                     )
                                                 }
                                             }
-                                        }
+                                        )
                                     }
                                 }
                             }
