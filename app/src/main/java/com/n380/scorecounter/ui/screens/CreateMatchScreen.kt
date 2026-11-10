@@ -422,7 +422,7 @@ fun CreateMatchScreen(
                                             modifier = Modifier.fillMaxWidth(),
                                             // PADDING FONDAMENTALE: Diamo 40.dp di spazio extra alla fine della corsa,
                                             // così l'ultimo elemento può essere tirato fuori dall'ombra.
-                                            contentPadding = PaddingValues(end = 35.dp)
+                                            contentPadding = PaddingValues(start = 6.dp, end = 35.dp)
                                         ) {
                                             // Cicliamo i titoli salvati nel ViewModel per permettere una selezione immediata da parte dell'utente.
                                             items(viewModel.matchTitleHistory) { recentTitle ->
@@ -602,7 +602,7 @@ fun CreateMatchScreen(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier.fillMaxWidth(),
                                         // PADDING: Aumentato da 16 a 40.dp per superare comodamente l'ombra
-                                        contentPadding = PaddingValues(end = 40.dp)
+                                        contentPadding = PaddingValues(start = 6.dp, end = 40.dp)
                                     ) {
                                         items(viewModel.favoriteNames) { fav ->
                                             // Scansione iterativa della lista giocatori attuale:

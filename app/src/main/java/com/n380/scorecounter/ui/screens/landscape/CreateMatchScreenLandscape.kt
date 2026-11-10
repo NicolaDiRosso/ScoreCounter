@@ -197,7 +197,7 @@ fun CreateMatchScreenLandscape(
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     modifier = Modifier.fillMaxWidth(),
-                                    contentPadding = PaddingValues(end = 16.dp)
+                                    contentPadding = PaddingValues(start = 6.dp, end = 16.dp)
                                 ) {
                                     items(viewModel.matchTitleHistory) { recentTitle ->
                                         val isSelected = viewModel.matchTitle == recentTitle
@@ -312,7 +312,7 @@ fun CreateMatchScreenLandscape(
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 modifier = Modifier.fillMaxWidth(),
-                                contentPadding = PaddingValues(end = 16.dp)
+                                contentPadding = PaddingValues(start = 6.dp, end = 16.dp)
                             ) {
                                 items(viewModel.favoriteNames) { fav ->
                                     val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
