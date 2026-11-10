@@ -49,7 +49,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -82,22 +81,14 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
  * ====================================================================
  * SCHERMATA IMPOSTAZIONI E PREFERENZE (SettingsScreen)
  * ====================================================================
- * 🧠 ARCHITETTURA E PATTERN COMPOSE:
- * Questa schermata dedicata (non-dialog) è integrata direttamente nel NavHost
- * con animazioni fluide di transizione slide da destra a sinistra e ritorno.
- *
- * Principi applicati:
- * 1. DESIGN SYSTEM COERENTE: Utilizza lo sfondo trasparente dello Scaffold per
- *    mostrare il pattern grafico globale dell'app presente in MainActivity.
- * 2. SCHELETRO MODULARE (UI Skeleton): Prepara ordinatamente tutte le sezioni
- *    e le opzioni richieste con stati reattivi locali (remember), predisponendo
- *    l'infrastruttura per il futuro salvataggio persistente su DataStore.
- * 3. TIPOGRAFIA ADATTIVA: Impiega [AutoResizedText] per garantire che titoli,
- *    descrizioni ed etichette scalino fluidamente senza troncamenti indesiderati.
- * 4. FEEDBACK TATTILE: Ogni interazione utente (tap, selezione, toggle) attiva
- *    il feedback aptico coerente con gli standard dell'applicazione.
- * 5. ERGONOMIA E DOCK INFERIORE: Presenta sia la freccia indietro in testata
- *    sia un pulsante di chiusura ancorato alla base della schermata (bottomBar).
+ * 🧠 ARCHITETTURA E PATTERN COMPOSE (Allineato a CreateMatchScreen):
+ * Questa schermata adotta lo stesso design strutturale di [CreateMatchScreen]:
+ * 1. TITOLO FISSO SUPERIORE: Intestazione pulita e fissa in cima alla schermata.
+ * 2. GRANDE TAVOLO CONTENITIVO (Outer Card): Una Card principale con angoli
+ *    arrotondati a 24.dp e colore `surfaceVariant` che racchiude tutte le preferenze.
+ * 3. AREA SCORREVOLE INTERNA: Un layout verticale scorrevole (`verticalScroll`)
+ *    che contiene tabelle/card più piccole per ogni gruppo di impostazioni.
+ * 4. DOCK INFERIORE: Pulsante di chiusura ad alto impatto visivo ancorato in basso.
  * ====================================================================
  */
 @Composable
@@ -114,44 +105,17 @@ fun SettingsScreen(
     // Prevenzione del doppio click accidentale sul pulsante di chiusura
     var isClosing by remember { mutableStateOf(false) }
 
-    // ====================================================================
-    // 🧠 GESTIONE REATTIVA PREFERENZE & STATI LOCALI
-    // ====================================================================
-    // Le seguenti preferenze sono collegate in tempo reale al MatchViewModel e al DataStore:
-    // - Tema app (`viewModel.appTheme`: 0 = Sistema, 1 = Scuro, 2 = Chiaro) con Material You nativo
-    // - Lingua app (`viewModel.appLanguage` sincronizzata con `LocaleManager`)
-    // - Blocco orientamento (`viewModel.appOrientation` sincronizzata con `Activity.requestedOrientation`)
-    // - Schermo sempre attivo (`viewModel.keepScreenOnMode`: 0 = Solo in partita, 1 = Sempre, 2 = Disattivato)
-    // Le restanti opzioni (conferma azioni, passo punteggio, riordino dinamico) restano gestite
-    // provvisoriamente con stati locali 'remember', pronte per i prossimi step.
-
-    // --- SEZIONE A: INTERFACCIA E ASPETTO ---
-    // Tema app: tendina a discesa
+    // Stati di apertura per i dropdown menu
     var showThemeDropdown by remember { mutableStateOf(false) }
-
-    // Lingua app: tendina a discesa
     var showLanguageDropdown by remember { mutableStateOf(false) }
-
-    // Blocco orientamento: tendina a discesa
     var showOrientationDropdown by remember { mutableStateOf(false) }
-
-    // --- SEZIONE B: SCHERMO E COMPORTAMENTO ---
-    // Schermo sempre attivo: tendina a discesa
     var showScreenKeepOnDropdown by remember { mutableStateOf(false) }
 
-    // Conferma azioni rapide ("Azzera" / "Concludi"): default true
+    // Stati locali temporanei per le opzioni in attesa di persistenza avanzata
     var confirmQuickActions by remember { mutableStateOf(true) }
-
-    // --- SEZIONE C: PERSONALIZZAZIONE GIOCO ---
-    // Passo predefinito punteggio: ±1, ±5, ±10, ±20 (default 1)
     var selectedScoreStep by remember { mutableIntStateOf(1) }
-
-    // Ordinamento dinamico classifica: default false
     var dynamicLeaderboardSorting by remember { mutableStateOf(false) }
 
-    // ====================================================================
-    // SCAFFOLD PRINCIPALE CON SFONDO TRASPARENTE
-    // ====================================================================
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -159,7 +123,7 @@ fun SettingsScreen(
         containerColor = Color.Transparent,
 
         // ====================================================================
-        // DOCK INFERIORE ANCORATO (Pulsante Chiudi ad alto impatto visivo)
+        // DOCK INFERIORE ANCORATO (Pulsante Chiudi)
         // ====================================================================
         bottomBar = {
             Surface(
@@ -187,7 +151,7 @@ fun SettingsScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .widthIn(max = 600.dp)
+                            .widthIn(max = 700.dp)
                             .height(if (isLandscape) 52.dp else 64.dp),
                         shape = RoundedCornerShape(20.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
@@ -213,6 +177,9 @@ fun SettingsScreen(
             }
         }
     ) { innerPadding ->
+        // ====================================================================
+        // STRUTTURA PRINCIPALE (Speculare a CreateMatchScreen)
+        // ====================================================================
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -220,16 +187,11 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // ==============================================================
-            // TESTATA SUPERIORE FISSA: FRECCIA INDIETRO + TITOLO SCREEN
-            // ==============================================================
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+            // 1. IL TITOLO FISSO SUPERIORE
+            Spacer(modifier = Modifier.height(16.dp))
             AutoResizedText(
                 text = stringResource(R.string.titolo_impostazioni_esteso),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -238,395 +200,360 @@ fun SettingsScreen(
                     .padding(bottom = 16.dp)
             )
 
-            // ==============================================================
-            // AREA SCORREVOLE DELLE PREFERENZE
-            // ==============================================================
-            Column(
+            // 2. IL GRANDE TAVOLO CONTENITIVO (La Card Unica esterna)
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 700.dp)
                     .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(bottom = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(24.dp)
             ) {
-                // ------------------------------------------------------------
-                // SEZIONE A: 📱 INTERFACCIA E ASPETTO
-                // ------------------------------------------------------------
-                SettingsSectionCard(
-                    title = stringResource(R.string.sez_interfaccia_aspetto),
-                    icon = Icons.Filled.Palette
+                // 3. AREA SCORREVOLE INTERNA (Il tavolo scrollabile con le tabelle figlie)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // 1. TEMA APP (Sistema | Scuro | Chiaro)
-                    // 🧠 ARCHITETTURA E DIDATTICA:
-                    // - 0 = Sistema (segue l'impostazione chiara o scura di Android)
-                    // - 1 = Scuro (forza il tema scuro con Material You nativo - dynamicDarkColorScheme)
-                    // - 2 = Chiaro (forza il tema chiaro con Material You nativo - dynamicLightColorScheme)
-                    // Non applichiamo un nero assoluto o bianco statico: manteniamo le sfumature dinamiche
-                    // estratte dallo sfondo del dispositivo (Dynamic Colors di Android 12+ / 14+),
-                    // garantendo l'eleganza grafica e il rispetto del Material Design.
-                    val themeLabels = listOf(
-                        stringResource(R.string.opt_tema_sistema) to Icons.Filled.BrightnessAuto,
-                        stringResource(R.string.opt_tema_scuro) to Icons.Filled.DarkMode,
-                        stringResource(R.string.opt_tema_chiaro) to Icons.Filled.LightMode
-                    )
-                    val safeThemeIndex = viewModel.appTheme.coerceIn(0, themeLabels.size - 1)
-
-                    SettingsDropdownItem(
-                        title = stringResource(R.string.opt_tema_app),
-                        subtitle = stringResource(R.string.desc_tema_app),
-                        currentSelectionText = themeLabels[safeThemeIndex].first,
-                        currentSelectionIcon = themeLabels[safeThemeIndex].second,
-                        isExpanded = showThemeDropdown,
-                        onExpandRequest = { showThemeDropdown = true },
-                        onDismissRequest = { showThemeDropdown = false }
+                    // ------------------------------------------------------------
+                    // SEZIONE A: INTERFACCIA E ASPETTO
+                    // ------------------------------------------------------------
+                    SettingsSectionCard(
+                        title = stringResource(R.string.sez_interfaccia_aspetto),
+                        icon = Icons.Filled.Palette
                     ) {
-                        themeLabels.forEachIndexed { index, (label, icon) ->
-                            val isSelected = safeThemeIndex == index
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = label,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (isSelected) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                },
-                                onClick = {
-                                    // 🧠 DIDATTICA: Feedback tattile e salvataggio istantaneo nel ViewModel
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    showThemeDropdown = false
-                                    viewModel.setAppThemePreference(index)
-                                }
-                            )
-                        }
-                    }
-
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    // 2. LINGUA APP (7 lingue supportate + Lingua di sistema)
-                    // 🧠 ARCHITETTURA E DIDATTICA (Per-App Language API - Android 13+ / API 33+):
-                    // L'elenco include le 7 lingue con i rispettivi codici ISO e bandiere.
-                    // Se l'utente non ha impostato alcuna preferenza ("system"), rileviamo la lingua
-                    // attualmente attiva a livello di sistema operativo tramite Locale.getDefault().language.
-                    val supportedLanguages = listOf(
-                        Triple("it", "Italiano", "🇮🇹"),
-                        Triple("en", "English", "🇬🇧"),
-                        Triple("de", "Deutsch", "🇩🇪"),
-                        Triple("es", "Español", "🇪🇸"),
-                        Triple("fr", "Français", "🇫🇷"),
-                        Triple("hi", "हिन्दी", "🇮🇳"),
-                        Triple("ja", "日本語", "🇯🇵")
-                    )
-
-                    // Risoluzione reattiva della lingua corrente:
-                    // 🧠 DIDATTICA: Utilizziamo `configuration.locales[0].language` che osserva lo stato di Compose,
-                    // invece del non-osservabile `Locale.getDefault()`.
-                    val currentSystemLang = configuration.locales[0]?.language ?: "it"
-                    val effectiveLangCode = if (viewModel.appLanguage == "system") {
-                        if (supportedLanguages.any { it.first == currentSystemLang }) currentSystemLang else "it"
-                    } else {
-                        viewModel.appLanguage
-                    }
-
-                    val currentLang = supportedLanguages.firstOrNull { it.first == effectiveLangCode }
-                        ?: supportedLanguages[0]
-
-                    SettingsDropdownItem(
-                        title = stringResource(R.string.opt_lingua_app),
-                        subtitle = stringResource(R.string.desc_lingua_app),
-                        currentSelectionText = "${currentLang.second} ${currentLang.third}",
-                        currentSelectionIcon = Icons.Filled.Language,
-                        isExpanded = showLanguageDropdown,
-                        onExpandRequest = { showLanguageDropdown = true },
-                        onDismissRequest = { showLanguageDropdown = false }
-                    ) {
-                        supportedLanguages.forEach { (code, name, flag) ->
-                            val isSelected = effectiveLangCode == code
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Text(
-                                        text = flag,
-                                        fontSize = 18.sp
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = name,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (isSelected) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                },
-                                onClick = {
-                                    // 🧠 DIDATTICA: Feedback aptico alla selezione
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    showLanguageDropdown = false
-
-                                    // 1. Salvataggio della preferenza nel ViewModel e su DataStore
-                                    viewModel.setAppLanguagePreference(code)
-
-                                    // 2. Applicazione in tempo reale della lingua tramite LocaleManager (API 33+)
-                                    // minSdk è 34, pertanto LocaleManager è sempre disponibile sul dispositivo.
-                                    val localeManager = context.getSystemService(Context.LOCALE_SERVICE) as? LocaleManager
-                                    localeManager?.applicationLocales = LocaleList.forLanguageTags(code)
-                                }
-                            )
-                        }
-                    }
-
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    // 3. BLOCCO ORIENTAMENTO (Auto | Orizzontale | Verticale)
-                    // 🧠 ARCHITETTURA E DIDATTICA:
-                    // - 0: Auto (segue il sensore del giroscopio e la rotazione di Android)
-                    // - 1: Orizzontale (forza la schermata in Landscape)
-                    // - 2: Verticale (forza la schermata in Portrait)
-                    // Modificando `viewModel.setAppOrientationPreference(index)`:
-                    // 1. Viene aggiornato il DataStore (persistenza al riavvio).
-                    // 2. Il LaunchedEffect in MainActivity reagisce istantaneamente impostando `requestedOrientation`.
-                    val orientationOptions = listOf(
-                        stringResource(R.string.opt_orientamento_auto) to Icons.Filled.ScreenRotation,
-                        stringResource(R.string.opt_orientamento_orizzontale) to Icons.Filled.StayCurrentLandscape,
-                        stringResource(R.string.opt_orientamento_verticale) to Icons.Filled.StayCurrentPortrait
-                    )
-                    val safeOrientationIndex = viewModel.appOrientation.coerceIn(0, orientationOptions.size - 1)
-
-                    SettingsDropdownItem(
-                        title = stringResource(R.string.opt_orientamento_schermo),
-                        subtitle = stringResource(R.string.desc_orientamento_schermo),
-                        currentSelectionText = orientationOptions[safeOrientationIndex].first,
-                        currentSelectionIcon = orientationOptions[safeOrientationIndex].second,
-                        isExpanded = showOrientationDropdown,
-                        onExpandRequest = { showOrientationDropdown = true },
-                        onDismissRequest = { showOrientationDropdown = false }
-                    ) {
-                        orientationOptions.forEachIndexed { index, (label, icon) ->
-                            val isSelected = safeOrientationIndex == index
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = label,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (isSelected) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                },
-                                onClick = {
-                                    // 🧠 DIDATTICA: Feedback tattile e aggiornamento istantaneo dell'orientamento
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    showOrientationDropdown = false
-                                    viewModel.setAppOrientationPreference(index)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // ------------------------------------------------------------
-                // SEZIONE B: 💡 SCHERMO E COMPORTAMENTO
-                // ------------------------------------------------------------
-                SettingsSectionCard(
-                    title = stringResource(R.string.sez_schermo_comportamento),
-                    icon = Icons.Filled.WbSunny
-                ) {
-                    // 1. SCHERMO SEMPRE ATTIVO (Solo in partita | Sempre attivo | Disattivato)
-                    // 🧠 ARCHITETTURA E DIDATTICA:
-                    // - 0 = Solo in partita: lo schermo rimane acceso in CounterScreen durante il gioco
-                    // - 1 = Sempre attivo: FLAG_KEEP_SCREEN_ON applicata a tutta l'app
-                    // - 2 = Disattivato: il display segue le normali regole di spegnimento/timeout del sistema
-                    val screenKeepOnOptions = listOf(
-                        stringResource(R.string.opt_schermo_solo_partita) to Icons.Filled.SportsEsports,
-                        stringResource(R.string.opt_schermo_sempre) to Icons.Filled.Visibility,
-                        stringResource(R.string.opt_schermo_disattivato) to Icons.Filled.Close
-                    )
-                    val safeKeepOnIndex = viewModel.keepScreenOnMode.coerceIn(0, screenKeepOnOptions.size - 1)
-
-                    SettingsDropdownItem(
-                        title = stringResource(R.string.opt_schermo_attivo),
-                        subtitle = stringResource(R.string.desc_schermo_attivo),
-                        currentSelectionText = screenKeepOnOptions[safeKeepOnIndex].first,
-                        currentSelectionIcon = screenKeepOnOptions[safeKeepOnIndex].second,
-                        isExpanded = showScreenKeepOnDropdown,
-                        onExpandRequest = { showScreenKeepOnDropdown = true },
-                        onDismissRequest = { showScreenKeepOnDropdown = false }
-                    ) {
-                        screenKeepOnOptions.forEachIndexed { index, (label, icon) ->
-                            val isSelected = safeKeepOnIndex == index
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = label,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (isSelected) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                },
-                                onClick = {
-                                    // 🧠 DIDATTICA: Feedback aptico e aggiornamento istantaneo
-                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    showScreenKeepOnDropdown = false
-                                    viewModel.setKeepScreenOnPreference(index)
-                                }
-                            )
-                        }
-                    }
-
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    // 2. CONFERMA AZIONI RAPIDE (Switch Toggle)
-                    SettingsSwitchItem(
-                        title = stringResource(R.string.opt_conferma_azioni),
-                        subtitle = stringResource(R.string.desc_conferma_azioni),
-                        isChecked = confirmQuickActions,
-                        onCheckedChange = { checked ->
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            confirmQuickActions = checked
-                        }
-                    )
-                }
-
-                // ------------------------------------------------------------
-                // SEZIONE C: 🎮 PERSONALIZZAZIONE GIOCO
-                // ------------------------------------------------------------
-                SettingsSectionCard(
-                    title = stringResource(R.string.sez_personalizzazione_gioco),
-                    icon = Icons.Filled.SportsEsports
-                ) {
-                    // 1. PASSO PREDEFINITO PUNTEGGIO (±1 | ±5 | ±10 | ±20)
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AutoResizedText(
-                            text = stringResource(R.string.opt_passo_punteggio),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                        // 1. TEMA APP
+                        val themeLabels = listOf(
+                            stringResource(R.string.opt_tema_sistema) to Icons.Filled.BrightnessAuto,
+                            stringResource(R.string.opt_tema_scuro) to Icons.Filled.DarkMode,
+                            stringResource(R.string.opt_tema_chiaro) to Icons.Filled.LightMode
                         )
-                        AutoResizedText(
-                            text = stringResource(R.string.desc_passo_punteggio),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        )
+                        val safeThemeIndex = viewModel.appTheme.coerceIn(0, themeLabels.size - 1)
 
-                        // Riga di FilterChips per la selezione rapida del passo
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.opt_tema_app),
+                            subtitle = stringResource(R.string.desc_tema_app),
+                            currentSelectionText = themeLabels[safeThemeIndex].first,
+                            currentSelectionIcon = themeLabels[safeThemeIndex].second,
+                            isExpanded = showThemeDropdown,
+                            onExpandRequest = { showThemeDropdown = true },
+                            onDismissRequest = { showThemeDropdown = false }
                         ) {
-                            val steps = listOf(1, 5, 10, 20)
-                            steps.forEach { step ->
-                                val isSelected = selectedScoreStep == step
-                                FilterChip(
-                                    selected = isSelected,
+                            themeLabels.forEachIndexed { index, (label, icon) ->
+                                val isSelected = safeThemeIndex == index
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = label,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    },
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        selectedScoreStep = step
-                                    },
-                                    label = {
+                                        showThemeDropdown = false
+                                        viewModel.setAppThemePreference(index)
+                                    }
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // 2. LINGUA APP
+                        val supportedLanguages = listOf(
+                            Triple("it", "Italiano", "🇮🇹"),
+                            Triple("en", "English", "🇬🇧"),
+                            Triple("de", "Deutsch", "🇩🇪"),
+                            Triple("es", "Español", "🇪🇸"),
+                            Triple("fr", "Français", "🇫🇷"),
+                            Triple("hi", "हिन्दी", "🇮🇳"),
+                            Triple("ja", "日本語", "🇯🇵")
+                        )
+
+                        val currentSystemLang = configuration.locales[0]?.language ?: "it"
+                        val effectiveLangCode = if (viewModel.appLanguage == "system") {
+                            if (supportedLanguages.any { it.first == currentSystemLang }) currentSystemLang else "it"
+                        } else {
+                            viewModel.appLanguage
+                        }
+
+                        val currentLang = supportedLanguages.firstOrNull { it.first == effectiveLangCode }
+                            ?: supportedLanguages[0]
+
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.opt_lingua_app),
+                            subtitle = stringResource(R.string.desc_lingua_app),
+                            currentSelectionText = "${currentLang.second} ${currentLang.third}",
+                            currentSelectionIcon = Icons.Filled.Language,
+                            isExpanded = showLanguageDropdown,
+                            onExpandRequest = { showLanguageDropdown = true },
+                            onDismissRequest = { showLanguageDropdown = false }
+                        ) {
+                            supportedLanguages.forEach { (code, name, flag) ->
+                                val isSelected = effectiveLangCode == code
+                                DropdownMenuItem(
+                                    leadingIcon = { Text(text = flag, fontSize = 18.sp) },
+                                    text = {
                                         Text(
-                                            text = "±$step",
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                            text = name,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                         )
                                     },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
+                                    trailingIcon = {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showLanguageDropdown = false
+                                        viewModel.setAppLanguagePreference(code)
+                                        val localeManager = context.getSystemService(Context.LOCALE_SERVICE) as? LocaleManager
+                                        localeManager?.applicationLocales = LocaleList.forLanguageTags(code)
+                                    }
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // 3. BLOCCO ORIENTAMENTO
+                        val orientationOptions = listOf(
+                            stringResource(R.string.opt_orientamento_auto) to Icons.Filled.ScreenRotation,
+                            stringResource(R.string.opt_orientamento_orizzontale) to Icons.Filled.StayCurrentLandscape,
+                            stringResource(R.string.opt_orientamento_verticale) to Icons.Filled.StayCurrentPortrait
+                        )
+                        val safeOrientationIndex = viewModel.appOrientation.coerceIn(0, orientationOptions.size - 1)
+
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.opt_orientamento_schermo),
+                            subtitle = stringResource(R.string.desc_orientamento_schermo),
+                            currentSelectionText = orientationOptions[safeOrientationIndex].first,
+                            currentSelectionIcon = orientationOptions[safeOrientationIndex].second,
+                            isExpanded = showOrientationDropdown,
+                            onExpandRequest = { showOrientationDropdown = true },
+                            onDismissRequest = { showOrientationDropdown = false }
+                        ) {
+                            orientationOptions.forEachIndexed { index, (label, icon) ->
+                                val isSelected = safeOrientationIndex == index
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = label,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showOrientationDropdown = false
+                                        viewModel.setAppOrientationPreference(index)
+                                    }
                                 )
                             }
                         }
                     }
 
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
+                    // ------------------------------------------------------------
+                    // SEZIONE B: SCHERMO E COMPORTAMENTO
+                    // ------------------------------------------------------------
+                    SettingsSectionCard(
+                        title = stringResource(R.string.sez_schermo_comportamento),
+                        icon = Icons.Filled.WbSunny
+                    ) {
+                        // 1. SCHERMO SEMPRE ATTIVO
+                        val screenKeepOnOptions = listOf(
+                            stringResource(R.string.opt_schermo_solo_partita) to Icons.Filled.SportsEsports,
+                            stringResource(R.string.opt_schermo_sempre) to Icons.Filled.Visibility,
+                            stringResource(R.string.opt_schermo_disattivato) to Icons.Filled.Close
+                        )
+                        val safeKeepOnIndex = viewModel.keepScreenOnMode.coerceIn(0, screenKeepOnOptions.size - 1)
 
-                    // 2. ORDINAMENTO DINAMICO CLASSIFICA (Switch Toggle)
-                    SettingsSwitchItem(
-                        title = stringResource(R.string.opt_ordinamento_classifica),
-                        subtitle = stringResource(R.string.desc_ordinamento_classifica),
-                        isChecked = dynamicLeaderboardSorting,
-                        onCheckedChange = { checked ->
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            dynamicLeaderboardSorting = checked
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.opt_schermo_attivo),
+                            subtitle = stringResource(R.string.desc_schermo_attivo),
+                            currentSelectionText = screenKeepOnOptions[safeKeepOnIndex].first,
+                            currentSelectionIcon = screenKeepOnOptions[safeKeepOnIndex].second,
+                            isExpanded = showScreenKeepOnDropdown,
+                            onExpandRequest = { showScreenKeepOnDropdown = true },
+                            onDismissRequest = { showScreenKeepOnDropdown = false }
+                        ) {
+                            screenKeepOnOptions.forEachIndexed { index, (label, icon) ->
+                                val isSelected = safeKeepOnIndex == index
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = label,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showScreenKeepOnDropdown = false
+                                        viewModel.setKeepScreenOnPreference(index)
+                                    }
+                                )
+                            }
                         }
-                    )
-                }
 
-                // Margine inferiore per non far impattare l'ultima card col dock
-                Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // 2. CONFERMA AZIONI RAPIDE
+                        SettingsSwitchItem(
+                            title = stringResource(R.string.opt_conferma_azioni),
+                            subtitle = stringResource(R.string.desc_conferma_azioni),
+                            isChecked = confirmQuickActions,
+                            onCheckedChange = { checked ->
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                confirmQuickActions = checked
+                            }
+                        )
+                    }
+
+                    // ------------------------------------------------------------
+                    // SEZIONE C: PERSONALIZZAZIONE GIOCO
+                    // ------------------------------------------------------------
+                    SettingsSectionCard(
+                        title = stringResource(R.string.sez_personalizzazione_gioco),
+                        icon = Icons.Filled.SportsEsports
+                    ) {
+                        // 1. PASSO PREDEFINITO PUNTEGGIO
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.opt_passo_punteggio),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            AutoResizedText(
+                                text = stringResource(R.string.desc_passo_punteggio),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                val steps = listOf(1, 5, 10, 20)
+                                steps.forEach { step ->
+                                    val isSelected = selectedScoreStep == step
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            selectedScoreStep = step
+                                        },
+                                        label = {
+                                            Text(
+                                                text = "±$step",
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                            )
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // 2. ORDINAMENTO DINAMICO CLASSIFICA
+                        SettingsSwitchItem(
+                            title = stringResource(R.string.opt_ordinamento_classifica),
+                            subtitle = stringResource(R.string.desc_ordinamento_classifica),
+                            isChecked = dynamicLeaderboardSorting,
+                            onCheckedChange = { checked ->
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                dynamicLeaderboardSorting = checked
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -634,9 +561,8 @@ fun SettingsScreen(
 
 /**
  * ====================================================================
- * COMPONENTE SCHEDA SEZIONE IMPOSTAZIONI
+ * COMPONENTE SCHEDA SEZIONE IMPOSTAZIONI (Tabella Figlia)
  * ====================================================================
- * Raggruppa visivamente le opzioni in un Card M3 con containerColor coerente.
  */
 @Composable
 private fun SettingsSectionCard(
@@ -648,7 +574,7 @@ private fun SettingsSectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         border = BorderStroke(
             width = 1.dp,
@@ -661,7 +587,6 @@ private fun SettingsSectionCard(
                 .padding(vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Intestazione sezione con icona tematica
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -694,7 +619,6 @@ private fun SettingsSectionCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Contenuto delle opzioni
             content()
         }
     }
@@ -724,7 +648,6 @@ private fun SettingsDropdownItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Colonna con Titolo e Sottotitolo descrittivo
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
@@ -742,7 +665,6 @@ private fun SettingsDropdownItem(
             )
         }
 
-        // Pillola interattiva con valore corrente e freccia a tendina
         Box {
             Surface(
                 shape = RoundedCornerShape(12.dp),
