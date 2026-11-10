@@ -1241,12 +1241,14 @@
  */
 @Composable
 fun AnimatedSelectableChip(
-    text: String,                 // Il testo o etichetta da visualizzare all'interno del chip
-    isSelected: Boolean,          // Stato booleano che indica se questo specifico chip è attualmente attivo/selezionato
-    onClick: () -> Unit,          // Callback lambda eseguita quando l'utente tocca il chip
-    modifier: Modifier = Modifier,// Modificatore Compose per personalizzare layout, padding o larghezza esterna
-    height: Dp = 46.dp,           // Altezza fissa predefinita del chip (default 46.dp)
-    shapeRadius: Dp = 16.dp       // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
+    text: String,                                     // Il testo o etichetta da visualizzare all'interno del chip
+    isSelected: Boolean,                              // Stato booleano che indica se questo specifico chip è attualmente attivo/selezionato
+    onClick: () -> Unit,                              // Callback lambda eseguita quando l'utente tocca il chip
+    modifier: Modifier = Modifier,                    // Modificatore Compose per personalizzare layout, padding o larghezza esterna
+    height: Dp = 46.dp,                               // Altezza fissa predefinita del chip (default 46.dp)
+    shapeRadius: Dp = 16.dp,                          // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
+    textStyle: TextStyle = TextStyle.Default,          // Stile tipografico del testo
+    trailingContent: @Composable (() -> Unit)? = null // Slot opzionale in alto a destra per elementi aggiuntivi (es. tasto matita)
 ) {
     // Otteniamo il riferimento al servizio di vibrazione aptica del sistema
     val haptic = LocalHapticFeedback.current
@@ -1301,20 +1303,34 @@ fun AnimatedSelectableChip(
         color = animatedBgColor,                // Colore di sfondo animato
         border = BorderStroke(width = animatedBorderWidth, color = animatedBorderColor) // Bordo animato
     ) {
-        // Contenitore interno centrato per il testo
+        // Contenitore interno centrato per il testo e l'eventuale contenuto secondario
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .padding(horizontal = 6.dp, vertical = 2.dp)
         ) {
-            // Testo intelligente che si adatta automaticamente per evitare tagli
+            // 🧠 PREVENZIONE SOVRAPPOSIZIONE TESTO-ICONA:
+            // Se è presente un elemento trailing (es. la matita di modifica in alto a destra),
+            // isoliamo il testo applicando un padding bilanciato a destra e a sinistra (22.dp).
+            // In questo modo AutoResizedText misura solo lo spazio libero a disposizione e riduce il font
+            // senza mai sovrapporsi o compenetrarsi con l'icona!
+            val sidePadding = if (trailingContent != null) 22.dp else 4.dp
+
             AutoResizedText(
                 text = text,
                 fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium, // Grassetto marcato se selezionato
+                style = textStyle,
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(start = sidePadding, end = sidePadding)
             )
+
+            // Rendering opzionale dell'elemento in alto a destra se fornito dallo slot
+            if (trailingContent != null) {
+                Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                    trailingContent()
+                }
+            }
         }
     }
 }

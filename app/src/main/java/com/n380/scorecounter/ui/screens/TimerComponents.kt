@@ -61,6 +61,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.n380.scorecounter.R
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.AnimatedSelectableChip
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -717,66 +718,26 @@ fun TimerSettingsDialog(
                                         val actualIndex = rowIndex * 2 + colIndex
                                         val formattedText = formatRawTimeToMMSS(rawPreset)
 
-                                        // 🧠 SPEGNIMENTO AUTOMATICO PRESET:
-                                        // Il pulsante del preset è attivo ('isPresetSelected = true') solo se 'rawInput'
-                                        // corrisponde esattamente a 'rawPreset'. Se l'utente digita o cambia il tempo manualmente,
-                                        // 'rawInput' cambia valore e non corrisponde più al preset, SPEGNENDO automaticamente il pulsante!
+                                        // 🧠 SPEGNIMENTO AUTOMATICO E EREDITARIETÀ COMPONENTE (Principio DRY):
+                                        // 1. Invece di duplicare 40+ righe di animazioni custom in questo file, richiamiamo
+                                        //    direttamente `AnimatedSelectableChip` importata da `SharedUtils.kt`.
+                                        // 2. LOGICA DI SPEGNIMENTO: Passiamo `isSelected = (rawInput == rawPreset)`.
+                                        //    Se l'utente digita o cambia il tempo manualmente nel campo di testo, 'rawInput'
+                                        //    assume un nuovo valore (es. "0315") che non coincide con nessuno dei 4 preset.
+                                        //    automaticamente `isSelected` diventa `false` e il pulsante si SPEGNE!
                                         val isPresetSelected = (rawInput == rawPreset)
 
-                                        // Animazione elastica di scala (Bounce Effect)
-                                        val cardScale by animateFloatAsState(
-                                            targetValue = if (isPresetSelected) 1.04f else 1.0f,
-                                            animationSpec = spring(
-                                                dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                stiffness = Spring.StiffnessLow
-                                            ),
-                                            label = "TimerChipScale"
-                                        )
-
-                                        // Animazione cromatica dello sfondo
-                                        val animatedBgColor by animateColorAsState(
-                                            targetValue = if (isPresetSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                                            animationSpec = tween(durationMillis = 220),
-                                            label = "TimerChipBg"
-                                        )
-
-                                        // Animazione cromatica del bordo
-                                        val animatedBorderColor by animateColorAsState(
-                                            targetValue = if (isPresetSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                            animationSpec = tween(durationMillis = 220),
-                                            label = "TimerChipBorderColor"
-                                        )
-
-                                        // Animazione dello spessore del bordo
-                                        val animatedBorderWidth by animateDpAsState(
-                                            targetValue = if (isPresetSelected) 2.dp else 1.dp,
-                                            animationSpec = tween(durationMillis = 220),
-                                            label = "TimerChipBorderWidth"
-                                        )
-
-                                        Surface(
+                                        // Richiamo della funzione ereditata centralizzata con lo slot `trailingContent`
+                                        AnimatedSelectableChip(
+                                            text = formattedText,
+                                            isSelected = isPresetSelected,
                                             onClick = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                                 rawInput = rawPreset
                                             },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .height(48.dp),
-                                            shape = RoundedCornerShape(16.dp),
-                                            color = animatedBgColor,
-                                            border = BorderStroke(width = animatedBorderWidth, color = animatedBorderColor)
-                                        ) {
-                                            Box(
-                                                modifier = Modifier.fillMaxSize().padding(horizontal = 6.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                AutoResizedText(
-                                                    text = formattedText,
-                                                    fontWeight = if (isPresetSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                                                    style = MaterialTheme.typography.titleMedium,
-                                                    color = if (isPresetSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-
+                                            height = 48.dp,
+                                            shapeRadius = 16.dp,
+                                            modifier = Modifier.weight(1f),
+                                            trailingContent = {
                                                 // TASTO MATITA IN ALTO A DESTRA PER MODIFICARE IL PRESET
                                                 IconButton(
                                                     onClick = {
@@ -785,7 +746,6 @@ fun TimerSettingsDialog(
                                                         editingRawValue = rawPreset
                                                     },
                                                     modifier = Modifier
-                                                        .align(Alignment.TopEnd)
                                                         .size(28.dp)
                                                         .padding(2.dp)
                                                 ) {
@@ -797,7 +757,7 @@ fun TimerSettingsDialog(
                                                     )
                                                 }
                                             }
-                                        }
+                                        )
                                     }
                                 }
                             }
