@@ -376,8 +376,7 @@
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni">Ajustes</string>
     <string name="titolo_impostazioni_esteso">Ajustes y preferencias</string>
-    <string name="desc_impostazioni_menu">Personaliza el aspecto y el juego</string>
-    <string name="sez_interfaccia_aspetto">📱 Interfaz y apariencia</string>
+    <string name="sez_interfaccia_aspetto">Interfaz y apariencia</string>
     <string name="opt_tema_app">Tema de la app</string>
     <string name="desc_tema_app">Elige tema del sistema, oscuro o claro</string>
     <string name="opt_tema_sistema">Sistema</string>
@@ -390,7 +389,7 @@
     <string name="opt_orientamento_auto">Automático</string>
     <string name="opt_orientamento_orizzontale">Horizontal</string>
     <string name="opt_orientamento_verticale">Vertical</string>
-    <string name="sez_schermo_comportamento">💡 Pantalla y comportamiento</string>
+    <string name="sez_schermo_comportamento">Pantalla y comportamiento</string>
     <string name="opt_schermo_attivo">Pantalla siempre activa</string>
     <string name="desc_schermo_attivo">Evita que la pantalla se apague durante el juego</string>
     <string name="opt_schermo_solo_partita">Solo en partida</string>
@@ -398,7 +397,7 @@
     <string name="opt_schermo_disattivato">Desactivada</string>
     <string name="opt_conferma_azioni">Confirmar acciones rápidas</string>
     <string name="desc_conferma_azioni">Pedir confirmación para \"Restablecer\" y \"Finalizar\" en partida</string>
-    <string name="sez_personalizzazione_gioco">🎮 Personalización del juego</string>
+    <string name="sez_personalizzazione_gioco">Personalización del juego</string>
     <string name="opt_passo_punteggio">Paso de puntuación predeterminado</string>
     <string name="desc_passo_punteggio">Incremento rápido al mantener pulsado (±1, ±5, ±10, ±20)</string>
     <string name="opt_ordinamento_classifica">Orden dinámico de clasificación</string>

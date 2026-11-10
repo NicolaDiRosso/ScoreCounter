@@ -376,8 +376,7 @@
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni">सेटिंग्स</string>
     <string name="titolo_impostazioni_esteso">सेटिंग्स और प्राथमिकताएं</string>
-    <string name="desc_impostazioni_menu">दिखावट और गेमप्ले कस्टमाइज़ करें</string>
-    <string name="sez_interfaccia_aspetto">📱 इंटरफ़ेस और दिखावट</string>
+    <string name="sez_interfaccia_aspetto">इंटरफ़ेस और दिखावट</string>
     <string name="opt_tema_app">ऐप थीम</string>
     <string name="desc_tema_app">सिस्टम, डार्क या लाइट थीम चुनें</string>
     <string name="opt_tema_sistema">सिस्टम</string>
@@ -390,7 +389,7 @@
     <string name="opt_orientamento_auto">ऑटो</string>
     <string name="opt_orientamento_orizzontale">लैंडस्केप</string>
     <string name="opt_orientamento_verticale">पोर्ट्रेट</string>
-    <string name="sez_schermo_comportamento">💡 स्क्रीन और व्यवहार</string>
+    <string name="sez_schermo_comportamento">स्क्रीन और व्यवहार</string>
     <string name="opt_schermo_attivo">स्क्रीन हमेशा चालू रखें</string>
     <string name="desc_schermo_attivo">मैच के दौरान स्क्रीन बंद होने से रोकें</string>
     <string name="opt_schermo_solo_partita">केवल मैच में</string>
@@ -398,7 +397,7 @@
     <string name="opt_schermo_disattivato">बंद</string>
     <string name="opt_conferma_azioni">त्वरित क्रियाओं की पुष्टि करें</string>
     <string name="desc_conferma_azioni">मैच में \"रीसेट\" और \"समाप्त\" के लिए पुष्टि मांगें</string>
-    <string name="sez_personalizzazione_gioco">🎮 गेम अनुकूलन</string>
+    <string name="sez_personalizzazione_gioco">गेम अनुकूलन</string>
     <string name="opt_passo_punteggio">डिफ़ॉल्ट स्कोर स्टेप</string>
     <string name="desc_passo_punteggio">लॉन्ग प्रेस पर त्वरित बढ़त (±1, ±5, ±10, ±20)</string>
     <string name="opt_ordinamento_classifica">डायनामिक लीडरबोर्ड सॉर्टिंग</string>

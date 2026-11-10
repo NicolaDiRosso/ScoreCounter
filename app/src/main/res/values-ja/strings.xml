@@ -376,8 +376,7 @@
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni">設定</string>
     <string name="titolo_impostazioni_esteso">設定と環境設定</string>
-    <string name="desc_impostazioni_menu">外観とゲームプレイをカスタマイズ</string>
-    <string name="sez_interfaccia_aspetto">📱 インターフェースと外観</string>
+    <string name="sez_interfaccia_aspetto">インターフェースと外観</string>
     <string name="opt_tema_app">アプリのテーマ</string>
     <string name="desc_tema_app">システム、ダーク、ライトから選択</string>
     <string name="opt_tema_sistema">システム</string>
@@ -390,7 +389,7 @@
     <string name="opt_orientamento_auto">自動</string>
     <string name="opt_orientamento_orizzontale">横向き</string>
     <string name="opt_orientamento_verticale">縦向き</string>
-    <string name="sez_schermo_comportamento">💡 画面と動作</string>
+    <string name="sez_schermo_comportamento">画面と動作</string>
     <string name="opt_schermo_attivo">画面の常時点灯</string>
     <string name="desc_schermo_attivo">対戦中の画面のスリープを防止</string>
     <string name="opt_schermo_solo_partita">対戦中のみ</string>
@@ -398,7 +397,7 @@
     <string name="opt_schermo_disattivato">無効</string>
     <string name="opt_conferma_azioni">クイック操作の確認</string>
     <string name="desc_conferma_azioni">対戦中の「リセット」と「終了」の確認を表示</string>
-    <string name="sez_personalizzazione_gioco">🎮 ゲームのカスタマイズ</string>
+    <string name="sez_personalizzazione_gioco">ゲームのカスタマイズ</string>
     <string name="opt_passo_punteggio">デフォルトのスコア増減幅</string>
     <string name="desc_passo_punteggio">長押し時のクイック増減値 (±1, ±5, ±10, ±20)</string>
     <string name="opt_ordinamento_classifica">順位の動的ソート</string>

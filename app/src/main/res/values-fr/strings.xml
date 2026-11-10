@@ -376,8 +376,7 @@
     <!-- ==================================================================== -->
     <string name="titolo_impostazioni">Paramètres</string>
     <string name="titolo_impostazioni_esteso">Paramètres et préférences</string>
-    <string name="desc_impostazioni_menu">Personnaliser l\'apparence et le jeu</string>
-    <string name="sez_interfaccia_aspetto">📱 Interface et apparence</string>
+    <string name="sez_interfaccia_aspetto">Interface et apparence</string>
     <string name="opt_tema_app">Thème de l\'application</string>
     <string name="desc_tema_app">Choisir entre thème système, sombre ou clair</string>
     <string name="opt_tema_sistema">Système</string>
@@ -390,7 +389,7 @@
     <string name="opt_orientamento_auto">Automatique</string>
     <string name="opt_orientamento_orizzontale">Paysage</string>
     <string name="opt_orientamento_verticale">Portrait</string>
-    <string name="sez_schermo_comportamento">💡 Écran et comportement</string>
+    <string name="sez_schermo_comportamento">Écran et comportement</string>
     <string name="opt_schermo_attivo">Écran toujours actif</string>
     <string name="desc_schermo_attivo">Empêcher la mise en veille pendant les parties</string>
     <string name="opt_schermo_solo_partita">Pendant la partie</string>
@@ -398,7 +397,7 @@
     <string name="opt_schermo_disattivato">Désactivé</string>
     <string name="opt_conferma_azioni">Confirmer les actions rapides</string>
     <string name="desc_conferma_azioni">Demander confirmation pour \"Réinitialiser\" et \"Terminer\" pendant la partie</string>
-    <string name="sez_personalizzazione_gioco">🎮 Personnalisation du jeu</string>
+    <string name="sez_personalizzazione_gioco">Personnalisation du jeu</string>
     <string name="opt_passo_punteggio">Incrément de score par défaut</string>
     <string name="desc_passo_punteggio">Valeur d\'incrément rapide lors d\'un appui long (±1, ±5, ±10, ±20)</string>
     <string name="opt_ordinamento_classifica">Tri dynamique du classement</string>

@@ -225,7 +225,7 @@ fun HomeScreenLandscape(
                     HomeLandscapeActionCard(
                         icon = Icons.Filled.Settings,
                         title = stringResource(R.string.titolo_impostazioni),
-                        subtitle = stringResource(R.string.desc_impostazioni_menu),
+                        subtitle = stringResource(R.string.titolo_impostazioni_esteso),
                         containerColor = MaterialTheme.colorScheme.surface,
                         iconBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
                         iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer,

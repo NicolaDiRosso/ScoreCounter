@@ -22,11 +22,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -227,55 +225,18 @@ fun SettingsScreen(
             // ==============================================================
             Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AutoResizedText(
+                text = stringResource(R.string.titolo_impostazioni_esteso),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .widthIn(max = 700.dp)
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Pillola / Tasto indietro con ripple e feedback tattile
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                    ),
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    IconButton(
-                        onClick = {
-                            if (!isClosing) {
-                                isClosing = true
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                onNavigateBack()
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.btn_chiudi_impostazioni),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
-                    AutoResizedText(
-                        text = stringResource(R.string.titolo_impostazioni_esteso),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    AutoResizedText(
-                        text = stringResource(R.string.desc_impostazioni_menu),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                    )
-                }
-            }
+                    .padding(bottom = 16.dp)
+            )
 
             // ==============================================================
             // AREA SCORREVOLE DELLE PREFERENZE
