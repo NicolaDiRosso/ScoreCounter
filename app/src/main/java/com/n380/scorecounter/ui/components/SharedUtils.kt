@@ -414,7 +414,7 @@
             Canvas(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
                 val padYTop = if (isDetailed) 10.dp.toPx() else 4.dp.toPx()
-                val padYBottom = if (isDetailed) 50.dp.toPx() else 24.dp.toPx()
+                val padYBottom = if (isDetailed) 32.dp.toPx() else 20.dp.toPx() // Ridotto da 50 a 32 per eliminare lo spazio vuoto inferiore
                 val padX = if (isDetailed) 20.dp.toPx() else 12.dp.toPx()
 
                 val drawW = (size.width - padX * 2).coerceAtLeast(1f)
@@ -601,7 +601,7 @@
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if(isDetailed) 12.dp else 4.dp)
+                    .padding(top = if(isDetailed) 4.dp else 2.dp) // Ridotto il padding superiore per avvicinare la legenda ed eliminare gli spazi vuoti
                     // Permette di scorrere i bottoni lateralmente se ci sono molti giocatori
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.Center
