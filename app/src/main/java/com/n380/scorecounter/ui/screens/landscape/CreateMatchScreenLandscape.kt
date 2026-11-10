@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
-import com.n380.scorecounter.ui.components.CustomSelectableChip
+import com.n380.scorecounter.ui.components.AnimatedSelectableChip
 import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.TonalActionPill
@@ -201,7 +201,7 @@ fun CreateMatchScreenLandscape(
                                 ) {
                                     items(viewModel.matchTitleHistory) { recentTitle ->
                                         val isSelected = viewModel.matchTitle == recentTitle
-                                        CustomSelectableChip(
+                                        AnimatedSelectableChip(
                                             text = recentTitle,
                                             isSelected = isSelected,
                                             onClick = {
@@ -316,7 +316,7 @@ fun CreateMatchScreenLandscape(
                             ) {
                                 items(viewModel.favoriteNames) { fav ->
                                     val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
-                                    CustomSelectableChip(
+                                    AnimatedSelectableChip(
                                         text = fav,
                                         isSelected = isAlreadyAtTable,
                                         onClick = {

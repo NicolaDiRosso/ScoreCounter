@@ -50,7 +50,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
-import com.n380.scorecounter.ui.components.CustomSelectableChip
+import com.n380.scorecounter.ui.components.AnimatedSelectableChip
 import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
 import com.n380.scorecounter.ui.components.TonalActionPill
@@ -435,7 +435,7 @@ fun CreateMatchScreen(
                                                 // Richiamo del componente UI custom centralizzato.
                                                 // L'astrazione grafica (colori, bordi, padding) è gestita internamente in SharedUtils.kt,
                                                 // qui passiamo esclusivamente i dati e i comportamenti di business logic (Principio DRY).
-                                                CustomSelectableChip(
+                                                AnimatedSelectableChip(
                                                     text = recentTitle,
                                                     isSelected = isSelected,
                                                     onClick = {
@@ -616,7 +616,7 @@ fun CreateMatchScreen(
 
                                             // Utilizzo del componente custom centralizzato per uniformita' estetica.
                                             // La configurazione cromatica (testo e sfondo) e' ora ereditata dalla funzione unica.
-                                            CustomSelectableChip(
+                                            AnimatedSelectableChip(
                                                 text = fav,
                                                 isSelected = isAlreadyAtTable,
                                                 onClick = {

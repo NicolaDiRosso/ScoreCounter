@@ -78,17 +78,17 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
         var savedTimerMemory by rememberSaveable { mutableStateOf("") }
 
         // ---> STATI PER IL DADO VIRTUALE <---
-        var showDiceDialog by remember { mutableStateOf(false) }
+        var showDiceDialog by rememberSaveable { mutableStateOf(false) }
 
         // ---> STATI PER IL PULSANTE TIMER VIRTUALE <---
-        var showTimerDialog by remember { mutableStateOf(false) }
+        var showTimerDialog by rememberSaveable { mutableStateOf(false) }
 
         // Stato per mostrare il popup delle impostazioni del dado
         var showDiceSettingsDialog by rememberSaveable { mutableStateOf(false) }
 
-        var diceResult by remember { mutableIntStateOf(1) }
+        var diceResult by rememberSaveable { mutableIntStateOf(1) }
         // Contatore univoco per forzare l'aggiornamento dell'interfaccia ad ogni click
-        var diceRollCount by remember { mutableIntStateOf(0) }
+        var diceRollCount by rememberSaveable { mutableIntStateOf(0) }
 
         // --->Ricorda QUALE giocatore stiamo modificando manualmente con la tastiera <---
         // Se è "null", il popup per l'inserimento manuale è nascosto.
