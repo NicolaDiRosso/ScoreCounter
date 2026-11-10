@@ -179,18 +179,12 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
         }
         // ====================================================================
 
-        // ---> SCHERMO SEMPRE ACCESO (Senza modalità immersiva problematica) <---
-        // DisposableEffect è magico: esegue un codice quando la pagina si APRE (init) e un altro quando si CHIUDE (onDispose).
-        DisposableEffect(Unit) {
-            val activity = context as? Activity
-            // Appena si apre il contatore, diciamo ad Android di attaccare il "Cartello Divieto di Standby"
-            activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-            onDispose {
-                // Appena usciamo da questa pagina, togliamo il cartello e permettiamo allo schermo di riposare.
-                activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            }
-        }
+        // ---> SCHERMO SEMPRE ACCESO (Centralizzato in MainActivity tramite preferenze utente) <---
+        // 🧠 NOTA ARCHITETTURALE: La gestione della flag 'FLAG_KEEP_SCREEN_ON' è ora gestita
+        // reattivamente a livello di 'MainActivity' in base all'impostazione scelta dall'utente:
+        // - "Solo in partita" (attiva durante 'counter')
+        // - "Sempre attivo" (attiva in tutta l'app)
+        // - "Disattivato" (disattivata ovunque)
 
         // ---> IL SALVA-VITA (BackHandler) <---
         // Intercetta il tasto "Indietro" fisico o lo swipe back del telefono.

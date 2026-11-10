@@ -119,15 +119,16 @@ fun SettingsScreen(
     // ====================================================================
     // 🧠 GESTIONE REATTIVA PREFERENZE & STATI LOCALI
     // ====================================================================
-    // Alcune preferenze sono già collegate in tempo reale al MatchViewModel e al DataStore:
+    // Le seguenti preferenze sono collegate in tempo reale al MatchViewModel e al DataStore:
+    // - Tema app (`viewModel.appTheme`: 0 = Sistema, 1 = Scuro, 2 = Chiaro) con Material You nativo
     // - Lingua app (`viewModel.appLanguage` sincronizzata con `LocaleManager`)
     // - Blocco orientamento (`viewModel.appOrientation` sincronizzata con `Activity.requestedOrientation`)
-    // Le restanti opzioni rimangono provvisoriamente gestite con stati locali 'remember',
-    // pronte per essere collegate progressivamente al database nei prossimi step.
+    // - Schermo sempre attivo (`viewModel.keepScreenOnMode`: 0 = Solo in partita, 1 = Sempre, 2 = Disattivato)
+    // Le restanti opzioni (conferma azioni, passo punteggio, riordino dinamico) restano gestite
+    // provvisoriamente con stati locali 'remember', pronte per i prossimi step.
 
     // --- SEZIONE A: INTERFACCIA E ASPETTO ---
-    // Tema app: 0 = Sistema, 1 = Scuro, 2 = Chiaro
-    var selectedThemeIndex by remember { mutableIntStateOf(0) }
+    // Tema app: tendina a discesa
     var showThemeDropdown by remember { mutableStateOf(false) }
 
     // Lingua app: tendina a discesa
@@ -137,8 +138,7 @@ fun SettingsScreen(
     var showOrientationDropdown by remember { mutableStateOf(false) }
 
     // --- SEZIONE B: SCHERMO E COMPORTAMENTO ---
-    // Schermo sempre attivo: 0 = Solo in partita, 1 = Sempre attivo, 2 = Disattivato
-    var selectedScreenKeepOnIndex by remember { mutableIntStateOf(0) }
+    // Schermo sempre attivo: tendina a discesa
     var showScreenKeepOnDropdown by remember { mutableStateOf(false) }
 
     // Conferma azioni rapide ("Azzera" / "Concludi"): default true
@@ -296,38 +296,48 @@ fun SettingsScreen(
                     icon = Icons.Filled.Palette
                 ) {
                     // 1. TEMA APP (Sistema | Scuro | Chiaro)
+                    // 🧠 ARCHITETTURA E DIDATTICA:
+                    // - 0 = Sistema (segue l'impostazione chiara o scura di Android)
+                    // - 1 = Scuro (forza il tema scuro con Material You nativo - dynamicDarkColorScheme)
+                    // - 2 = Chiaro (forza il tema chiaro con Material You nativo - dynamicLightColorScheme)
+                    // Non applichiamo un nero assoluto o bianco statico: manteniamo le sfumature dinamiche
+                    // estratte dallo sfondo del dispositivo (Dynamic Colors di Android 12+ / 14+),
+                    // garantendo l'eleganza grafica e il rispetto del Material Design.
                     val themeLabels = listOf(
                         stringResource(R.string.opt_tema_sistema) to Icons.Filled.BrightnessAuto,
                         stringResource(R.string.opt_tema_scuro) to Icons.Filled.DarkMode,
                         stringResource(R.string.opt_tema_chiaro) to Icons.Filled.LightMode
                     )
+                    val safeThemeIndex = viewModel.appTheme.coerceIn(0, themeLabels.size - 1)
+
                     SettingsDropdownItem(
                         title = stringResource(R.string.opt_tema_app),
                         subtitle = stringResource(R.string.desc_tema_app),
-                        currentSelectionText = themeLabels[selectedThemeIndex].first,
-                        currentSelectionIcon = themeLabels[selectedThemeIndex].second,
+                        currentSelectionText = themeLabels[safeThemeIndex].first,
+                        currentSelectionIcon = themeLabels[safeThemeIndex].second,
                         isExpanded = showThemeDropdown,
                         onExpandRequest = { showThemeDropdown = true },
                         onDismissRequest = { showThemeDropdown = false }
                     ) {
                         themeLabels.forEachIndexed { index, (label, icon) ->
+                            val isSelected = safeThemeIndex == index
                             DropdownMenuItem(
                                 leadingIcon = {
                                     Icon(
                                         imageVector = icon,
                                         contentDescription = null,
-                                        tint = if (selectedThemeIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
                                 text = {
                                     Text(
                                         text = label,
-                                        fontWeight = if (selectedThemeIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selectedThemeIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                     )
                                 },
                                 trailingIcon = {
-                                    if (selectedThemeIndex == index) {
+                                    if (isSelected) {
                                         Icon(
                                             imageVector = Icons.Filled.Check,
                                             contentDescription = null,
@@ -337,9 +347,10 @@ fun SettingsScreen(
                                     }
                                 },
                                 onClick = {
+                                    // 🧠 DIDATTICA: Feedback tattile e salvataggio istantaneo nel ViewModel
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    selectedThemeIndex = index
                                     showThemeDropdown = false
+                                    viewModel.setAppThemePreference(index)
                                 }
                             )
                         }
@@ -505,38 +516,45 @@ fun SettingsScreen(
                     icon = Icons.Filled.WbSunny
                 ) {
                     // 1. SCHERMO SEMPRE ATTIVO (Solo in partita | Sempre attivo | Disattivato)
+                    // 🧠 ARCHITETTURA E DIDATTICA:
+                    // - 0 = Solo in partita: lo schermo rimane acceso in CounterScreen durante il gioco
+                    // - 1 = Sempre attivo: FLAG_KEEP_SCREEN_ON applicata a tutta l'app
+                    // - 2 = Disattivato: il display segue le normali regole di spegnimento/timeout del sistema
                     val screenKeepOnOptions = listOf(
                         stringResource(R.string.opt_schermo_solo_partita) to Icons.Filled.SportsEsports,
                         stringResource(R.string.opt_schermo_sempre) to Icons.Filled.Visibility,
                         stringResource(R.string.opt_schermo_disattivato) to Icons.Filled.Close
                     )
+                    val safeKeepOnIndex = viewModel.keepScreenOnMode.coerceIn(0, screenKeepOnOptions.size - 1)
+
                     SettingsDropdownItem(
                         title = stringResource(R.string.opt_schermo_attivo),
                         subtitle = stringResource(R.string.desc_schermo_attivo),
-                        currentSelectionText = screenKeepOnOptions[selectedScreenKeepOnIndex].first,
-                        currentSelectionIcon = screenKeepOnOptions[selectedScreenKeepOnIndex].second,
+                        currentSelectionText = screenKeepOnOptions[safeKeepOnIndex].first,
+                        currentSelectionIcon = screenKeepOnOptions[safeKeepOnIndex].second,
                         isExpanded = showScreenKeepOnDropdown,
                         onExpandRequest = { showScreenKeepOnDropdown = true },
                         onDismissRequest = { showScreenKeepOnDropdown = false }
                     ) {
                         screenKeepOnOptions.forEachIndexed { index, (label, icon) ->
+                            val isSelected = safeKeepOnIndex == index
                             DropdownMenuItem(
                                 leadingIcon = {
                                     Icon(
                                         imageVector = icon,
                                         contentDescription = null,
-                                        tint = if (selectedScreenKeepOnIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 },
                                 text = {
                                     Text(
                                         text = label,
-                                        fontWeight = if (selectedScreenKeepOnIndex == index) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (selectedScreenKeepOnIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                     )
                                 },
                                 trailingIcon = {
-                                    if (selectedScreenKeepOnIndex == index) {
+                                    if (isSelected) {
                                         Icon(
                                             imageVector = Icons.Filled.Check,
                                             contentDescription = null,
@@ -546,9 +564,10 @@ fun SettingsScreen(
                                     }
                                 },
                                 onClick = {
+                                    // 🧠 DIDATTICA: Feedback aptico e aggiornamento istantaneo
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    selectedScreenKeepOnIndex = index
                                     showScreenKeepOnDropdown = false
+                                    viewModel.setKeepScreenOnPreference(index)
                                 }
                             )
                         }

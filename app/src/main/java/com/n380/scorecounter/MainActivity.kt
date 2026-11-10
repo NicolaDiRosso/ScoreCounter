@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.LocaleList
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -27,6 +28,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.n380.scorecounter.ui.components.PatternedBackground
 import com.n380.scorecounter.ui.screens.CounterScreen
@@ -56,7 +58,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ScoreCounterTheme {
+            // INIZIALIZZAZIONE STRUMENTI ARCHITETTURALI
+            // 🧠 SPIEGAZIONE DIDATTICA:
+            // Creiamo 'matchViewModel' prima di 'ScoreCounterTheme' in modo che il tema
+            // possa osservare in tempo reale lo stato 'matchViewModel.appTheme'.
+            val matchViewModel: MatchViewModel = viewModel()
+
+            // Risoluzione reattiva del tema:
+            // - 0 (Sistema): darkTheme = isSystemInDarkTheme() (segue Android)
+            // - 1 (Scuro): darkTheme = true (forza Dark con Material You nativo)
+            // - 2 (Chiaro): darkTheme = false (forza Light con Material You nativo)
+            val isDarkTheme = when (matchViewModel.appTheme) {
+                1 -> true
+                2 -> false
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
+
+            ScoreCounterTheme(darkTheme = isDarkTheme) {
 
                 // ====================================================================
                 // ---> Il Livello Base <---
@@ -73,8 +91,31 @@ class MainActivity : ComponentActivity() {
                     // INIZIALIZZAZIONE STRUMENTI:
                     // Creiamo il "Vigile Urbano" che sposta l'utente da una stanza all'altra
                     val navController = rememberNavController()
-                    // Creiamo lo Il Cervello dell'app che ricorda i dati
-                    val matchViewModel: MatchViewModel = viewModel()
+
+                    // ====================================================================
+                    // 🧠 GESTIONE REATTIVA: SCHERMO SEMPRE ATTIVO (FLAG_KEEP_SCREEN_ON)
+                    // ====================================================================
+                    // LaunchedEffect osserva congiuntamente la modalità scelta nelle Impostazioni
+                    // e la schermata attualmente aperta nel NavController:
+                    // - Modalità 1 (Sempre attivo): la finestra di Android mantiene il display acceso ovunque nell'app.
+                    // - Modalità 0 (Solo in partita): attiva la flag SOLO quando ci troviamo nella rotta "counter".
+                    // - Modalità 2 (Disattivato): rimuove sempre la flag, rispettando lo standby del telefono.
+                    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = currentBackStackEntry?.destination?.route
+
+                    androidx.compose.runtime.LaunchedEffect(matchViewModel.keepScreenOnMode, currentRoute) {
+                        val shouldKeepScreenOn = when (matchViewModel.keepScreenOnMode) {
+                            1 -> true // Sempre attivo
+                            0 -> currentRoute == "counter" // Solo in partita
+                            else -> false // Disattivato
+                        }
+
+                        if (shouldKeepScreenOn) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        } else {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        }
+                    }
 
                     // ====================================================================
                     // 🧠 SINCRONIZZAZIONE REATTIVA: BLOCCO ORIENTAMENTO SCHERMO

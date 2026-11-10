@@ -115,6 +115,19 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var appOrientation by mutableIntStateOf(0)
         private set
 
+    // 3. TEMA APP:
+    // 0 = Sistema (segue il tema chiaro/scuro di Android), 1 = Scuro (Dark), 2 = Chiaro (Light)
+    // Entrambi i temi mantengono la tavolozza dinamica nativa Material You (Dynamic Colors) di Android
+    private val appThemeKey = intPreferencesKey("app_theme_preference")
+    var appTheme by mutableIntStateOf(0)
+        private set
+
+    // 4. SCHERMO SEMPRE ATTIVO (FLAG_KEEP_SCREEN_ON):
+    // 0 = Solo in partita (CounterScreen), 1 = Sempre attivo (in tutta l'app), 2 = Disattivato (mai attivo)
+    private val keepScreenOnKey = intPreferencesKey("keep_screen_on_preference")
+    var keepScreenOnMode by mutableIntStateOf(0)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -198,6 +211,54 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             val savedOrientation = preferences[appOrientationKey]
             if (savedOrientation != null) {
                 appOrientation = savedOrientation
+            }
+
+            // CARICAMENTO PREFERENZA TEMA APP (0 = Sistema, 1 = Scuro, 2 = Chiaro)
+            val savedTheme = preferences[appThemeKey]
+            if (savedTheme != null) {
+                appTheme = savedTheme
+            }
+
+            // CARICAMENTO PREFERENZA SCHERMO SEMPRE ATTIVO (0 = Solo in partita, 1 = Sempre, 2 = Disattivato)
+            val savedKeepScreenOn = preferences[keepScreenOnKey]
+            if (savedKeepScreenOn != null) {
+                keepScreenOnMode = savedKeepScreenOn
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA DEL TEMA DELL'APP
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato `appTheme` (0 = Sistema, 1 = Scuro nativo, 2 = Chiaro nativo).
+     * 2. Scrive la preferenza in background nel DataStore.
+     * 3. ScoreCounterTheme ricompone istantaneamente la tavolozza colori Material You
+     *    nativa (dynamicDarkColorScheme / dynamicLightColorScheme) senza alterare le sfumature di sistema.
+     */
+    fun setAppThemePreference(newThemeIndex: Int) {
+        appTheme = newThemeIndex
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[appThemeKey] = newThemeIndex
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA DELLA MODALITÀ SCHERMO SEMPRE ATTIVO
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato `keepScreenOnMode`:
+     *    - 0: Solo durante la partita attiva (CounterScreen)
+     *    - 1: Sempre attivo (il display non va mai in standby mentre l'app è aperta)
+     *    - 2: Disattivato (segue le normali impostazioni di standby del sistema Android)
+     * 2. Persiste la scelta nel DataStore asincronamente.
+     * 3. L'Activity sincronizza reattivamente la flag WindowManager `FLAG_KEEP_SCREEN_ON`.
+     */
+    fun setKeepScreenOnPreference(newModeIndex: Int) {
+        keepScreenOnMode = newModeIndex
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[keepScreenOnKey] = newModeIndex
             }
         }
     }
