@@ -145,11 +145,11 @@
     <string name="desc_obbiettivo">Ziel: %s</string>
     <string name="desc_attenzione_icon">Achtung</string>
     <string name="titolo_conferma_azzeramento">Möchtest du wirklich zurücksetzen?</string>
-    <string name="msg_conferma_azzeramento">Bist du sicher, dass du alles zurücksetzen möchtest?\nDiese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="msg_conferma_azzeramento">Alle Punkte werden zurückgesetzt.\nDiese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="btn_conferma_azzera">Zurücksetzen</string>
     <string name="desc_uscita_icon">Achtung Verlassen</string>
     <string name="titolo_conferma_uscita">Spiel abbrechen?</string>
-    <string name="msg_conferma_uscita">Wenn du zum Hauptmenü zurückkehrst, geht der aktuelle Fortschritt für immer verloren. Bist du sicher, dass du das Spiel verlassen willst?</string>
+    <string name="msg_conferma_uscita">Wenn du zum Hauptmenü zurückkehrst, geht der aktuelle Fortschritt für immer verloren. Möchtest du das Spiel verlassen?</string>
     <string name="btn_conferma_uscita">Verlassen</string>
     <string name="titolo_info_funzionalita">Funktions-Infos</string>
     <string name="desc_info_funzionalita">Entdecke alle versteckten Tricks und Funktionen, um dein Spiel optimal zu verwalten!</string>
@@ -160,12 +160,12 @@
     <string name="titolo_info_manuale">⌨️ Manuelle Bearbeitung</string>
     <string name="msg_info_manuale">Klicke direkt auf die Zahl des Punktestands, um die Tastatur zu öffnen und einen genauen Wert nach Wunsch einzugeben.</string>
     <string name="titolo_info_dado">🎲 Glückswürfel</string>
-    <string name="msg_info_dado">Nutze die \'Würfel\'-Taste, um eine Zufallszahl zu generieren und zu entscheiden, wer beginnt oder Streitigkeiten zu schlichten. Um die Anzahl der Würfelseiten zu ändern, tippe auf den Button oben rechts im Wurfdialog (z.B. \"D6\").</string>
+    <string name="msg_info_dado">Nutze die \'Würfel\'-Taste, um eine Zufallszahl zu generieren und zu entscheiden, wer beginnt oder Streitigkeiten zu schlichten.\nUm die Anzahl der Würfelseiten zu ändern, tippe auf den Button oben rechts im Wurfdialog (z.B. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Benutzerdefinierter Timer</string>
     <string name="msg_info_timer">Nutze die \'Timer\'-Taste, um einen Countdown einzustellen. Die App benachrichtigt dich mit einer Vibration und einem Ton, wenn die Zeit abgelaufen ist.</string>
     <string name="btn_ho_capito">Verstanden</string>
     <string name="titolo_conferma_fine">Spiel abschließen?</string>
-    <string name="msg_conferma_fine">Bist du sicher, dass du die Herausforderung beenden möchtest?\nDiese Aktion ist unumkehrbar und die Ergebnisse werden automatisch im Verlauf gespeichert.</string>
+    <string name="msg_conferma_fine">Das Spiel wird beendet.\nDiese Aktion ist unumkehrbar und die Ergebnisse werden automatisch im Verlauf gespeichert.</string>
     <string name="btn_concludi">Abschließen</string>
 
     <!-- ==================================================================== -->

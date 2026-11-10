@@ -145,11 +145,11 @@
     <string name="desc_obbiettivo">Objectif: %s</string>
     <string name="desc_attenzione_icon">Attention</string>
     <string name="titolo_conferma_azzeramento">Voulez-vous vraiment réinitialiser ?</string>
-    <string name="msg_conferma_azzeramento">Êtes-vous sûr de vouloir tout réinitialiser ?\nCette action est irréversible.</string>
+    <string name="msg_conferma_azzeramento">Tous les scores seront réinitialisés.\nCette action est irréversible.</string>
     <string name="btn_conferma_azzera">Réinitialiser</string>
     <string name="desc_uscita_icon">Attention sortie</string>
     <string name="titolo_conferma_uscita">Abandonner la partie ?</string>
-    <string name="msg_conferma_uscita">Si vous revenez à l\'Accueil, la progression actuelle sera perdue à jamais. Êtes-vous sûr de vouloir quitter ?</string>
+    <string name="msg_conferma_uscita">Si vous revenez à l\'Accueil, la progression actuelle sera perdue à jamais. Souhaitez-vous quitter ?</string>
     <string name="btn_conferma_uscita">Quitter</string>
     <string name="titolo_info_funzionalita">Infos fonctionnalités</string>
     <string name="desc_info_funzionalita">Découvrez toutes les astuces et fonctionnalités cachées pour mieux gérer votre partie !</string>
@@ -160,12 +160,12 @@
     <string name="titolo_info_manuale">⌨️ Modification manuelle</string>
     <string name="msg_info_manuale">Cliquez directement sur le nombre du score pour ouvrir le clavier et entrer la valeur exacte de votre choix.</string>
     <string name="titolo_info_dado">🎲 Dé de la chance</string>
-    <string name="msg_info_dado">Utilisez le bouton \'Dé\' pour générer un nombre aléatoire et décider qui commence ou régler des différends. Pour modifier les faces du dé, touchez le bouton en haut à droite dans la boîte de dialogue (ex. \"D6\").</string>
+    <string name="msg_info_dado">Utilisez le bouton \'Dé\' pour générer un nombre aléatoire et décider qui commence ou régler des différends.\nPour modifier les faces du dé, touchez le bouton en haut à droite dans la boîte de dialogue (ex. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Minuteur personnalisé</string>
     <string name="msg_info_timer">Utilisez le bouton \'Minuteur\' pour configurer un compte à rebours. L\'application vous avertira par une vibration et un son à la fin du temps.</string>
     <string name="btn_ho_capito">J\'ai compris</string>
     <string name="titolo_conferma_fine">Terminer la partie ?</string>
-    <string name="msg_conferma_fine">Êtes-vous sûr de vouloir terminer le défi ?\nCette action est irréversible et les résultats seront automatiquement sauvegardés dans l\'historique.</string>
+    <string name="msg_conferma_fine">La partie va se terminer.\nCette action est irréversible et les résultats seront automatiquement sauvegardés dans l\'historique.</string>
     <string name="btn_concludi">Conclure</string>
 
     <!-- ==================================================================== -->

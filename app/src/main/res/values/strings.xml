@@ -145,11 +145,11 @@
     <string name="desc_obbiettivo">Goal: %s</string>
     <string name="desc_attenzione_icon">Warning</string>
     <string name="titolo_conferma_azzeramento">Are you sure you want to reset?</string>
-    <string name="msg_conferma_azzeramento">Are you sure you want to reset everything?\nThis action cannot be undone.</string>
+    <string name="msg_conferma_azzeramento">All scores will be reset.\nThis action cannot be undone.</string>
     <string name="btn_conferma_azzera">Reset</string>
     <string name="desc_uscita_icon">Exit warning</string>
     <string name="titolo_conferma_uscita">Leave the match?</string>
-    <string name="msg_conferma_uscita">If you return to Home, current progress will be lost forever. Are you sure you want to exit?</string>
+    <string name="msg_conferma_uscita">If you return to Home, current progress will be lost forever. Do you want to exit?</string>
     <string name="btn_conferma_uscita">Exit</string>
     <string name="titolo_info_funzionalita">Feature info</string>
     <string name="desc_info_funzionalita">Discover all the hidden tricks and features to best manage your match!</string>
@@ -160,12 +160,12 @@
     <string name="titolo_info_manuale">⌨️ Manual edit</string>
     <string name="msg_info_manuale">Tap directly on the score number to open the keyboard and enter an exact value.</string>
     <string name="titolo_info_dado">🎲 Lucky dice</string>
-    <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes. To change the number of dice faces, tap the button in the top right of the roll dialog (e.g. \"D6\").</string>
+    <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes.\nTo change the number of dice faces, tap the button in the top right of the roll dialog (e.g. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Custom timer</string>
     <string name="msg_info_timer">Use the \'Timer\' button to set a countdown. The app will notify you with a vibration and sound when time is up.</string>
     <string name="btn_ho_capito">Got it</string>
     <string name="titolo_conferma_fine">End game?</string>
-    <string name="msg_conferma_fine">Are you sure you want to end the match?\nThis action is irreversible and the results will be automatically saved to the history.</string>
+    <string name="msg_conferma_fine">The match will be ended.\nThis action is irreversible and the results will be automatically saved to history.</string>
     <string name="btn_concludi">End</string>
 
     <!-- ==================================================================== -->

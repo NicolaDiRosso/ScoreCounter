@@ -145,11 +145,11 @@
     <string name="desc_obbiettivo">लक्ष्य: %s</string>
     <string name="desc_attenzione_icon">ध्यान दें</string>
     <string name="titolo_conferma_azzeramento">क्या आप वाकई रिसेट करना चाहते हैं?</string>
-    <string name="msg_conferma_azzeramento">क्या आप वाकई सब कुछ रिसेट करना चाहते हैं?\nइस कार्रवाई को पूर्ववत नहीं किया जा सकता।</string>
+    <string name="msg_conferma_azzeramento">सभी स्कोर रीसेट किए जाएंगे।\nइस कार्रवाई को पूर्ववत नहीं किया जा सकता।</string>
     <string name="btn_conferma_azzera">रिसेट करें</string>
     <string name="desc_uscita_icon">बाहर निकलने की चेतावनी</string>
     <string name="titolo_conferma_uscita">मैच छोड़ दें?</string>
-    <string name="msg_conferma_uscita">यदि आप होम पर वापस जाते हैं, तो वर्तमान प्रगति हमेशा के लिए खो जाएगी। क्या आप वाकई बाहर निकलना चाहते हैं?</string>
+    <string name="msg_conferma_uscita">यदि आप होम पर वापस जाते हैं, तो वर्तमान प्रगति हमेशा के लिए खो जाएगी। क्या आप बाहर निकलना चाहते हैं?</string>
     <string name="btn_conferma_uscita">बाहर निकलें</string>
     <string name="titolo_info_funzionalita">सुविधा की जानकारी</string>
     <string name="desc_info_funzionalita">अपने मैच को बेहतर ढंग से प्रबंधित करने के लिए सभी छिपे हुए ट्रिक्स और सुविधाओं की खोज करें!</string>
@@ -160,12 +160,12 @@
     <string name="titolo_info_manuale">⌨️ मैन्युअल संपादन</string>
     <string name="msg_info_manuale">कीबोर्ड खोलने और अपनी पसंद का सटीक मान दर्ज करने के लिए सीधे स्कोर नंबर पर टैप करें।</string>
     <string name="titolo_info_dado">🎲 भाग्यशाली पासा</string>
-    <string name="msg_info_dado">यह तय करने के लिए कि कौन शुरू करेगा या दोस्तों के बीच विवादों को सुलझाने के लिए यादृच्छिक संख्या उत्पन्न करने के लिए \'पासा\' बटन का उपयोग करें। पासे के चेहरों को बदलने के लिए, रोल डायलॉग के शीर्ष दाईं ओर स्थित बटन पर टैप करें (उदा. \"D6\").</string>
+    <string name="msg_info_dado">यह तय करने के लिए कि कौन शुरू करेगा या दोस्तों के बीच विवादों को सुलझाने के लिए यादृच्छिक संख्या उत्पन्न करने के लिए \'पासा\' बटन का उपयोग करें।\nपासे के चेहरों को बदलने के लिए, रोल डायलॉग के शीर्ष दाईं ओर स्थित बटन पर टैप करें (उदा. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ कस्टम टाइमर</string>
     <string name="msg_info_timer">उलटी गिनती सेट करने के लिए \'टाइमर\' बटन का उपयोग करें। समय समाप्त होने पर ऐप आपको कंपन और ध्वनि के साथ सूचित करेगा।</string>
     <string name="btn_ho_capito">समझ गया</string>
     <string name="titolo_conferma_fine">मैच समाप्त करें?</string>
-    <string name="msg_conferma_fine">क्या आप वाकई चुनौती को समाप्त करना चाहते हैं?\nयह कार्रवाई अपरिवर्तनीय है और परिणाम स्वचालित रूप से इतिहास में सहेजे जाएंगे।</string>
+    <string name="msg_conferma_fine">मैच समाप्त किया जाएगा।\nयह कार्रवाई अपरिवर्तनीय है और परिणाम स्वचालित रूप से इतिहास में सहेजे जाएंगे।</string>
     <string name="btn_concludi">समाप्त</string>
 
     <!-- ==================================================================== -->

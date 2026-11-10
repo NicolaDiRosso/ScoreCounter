@@ -145,11 +145,11 @@
     <string name="desc_obbiettivo">Traguardo: %s</string>
     <string name="desc_attenzione_icon">Attenzione</string>
     <string name="titolo_conferma_azzeramento">Vuoi proprio azzerare?</string>
-    <string name="msg_conferma_azzeramento">Sei sicuro di voler azzerare tutto?\nQuesta azione non può essere annullata.</string>
+    <string name="msg_conferma_azzeramento">Tutti i punteggi verranno azzerati.\nQuesta azione non può essere annullata.</string>
     <string name="btn_conferma_azzera">Azzera</string>
     <string name="desc_uscita_icon">Attenzione uscita</string>
     <string name="titolo_conferma_uscita">Abbandonare la partita?</string>
-    <string name="msg_conferma_uscita">Se torni alla Home, i progressi attuali andranno persi per sempre. Sei sicuro di voler uscire?</string>
+    <string name="msg_conferma_uscita">Se torni alla Home, i progressi attuali andranno persi per sempre. Vuoi uscire?</string>
     <string name="btn_conferma_uscita">Esci</string>
     <string name="titolo_info_funzionalita">Info funzionalità</string>
     <string name="desc_info_funzionalita">Scopri tutti i trucchi e le funzioni nascoste per gestire al meglio la tua partita!</string>
@@ -160,12 +160,12 @@
     <string name="titolo_info_manuale">⌨️ Modifica manuale</string>
     <string name="msg_info_manuale">Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.</string>
     <string name="titolo_info_dado">🎲 Dado fortunato</string>
-    <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici. Per modificare le facce del dado, premi il pulsante in alto a destra nel dialogo di lancio (es. \"D6\").</string>
+    <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici.\nPer modificare le facce del dado, premi il pulsante in alto a destra nel dialogo di lancio (es. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Timer personalizzato</string>
     <string name="msg_info_timer">Usa il tasto \'Timer\' per impostare un conto alla rovescia. L\'app ti avviserà con una vibrazione e un suono al termine del tempo.</string>
     <string name="btn_ho_capito">Ho capito</string>
     <string name="titolo_conferma_fine">Concludere partita?</string>
-    <string name="msg_conferma_fine">Sei sicuro di voler terminare la sfida?\nL\'azione è irreversibile e i risultati verranno salvati automaticamente nello storico.</string>
+    <string name="msg_conferma_fine">La partita verrà conclusa.\nL\'azione è irreversibile e i risultati verranno salvati automaticamente nello storico.</string>
     <string name="btn_concludi">Concludi</string>
 
     <!-- ==================================================================== -->

@@ -145,11 +145,11 @@
     <string name="desc_obbiettivo">目標: %s</string>
     <string name="desc_attenzione_icon">注意</string>
     <string name="titolo_conferma_azzeramento">本当にリセットしますか？</string>
-    <string name="msg_conferma_azzeramento">すべてをリセットしてもよろしいですか？\nこの操作は取り消せません。</string>
+    <string name="msg_conferma_azzeramento">すべてのスコアがリセットされます。\nこの操作は元に戻せません。</string>
     <string name="btn_conferma_azzera">リセット</string>
     <string name="desc_uscita_icon">終了確認</string>
     <string name="titolo_conferma_uscita">試合を中断しますか？</string>
-    <string name="msg_conferma_uscita">ホームに戻ると、現在の進行状況が永久に失われます。本当に終了しますか？</string>
+    <string name="msg_conferma_uscita">ホームに戻ると、現在の進行状況が永久に失われます。終了しますか？</string>
     <string name="btn_conferma_uscita">終了</string>
     <string name="titolo_info_funzionalita">機能ガイド</string>
     <string name="desc_info_funzionalita">試合を最大限に活用するための隠されたコツや機能をすべて発見しましょう！</string>
@@ -160,12 +160,12 @@
     <string name="titolo_info_manuale">⌨️ 手動編集</string>
     <string name="msg_info_manuale">スコアの数値を直接タップすると、キーボードが開き、好きな正確な値を入力できます。</string>
     <string name="titolo_info_dado">🎲 ラッキーサイコロ</string>
-    <string name="msg_info_dado">「サイコロ」ボタンを使ってランダムな数字を生成し、順番を決めたり友達との判定に使ったりできます。サイコロの面数を変更するには、ロールダイアログの右上にあるボタン（例: \"D6\"）をタップしてください。</string>
+    <string name="msg_info_dado">「サイコロ」ボタンを使ってランダムな数字を生成し、順番を決めたり友達との判定に使ったりできます。\nサイコロの面数を変更するには、ロールダイアログの右上にあるボタン（例: \"D6\"）をタップしてください。</string>
     <string name="titolo_info_timer">⏱️ カスタムタイマー</string>
     <string name="msg_info_timer">「タイマー」ボタンでカウントダウンを設定できます。時間が来ると、アプリが振動と音でお知らせします。</string>
     <string name="btn_ho_capito">了解</string>
     <string name="titolo_conferma_fine">試合を終了しますか？</string>
-    <string name="msg_conferma_fine">チャレンジを終了してもよろしいですか？\nこの操作はやり直すことができず、結果は自動的に履歴に保存されます。</string>
+    <string name="msg_conferma_fine">試合が終了します。\nこの操作はやり直すことができず、結果は自動的に履歴に保存されます。</string>
     <string name="btn_concludi">終了</string>
 
     <!-- ==================================================================== -->
