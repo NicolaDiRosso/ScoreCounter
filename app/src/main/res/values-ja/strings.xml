@@ -398,8 +398,14 @@
     <string name="opt_conferma_azioni">クイック操作の確認</string>
     <string name="desc_conferma_azioni">対戦中の「リセット」と「終了」の確認を表示</string>
     <string name="sez_personalizzazione_gioco">ゲームのカスタマイズ</string>
-    <string name="opt_passo_punteggio">デフォルトのスコア増減幅</string>
-    <string name="desc_passo_punteggio">長押し時のクイック増減値 (±1, ±5, ±10, ±20)</string>
+    <string name="opt_passo_punteggio">クイック増減幅</string>
+    <string name="desc_passo_punteggio">長押し時の増減ポイントをカスタマイズ</string>
+    <string name="opt_incremento_lungo">長押し増加 (+)</string>
+    <string name="desc_incremento_lungo">+長押し時に追加されるポイント</string>
+    <string name="opt_decremento_lungo">長押し減少 (-)</string>
+    <string name="desc_decremento_lungo">-長押し時に減算されるポイント</string>
+    <string name="desc_dialog_passo">クイック値を選択するか、カスタム数値を入力してください：</string>
+    <string name="hint_valore_personalizzato">カスタム値</string>
     <string name="opt_ordinamento_classifica">順位の動的ソート</string>
     <string name="desc_ordinamento_classifica">対戦中にスコアの高い順にプレイヤーを自動並べ替え</string>
     <string name="btn_chiudi_impostazioni">閉じる</string>

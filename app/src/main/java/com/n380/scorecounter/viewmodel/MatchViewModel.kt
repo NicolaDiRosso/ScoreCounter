@@ -128,6 +128,15 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var keepScreenOnMode by mutableIntStateOf(0)
         private set
 
+    // 5. PASSO PRESSIONE PROLUNGATA (+ e -):
+    private val longPressPositiveStepKey = intPreferencesKey("long_press_positive_step")
+    var longPressPositiveStep by mutableIntStateOf(10)
+        private set
+
+    private val longPressNegativeStepKey = intPreferencesKey("long_press_negative_step")
+    var longPressNegativeStep by mutableIntStateOf(5)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -224,6 +233,16 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             if (savedKeepScreenOn != null) {
                 keepScreenOnMode = savedKeepScreenOn
             }
+
+            // CARICAMENTO PREFERENZE PASSO PRESSIONE PROLUNGATA (+ e -)
+            val savedPosStep = preferences[longPressPositiveStepKey]
+            if (savedPosStep != null) {
+                longPressPositiveStep = savedPosStep
+            }
+            val savedNegStep = preferences[longPressNegativeStepKey]
+            if (savedNegStep != null) {
+                longPressNegativeStep = savedNegStep
+            }
         }
     }
 
@@ -291,6 +310,34 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             getApplication<Application>().dataStore.edit { prefs ->
                 prefs[appOrientationKey] = newOrientation
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA INCREMENTO PROLUNGATO (+)
+     */
+    fun updateLongPressPositiveStep(step: Int) {
+        if (step > 0) {
+            longPressPositiveStep = step
+            viewModelScope.launch {
+                getApplication<Application>().dataStore.edit { prefs ->
+                    prefs[longPressPositiveStepKey] = step
+                }
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA DECREMENTO PROLUNGATO (-)
+     */
+    fun updateLongPressNegativeStep(step: Int) {
+        if (step > 0) {
+            longPressNegativeStep = step
+            viewModelScope.launch {
+                getApplication<Application>().dataStore.edit { prefs ->
+                    prefs[longPressNegativeStepKey] = step
+                }
             }
         }
     }

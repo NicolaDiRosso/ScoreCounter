@@ -261,6 +261,8 @@
     fun PlayerScoreCard(
         player: Player,
         isLeader: Boolean = false,
+        positiveStep: Int = 10,
+        negativeStep: Int = 5,
         onScoreChange: (Int) -> Unit,
         onScoreClick: () -> Unit
     ) {
@@ -387,7 +389,7 @@
                                         },
                                         onLongClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onScoreChange(-5)
+                                            onScoreChange(-negativeStep)
                                         }
                                     ),
                                 contentAlignment = Alignment.Center
@@ -475,7 +477,7 @@
                                         },
                                         onLongClick = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onScoreChange(10)
+                                            onScoreChange(positiveStep)
                                         }
                                     ),
                                 contentAlignment = Alignment.Center

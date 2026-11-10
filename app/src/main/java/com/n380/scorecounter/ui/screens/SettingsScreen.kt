@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -33,23 +35,25 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.StayCurrentLandscape
 import androidx.compose.material.icons.filled.StayCurrentPortrait
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -71,9 +75,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.n380.scorecounter.R
+import com.n380.scorecounter.ui.components.AnimatedSelectableChip
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.viewmodel.MatchViewModel
 
@@ -111,10 +117,35 @@ fun SettingsScreen(
     var showOrientationDropdown by remember { mutableStateOf(false) }
     var showScreenKeepOnDropdown by remember { mutableStateOf(false) }
 
+    // Stati per i dialoghi di personalizzazione passo (+) e (-)
+    var showPositiveStepDialog by remember { mutableStateOf(false) }
+    var showNegativeStepDialog by remember { mutableStateOf(false) }
+
     // Stati locali temporanei per le opzioni in attesa di persistenza avanzata
     var confirmQuickActions by remember { mutableStateOf(true) }
-    var selectedScoreStep by remember { mutableIntStateOf(1) }
     var dynamicLeaderboardSorting by remember { mutableStateOf(false) }
+
+    // Dialogo per la personalizzazione del passo (+)
+    if (showPositiveStepDialog) {
+        LongPressStepDialog(
+            title = stringResource(R.string.opt_incremento_lungo),
+            initialValue = viewModel.longPressPositiveStep,
+            isPositive = true,
+            onDismiss = { showPositiveStepDialog = false },
+            onConfirm = { step -> viewModel.updateLongPressPositiveStep(step) }
+        )
+    }
+
+    // Dialogo per la personalizzazione del passo (-)
+    if (showNegativeStepDialog) {
+        LongPressStepDialog(
+            title = stringResource(R.string.opt_decremento_lungo),
+            initialValue = viewModel.longPressNegativeStep,
+            isPositive = false,
+            onDismiss = { showNegativeStepDialog = false },
+            onConfirm = { step -> viewModel.updateLongPressNegativeStep(step) }
+        )
+    }
 
     Scaffold(
         modifier = modifier
@@ -482,59 +513,23 @@ fun SettingsScreen(
                     }
 
                     // ------------------------------------------------------------
-                    // SEZIONE C: PERSONALIZZAZIONE GIOCO
+                    // SEZIONE C: PERSONALIZZAZIONE GIOCO (Incremento / Decremento)
                     // ------------------------------------------------------------
                     SettingsSectionCard(
                         title = stringResource(R.string.sez_personalizzazione_gioco),
                         icon = Icons.Filled.SportsEsports
                     ) {
-                        // 1. PASSO PREDEFINITO PUNTEGGIO
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // 1. INCREMENTO PROLUNGATO (+)
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.opt_incremento_lungo),
+                            subtitle = stringResource(R.string.desc_incremento_lungo),
+                            currentSelectionText = "+${viewModel.longPressPositiveStep}",
+                            currentSelectionIcon = Icons.Filled.Add,
+                            isExpanded = false,
+                            onExpandRequest = { showPositiveStepDialog = true },
+                            onDismissRequest = {}
                         ) {
-                            AutoResizedText(
-                                text = stringResource(R.string.opt_passo_punteggio),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            AutoResizedText(
-                                text = stringResource(R.string.desc_passo_punteggio),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                            )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                val steps = listOf(1, 5, 10, 20)
-                                steps.forEach { step ->
-                                    val isSelected = selectedScoreStep == step
-                                    FilterChip(
-                                        selected = isSelected,
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            selectedScoreStep = step
-                                        },
-                                        label = {
-                                            Text(
-                                                text = "±$step",
-                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                            )
-                                        },
-                                        modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(12.dp),
-                                        colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                        )
-                                    )
-                                }
-                            }
+                            // Nessun menu a tendina diretto (apre il Dialog)
                         }
 
                         HorizontalDivider(
@@ -542,7 +537,25 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 
-                        // 2. ORDINAMENTO DINAMICO CLASSIFICA
+                        // 2. DECREMENTO PROLUNGATO (-)
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.opt_decremento_lungo),
+                            subtitle = stringResource(R.string.desc_decremento_lungo),
+                            currentSelectionText = "-${viewModel.longPressNegativeStep}",
+                            currentSelectionIcon = Icons.Filled.Remove,
+                            isExpanded = false,
+                            onExpandRequest = { showNegativeStepDialog = true },
+                            onDismissRequest = {}
+                        ) {
+                            // Nessun menu a tendina diretto (apre il Dialog)
+                        }
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // 3. ORDINAMENTO DINAMICO CLASSIFICA
                         SettingsSwitchItem(
                             title = stringResource(R.string.opt_ordinamento_classifica),
                             subtitle = stringResource(R.string.desc_ordinamento_classifica),
@@ -557,6 +570,115 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+/**
+ * ====================================================================
+ * DIALOG DI PERSONALIZZAZIONE PASSO (LongPressStepDialog)
+ * ====================================================================
+ * 🧠 ARCHITETTURA E DIDATTICA:
+ * Questo dialog interattivo permette all'utente di selezionare un valore rapido
+ * tramite chip animate (`AnimatedSelectableChip`) o di inserire un numero
+ * personalizzato tramite tastiera numerica.
+ */
+@Composable
+private fun LongPressStepDialog(
+    title: String,
+    initialValue: Int,
+    isPositive: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    var textInput by remember { mutableStateOf(initialValue.toString()) }
+    val quickPresets = if (isPositive) listOf(1, 2, 5, 10, 15, 20, 50, 100) else listOf(1, 2, 3, 5, 10, 15, 20, 50)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(title, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = stringResource(R.string.desc_dialog_passo),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Griglia di preset rapidi con AnimatedSelectableChip
+                val rows = quickPresets.chunked(4)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    rows.forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowItems.forEach { preset ->
+                                val isSelected = textInput.toIntOrNull() == preset
+                                AnimatedSelectableChip(
+                                    text = if (isPositive) "+$preset" else "-$preset",
+                                    isSelected = isSelected,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        textInput = preset.toString()
+                                    },
+                                    height = 42.dp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                OutlinedTextField(
+                    value = textInput,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) textInput = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.hint_valore_personalizzato)) },
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_annulla))
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        val value = textInput.toIntOrNull() ?: initialValue
+                        if (value > 0) {
+                            onConfirm(value)
+                        }
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_applica))
+                }
+            }
+        },
+        dismissButton = null,
+        shape = RoundedCornerShape(24.dp)
+    )
 }
 
 /**
@@ -751,7 +873,7 @@ private fun SettingsSwitchItem(
             AutoResizedText(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha =.8f)
             )
         }
 

@@ -609,6 +609,8 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                                 PlayerScoreCard(
                                     player = p,
                                     isLeader = isLeader,
+                                    positiveStep = viewModel.longPressPositiveStep,
+                                    negativeStep = viewModel.longPressNegativeStep,
                                     onScoreChange = { amount ->
                                         viewModel.updatePlayerScore(p, amount)
                                     },

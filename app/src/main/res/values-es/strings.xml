@@ -398,8 +398,14 @@
     <string name="opt_conferma_azioni">Confirmar acciones rápidas</string>
     <string name="desc_conferma_azioni">Pedir confirmación para \"Restablecer\" y \"Finalizar\" en partida</string>
     <string name="sez_personalizzazione_gioco">Personalización del juego</string>
-    <string name="opt_passo_punteggio">Paso de puntuación predeterminado</string>
-    <string name="desc_passo_punteggio">Incremento rápido al mantener pulsado (±1, ±5, ±10, ±20)</string>
+    <string name="opt_passo_punteggio">Incremento y decremento rápido</string>
+    <string name="desc_passo_punteggio">Personaliza los puntos añadidos y restados al mantener pulsado</string>
+    <string name="opt_incremento_lungo">Incremento pulsación larga (+)</string>
+    <string name="desc_incremento_lungo">Puntos añadidos al mantener pulsado +</string>
+    <string name="opt_decremento_lungo">Decremento pulsación larga (-)</string>
+    <string name="desc_decremento_lungo">Puntos restados al mantener pulsado -</string>
+    <string name="desc_dialog_passo">Selecciona un valor rápido o introduce un número personalizado:</string>
+    <string name="hint_valore_personalizzato">Valor personalizado</string>
     <string name="opt_ordinamento_classifica">Orden dinámico de clasificación</string>
     <string name="desc_ordinamento_classifica">Reordena automáticamente a los jugadores por puntuación en la partida</string>
     <string name="btn_chiudi_impostazioni">Cerrar</string>
