@@ -3,8 +3,11 @@ package com.n380.scorecounter
 // ====================================================================
 // 1. AREA IMPORTAZIONI (Solo quelle necessarie per l'avvio!)
 // ====================================================================
+import android.app.LocaleManager
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.os.LocaleList
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -31,6 +34,7 @@ import com.n380.scorecounter.ui.screens.CreateMatchScreen
 import com.n380.scorecounter.ui.screens.GlobalStatsScreen
 import com.n380.scorecounter.ui.screens.HomeScreen
 import com.n380.scorecounter.ui.screens.ResultsScreen
+import com.n380.scorecounter.ui.screens.SettingsScreen
 import com.n380.scorecounter.ui.theme.ScoreCounterTheme
 import com.n380.scorecounter.viewmodel.MatchViewModel
 
@@ -71,6 +75,24 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     // Creiamo lo Il Cervello dell'app che ricorda i dati
                     val matchViewModel: MatchViewModel = viewModel()
+
+                    // ====================================================================
+                    // 🧠 SINCRONIZZAZIONE REATTIVA: BLOCCO ORIENTAMENTO SCHERMO
+                    // ====================================================================
+                    // LaunchedEffect osserva la proprietà reattiva 'matchViewModel.appOrientation'.
+                    // Ogni volta che l'utente seleziona una voce nella schermata Impostazioni:
+                    // - Valore 0: Auto -> SCREEN_ORIENTATION_UNSPECIFIED (segue i sensori del telefono e le rotazioni dell'utente).
+                    // - Valore 1: Orizzontale -> SCREEN_ORIENTATION_SENSOR_LANDSCAPE (forza la modalità Landscape orizzontale).
+                    // - Valore 2: Verticale -> SCREEN_ORIENTATION_USER_PORTRAIT (forza la modalità Portrait verticale).
+                    // Essendo eseguito a livello di Activity, il cambio di orientamento si applica
+                    // istantaneamente all'intero hardware del display senza ritardi né sfarfallii.
+                    androidx.compose.runtime.LaunchedEffect(matchViewModel.appOrientation) {
+                        requestedOrientation = when (matchViewModel.appOrientation) {
+                            1 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                            2 -> ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+                            else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        }
+                    }
 
                     // ====================================================================
                     // CONTROLLO DI SICUREZZA PER LA ROTAZIONE DELLO SCHERMO
@@ -152,7 +174,8 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("create")
                                 },
                                 onNavigateToCounter = { navController.navigate("counter") },
-                                onNavigateToStats = { navController.navigate("stats") }
+                                onNavigateToStats = { navController.navigate("stats") },
+                                onNavigateToSettings = { navController.navigate("settings") }
                             )
                         }
 
@@ -214,6 +237,14 @@ class MainActivity : ComponentActivity() {
                         // ROTTA 5: Statistiche Globali
                         composable("stats") {
                             GlobalStatsScreen(
+                                viewModel = matchViewModel,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+
+                        // ROTTA 6: Impostazioni e Preferenze
+                        composable("settings") {
+                            SettingsScreen(
                                 viewModel = matchViewModel,
                                 onNavigateBack = { navController.popBackStack() }
                             )

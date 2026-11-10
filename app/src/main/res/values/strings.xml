@@ -370,4 +370,39 @@
     <string name="label_segmento_q4">4th Q</string>
     <string name="titolo_guida_zoom">🔍 Time zoom</string>
     <string name="msg_guida_zoom">Tap one or up to 3 consecutive time quarters to zoom into a specific game phase!</string>
+
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsScreen                            -->
+    <!-- ==================================================================== -->
+    <string name="titolo_impostazioni">Settings</string>
+    <string name="titolo_impostazioni_esteso">Settings &amp; preferences</string>
+    <string name="desc_impostazioni_menu">Customize appearance and gameplay</string>
+    <string name="sez_interfaccia_aspetto">📱 Interface &amp; appearance</string>
+    <string name="opt_tema_app">App theme</string>
+    <string name="desc_tema_app">Choose light, dark, or system theme</string>
+    <string name="opt_tema_sistema">System</string>
+    <string name="opt_tema_scuro">Dark</string>
+    <string name="opt_tema_chiaro">Light</string>
+    <string name="opt_lingua_app">App language</string>
+    <string name="desc_lingua_app">Change interface display language</string>
+    <string name="opt_orientamento_schermo">Orientation lock</string>
+    <string name="desc_orientamento_schermo">Lock app orientation or follow sensors</string>
+    <string name="opt_orientamento_auto">Auto</string>
+    <string name="opt_orientamento_orizzontale">Landscape</string>
+    <string name="opt_orientamento_verticale">Portrait</string>
+    <string name="sez_schermo_comportamento">💡 Screen &amp; behavior</string>
+    <string name="opt_schermo_attivo">Keep screen on</string>
+    <string name="desc_schermo_attivo">Prevent screen from sleeping during gameplay</string>
+    <string name="opt_schermo_solo_partita">During matches</string>
+    <string name="opt_schermo_sempre">Always on</string>
+    <string name="opt_schermo_disattivato">Disabled</string>
+    <string name="opt_conferma_azioni">Confirm quick actions</string>
+    <string name="desc_conferma_azioni">Ask confirmation for \'Reset\' and \'Finish\' during match</string>
+    <string name="sez_personalizzazione_gioco">🎮 Game customization</string>
+    <string name="opt_passo_punteggio">Default score step</string>
+    <string name="desc_passo_punteggio">Quick increment value on long press (±1, ±5, ±10, ±20)</string>
+    <string name="opt_ordinamento_classifica">Dynamic leaderboard sorting</string>
+    <string name="desc_ordinamento_classifica">Automatically reorder players by score during match</string>
+    <string name="btn_chiudi_impostazioni">Close</string>
+    <string name="desc_impostazioni_icon">Settings</string>
 </resources>

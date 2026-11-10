@@ -94,6 +94,7 @@ fun HomeScreenLandscape(
     viewModel: MatchViewModel,
     onNavigateToCreate: () -> Unit,
     onNavigateToStats: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     onShowDonationDialog: () -> Unit,
     onShowAboutDialog: () -> Unit,
     onShowBackupDialog: () -> Unit,
@@ -219,7 +220,23 @@ fun HomeScreenLandscape(
                     )
 
                     // ------------------------------------------------------------
-                    // CARD AZIONE 4: BACKUP E RIPRISTINO DATI
+                    // CARD AZIONE 4: IMPOSTAZIONI E PREFERENZE
+                    // ------------------------------------------------------------
+                    HomeLandscapeActionCard(
+                        icon = Icons.Filled.Settings,
+                        title = stringResource(R.string.titolo_impostazioni),
+                        subtitle = stringResource(R.string.desc_impostazioni_menu),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        iconBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                        iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onNavigateToSettings()
+                        }
+                    )
+
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 5: BACKUP E RIPRISTINO DATI
                     // ------------------------------------------------------------
                     HomeLandscapeActionCard(
                         icon = Icons.Filled.Storage,

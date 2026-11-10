@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    ====================================================================
+    CONFIGURAZIONE LINGUE PER-APP (Android 13+ / API 33+)
+    ====================================================================
+    🧠 SPIEGAZIONE DIDATTICA:
+    Questo file dichiara formalmente al sistema operativo Android quali lingue
+    sono supportate all'interno di ScoreCounter.
+    Grazie a questa dichiarazione e all'attributo nel Manifest:
+    1. Android riconosce l'app compatibile con l'API di selezione lingua per-app (`LocaleManager`).
+    2. Nelle impostazioni di sistema del telefono ("Lingua delle app") apparirà ScoreCounter
+       con l'elenco esatto delle 7 lingue tradotte.
+    3. Quando l'utente cambia lingua dall'interno dell'app, `LocaleManager.applicationLocales`
+       applica istantaneamente il bundle corretto senza riavviare forzatamente il processo.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="it" />
+    <locale android:name="en" />
+    <locale android:name="de" />
+    <locale android:name="es" />
+    <locale android:name="fr" />
+    <locale android:name="hi" />
+    <locale android:name="ja" />
+</locale-config>

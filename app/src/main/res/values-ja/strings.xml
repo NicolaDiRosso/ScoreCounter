@@ -370,4 +370,39 @@
     <string name="label_segmento_q4">第4Q</string>
     <string name="titolo_guida_zoom">🔍 タイムズーム</string>
     <string name="msg_guida_zoom">1〜3の連続するタイムクォーターをタップして、特定のゲームフェーズにズームインできます！</string>
+
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsScreen                            -->
+    <!-- ==================================================================== -->
+    <string name="titolo_impostazioni">設定</string>
+    <string name="titolo_impostazioni_esteso">設定と環境設定</string>
+    <string name="desc_impostazioni_menu">外観とゲームプレイをカスタマイズ</string>
+    <string name="sez_interfaccia_aspetto">📱 インターフェースと外観</string>
+    <string name="opt_tema_app">アプリのテーマ</string>
+    <string name="desc_tema_app">システム、ダーク、ライトから選択</string>
+    <string name="opt_tema_sistema">システム</string>
+    <string name="opt_tema_scuro">ダーク</string>
+    <string name="opt_tema_chiaro">ライト</string>
+    <string name="opt_lingua_app">アプリの言語</string>
+    <string name="desc_lingua_app">表示言語を変更します</string>
+    <string name="opt_orientamento_schermo">画面の向きの固定</string>
+    <string name="desc_orientamento_schermo">画面の向きを固定または自動回転</string>
+    <string name="opt_orientamento_auto">自動</string>
+    <string name="opt_orientamento_orizzontale">横向き</string>
+    <string name="opt_orientamento_verticale">縦向き</string>
+    <string name="sez_schermo_comportamento">💡 画面と動作</string>
+    <string name="opt_schermo_attivo">画面の常時点灯</string>
+    <string name="desc_schermo_attivo">対戦中の画面のスリープを防止</string>
+    <string name="opt_schermo_solo_partita">対戦中のみ</string>
+    <string name="opt_schermo_sempre">常に点灯</string>
+    <string name="opt_schermo_disattivato">無効</string>
+    <string name="opt_conferma_azioni">クイック操作の確認</string>
+    <string name="desc_conferma_azioni">対戦中の「リセット」と「終了」の確認を表示</string>
+    <string name="sez_personalizzazione_gioco">🎮 ゲームのカスタマイズ</string>
+    <string name="opt_passo_punteggio">デフォルトのスコア増減幅</string>
+    <string name="desc_passo_punteggio">長押し時のクイック増減値 (±1, ±5, ±10, ±20)</string>
+    <string name="opt_ordinamento_classifica">順位の動的ソート</string>
+    <string name="desc_ordinamento_classifica">対戦中にスコアの高い順にプレイヤーを自動並べ替え</string>
+    <string name="btn_chiudi_impostazioni">閉じる</string>
+    <string name="desc_impostazioni_icon">設定</string>
 </resources>

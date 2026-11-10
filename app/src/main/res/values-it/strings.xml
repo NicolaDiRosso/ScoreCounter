@@ -370,4 +370,39 @@
     <string name="label_segmento_q4">4° Q</string>
     <string name="titolo_guida_zoom">🔍 Zoom temporale</string>
     <string name="msg_guida_zoom">Tocca uno o più quarti temporali consecutivi (fino a 3) per ingrandire una specifica fase della partita!</string>
+
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsScreen                            -->
+    <!-- ==================================================================== -->
+    <string name="titolo_impostazioni">Impostazioni</string>
+    <string name="titolo_impostazioni_esteso">Impostazioni e preferenze</string>
+    <string name="desc_impostazioni_menu">Personalizza aspetto e gioco</string>
+    <string name="sez_interfaccia_aspetto">📱 Interfaccia e aspetto</string>
+    <string name="opt_tema_app">Tema app</string>
+    <string name="desc_tema_app">Scegli tra tema di sistema, scuro o chiaro</string>
+    <string name="opt_tema_sistema">Sistema</string>
+    <string name="opt_tema_scuro">Scuro</string>
+    <string name="opt_tema_chiaro">Chiaro</string>
+    <string name="opt_lingua_app">Lingua app</string>
+    <string name="desc_lingua_app">Modifica la lingua visualizzata nell\'app</string>
+    <string name="opt_orientamento_schermo">Blocco orientamento</string>
+    <string name="desc_orientamento_schermo">Blocca l\'orientamento o segui i sensori</string>
+    <string name="opt_orientamento_auto">Auto</string>
+    <string name="opt_orientamento_orizzontale">Orizzontale</string>
+    <string name="opt_orientamento_verticale">Verticale</string>
+    <string name="sez_schermo_comportamento">💡 Schermo e comportamento</string>
+    <string name="opt_schermo_attivo">Schermo sempre attivo</string>
+    <string name="desc_schermo_attivo">Evita lo spegnimento dello schermo</string>
+    <string name="opt_schermo_solo_partita">Solo in partita</string>
+    <string name="opt_schermo_sempre">Sempre attivo</string>
+    <string name="opt_schermo_disattivato">Disattivato</string>
+    <string name="opt_conferma_azioni">Conferma azioni rapide</string>
+    <string name="desc_conferma_azioni">Richiedi conferma per \"Azzera\" e \"Concludi\" durante la partita</string>
+    <string name="sez_personalizzazione_gioco">🎮 Personalizzazione gioco</string>
+    <string name="opt_passo_punteggio">Passo predefinito punteggio</string>
+    <string name="desc_passo_punteggio">Incremento rapido con pressione prolungata (±1, ±5, ±10, ±20)</string>
+    <string name="opt_ordinamento_classifica">Ordinamento dinamico classifica</string>
+    <string name="desc_ordinamento_classifica">Riordina automaticamente i giocatori in testa durante la partita</string>
+    <string name="btn_chiudi_impostazioni">Chiudi</string>
+    <string name="desc_impostazioni_icon">Impostazioni</string>
 </resources>

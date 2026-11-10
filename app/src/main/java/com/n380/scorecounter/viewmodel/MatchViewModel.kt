@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -95,6 +96,25 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // ---> CHIAVE DATABASE PER I PRESET CUSTOM DEL TIMER <---
     private val timerPresetsKey = stringPreferencesKey("custom_timer_presets")
 
+    // ====================================================================
+    // CHIAVI DATABASE E STATI REATTIVI PER LE IMPOSTAZIONI DELL'APP
+    // ====================================================================
+    // 🧠 SPIEGAZIONE DIDATTICA:
+    // Le chiavi DataStore fungono da "indirizzi" univoci nella memoria persistente del telefono.
+    // Gli stati `mutableStateOf` / `mutableIntStateOf` consentono a Compose di reagire
+    // istantaneamente quando l'utente modifica una preferenza, ri-renderizzando la UI senza lag.
+
+    // 1. LINGUA APP: Codice ISO della lingua selezionata ("system", "it", "en", "de", "es", "fr", "hi", "ja")
+    private val appLanguageKey = stringPreferencesKey("app_language_preference")
+    var appLanguage by mutableStateOf("system")
+        private set
+
+    // 2. BLOCCO ORIENTAMENTO:
+    // 0 = Auto (sensori di sistema), 1 = Orizzontale (Landscape), 2 = Verticale (Portrait)
+    private val appOrientationKey = intPreferencesKey("app_orientation_preference")
+    var appOrientation by mutableIntStateOf(0)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -166,6 +186,50 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     timerPresets.clear()
                     timerPresets.addAll(savedPresets)
                 }
+            }
+
+            // CARICAMENTO PREFERENZE LINGUA E ORIENTAMENTO
+            // Se non sono mai state salvate, usano i default di sicurezza ("system" e 0 = Auto)
+            val savedLanguage = preferences[appLanguageKey]
+            if (savedLanguage != null) {
+                appLanguage = savedLanguage
+            }
+
+            val savedOrientation = preferences[appOrientationKey]
+            if (savedOrientation != null) {
+                appOrientation = savedOrientation
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA DELLA LINGUA DELL'APP
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna immediatamente lo stato osservabile `appLanguage` in memoria, garantendo reattività immediata alla UI.
+     * 2. Salva in background la stringa ISO (es. "it", "en", "system") all'interno del DataStore Preferences.
+     * 3. Permette all'app di ricaricare la lingua corretta ad ogni successivo riavvio.
+     */
+    fun setAppLanguagePreference(newLanguageCode: String) {
+        appLanguage = newLanguageCode
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[appLanguageKey] = newLanguageCode
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA DEL BLOCCO ORIENTAMENTO SCHERMO
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato osservabile `appOrientation` (0 = Auto, 1 = Landscape, 2 = Portrait).
+     * 2. Scrive il nuovo valore numerico nel DataStore asincronamente.
+     * 3. La MainActivity o i listener dell'Activity applicano immediatamente il `requestedOrientation`.
+     */
+    fun setAppOrientationPreference(newOrientation: Int) {
+        appOrientation = newOrientation
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[appOrientationKey] = newOrientation
             }
         }
     }

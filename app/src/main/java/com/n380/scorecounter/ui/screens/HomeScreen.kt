@@ -87,7 +87,8 @@ fun HomeScreen(
     // eseguiamo questa funzione per delegare la navigazione al file MainActivity che gestisce le rotte.
     onNavigateToCreate: () -> Unit,
     onNavigateToCounter: () -> Unit,
-    onNavigateToStats: () -> Unit
+    onNavigateToStats: () -> Unit,
+    onNavigateToSettings: () -> Unit = {}
 ) {
     // --------------------------------------------------------------------
     // COMPOSITION LOCALS E COROUTINES
@@ -341,6 +342,7 @@ fun HomeScreen(
             viewModel = viewModel,
             onNavigateToCreate = onNavigateToCreate,
             onNavigateToStats = onNavigateToStats,
+            onNavigateToSettings = onNavigateToSettings,
             onShowDonationDialog = { showDonationDialog = true },
             onShowAboutDialog = { showAboutDialog = true },
             onShowBackupDialog = { showBackupDialog = true },
@@ -578,7 +580,34 @@ fun HomeScreen(
                                 ),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            // POSIZIONE 1: BACKUP E RIPRISTINO DATI (Utility critica salvataggi)
+                            // POSIZIONE 1: IMPOSTAZIONI E PREFERENZE (Nuova voce principale in cima alle opzioni)
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = stringResource(R.string.titolo_impostazioni),
+                                        fontWeight = menuItemFontWeight,
+                                        style = menuItemTextStyle
+                                    )
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Settings,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(menuItemIconSize)
+                                    )
+                                },
+                                modifier = if (isTablet) Modifier.padding(vertical = 4.dp) else Modifier,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    showTopMenu = false
+                                    onNavigateToSettings()
+                                }
+                            )
+
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                            // POSIZIONE 2: BACKUP E RIPRISTINO DATI (Utility critica salvataggi)
                             DropdownMenuItem(
                                 text = {
                                     Text(

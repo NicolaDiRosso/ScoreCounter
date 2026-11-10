@@ -370,4 +370,39 @@
     <string name="label_segmento_q4">4. Q</string>
     <string name="titolo_guida_zoom">🔍 Zeit-Zoom</string>
     <string name="msg_guida_zoom">Tippe auf 1 bis 3 aufeinanderfolgende Zeitquartale, um eine bestimmte Spielphase heranzuzoomen!</string>
+
+    <!-- ==================================================================== -->
+    <!-- IMPOSTAZIONI E PREFERENZE: SettingsScreen                            -->
+    <!-- ==================================================================== -->
+    <string name="titolo_impostazioni">Einstellungen</string>
+    <string name="titolo_impostazioni_esteso">Einstellungen &amp; Präferenzen</string>
+    <string name="desc_impostazioni_menu">Aussehen und Spiel anpassen</string>
+    <string name="sez_interfaccia_aspetto">📱 Oberfläche &amp; Aussehen</string>
+    <string name="opt_tema_app">App-Design</string>
+    <string name="desc_tema_app">Zwischen System-, dunklem oder hellem Design wählen</string>
+    <string name="opt_tema_sistema">System</string>
+    <string name="opt_tema_scuro">Dunkel</string>
+    <string name="opt_tema_chiaro">Hell</string>
+    <string name="opt_lingua_app">App-Sprache</string>
+    <string name="desc_lingua_app">Anzeigesprache der App ändern</string>
+    <string name="opt_orientamento_schermo">Ausrichtungssperre</string>
+    <string name="desc_orientamento_schermo">Ausrichtung sperren oder Sensoren folgen</string>
+    <string name="opt_orientamento_auto">Automatisch</string>
+    <string name="opt_orientamento_orizzontale">Querformat</string>
+    <string name="opt_orientamento_verticale">Hochformat</string>
+    <string name="sez_schermo_comportamento">💡 Bildschirm &amp; Verhalten</string>
+    <string name="opt_schermo_attivo">Bildschirm aktiv lassen</string>
+    <string name="desc_schermo_attivo">Bildschirm während des Spiels nicht ausschalten</string>
+    <string name="opt_schermo_solo_partita">Nur im Spiel</string>
+    <string name="opt_schermo_sempre">Immer an</string>
+    <string name="opt_schermo_disattivato">Deaktiviert</string>
+    <string name="opt_conferma_azioni">Schnellaktionen bestätigen</string>
+    <string name="desc_conferma_azioni">Bestätigung für \"Zurücksetzen\" und \"Beenden\" im Spiel anfordern</string>
+    <string name="sez_personalizzazione_gioco">🎮 Spielanpassung</string>
+    <string name="opt_passo_punteggio">Standard-Punktestufe</string>
+    <string name="desc_passo_punteggio">Schnellschrittwert bei langem Drücken (±1, ±5, ±10, ±20)</string>
+    <string name="opt_ordinamento_classifica">Dynamische Ranglistensortierung</string>
+    <string name="desc_ordinamento_classifica">Spieler während des Spiels automatisch nach Punktstand sortieren</string>
+    <string name="btn_chiudi_impostazioni">Schließen</string>
+    <string name="desc_impostazioni_icon">Einstellungen</string>
 </resources>
