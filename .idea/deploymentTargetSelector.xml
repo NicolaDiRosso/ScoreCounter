@@ -90,11 +90,6 @@
                 <DeviceId pluginId="PhysicalDevice" identifier="serial=57280DLAQ000CQ" />
               </handle>
             </Target>
-            <Target type="DEFAULT_BOOT">
-              <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\diros\.android\avd\Pixel_Tablet.avd" />
-              </handle>
-            </Target>
           </targets>
         </DialogSelection>
       </SelectionState>
