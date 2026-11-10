@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -98,24 +99,33 @@ fun TimerSettingsDialog(
     val vibratorManager = remember { context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager }
     val vibrator = remember { vibratorManager.defaultVibrator }
 
-    var isRunning by remember { mutableStateOf(false) }
-    var isPaused by remember { mutableStateOf(false) }
-    var timeLeft by remember { mutableLongStateOf(0L) }
-    var activeRingtone by remember { mutableStateOf<Ringtone?>(null) }
-    var rawInput by remember { mutableStateOf(initialRawInput) }
+    // 🧠 PERSISTENZA DI STATO CONTRO LA ROTAZIONE SCHERMO (RememberSaveable):
+    // Utilizziamo `rememberSaveable` anziché il semplice `remember` per tutte le variabili di stato critiche del timer
+    // (`isRunning`, `isPaused`, `timeLeft`, `rawInput`, ecc.).
+    // 
+    // PERCHÉ È FONDAMENTALE?
+    // Quando l'utente ruota lo schermo (Landscape <-> Portrait), Android distrugge e ricrea l'Activity e l'albero dei Composable.
+    // Con `remember`, lo stato andrebbe perduto, azzerando il timer e fermando il conto alla rovescia.
+    // Con `rememberSaveable`, lo stato viene salvato nel Bundle di Android e ripristinato istantaneamente alla ricreazione,
+    // consentendo al timer di rimanere attivo, mantenere il tempo residuo (`timeLeft`) esatto e proseguire senza interruzioni!
+    var isRunning by rememberSaveable { mutableStateOf(false) }
+    var isPaused by rememberSaveable { mutableStateOf(false) }
+    var timeLeft by rememberSaveable { mutableLongStateOf(0L) }
+    var activeRingtone by remember { mutableStateOf<Ringtone?>(null) } // I riferimenti multimediali (Ringtone) non sono serializzabili e si riavviano se necessario
+    var rawInput by rememberSaveable { mutableStateOf(initialRawInput) }
 
     // Lista dei 4 preset caricata reattivamente dal ViewModel
     val presets = viewModel.timerPresets
 
-    // Stato per la gestione del popup di modifica del singolo preset
-    var presetToEditIndex by remember { mutableStateOf<Int?>(null) }
-    var editingRawValue by remember { mutableStateOf("") }
+    // Stato per la gestione del popup di modifica del singolo preset (persistito con rememberSaveable)
+    var presetToEditIndex by rememberSaveable { mutableStateOf<Int?>(null) }
+    var editingRawValue by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(rawInput) {
         onInputChanged(rawInput)
     }
 
-    var isTextFieldFocused by remember { mutableStateOf(false) }
+    var isTextFieldFocused by rememberSaveable { mutableStateOf(false) }
 
     val stopAllAlarms = {
         vibrator.cancel()
