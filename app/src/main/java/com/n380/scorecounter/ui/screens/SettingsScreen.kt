@@ -126,8 +126,7 @@ fun SettingsScreen(
     var showPositiveStepDialog by remember { mutableStateOf(false) }
     var showNegativeStepDialog by remember { mutableStateOf(false) }
 
-    // Stati locali temporanei per le opzioni in attesa di persistenza avanzata
-    var dynamicLeaderboardSorting by remember { mutableStateOf(false) }
+
 
     // ====================================================================
     // 🧠 RENDER DIALOGHI MODALI (Incremento / Decremento Prolungato)
@@ -577,10 +576,10 @@ fun SettingsScreen(
                         SettingsSwitchItem(
                             title = stringResource(R.string.opt_ordinamento_classifica),
                             subtitle = stringResource(R.string.desc_ordinamento_classifica),
-                            isChecked = dynamicLeaderboardSorting,
+                            isChecked = viewModel.dynamicLeaderboardSorting,
                             onCheckedChange = { checked ->
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                dynamicLeaderboardSorting = checked
+                                viewModel.setDynamicLeaderboardSortingPreference(checked)
                             }
                         )
                     }

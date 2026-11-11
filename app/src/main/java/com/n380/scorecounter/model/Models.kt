@@ -2,6 +2,7 @@ package com.n380.scorecounter.model
 
     import androidx.compose.runtime.getValue
     import androidx.compose.runtime.mutableIntStateOf
+    import androidx.compose.runtime.mutableLongStateOf
     import androidx.compose.runtime.mutableStateListOf
     import androidx.compose.runtime.mutableStateOf
     import androidx.compose.runtime.setValue
@@ -23,6 +24,11 @@ package com.n380.scorecounter.model
 
         // ---> Il pallottoliere delle combo attivate in QUESTA partita
         var fireComboCount by mutableIntStateOf(0)
+
+        // ---> TIMESTAMP ULTIMO AGGIORNAMENTO PUNTEGGIO:
+        // Criterio di ordinamento secondario (tie-breaker) per l'ordinamento dinamico della classifica.
+        // A parità di punteggio, il giocatore che ha ottenuto punti più recentemente viene posizionato in cima.
+        var lastScoreUpdateTime by mutableLongStateOf(0L)
 
         // LA MEMORIA STORICA PER IL GRAFICO
         val scoreHistory = mutableStateListOf<Int>(0)

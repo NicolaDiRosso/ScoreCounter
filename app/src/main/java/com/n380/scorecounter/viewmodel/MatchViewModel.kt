@@ -150,6 +150,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var confirmQuickActions by mutableStateOf(true)
         private set
 
+    // 7. ORDINAMENTO DINAMICO DELLA CLASSIFICA:
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Memorizza se la classifica in tempo reale deve riordinarsi automaticamente
+     * posizionando in alto i giocatori con punteggio maggiore e, in caso di parità,
+     * l'ultimo che ha ottenuto punti più recentemente.
+     * - Di default è impostato a FALSE (disattivato) al primo avvio/installazione dell'app.
+     */
+    private val dynamicLeaderboardSortingKey = booleanPreferencesKey("dynamic_leaderboard_sorting_preference")
+    var dynamicLeaderboardSorting by mutableStateOf(false)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -274,6 +286,31 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 confirmQuickActions = true
+            }
+
+            // CARICAMENTO PREFERENZA ORDINAMENTO DINAMICO CLASSIFICA
+            try {
+                val savedDynamicSorting = preferences[dynamicLeaderboardSortingKey]
+                if (savedDynamicSorting != null) {
+                    dynamicLeaderboardSorting = savedDynamicSorting
+                }
+            } catch (_: Exception) {
+                dynamicLeaderboardSorting = false
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA ORDINAMENTO DINAMICO CLASSIFICA
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato booleano in memoria (`dynamicLeaderboardSorting`).
+     * 2. Salva la preferenza asincronamente nel DataStore su disco.
+     */
+    fun setDynamicLeaderboardSortingPreference(enabled: Boolean) {
+        dynamicLeaderboardSorting = enabled
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[dynamicLeaderboardSortingKey] = enabled
             }
         }
     }
@@ -775,6 +812,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
         // 1. APPLICAZIONE MATEMATICA: Modifica il punteggio grezzo del giocatore
         player.changeScore(amount)
+
+        // Aggiorniamo il timestamp di ultimo aggiornamento per il tie-breaker dell'ordinamento dinamico classifica
+        player.lastScoreUpdateTime = System.currentTimeMillis()
 
         // 2. SINCRONIZZAZIONE GRAFICA (GLOBAL TICK)
         // Iteriamo su tutti i giocatori presenti al tavolo, non solo su chi ha segnato.

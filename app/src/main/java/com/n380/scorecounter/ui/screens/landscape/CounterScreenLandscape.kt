@@ -332,8 +332,19 @@ fun CounterScreenLandscape(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
+                // Applichiamo lo stesso ordinamento dinamico anche nella versione landscape.
+                val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
+                    viewModel.players.sortedWith(
+                        compareByDescending<Player> { it.score }
+                            .thenByDescending { it.lastScoreUpdateTime }
+                    )
+                } else {
+                    viewModel.players
+                }
+
                 items(
-                    items = viewModel.players,
+                    items = displayedPlayers,
                     key = { player -> player.name }
                 ) { player ->
                     PlayerScoreCard(

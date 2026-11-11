@@ -617,7 +617,26 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                                 bottom = 16.dp
                             )
                         ) {
-                            items(viewModel.players) { p ->
+                            // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
+                            // Verifichiamo se l'impostazione "Ordinamento dinamico classifica" è attiva.
+                            // Se attiva, ordiniamo i giocatori:
+                            // 1. Primariamente per punteggio discendente (`compareByDescending { it.score }`).
+                            // 2. Secondariamente (in caso di parità) per timestamp di ultimo aggiornamento (`thenByDescending { it.lastScoreUpdateTime }`),
+                            //    garantendo che l'ultimo giocatore ad aver segnato salga in cima tra i pari merito.
+                            // Se disattiva, manteniamo l'ordine originale della lista.
+                            val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
+                                viewModel.players.sortedWith(
+                                    compareByDescending<Player> { it.score }
+                                        .thenByDescending { it.lastScoreUpdateTime }
+                                )
+                            } else {
+                                viewModel.players
+                            }
+
+                            items(
+                                items = displayedPlayers,
+                                key = { player -> player.name } // Chiave stabile per animazioni fluide
+                            ) { p ->
 
                                 val isLeader = p.score == maxScore && maxScore > 0
 
