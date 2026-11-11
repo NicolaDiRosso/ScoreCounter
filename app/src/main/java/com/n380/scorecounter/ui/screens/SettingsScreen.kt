@@ -607,7 +607,12 @@ private fun PositiveStepDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(stringResource(R.string.opt_incremento_lungo), fontWeight = FontWeight.Bold)
+            AutoResizedText(
+                text = stringResource(R.string.opt_incremento_lungo),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -709,7 +714,12 @@ private fun NegativeStepDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(stringResource(R.string.opt_decremento_lungo), fontWeight = FontWeight.Bold)
+            AutoResizedText(
+                text = stringResource(R.string.opt_decremento_lungo),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
