@@ -127,7 +127,6 @@ fun SettingsScreen(
     var showNegativeStepDialog by remember { mutableStateOf(false) }
 
     // Stati locali temporanei per le opzioni in attesa di persistenza avanzata
-    var confirmQuickActions by remember { mutableStateOf(true) }
     var dynamicLeaderboardSorting by remember { mutableStateOf(false) }
 
     // ====================================================================
@@ -521,10 +520,10 @@ fun SettingsScreen(
                         SettingsSwitchItem(
                             title = stringResource(R.string.opt_conferma_azioni),
                             subtitle = stringResource(R.string.desc_conferma_azioni),
-                            isChecked = confirmQuickActions,
+                            isChecked = viewModel.confirmQuickActions,
                             onCheckedChange = { checked ->
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                confirmQuickActions = checked
+                                viewModel.setConfirmQuickActionsPreference(checked)
                             }
                         )
                     }

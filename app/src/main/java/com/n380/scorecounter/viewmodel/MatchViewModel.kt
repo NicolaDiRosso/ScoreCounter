@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -137,6 +138,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var longPressNegativeStep by mutableIntStateOf(5)
         private set
 
+    // 6. CONFERMA AZIONI RAPIDE (Azzera e Concludi):
+    private val confirmQuickActionsKey = booleanPreferencesKey("confirm_quick_actions_preference")
+    var confirmQuickActions by mutableStateOf(true)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -251,6 +257,28 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 longPressNegativeStep = 5
+            }
+
+            // CARICAMENTO PREFERENZA CONFERMA AZIONI RAPIDE
+            try {
+                val savedConfirm = preferences[confirmQuickActionsKey]
+                if (savedConfirm != null) {
+                    confirmQuickActions = savedConfirm
+                }
+            } catch (_: Exception) {
+                confirmQuickActions = true
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA CONFERMA AZIONI RAPIDE
+     */
+    fun setConfirmQuickActionsPreference(enabled: Boolean) {
+        confirmQuickActions = enabled
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[confirmQuickActionsKey] = enabled
             }
         }
     }

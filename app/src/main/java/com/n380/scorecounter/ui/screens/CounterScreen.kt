@@ -278,13 +278,14 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                         // ========================================================
                         OutlinedButton(
                             onClick = {
-                                // 🧠 FIX UI: Sistemata indentazione sospetta e logica di protezione.
-                                // Se la navigazione è bloccata o c'è un dialogo aperto, ignoriamo il tocco.
                                 if (viewModel.isNavigationLocked || showEndMatchDialog) return@OutlinedButton
-
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                diceRollCount++//serve per incrementare il contatore che ricorda il punteggio precendente del dado
-                                showResetDialog = true// ...allora puoi aprire il popup!
+                                diceRollCount++
+                                if (viewModel.confirmQuickActions) {
+                                    showResetDialog = true
+                                } else {
+                                    viewModel.resetScoresWithUndo()
+                                }
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -320,10 +321,17 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                             onClick = {
                                 // PROTEZIONE LUCCHETTO: Ignora se stiamo azzerando
                                 if (viewModel.isNavigationLocked || showResetDialog) return@Button
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (viewModel.confirmQuickActions) {
                                     viewModel.pauseTimer()
-                                // INVECE DI NAVIGARE DIRETTAMENTE, APRIAMO IL POPUP DI CONFERMA!
-                                showEndMatchDialog = true
+                                    showEndMatchDialog = true
+                                } else {
+                                    if (viewModel.lockNavigation()) {
+                                        viewModel.pauseTimer()
+                                        viewModel.saveCurrentMatch()
+                                        onNavigateToResults()
+                                    }
+                                }
                             },
                             modifier = Modifier
                                 .weight(1f)

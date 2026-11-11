@@ -251,7 +251,11 @@ fun CounterScreenLandscape(
                         if (viewModel.isNavigationLocked || showEndMatchDialog) return@OutlinedButton
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onDiceRollCountChange(diceRollCount + 1)
-                        onShowResetDialogChange(true)
+                        if (viewModel.confirmQuickActions) {
+                            onShowResetDialogChange(true)
+                        } else {
+                            viewModel.resetScoresWithUndo()
+                        }
                     },
                     modifier = Modifier.fillMaxWidth().height(44.dp),
                     shape = RoundedCornerShape(14.dp),
@@ -275,8 +279,16 @@ fun CounterScreenLandscape(
                     onClick = {
                         if (viewModel.isNavigationLocked || showResetDialog) return@Button
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.pauseTimer()
-                        onShowEndMatchDialogChange(true)
+                        if (viewModel.confirmQuickActions) {
+                            viewModel.pauseTimer()
+                            onShowEndMatchDialogChange(true)
+                        } else {
+                            if (viewModel.lockNavigation()) {
+                                viewModel.pauseTimer()
+                                viewModel.saveCurrentMatch()
+                                onNavigateToResults()
+                            }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth().height(46.dp),
                     shape = RoundedCornerShape(14.dp),
