@@ -61,7 +61,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,23 +124,19 @@ fun SettingsScreen(
     var confirmQuickActions by remember { mutableStateOf(true) }
     var dynamicLeaderboardSorting by remember { mutableStateOf(false) }
 
-    // Dialogo per la personalizzazione del passo (+)
+    // Dialogo dedicato per la personalizzazione dell'incremento (+)
     if (showPositiveStepDialog) {
-        LongPressStepDialog(
-            title = stringResource(R.string.opt_incremento_lungo),
+        PositiveStepDialog(
             initialValue = viewModel.longPressPositiveStep,
-            isPositive = true,
             onDismiss = { showPositiveStepDialog = false },
             onConfirm = { step -> viewModel.updateLongPressPositiveStep(step) }
         )
     }
 
-    // Dialogo per la personalizzazione del passo (-)
+    // Dialogo dedicato per la personalizzazione del decremento (-)
     if (showNegativeStepDialog) {
-        LongPressStepDialog(
-            title = stringResource(R.string.opt_decremento_lungo),
+        NegativeStepDialog(
             initialValue = viewModel.longPressNegativeStep,
-            isPositive = false,
             onDismiss = { showNegativeStepDialog = false },
             onConfirm = { step -> viewModel.updateLongPressNegativeStep(step) }
         )
@@ -520,17 +515,16 @@ fun SettingsScreen(
                         icon = Icons.Filled.SportsEsports
                     ) {
                         // 1. INCREMENTO PROLUNGATO (+)
-                        SettingsDropdownItem(
+                        SettingsClickableItem(
                             title = stringResource(R.string.opt_incremento_lungo),
                             subtitle = stringResource(R.string.desc_incremento_lungo),
                             currentSelectionText = "+${viewModel.longPressPositiveStep}",
                             currentSelectionIcon = Icons.Filled.Add,
-                            isExpanded = false,
-                            onExpandRequest = { showPositiveStepDialog = true },
-                            onDismissRequest = {}
-                        ) {
-                            // Nessun menu a tendina diretto (apre il Dialog)
-                        }
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                showPositiveStepDialog = true
+                            }
+                        )
 
                         HorizontalDivider(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
@@ -538,17 +532,16 @@ fun SettingsScreen(
                         )
 
                         // 2. DECREMENTO PROLUNGATO (-)
-                        SettingsDropdownItem(
+                        SettingsClickableItem(
                             title = stringResource(R.string.opt_decremento_lungo),
                             subtitle = stringResource(R.string.desc_decremento_lungo),
                             currentSelectionText = "-${viewModel.longPressNegativeStep}",
                             currentSelectionIcon = Icons.Filled.Remove,
-                            isExpanded = false,
-                            onExpandRequest = { showNegativeStepDialog = true },
-                            onDismissRequest = {}
-                        ) {
-                            // Nessun menu a tendina diretto (apre il Dialog)
-                        }
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                showNegativeStepDialog = true
+                            }
+                        )
 
                         HorizontalDivider(
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
@@ -574,29 +567,23 @@ fun SettingsScreen(
 
 /**
  * ====================================================================
- * DIALOG DI PERSONALIZZAZIONE PASSO (LongPressStepDialog)
+ * DIALOG DI PERSONALIZZAZIONE INCREMENTO (+)
  * ====================================================================
- * 🧠 ARCHITETTURA E DIDATTICA:
- * Questo dialog interattivo permette all'utente di selezionare un valore rapido
- * tramite chip animate (`AnimatedSelectableChip`) o di inserire un numero
- * personalizzato tramite tastiera numerica.
  */
 @Composable
-private fun LongPressStepDialog(
-    title: String,
+private fun PositiveStepDialog(
     initialValue: Int,
-    isPositive: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     var textInput by remember { mutableStateOf(initialValue.toString()) }
-    val quickPresets = if (isPositive) listOf(1, 2, 5, 10, 15, 20, 50, 100) else listOf(1, 2, 3, 5, 10, 15, 20, 50)
+    val quickPresets = listOf(1, 2, 5, 10, 15, 20, 50, 100)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(title, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.opt_incremento_lungo), fontWeight = FontWeight.Bold)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -606,7 +593,6 @@ private fun LongPressStepDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                // Griglia di preset rapidi con AnimatedSelectableChip
                 val rows = quickPresets.chunked(4)
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     rows.forEach { rowItems ->
@@ -617,7 +603,109 @@ private fun LongPressStepDialog(
                             rowItems.forEach { preset ->
                                 val isSelected = textInput.toIntOrNull() == preset
                                 AnimatedSelectableChip(
-                                    text = if (isPositive) "+$preset" else "-$preset",
+                                    text = "+$preset",
+                                    isSelected = isSelected,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        textInput = preset.toString()
+                                    },
+                                    height = 42.dp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                OutlinedTextField(
+                    value = textInput,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) textInput = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.hint_valore_personalizzato)) },
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_annulla))
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        val value = textInput.toIntOrNull() ?: initialValue
+                        if (value > 0) {
+                            onConfirm(value)
+                        }
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_applica))
+                }
+            }
+        },
+        dismissButton = null,
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+/**
+ * ====================================================================
+ * DIALOG DI PERSONALIZZAZIONE DECREMENTO (-)
+ * ====================================================================
+ */
+@Composable
+private fun NegativeStepDialog(
+    initialValue: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    var textInput by remember { mutableStateOf(initialValue.toString()) }
+    val quickPresets = listOf(1, 2, 3, 5, 10, 15, 20, 50)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(R.string.opt_decremento_lungo), fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = stringResource(R.string.desc_dialog_passo),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                val rows = quickPresets.chunked(4)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    rows.forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowItems.forEach { preset ->
+                                val isSelected = textInput.toIntOrNull() == preset
+                                AnimatedSelectableChip(
+                                    text = "-$preset",
                                     isSelected = isSelected,
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -742,6 +830,75 @@ private fun SettingsSectionCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             content()
+        }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE VOCE IMPOSTAZIONI CLICCABILE (Per Apertura Dialog Modali)
+ * ====================================================================
+ */
+@Composable
+private fun SettingsClickableItem(
+    title: String,
+    subtitle: String,
+    currentSelectionText: String,
+    currentSelectionIcon: ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center
+        ) {
+            AutoResizedText(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            AutoResizedText(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            )
+        }
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+            ),
+            modifier = Modifier.clickable { onClick() }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = currentSelectionIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = currentSelectionText,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }
@@ -873,7 +1030,7 @@ private fun SettingsSwitchItem(
             AutoResizedText(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha =.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
             )
         }
 

@@ -234,14 +234,23 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 keepScreenOnMode = savedKeepScreenOn
             }
 
-            // CARICAMENTO PREFERENZE PASSO PRESSIONE PROLUNGATA (+ e -)
-            val savedPosStep = preferences[longPressPositiveStepKey]
-            if (savedPosStep != null) {
-                longPressPositiveStep = savedPosStep
+            // CARICAMENTO PREFERENZE PASSO PRESSIONE PROLUNGATA (+ e -) CON PROTEZIONE ANTI-CRASH
+            try {
+                val savedPosStep = preferences[longPressPositiveStepKey]
+                if (savedPosStep != null && savedPosStep > 0) {
+                    longPressPositiveStep = savedPosStep
+                }
+            } catch (_: Exception) {
+                longPressPositiveStep = 10
             }
-            val savedNegStep = preferences[longPressNegativeStepKey]
-            if (savedNegStep != null) {
-                longPressNegativeStep = savedNegStep
+
+            try {
+                val savedNegStep = preferences[longPressNegativeStepKey]
+                if (savedNegStep != null && savedNegStep > 0) {
+                    longPressNegativeStep = savedNegStep
+                }
+            } catch (_: Exception) {
+                longPressNegativeStep = 5
             }
         }
     }

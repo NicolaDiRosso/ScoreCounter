@@ -42,6 +42,8 @@
     import androidx.compose.ui.text.TextStyle
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.unit.dp
+    import androidx.compose.ui.unit.sp
+    import androidx.compose.ui.unit.isSpecified
     import android.graphics.Bitmap
     import java.io.File
     import java.io.FileOutputStream
@@ -1030,86 +1032,50 @@
     fun AutoResizedText(
         text: String,
         modifier: Modifier = Modifier,
-        style: TextStyle = MaterialTheme.typography.displaySmall,
+        style: TextStyle = MaterialTheme.typography.titleMedium,
         color: Color = style.color,
         fontWeight: FontWeight? = style.fontWeight
     ) {
+        // 🧠 SICUREZZA DIMENSIONE FONT (PROTEZIONE ANTI-CRASH):
+        // Se `style.fontSize` non è specificato (Unspecified), impostiamo una dimensione base di 16.sp
+        // prima di eseguire operazioni matematiche di riduzione percentuale (fontSize * 0.92f).
+        val initialFontSize = if (style.fontSize.isSpecified) style.fontSize else 16.sp
 
-        /// 1. ALLOCAZIONE DELLO STATO TIPOGRAFICO CON NEUTRALIZZAZIONE LINE-HEIGHT
-        // Inizializza un MutableState (Oggetto per la gestione reattiva della memoria).
-        var resizedStyle by remember(text) {
-            // La funzione .copy() della classe TextStyle permette di sovrascrivere parametri specifici.
-            // Assegnando la Costante 'TextUnit.Unspecified' alla Proprietà 'lineHeight',
-            // annulliamo i vincoli verticali rigidi del Material Design.
-            // In questo modo, l'ingombro sull'asse Y scalerà proporzionalmente alla Proprietà 'fontSize',
-            // scongiurando l'overflow verticale irreversibile.
+        var resizedStyle by remember(text, style) {
             mutableStateOf(
                 style.copy(
+                    fontSize = initialFontSize,
                     lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified
                 )
             )
         }
 
-        // 2. SEMAFORO DI RENDERING (Deferred Painting)
-        // Variabile di stato booleana che funge da gatekeeper per l'invio dei pixel alla GPU.
-        // Viene inizializzata a 'false' per impedire il rendering del componente
-        // finché l'algoritmo di misurazione non raggiunge la convergenza matematica.
-        var readyToDraw by remember {
+        var readyToDraw by remember(text, style) {
             mutableStateOf(false)
         }
 
         Text(
             text = text,
-
-            // 3. INTERCETTAZIONE DELLA DRAW PHASE
-            // Il modificatore drawWithContent si inserisce nell'ultima fase del ciclo
-            // di rendering (Composition -> Layout -> Draw).
-            // Se 'readyToDraw' è false, il componente occupa spazio computazionale
-            // (permettendo i calcoli metrici) ma non esegue 'drawContent()',
-            // evitando il fenomeno del flickering (sfarfallio a schermo).
             modifier = modifier.drawWithContent {
                 if (readyToDraw) {
                     drawContent()
                 }
             },
-
-            // Assegnazione dinamica dello stile. Essendo legata a uno State,
-            // ogni sua mutazione forzerà la Ricomposizione (Recomposition) di questo nodo.
             style = resizedStyle,
             color = color,
             fontWeight = fontWeight,
-
-            // 4. VINCOLI SPAZIALI (Constraints)
-            // softWrap = false inibisce la segmentazione automatica delle stringhe (line-wrapping).
-            // maxLines = 1 obbliga l'engine a generare un singolo vettore orizzontale.
-            // Questi due parametri sono necessari per forzare la collisione con il Bounding Box genitore.
             softWrap = false,
             maxLines = 1,
-
-            // 5. OBSERVER DELLA LAYOUT PHASE (Motore Iterativo)
-            // Callback asincrona triggerata al termine del calcolo degli ingombri da parte del motore Skia.(motore grafico di Android)
             onTextLayout = { result ->
-
-                // Valutazione della metrica di collisione spaziale.
-                // Si usa hasVisualOverflow che è una variabile booleana appartenente alla classe TextLayoutResult
-                // Se la dimensione orizzontale calcolata eccede il maxWidth allocato dal parent:
                 if (result.hasVisualOverflow) {
-
-                    // Mutazione di stato.
-                    // Sovrascrive l'oggetto resizedStyle clonandolo tramite .copy() e applicando
-                    // un fattore di degradazione del 5% (0.95) al fontSize corrente.
-                    // Questa assegnazione invalida lo stato e innesca immediatamente una nuova
-                    // Ricomposizione del componente Text, creando un loop ricorsivo invisibile all'utente.
-                    resizedStyle = resizedStyle.copy(
-                        fontSize = resizedStyle.fontSize * 0.95
-                    )
-
+                    if (resizedStyle.fontSize.isSpecified && resizedStyle.fontSize.value > 8f) {
+                        resizedStyle = resizedStyle.copy(
+                            fontSize = resizedStyle.fontSize * 0.92f
+                        )
+                    } else {
+                        readyToDraw = true
+                    }
                 } else {
-
-                    // Condizione di uscita dal loop (Convergenza dell'Algoritmo).
-                    // Il testo rientra matematicamente nei vincoli imposti.
-                    // La mutazione di 'readyToDraw' innesca l'ultima Ricomposizione,
-                    // aprendo il gatekeeper nel drawWithContent e permettendo il flushing dei pixel a schermo.
                     readyToDraw = true
                 }
             }
@@ -1247,7 +1213,7 @@ fun AnimatedSelectableChip(
     modifier: Modifier = Modifier,                    // Modificatore Compose per personalizzare layout, padding o larghezza esterna
     height: Dp? = 46.dp,                              // Altezza fissa opzionale del chip (null per consentire fillMaxHeight in landscape)
     shapeRadius: Dp = 16.dp,                          // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
-    textStyle: TextStyle = TextStyle.Default,         // Stile tipografico del testo
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium, // Stile tipografico predefinito con dimensione definita
     trailingContent: @Composable (() -> Unit)? = null // Slot opzionale in alto a destra per elementi aggiuntivi (es. tasto matita)
 ) {
     // Otteniamo il riferimento al servizio di vibrazione aptica del sistema
