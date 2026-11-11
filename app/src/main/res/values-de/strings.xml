@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">Spielanpassung</string>
     <string name="opt_passo_punteggio">Schnelles Erhöhen &amp; Verringern</string>
     <string name="desc_passo_punteggio">Punkte für langes Drücken anpassen</string>
-    <string name="opt_incremento_lungo">Langes Drücken Erhöhung (+)</string>
-    <string name="desc_incremento_lungo">Punkte beim Halten von + hinzugefügt</string>
-    <string name="opt_decremento_lungo">Langes Drücken Verringerung (-)</string>
-    <string name="desc_decremento_lungo">Punkte beim Halten von - abgezogen</string>
+    <string name="opt_incremento_lungo">Langes Drücken Erhöhung</string>
+    <string name="desc_incremento_lungo">Punkte werden automatisch hinzugefügt, wenn du die +-Taste gedrückt hältst</string>
+    <string name="opt_decremento_lungo">Langes Drücken Verringerung</string>
+    <string name="desc_decremento_lungo">Punkte werden automatisch abgezogen, wenn du die Minus-Taste gedrückt hältst</string>
     <string name="desc_dialog_passo">Wähle einen Schnellwert oder gib einen eigenen ein:</string>
     <string name="hint_valore_personalizzato">Benutzerdefinierter Wert</string>
     <string name="opt_ordinamento_classifica">Dynamische Ranglistensortierung</string>

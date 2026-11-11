@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">Game customization</string>
     <string name="opt_passo_punteggio">Quick increment &amp; decrement</string>
     <string name="desc_passo_punteggio">Customize points added and subtracted on long press</string>
-    <string name="opt_incremento_lungo">Long press increment (+)</string>
-    <string name="desc_incremento_lungo">Points added when holding + button</string>
-    <string name="opt_decremento_lungo">Long press decrement (-)</string>
-    <string name="desc_decremento_lungo">Points subtracted when holding - button</string>
+    <string name="opt_incremento_lungo">Long press increment</string>
+    <string name="desc_incremento_lungo">Points added automatically when holding the + button</string>
+    <string name="opt_decremento_lungo">Long press decrement</string>
+    <string name="desc_decremento_lungo">Points subtracted automatically when holding the - button</string>
     <string name="desc_dialog_passo">Select a quick value or enter a custom number:</string>
     <string name="hint_valore_personalizzato">Custom value</string>
     <string name="opt_ordinamento_classifica">Dynamic leaderboard sorting</string>

@@ -20,22 +20,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.StayCurrentLandscape
@@ -86,14 +84,20 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
  * ====================================================================
  * SCHERMATA IMPOSTAZIONI E PREFERENZE (SettingsScreen)
  * ====================================================================
- * 🧠 ARCHITETTURA E PATTERN COMPOSE (Allineato a CreateMatchScreen):
- * Questa schermata adotta lo stesso design strutturale di [CreateMatchScreen]:
- * 1. TITOLO FISSO SUPERIORE: Intestazione pulita e fissa in cima alla schermata.
- * 2. GRANDE TAVOLO CONTENITIVO (Outer Card): Una Card principale con angoli
- *    arrotondati a 24.dp e colore `surfaceVariant` che racchiude tutte le preferenze.
- * 3. AREA SCORREVOLE INTERNA: Un layout verticale scorrevole (`verticalScroll`)
- *    che contiene tabelle/card più piccole per ogni gruppo di impostazioni.
- * 4. DOCK INFERIORE: Pulsante di chiusura ad alto impatto visivo ancorato in basso.
+ * 🧠 GUIDA DIDATTICA E ARCHITETTURA JETPACK COMPOSE:
+ * Questa schermata gestisce tutte le preferenze globali dell'applicazione.
+ *
+ * Pattern Architetturali Applicati:
+ * 1. STATE HOISTING & VIEWMODEL BINDING: Le preferenze vengono lette e salvate
+ *    direttamente nel [MatchViewModel] tramite DataStore in modo reattivo.
+ * 2. LAYOUT GERARCHICO (Outer Card & Tables): Speculare a [CreateMatchScreen],
+ *    presenta un grande tavolo contenitivo esterno (`surfaceVariant`) e tabelle
+ *    figlie separate (`surface`) per raggruppare le opzioni in modo ordinato.
+ * 3. COMPONENTI MODULARI:
+ *    - [SettingsSectionCard]: Tabella/card contenitrice di sezione.
+ *    - [SettingsDropdownItem]: Voce con menu a tendina e icona di stato.
+ *    - [SettingsClickableItem]: Voce cliccabile per l'apertura di dialog modali.
+ *    - [SettingsSwitchItem]: Voce con interruttore (Switch on/off).
  * ====================================================================
  */
 @Composable
@@ -110,13 +114,15 @@ fun SettingsScreen(
     // Prevenzione del doppio click accidentale sul pulsante di chiusura
     var isClosing by remember { mutableStateOf(false) }
 
-    // Stati di apertura per i dropdown menu
+    // ====================================================================
+    // 🧠 STATI LOCALI DI APERTURA (UI State Flags)
+    // ====================================================================
+    // Gestiscono la visibilità dei menu a tendina e dei dialoghi modali.
     var showThemeDropdown by remember { mutableStateOf(false) }
     var showLanguageDropdown by remember { mutableStateOf(false) }
     var showOrientationDropdown by remember { mutableStateOf(false) }
     var showScreenKeepOnDropdown by remember { mutableStateOf(false) }
 
-    // Stati per i dialoghi di personalizzazione passo (+) e (-)
     var showPositiveStepDialog by remember { mutableStateOf(false) }
     var showNegativeStepDialog by remember { mutableStateOf(false) }
 
@@ -124,7 +130,9 @@ fun SettingsScreen(
     var confirmQuickActions by remember { mutableStateOf(true) }
     var dynamicLeaderboardSorting by remember { mutableStateOf(false) }
 
-    // Dialogo dedicato per la personalizzazione dell'incremento (+)
+    // ====================================================================
+    // 🧠 RENDER DIALOGHI MODALI (Incremento / Decremento Prolungato)
+    // ====================================================================
     if (showPositiveStepDialog) {
         PositiveStepDialog(
             initialValue = viewModel.longPressPositiveStep,
@@ -133,7 +141,6 @@ fun SettingsScreen(
         )
     }
 
-    // Dialogo dedicato per la personalizzazione del decremento (-)
     if (showNegativeStepDialog) {
         NegativeStepDialog(
             initialValue = viewModel.longPressNegativeStep,
@@ -213,7 +220,7 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. IL TITOLO FISSO SUPERIORE
+            // 1. TITOLO PRINCIPALE FISSO IN CIMA
             Spacer(modifier = Modifier.height(16.dp))
             AutoResizedText(
                 text = stringResource(R.string.titolo_impostazioni_esteso),
@@ -226,7 +233,7 @@ fun SettingsScreen(
                     .padding(bottom = 16.dp)
             )
 
-            // 2. IL GRANDE TAVOLO CONTENITIVO (La Card Unica esterna)
+            // 2. IL GRANDE TAVOLO CONTENITIVO (Outer Card)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -236,7 +243,7 @@ fun SettingsScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                // 3. AREA SCORREVOLE INTERNA (Il tavolo scrollabile con le tabelle figlie)
+                // 3. AREA SCORREVOLE INTERNA (Contiene le tabelle figlie di sezione)
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -244,14 +251,17 @@ fun SettingsScreen(
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // ------------------------------------------------------------
-                    // SEZIONE A: INTERFACCIA E ASPETTO
-                    // ------------------------------------------------------------
+
+                    // ================================================================
+                    // 📁 SEZIONE A: INTERFACCIA E ASPETTO
+                    // ================================================================
                     SettingsSectionCard(
                         title = stringResource(R.string.sez_interfaccia_aspetto),
                         icon = Icons.Filled.Palette
                     ) {
-                        // 1. TEMA APP
+                        // ------------------------------------------------------------
+                        // A.1: TEMA APP (Gestisce Sistema / Scuro / Chiaro)
+                        // ------------------------------------------------------------
                         val themeLabels = listOf(
                             stringResource(R.string.opt_tema_sistema) to Icons.Filled.BrightnessAuto,
                             stringResource(R.string.opt_tema_scuro) to Icons.Filled.DarkMode,
@@ -264,6 +274,7 @@ fun SettingsScreen(
                             subtitle = stringResource(R.string.desc_tema_app),
                             currentSelectionText = themeLabels[safeThemeIndex].first,
                             currentSelectionIcon = themeLabels[safeThemeIndex].second,
+                            showTextInCollapsed = false, // Mostra solo l'icona quando chiuso
                             isExpanded = showThemeDropdown,
                             onExpandRequest = { showThemeDropdown = true },
                             onDismissRequest = { showThemeDropdown = false }
@@ -309,7 +320,9 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 
-                        // 2. LINGUA APP
+                        // ------------------------------------------------------------
+                        // A.2: LINGUA APP (Gestisce le 7 lingue supportate + bandiere)
+                        // ------------------------------------------------------------
                         val supportedLanguages = listOf(
                             Triple("it", "Italiano", "🇮🇹"),
                             Triple("en", "English", "🇬🇧"),
@@ -334,7 +347,8 @@ fun SettingsScreen(
                             title = stringResource(R.string.opt_lingua_app),
                             subtitle = stringResource(R.string.desc_lingua_app),
                             currentSelectionText = "${currentLang.second} ${currentLang.third}",
-                            currentSelectionIcon = Icons.Filled.Language,
+                            currentSelectionFlag = currentLang.third, // Mostra solo la bandiera emoji quando chiuso
+                            showTextInCollapsed = false,
                             isExpanded = showLanguageDropdown,
                             onExpandRequest = { showLanguageDropdown = true },
                             onDismissRequest = { showLanguageDropdown = false }
@@ -376,7 +390,9 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 
-                        // 3. BLOCCO ORIENTAMENTO
+                        // ------------------------------------------------------------
+                        // A.3: BLOCCO ORIENTAMENTO (Auto, Orizzontale, Verticale)
+                        // ------------------------------------------------------------
                         val orientationOptions = listOf(
                             stringResource(R.string.opt_orientamento_auto) to Icons.Filled.ScreenRotation,
                             stringResource(R.string.opt_orientamento_orizzontale) to Icons.Filled.StayCurrentLandscape,
@@ -389,6 +405,7 @@ fun SettingsScreen(
                             subtitle = stringResource(R.string.desc_orientamento_schermo),
                             currentSelectionText = orientationOptions[safeOrientationIndex].first,
                             currentSelectionIcon = orientationOptions[safeOrientationIndex].second,
+                            showTextInCollapsed = false, // Mostra solo l'icona quando chiuso
                             isExpanded = showOrientationDropdown,
                             onExpandRequest = { showOrientationDropdown = true },
                             onDismissRequest = { showOrientationDropdown = false }
@@ -430,14 +447,16 @@ fun SettingsScreen(
                         }
                     }
 
-                    // ------------------------------------------------------------
-                    // SEZIONE B: SCHERMO E COMPORTAMENTO
-                    // ------------------------------------------------------------
+                    // ================================================================
+                    // 📁 SEZIONE B: SCHERMO E COMPORTAMENTO
+                    // ================================================================
                     SettingsSectionCard(
                         title = stringResource(R.string.sez_schermo_comportamento),
                         icon = Icons.Filled.WbSunny
                     ) {
-                        // 1. SCHERMO SEMPRE ATTIVO
+                        // ------------------------------------------------------------
+                        // B.1: SCHERMO SEMPRE ATTIVO (Solo in partita, Sempre, Disattivato)
+                        // ------------------------------------------------------------
                         val screenKeepOnOptions = listOf(
                             stringResource(R.string.opt_schermo_solo_partita) to Icons.Filled.SportsEsports,
                             stringResource(R.string.opt_schermo_sempre) to Icons.Filled.Visibility,
@@ -450,6 +469,7 @@ fun SettingsScreen(
                             subtitle = stringResource(R.string.desc_schermo_attivo),
                             currentSelectionText = screenKeepOnOptions[safeKeepOnIndex].first,
                             currentSelectionIcon = screenKeepOnOptions[safeKeepOnIndex].second,
+                            showTextInCollapsed = false, // Mostra solo l'icona quando chiuso
                             isExpanded = showScreenKeepOnDropdown,
                             onExpandRequest = { showScreenKeepOnDropdown = true },
                             onDismissRequest = { showScreenKeepOnDropdown = false }
@@ -495,7 +515,9 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 
-                        // 2. CONFERMA AZIONI RAPIDE
+                        // ------------------------------------------------------------
+                        // B.2: CONFERMA AZIONI RAPIDE (Interruttore Switch On/Off)
+                        // ------------------------------------------------------------
                         SettingsSwitchItem(
                             title = stringResource(R.string.opt_conferma_azioni),
                             subtitle = stringResource(R.string.desc_conferma_azioni),
@@ -507,19 +529,20 @@ fun SettingsScreen(
                         )
                     }
 
-                    // ------------------------------------------------------------
-                    // SEZIONE C: PERSONALIZZAZIONE GIOCO (Incremento / Decremento)
-                    // ------------------------------------------------------------
+                    // ================================================================
+                    // 📁 SEZIONE C: PERSONALIZZAZIONE GIOCO
+                    // ================================================================
                     SettingsSectionCard(
                         title = stringResource(R.string.sez_personalizzazione_gioco),
                         icon = Icons.Filled.SportsEsports
                     ) {
-                        // 1. INCREMENTO PROLUNGATO (+)
+                        // ------------------------------------------------------------
+                        // C.1: INCREMENTO PROLUNGATO (+) (Apre PositiveStepDialog)
+                        // ------------------------------------------------------------
                         SettingsClickableItem(
                             title = stringResource(R.string.opt_incremento_lungo),
                             subtitle = stringResource(R.string.desc_incremento_lungo),
                             currentSelectionText = "+${viewModel.longPressPositiveStep}",
-                            currentSelectionIcon = Icons.Filled.Add,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 showPositiveStepDialog = true
@@ -531,12 +554,13 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 
-                        // 2. DECREMENTO PROLUNGATO (-)
+                        // ------------------------------------------------------------
+                        // C.2: DECREMENTO PROLUNGATO (-) (Apre NegativeStepDialog)
+                        // ------------------------------------------------------------
                         SettingsClickableItem(
                             title = stringResource(R.string.opt_decremento_lungo),
                             subtitle = stringResource(R.string.desc_decremento_lungo),
                             currentSelectionText = "-${viewModel.longPressNegativeStep}",
-                            currentSelectionIcon = Icons.Filled.Remove,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 showNegativeStepDialog = true
@@ -548,7 +572,9 @@ fun SettingsScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 
-                        // 3. ORDINAMENTO DINAMICO CLASSIFICA
+                        // ------------------------------------------------------------
+                        // C.3: ORDINAMENTO DINAMICO CLASSIFICA (Interruttore Switch On/Off)
+                        // ------------------------------------------------------------
                         SettingsSwitchItem(
                             title = stringResource(R.string.opt_ordinamento_classifica),
                             subtitle = stringResource(R.string.desc_ordinamento_classifica),
@@ -838,13 +864,15 @@ private fun SettingsSectionCard(
  * ====================================================================
  * COMPONENTE VOCE IMPOSTAZIONI CLICCABILE (Per Apertura Dialog Modali)
  * ====================================================================
+ * 🧠 DIDATTICA KOTLIN / COMPOSE:
+ * Utilizza [AutoResizedText] per il titolo (resilient scale) e [Text] multiriga
+ * con softWrap abilitato per il sottotitolo, garantendo assenza di troncamenti.
  */
 @Composable
 private fun SettingsClickableItem(
     title: String,
     subtitle: String,
     currentSelectionText: String,
-    currentSelectionIcon: ImageVector,
     onClick: () -> Unit
 ) {
     Row(
@@ -855,43 +883,45 @@ private fun SettingsClickableItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Colonna testi: Titolo sopra, Sottotitolo multiriga sotto con spaziatura di 4.dp
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             AutoResizedText(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            AutoResizedText(
+            Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                softWrap = true,
+                maxLines = 3,
+                lineHeight = 16.sp
             )
         }
 
+        // Pillola interattiva con dimensione standardizzata (width = 72.dp, height = 40.dp)
         Surface(
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(14.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
             border = BorderStroke(
                 1.dp,
                 MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
             ),
-            modifier = Modifier.clickable { onClick() }
+            modifier = Modifier
+                .size(width = 72.dp, height = 40.dp)
+                .clickable { onClick() }
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = currentSelectionIcon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp)
-                )
                 Text(
                     text = currentSelectionText,
                     style = MaterialTheme.typography.labelLarge,
@@ -907,13 +937,18 @@ private fun SettingsClickableItem(
  * ====================================================================
  * COMPONENTE VOCE IMPOSTAZIONI CON TENDINA A DISCESA (Dropdown)
  * ====================================================================
+ * 🧠 DIDATTICA KOTLIN / COMPOSE:
+ * Mostra solo l'icona o la bandiera quando chiuso (`showTextInCollapsed = false`),
+ * espandendo il menu a tendina al click.
  */
 @Composable
 private fun SettingsDropdownItem(
     title: String,
     subtitle: String,
     currentSelectionText: String,
-    currentSelectionIcon: ImageVector,
+    currentSelectionIcon: ImageVector? = null,
+    currentSelectionFlag: String? = null,
+    showTextInCollapsed: Boolean = true,
     isExpanded: Boolean,
     onExpandRequest: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -927,55 +962,77 @@ private fun SettingsDropdownItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Colonna testi: Titolo sopra, Sottotitolo multiriga sotto con spaziatura di 4.dp
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             AutoResizedText(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            AutoResizedText(
+            Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                softWrap = true,
+                maxLines = 3,
+                lineHeight = 16.sp
             )
         }
 
         Box {
+            // Pillola con dimensione standardizzata (width = 72.dp, height = 40.dp)
             Surface(
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
                 border = BorderStroke(
                     1.dp,
                     MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
                 ),
-                modifier = Modifier.clickable { onExpandRequest() }
+                modifier = Modifier
+                    .size(width = 72.dp, height = 40.dp)
+                    .clickable { onExpandRequest() }
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                    modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = currentSelectionIcon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = currentSelectionText,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    if (currentSelectionFlag != null) {
+                        Text(
+                            text = currentSelectionFlag,
+                            fontSize = 16.sp
+                        )
+                    } else if (currentSelectionIcon != null) {
+                        Icon(
+                            imageVector = currentSelectionIcon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    if (showTextInCollapsed) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = currentSelectionText,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(2.dp))
                     Icon(
                         imageVector = Icons.Filled.KeyboardArrowDown,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
@@ -1017,20 +1074,26 @@ private fun SettingsSwitchItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Colonna testi: Titolo sopra, Sottotitolo multiriga sotto con spaziatura di 4.dp
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             AutoResizedText(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            AutoResizedText(
+            Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                softWrap = true,
+                maxLines = 3,
+                lineHeight = 16.sp
             )
         }
 

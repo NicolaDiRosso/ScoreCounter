@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">Personalizzazione gioco</string>
     <string name="opt_passo_punteggio">Incremento e decremento rapido</string>
     <string name="desc_passo_punteggio">Personalizza i punti aggiunti e sottratti con la pressione prolungata</string>
-    <string name="opt_incremento_lungo">Incremento prolungato (+)</string>
-    <string name="desc_incremento_lungo">Punti aggiunti tenendo premuto il tasto +</string>
-    <string name="opt_decremento_lungo">Decremento prolungato (-)</string>
-    <string name="desc_decremento_lungo">Punti sottratti tenendo premuto il tasto -</string>
+    <string name="opt_incremento_lungo">Incremento prolungato</string>
+    <string name="desc_incremento_lungo">Punti aggiunti automaticamente quando tieni premuto il tasto +</string>
+    <string name="opt_decremento_lungo">Decremento prolungato</string>
+    <string name="desc_decremento_lungo">Punti sottratti automaticamente quando tieni premuto il tasto -</string>
     <string name="desc_dialog_passo">Seleziona un valore rapido o inserisci un numero personalizzato:</string>
     <string name="hint_valore_personalizzato">Valore personalizzato</string>
     <string name="opt_ordinamento_classifica">Ordinamento dinamico classifica</string>

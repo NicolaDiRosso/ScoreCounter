@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">ゲームのカスタマイズ</string>
     <string name="opt_passo_punteggio">クイック増減幅</string>
     <string name="desc_passo_punteggio">長押し時の増減ポイントをカスタマイズ</string>
-    <string name="opt_incremento_lungo">長押し増加 (+)</string>
-    <string name="desc_incremento_lungo">+長押し時に追加されるポイント</string>
-    <string name="opt_decremento_lungo">長押し減少 (-)</string>
-    <string name="desc_decremento_lungo">-長押し時に減算されるポイント</string>
+    <string name="opt_incremento_lungo">長押し増加</string>
+    <string name="desc_incremento_lungo">+ボタンを長押しするとポイントが自動的に追加されます</string>
+    <string name="opt_decremento_lungo">長押し減少</string>
+    <string name="desc_decremento_lungo">-ボタンを長押しするとポイントが自動的に減算されます</string>
     <string name="desc_dialog_passo">クイック値を選択するか、カスタム数値を入力してください：</string>
     <string name="hint_valore_personalizzato">カスタム値</string>
     <string name="opt_ordinamento_classifica">順位の動的ソート</string>

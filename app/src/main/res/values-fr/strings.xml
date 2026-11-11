@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">Personnalisation du jeu</string>
     <string name="opt_passo_punteggio">Incrément et décrément rapides</string>
     <string name="desc_passo_punteggio">Personnaliser les points ajoutés et retirés lors d\'un appui long</string>
-    <string name="opt_incremento_lungo">Incrément appui long (+)</string>
-    <string name="desc_incremento_lungo">Points ajoutés en maintenant +</string>
-    <string name="opt_decremento_lungo">Décrément appui long (-)</string>
-    <string name="desc_decremento_lungo">Points retirés en maintenant -</string>
+    <string name="opt_incremento_lungo">Incrément appui long</string>
+    <string name="desc_incremento_lungo">Points ajoutés automatiquement lors du maintien du bouton +</string>
+    <string name="opt_decremento_lungo">Décrément appui long</string>
+    <string name="desc_decremento_lungo">Points retirés automatiquement lors du maintien du bouton -</string>
     <string name="desc_dialog_passo">Sélectionnez une valeur rapide ou entrez un nombre personnalisé :</string>
     <string name="hint_valore_personalizzato">Valeur personnalisée</string>
     <string name="opt_ordinamento_classifica">Tri dynamique du classement</string>

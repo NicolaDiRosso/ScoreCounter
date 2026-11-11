@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">Personalización del juego</string>
     <string name="opt_passo_punteggio">Incremento y decremento rápido</string>
     <string name="desc_passo_punteggio">Personaliza los puntos añadidos y restados al mantener pulsado</string>
-    <string name="opt_incremento_lungo">Incremento pulsación larga (+)</string>
-    <string name="desc_incremento_lungo">Puntos añadidos al mantener pulsado +</string>
-    <string name="opt_decremento_lungo">Decremento pulsación larga (-)</string>
-    <string name="desc_decremento_lungo">Puntos restados al mantener pulsado -</string>
+    <string name="opt_incremento_lungo">Incremento pulsación larga</string>
+    <string name="desc_incremento_lungo">Puntos añadidos automáticamente al mantener pulsado el botón +</string>
+    <string name="opt_decremento_lungo">Decremento pulsación larga</string>
+    <string name="desc_decremento_lungo">Puntos restados automáticamente al mantener pulsado el botón -</string>
     <string name="desc_dialog_passo">Selecciona un valor rápido o introduce un número personalizado:</string>
     <string name="hint_valore_personalizzato">Valor personalizado</string>
     <string name="opt_ordinamento_classifica">Orden dinámico de clasificación</string>

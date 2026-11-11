@@ -400,10 +400,10 @@
     <string name="sez_personalizzazione_gioco">गेम अनुकूलन</string>
     <string name="opt_passo_punteggio">त्वरित वृद्धि और कमी</string>
     <string name="desc_passo_punteggio">लंबे समय तक दबाने पर जोड़े और घटाए गए अंकों को कस्टमाइज़ करें</string>
-    <string name="opt_incremento_lungo">लॉन्ग प्रेस वृद्धि (+)</string>
-    <string name="desc_incremento_lungo">+ दबाए रखने पर जोड़े गए अंक</string>
-    <string name="opt_decremento_lungo">लॉन्ग प्रेस कमी (-)</string>
-    <string name="desc_decremento_lungo">- दबाए रखने पर घटाए गए अंक</string>
+    <string name="opt_incremento_lungo">लॉन्ग प्रेस वृद्धि</string>
+    <string name="desc_incremento_lungo">+ बटन दबाए रखने पर अंक स्वचालित रूप से जोड़े जाते हैं</string>
+    <string name="opt_decremento_lungo">लॉन्ग प्रेस कमी</string>
+    <string name="desc_decremento_lungo">- बटन दबाए रखने पर अंक स्वचालित रूप से घटाए जाते हैं</string>
     <string name="desc_dialog_passo">त्वरित मान चुनें या कस्टम नंबर दर्ज करें:</string>
     <string name="hint_valore_personalizzato">कस्टम मान</string>
     <string name="opt_ordinamento_classifica">डायनामिक लीडरबोर्ड सॉर्टिंग</string>
