@@ -188,39 +188,7 @@ fun HomeScreenLandscape(
                     }
 
                     // ------------------------------------------------------------
-                    // CARD AZIONE 3: SOSTIENI SCORECOUNTER (DONAZIONE)
-                    // ------------------------------------------------------------
-                    HomeLandscapeActionCard(
-                        icon = Icons.Filled.Favorite,
-                        title = stringResource(R.string.title_sostieni_landscape),
-                        subtitle = stringResource(R.string.subtitle_sostieni_landscape),
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
-                        iconTintColor = MaterialTheme.colorScheme.onTertiary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onShowDonationDialog()
-                        }
-                    )
-
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 3: INFO APP & FEEDBACK
-                    // ------------------------------------------------------------
-                    HomeLandscapeActionCard(
-                        icon = Icons.AutoMirrored.Filled.Help,
-                        title = stringResource(R.string.title_info_landscape),
-                        subtitle = stringResource(R.string.subtitle_info_landscape),
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        iconBackgroundColor = MaterialTheme.colorScheme.primary,
-                        iconTintColor = MaterialTheme.colorScheme.onPrimary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onShowAboutDialog()
-                        }
-                    )
-
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 4: IMPOSTAZIONI E PREFERENZE
+                    // CARD AZIONE 2: IMPOSTAZIONI E PREFERENZE
                     // ------------------------------------------------------------
                     HomeLandscapeActionCard(
                         icon = Icons.Filled.Settings,
@@ -236,7 +204,7 @@ fun HomeScreenLandscape(
                     )
 
                     // ------------------------------------------------------------
-                    // CARD AZIONE 5: BACKUP E RIPRISTINO DATI
+                    // CARD AZIONE 3: BACKUP E RIPRISTINO DATI
                     // ------------------------------------------------------------
                     HomeLandscapeActionCard(
                         icon = Icons.Filled.Storage,
@@ -248,6 +216,38 @@ fun HomeScreenLandscape(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             onShowBackupDialog()
+                        }
+                    )
+
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 4: SOSTIENI SCORECOUNTER (DONAZIONE)
+                    // ------------------------------------------------------------
+                    HomeLandscapeActionCard(
+                        icon = Icons.Filled.Favorite,
+                        title = stringResource(R.string.title_sostieni_landscape),
+                        subtitle = stringResource(R.string.subtitle_sostieni_landscape),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
+                        iconTintColor = MaterialTheme.colorScheme.onTertiary,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onShowDonationDialog()
+                        }
+                    )
+
+                    // ------------------------------------------------------------
+                    // CARD AZIONE 5: INFO APP & FEEDBACK
+                    // ------------------------------------------------------------
+                    HomeLandscapeActionCard(
+                        icon = Icons.AutoMirrored.Filled.Help,
+                        title = stringResource(R.string.title_info_landscape),
+                        subtitle = stringResource(R.string.subtitle_info_landscape),
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        iconBackgroundColor = MaterialTheme.colorScheme.primary,
+                        iconTintColor = MaterialTheme.colorScheme.onPrimary,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onShowAboutDialog()
                         }
                     )
                 }
