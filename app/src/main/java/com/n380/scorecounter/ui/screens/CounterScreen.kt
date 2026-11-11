@@ -281,10 +281,13 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                                 if (viewModel.isNavigationLocked || showEndMatchDialog) return@OutlinedButton
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 diceRollCount++
+
+                                // 🧠 LOGICA DIDATTICA (Conferma Azioni Rapide):
+                                // Verifichiamo se l'utente ha attivato la richiesta di conferma nelle impostazioni.
                                 if (viewModel.confirmQuickActions) {
-                                    showResetDialog = true
+                                    showResetDialog = true // Mostra il dialogo di conferma azzeramento
                                 } else {
-                                    viewModel.resetScoresWithUndo()
+                                    viewModel.resetScoresWithUndo() // Esegue l'azzeramento istantaneamente senza dialoghi
                                 }
                             },
                             modifier = Modifier
@@ -322,6 +325,10 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                                 // PROTEZIONE LUCCHETTO: Ignora se stiamo azzerando
                                 if (viewModel.isNavigationLocked || showResetDialog) return@Button
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                                // 🧠 LOGICA DIDATTICA (Conferma Azioni Rapide):
+                                // Se attivo, mette in pausa il timer e apre il dialogo di fine partita.
+                                // Se disattivo, chiude istantaneamente la partita, salva e naviga ai risultati.
                                 if (viewModel.confirmQuickActions) {
                                     viewModel.pauseTimer()
                                     showEndMatchDialog = true

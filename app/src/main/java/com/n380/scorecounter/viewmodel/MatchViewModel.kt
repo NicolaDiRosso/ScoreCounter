@@ -139,6 +139,13 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     // 6. CONFERMA AZIONI RAPIDE (Azzera e Concludi):
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Memorizza se l'utente desidera visualizzare i dialoghi di conferma prima di eseguire
+     * azioni distruttive o definitive come "Azzera" i punteggi o "Concludi" la partita in corso.
+     * - Se TRUE (default): I tasti aprono il rispettivo AlertDialog di conferma.
+     * - Se FALSE: I tasti eseguono l'azione istantaneamente senza chiedere conferme.
+     */
     private val confirmQuickActionsKey = booleanPreferencesKey("confirm_quick_actions_preference")
     var confirmQuickActions by mutableStateOf(true)
         private set
@@ -273,6 +280,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * IMPOSTAZIONE E PERSISTENZA CONFERMA AZIONI RAPIDE
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna immediatamente lo stato booleano in memoria (`confirmQuickActions`).
+     * 2. Scrive asincronamente la preferenza nel DataStore Preferences su disco tramite `dataStore.edit`.
      */
     fun setConfirmQuickActionsPreference(enabled: Boolean) {
         confirmQuickActions = enabled
