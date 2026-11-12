@@ -397,6 +397,8 @@
     <string name="opt_schermo_disattivato">Disabled</string>
     <string name="opt_conferma_azioni">Confirm quick actions</string>
     <string name="desc_conferma_azioni">Ask confirmation for \'Reset\' and \'Finish\' during match</string>
+    <string name="opt_feedback_aptico">Haptic feedback</string>
+    <string name="desc_feedback_aptico">Enable or disable tactile vibration on touches in the app</string>
     <string name="sez_personalizzazione_gioco">Game customization</string>
     <string name="opt_passo_punteggio">Quick increment &amp; decrement</string>
     <string name="desc_passo_punteggio">Customize points added and subtracted on long press</string>

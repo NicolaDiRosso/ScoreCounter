@@ -530,106 +530,117 @@ fun DiceRollDialog(
     onDismiss: () -> Unit,     // Callback per chiudere il dialogo modale
     onOpenSettings: () -> Unit // Callback per aprire le impostazioni del dado
 ) {
-    // Otteniamo il riferimento al motore di vibrazione aptica
+    // Otteniamo il riferimento al motore di vibrazione aptica del contesto padre (customHaptic di MainActivity)
     val haptic = LocalHapticFeedback.current
 
     AlertDialog(
         onDismissRequest = onDismiss, // Esegue onDismiss quando si clicca all'esterno o si preme indietro
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Titolo principale del dialogo ("Lancio del dado")
-                AutoResizedText(
-                    text = stringResource(R.string.titolo_lancio_dado),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f)
-                )
-
-                // Pillola in alto a destra per mostrare il tipo di dado corrente (es. "D6") e aprire le impostazioni
-                Surface(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onOpenSettings()
-                    },
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+            // 🧠 INIEZIONE LOCAL HAPTIC DENTRO LA FINESTRA MODALE DELL'ALERTDIALOG:
+            // Gli AlertDialog creano una nuova finestra di Android (DialogWindow) slegata dall'albero radice.
+            // Iniettando 'CompositionLocalProvider' dentro le lambda del contenuto del dialogo,
+            // garantiamo che il provider customHaptic venga ereditato ed eseguito al 100%.
+            CompositionLocalProvider(LocalHapticFeedback provides haptic) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    // Titolo principale del dialogo ("Lancio del dado")
+                    AutoResizedText(
+                        text = stringResource(R.string.titolo_lancio_dado),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    // Pillola in alto a destra per mostrare il tipo di dado corrente (es. "D6") e aprire le impostazioni
+                    Surface(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onOpenSettings()
+                        },
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = stringResource(R.string.desc_gestisci_rapidi_icon),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        AutoResizedText(
-                            text = "D$diceSides",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.widthIn(max = 50.dp),
-                        )
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Settings,
+                                contentDescription = stringResource(R.string.desc_gestisci_rapidi_icon),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            AutoResizedText(
+                                text = "D$diceSides",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.widthIn(max = 50.dp),
+                            )
+                        }
                     }
                 }
             }
         },
         text = {
-            // Contenitore centrale che ospita il dado fisico 3D animato
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                MaterialYouDice3D(
-                    result = result,
-                    diceSides = diceSides,
-                    rollCount = rollCount
-                )
+            // 🧠 INIEZIONE LOCAL HAPTIC DENTRO IL TESTO DEL DIALOGO:
+            // Garantisce che il componente MaterialYouDice3D erediti customHaptic durante le micro-vibrazioni del lancio.
+            CompositionLocalProvider(LocalHapticFeedback provides haptic) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    MaterialYouDice3D(
+                        result = result,
+                        diceSides = diceSides,
+                        rollCount = rollCount
+                    )
+                }
             }
         },
         confirmButton = {
-            // Riga orizzontale contenente i pulsanti d'azione "CHIUDI" e "RILANCIA"
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Pulsante Chiudi (Outlined)
-                OutlinedButton(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(55.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        onDismiss()
+            // 🧠 INIEZIONE LOCAL HAPTIC DENTRO I PULSANTI D'AZIONE DEL DIALOGO
+            CompositionLocalProvider(LocalHapticFeedback provides haptic) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Pulsante Chiudi (Outlined)
+                    OutlinedButton(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(55.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onDismiss()
+                        }
+                    ) {
+                        Text(stringResource(R.string.btn_chiudi), fontWeight = FontWeight.Bold)
                     }
-                ) {
-                    Text(stringResource(R.string.btn_chiudi), fontWeight = FontWeight.Bold)
-                }
 
-                // Pulsante Rilancia (Pieno in Primary Container)
-                Button(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(55.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onRollAgain()
+                    // Pulsante Rilancia (Pieno in Primary Container)
+                    Button(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(55.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onRollAgain()
+                        }
+                    ) {
+                        AutoResizedText(stringResource(R.string.btn_rilancia), fontWeight = FontWeight.Bold)
                     }
-                ) {
-                    AutoResizedText(stringResource(R.string.btn_rilancia), fontWeight = FontWeight.Bold)
                 }
             }
         },

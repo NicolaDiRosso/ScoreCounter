@@ -397,6 +397,8 @@
     <string name="opt_schermo_disattivato">Disattivato</string>
     <string name="opt_conferma_azioni">Conferma azioni rapide</string>
     <string name="desc_conferma_azioni">Richiedi conferma per \"Azzera\" e \"Concludi\" durante la partita</string>
+    <string name="opt_feedback_aptico">Feedback aptico</string>
+    <string name="desc_feedback_aptico">Attiva o disattiva le vibrazioni tattili durante le interazioni nell\'app</string>
     <string name="sez_personalizzazione_gioco">Personalizzazione gioco</string>
     <string name="opt_passo_punteggio">Incremento e decremento rapido</string>
     <string name="desc_passo_punteggio">Personalizza i punti aggiunti e sottratti con la pressione prolungata</string>

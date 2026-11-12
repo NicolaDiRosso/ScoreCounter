@@ -397,6 +397,8 @@
     <string name="opt_schermo_disattivato">Désactivé</string>
     <string name="opt_conferma_azioni">Confirmer les actions rapides</string>
     <string name="desc_conferma_azioni">Demander confirmation pour \"Réinitialiser\" et \"Terminer\" pendant la partie</string>
+    <string name="opt_feedback_aptico">Retour haptique</string>
+    <string name="desc_feedback_aptico">Activer ou désactiver les vibrations tactiles dans l\'application</string>
     <string name="sez_personalizzazione_gioco">Personnalisation du jeu</string>
     <string name="opt_passo_punteggio">Incrément et décrément rapides</string>
     <string name="desc_passo_punteggio">Personnaliser les points ajoutés et retirés lors d\'un appui long</string>

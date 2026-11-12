@@ -397,6 +397,8 @@
     <string name="opt_schermo_disattivato">Deaktiviert</string>
     <string name="opt_conferma_azioni">Schnellaktionen bestätigen</string>
     <string name="desc_conferma_azioni">Bestätigung für \"Zurücksetzen\" und \"Beenden\" im Spiel anfordern</string>
+    <string name="opt_feedback_aptico">Haptisches Feedback</string>
+    <string name="desc_feedback_aptico">Aktivieren oder Deaktivieren der haptischen Vibration in der App</string>
     <string name="sez_personalizzazione_gioco">Spielanpassung</string>
     <string name="opt_passo_punteggio">Schnelles Erhöhen &amp; Verringern</string>
     <string name="desc_passo_punteggio">Punkte für langes Drücken anpassen</string>

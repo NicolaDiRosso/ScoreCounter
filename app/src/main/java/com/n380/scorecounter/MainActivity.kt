@@ -74,7 +74,26 @@ class MainActivity : ComponentActivity() {
                 else -> androidx.compose.foundation.isSystemInDarkTheme()
             }
 
-            ScoreCounterTheme(darkTheme = isDarkTheme) {
+            // 🧠 SPIEGAZIONE DIDATTICA (Sobrascrittura Reattiva di LocalHapticFeedback):
+            // Intercettiamo il provider di feedback aptico nativo di Android (`LocalHapticFeedback.current`).
+            // Creiamo un wrapper reattivo che verifica la preferenza dell'utente (`matchViewModel.isHapticFeedbackEnabled`).
+            // - Se abilitato (true): delega la vibrazione al servizio di sistema.
+            // - Se disabilitato (false): intercetta la chiamata silenziando ogni vibrazione nell'intera app.
+            val systemHaptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+            val customHaptic = androidx.compose.runtime.remember(systemHaptic, matchViewModel.isHapticFeedbackEnabled) {
+                object : androidx.compose.ui.hapticfeedback.HapticFeedback {
+                    override fun performHapticFeedback(hapticFeedbackType: androidx.compose.ui.hapticfeedback.HapticFeedbackType) {
+                        if (matchViewModel.isHapticFeedbackEnabled) {
+                            systemHaptic.performHapticFeedback(hapticFeedbackType)
+                        }
+                    }
+                }
+            }
+
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalHapticFeedback provides customHaptic
+            ) {
+                ScoreCounterTheme(darkTheme = isDarkTheme) {
 
                 // ====================================================================
                 // ---> Il Livello Base <---
@@ -295,4 +314,5 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
 }

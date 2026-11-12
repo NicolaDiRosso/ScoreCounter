@@ -525,6 +525,24 @@ fun SettingsScreen(
                                 viewModel.setConfirmQuickActionsPreference(checked)
                             }
                         )
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // ------------------------------------------------------------
+                        // B.3: FEEDBACK APTICO GLOBALE (Interruttore Switch On/Off)
+                        // ------------------------------------------------------------
+                        SettingsSwitchItem(
+                            title = stringResource(R.string.opt_feedback_aptico),
+                            subtitle = stringResource(R.string.desc_feedback_aptico),
+                            isChecked = viewModel.isHapticFeedbackEnabled,
+                            onCheckedChange = { checked ->
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                viewModel.setHapticFeedbackPreference(checked)
+                            }
+                        )
                     }
 
                     // ================================================================

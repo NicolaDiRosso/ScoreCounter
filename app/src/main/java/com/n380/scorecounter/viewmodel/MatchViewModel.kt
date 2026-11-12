@@ -129,6 +129,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var keepScreenOnMode by mutableIntStateOf(0)
         private set
 
+    // 4.5 FEEDBACK APTICO GLOBALE:
+    // Memorizza e gestisce l'abilitazione delle vibrazioni tattili dell'app (true di default al primo avvio)
+    private val hapticFeedbackKey = booleanPreferencesKey("haptic_feedback_preference")
+    var isHapticFeedbackEnabled by mutableStateOf(true)
+        private set
+
     // 5. PASSO PRESSIONE PROLUNGATA (+ e -):
     private val longPressPositiveStepKey = intPreferencesKey("long_press_positive_step")
     var longPressPositiveStep by mutableIntStateOf(10)
@@ -288,6 +294,16 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 confirmQuickActions = true
             }
 
+            // CARICAMENTO PREFERENZA FEEDBACK APTICO GLOBALE
+            try {
+                val savedHaptic = preferences[hapticFeedbackKey]
+                if (savedHaptic != null) {
+                    isHapticFeedbackEnabled = savedHaptic
+                }
+            } catch (_: Exception) {
+                isHapticFeedbackEnabled = true
+            }
+
             // CARICAMENTO PREFERENZA ORDINAMENTO DINAMICO CLASSIFICA
             try {
                 val savedDynamicSorting = preferences[dynamicLeaderboardSortingKey]
@@ -296,6 +312,21 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 dynamicLeaderboardSorting = false
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA FEEDBACK APTICO
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato booleano `isHapticFeedbackEnabled` in memoria.
+     * 2. Scrive la preferenza asincronamente nel DataStore su disco.
+     */
+    fun setHapticFeedbackPreference(enabled: Boolean) {
+        isHapticFeedbackEnabled = enabled
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[hapticFeedbackKey] = enabled
             }
         }
     }

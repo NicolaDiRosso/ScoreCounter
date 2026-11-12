@@ -397,6 +397,8 @@
     <string name="opt_schermo_disattivato">無効</string>
     <string name="opt_conferma_azioni">クイック操作の確認</string>
     <string name="desc_conferma_azioni">対戦中の「リセット」と「終了」の確認を表示</string>
+    <string name="opt_feedback_aptico">触覚フィードバック</string>
+    <string name="desc_feedback_aptico">アプリ内でのタッチ時の振動を有効または無効にします</string>
     <string name="sez_personalizzazione_gioco">ゲームのカスタマイズ</string>
     <string name="opt_passo_punteggio">クイック増減幅</string>
     <string name="desc_passo_punteggio">長押し時の増減ポイントをカスタマイズ</string>
