@@ -599,58 +599,197 @@ import com.n380.scorecounter.ui.components.FeatureInfoDialog
                     // Scrivendo solo 24.dp (senza specificare top o bottom), Android stonda tutti e 4 gli angoli!
                     shape = RoundedCornerShape(24.dp)
                 ) {
-                    // OTTIMIZZAZIONE LAYOUT:
-                    // Se lasciamo il padding sulla Column, la lista viene "tagliata" appena i nomi dei
-                    // giocatori toccano quel bordo invisibile durante lo scorrimento.
-                    Column(modifier = Modifier.fillMaxSize()) {
+                    // 🧠 ARCHITETTURA RESPONSIVA ADATTIVA (BoxWithConstraints):
+                    // Misuriamo l'altezza e la larghezza reale a disposizione del tavolo.
+                    // Questo ci consente di calcolare matematicamente se le card possono espandersi
+                    // ed equispaziarsi su tutto lo schermo (senza lasciare vuoti inferiori asimmetrici)
+                    // o se devono passare alla visualizzazione compatta a scorrimento.
+                    val tablePadding = 12.dp // Margine perimetrale uniforme su tutti e 4 i lati del tavolo
+                    val spacingBetweenCards = tablePadding // 🧠 Distanza tra le varie card IDENTICA al margine perimetrale!
 
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            // ContentPadding:
-                            // Mettiamo i margini (top, horizontal e bottom) dentro la LazyColumn,
-                            // permettiamo alle carte di scivolare fin sotto il bordo arrotondato della Card.
-                            contentPadding = PaddingValues(
-                                top = 16.dp,
-                                start = 12.dp,
-                                end = 12.dp,
-                                bottom = 16.dp
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(tablePadding) // 🧠 Margine esterno perfettamente uniforme sui 4 lati (top, bottom, start, end)
+                    ) {
+                        val availableWidth = maxWidth
+                        val availableHeight = maxHeight
+
+                        // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
+                        // Verifichiamo se l'impostazione "Ordinamento dinamico classifica" è attiva.
+                        // Se attiva, ordiniamo i giocatori:
+                        // 1. Primariamente per punteggio discendente (`compareByDescending { it.score }`).
+                        // 2. Secondariamente (in caso di parità) per timestamp di ultimo aggiornamento (`thenByDescending { it.lastScoreUpdateTime }`),
+                        //    garantendo che l'ultimo giocatore ad aver segnato salga in cima tra i pari merito.
+                        // Se disattiva, manteniamo l'ordine originale della lista.
+                        val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
+                            viewModel.players.sortedWith(
+                                compareByDescending<Player> { it.score }
+                                    .thenByDescending { it.lastScoreUpdateTime }
                             )
-                        ) {
-                            // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
-                            // Verifichiamo se l'impostazione "Ordinamento dinamico classifica" è attiva.
-                            // Se attiva, ordiniamo i giocatori:
-                            // 1. Primariamente per punteggio discendente (`compareByDescending { it.score }`).
-                            // 2. Secondariamente (in caso di parità) per timestamp di ultimo aggiornamento (`thenByDescending { it.lastScoreUpdateTime }`),
-                            //    garantendo che l'ultimo giocatore ad aver segnato salga in cima tra i pari merito.
-                            // Se disattiva, manteniamo l'ordine originale della lista.
-                            val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
-                                viewModel.players.sortedWith(
-                                    compareByDescending<Player> { it.score }
-                                        .thenByDescending { it.lastScoreUpdateTime }
-                                )
-                            } else {
-                                viewModel.players
+                        } else {
+                            viewModel.players
+                        }
+
+                        val playerCount = displayedPlayers.size
+
+                        // 🧠 METRICHE E SOGLIE RESPONSIVE:
+                        // L'altezza minima confortevole per una card espansa affinché non risulti schiacciata è ~105.dp.
+                        val minExpandedCardHeight = 105.dp
+
+                        // Schermi ampi (tablet / foldable aperto con larghezza >= 540.dp)
+                        val isTabletOrWide = availableWidth >= 540.dp
+
+                        // Calcoliamo se lo spazio reale disponibile permette la visualizzazione espansa
+                        val (isExpandedMode, useTwoColumns) = when {
+                            isTabletOrWide -> {
+                                val rows = (playerCount + 1) / 2
+                                val heightNeeded = (minExpandedCardHeight * rows) + (spacingBetweenCards * (rows - 1).coerceAtLeast(0))
+                                val fits = heightNeeded <= availableHeight && playerCount <= 8
+                                Pair(fits, fits)
                             }
+                            else -> {
+                                // Su smartphone standard a colonna singola:
+                                // Attiviamo la modalità espansa per 1-4 giocatori come standard,
+                                // oppure fino a 5 giocatori solo su display molto alti/ampi dove heightNeeded <= availableHeight.
+                                // Con 6 o più giocatori (o se lo spazio verticale non basta), passiamo alla modalità compatta.
+                                val heightNeeded = (minExpandedCardHeight * playerCount) + (spacingBetweenCards * (playerCount - 1).coerceAtLeast(0))
+                                val fits = (playerCount in 1..4 && heightNeeded <= availableHeight) ||
+                                        (playerCount == 5 && heightNeeded <= availableHeight)
+                                Pair(fits, false)
+                            }
+                        }
 
-                            items(
-                                items = displayedPlayers,
-                                key = { player -> player.name } // Chiave stabile per animazioni fluide
-                            ) { p ->
+                        if (isExpandedMode) {
+                            if (useTwoColumns) {
+                                // 🌟 MODALITÀ ESPANSA PER TABLET (Griglia bilanciata a 2 colonne)
+                                Row(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                                ) {
+                                    val half = (playerCount + 1) / 2
+                                    val leftPlayers = displayedPlayers.take(half)
+                                    val rightPlayers = displayedPlayers.drop(half)
 
-                                val isLeader = p.score == maxScore && maxScore > 0
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                        verticalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                                    ) {
+                                        leftPlayers.forEach { p ->
+                                            key(p.name) {
+                                                val isLeader = p.score == maxScore && maxScore > 0
+                                                PlayerScoreCard(
+                                                    player = p,
+                                                    isLeader = isLeader,
+                                                    positiveStep = viewModel.longPressPositiveStep,
+                                                    negativeStep = viewModel.longPressNegativeStep,
+                                                    totalPlayers = playerCount,
+                                                    isExpandedMode = true,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .fillMaxWidth(),
+                                                    onScoreChange = { amount -> viewModel.updatePlayerScore(p, amount) },
+                                                    onScoreClick = { playerForManualEdit = p }
+                                                )
+                                            }
+                                        }
+                                    }
 
-                                PlayerScoreCard(
-                                    player = p,
-                                    isLeader = isLeader,
-                                    positiveStep = viewModel.longPressPositiveStep,
-                                    negativeStep = viewModel.longPressNegativeStep,
-                                    totalPlayers = displayedPlayers.size,
-                                    onScoreChange = { amount ->
-                                        viewModel.updatePlayerScore(p, amount)
-                                    },
-                                    onScoreClick = { playerForManualEdit = p }
-                                )
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                        verticalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                                    ) {
+                                        rightPlayers.forEach { p ->
+                                            key(p.name) {
+                                                val isLeader = p.score == maxScore && maxScore > 0
+                                                PlayerScoreCard(
+                                                    player = p,
+                                                    isLeader = isLeader,
+                                                    positiveStep = viewModel.longPressPositiveStep,
+                                                    negativeStep = viewModel.longPressNegativeStep,
+                                                    totalPlayers = playerCount,
+                                                    isExpandedMode = true,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .fillMaxWidth(),
+                                                    onScoreChange = { amount -> viewModel.updatePlayerScore(p, amount) },
+                                                    onScoreClick = { playerForManualEdit = p }
+                                                )
+                                            }
+                                        }
+                                        if (rightPlayers.size < leftPlayers.size) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            } else {
+                                // 🌟 MODALITÀ ESPANSA SMARTPHONE (1-4, o 5 su display alti)
+                                // 🧠 DISTRIBUZIONE UNIFORME DELLO SPAZIO:
+                                // Assegnando `Modifier.weight(1f)` a tutte le card, queste assumono
+                                // esattamente la stessa altezza e riempiono perfettamente l'intero tavolo.
+                                // In questo modo viene eliminato qualsiasi vuoto asimmetrico in basso!
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                                ) {
+                                    displayedPlayers.forEach { p ->
+                                        key(p.name) {
+                                            val isLeader = p.score == maxScore && maxScore > 0
+                                            val cardModifier = if (playerCount == 1) {
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(min = 130.dp, max = 190.dp)
+                                            } else {
+                                                Modifier
+                                                    .weight(1f)
+                                                    .fillMaxWidth()
+                                            }
+
+                                            PlayerScoreCard(
+                                                player = p,
+                                                isLeader = isLeader,
+                                                positiveStep = viewModel.longPressPositiveStep,
+                                                negativeStep = viewModel.longPressNegativeStep,
+                                                totalPlayers = playerCount,
+                                                isExpandedMode = true,
+                                                modifier = cardModifier,
+                                                onScoreChange = { amount -> viewModel.updatePlayerScore(p, amount) },
+                                                onScoreClick = { playerForManualEdit = p }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // 📊 MODALITÀ COMPATTA (5 o più giocatori su mobile, o altezza insufficiente)
+                            // Utilizziamo LazyColumn per consentire lo scorrimento fluido ad alta densità.
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                            ) {
+                                items(
+                                    items = displayedPlayers,
+                                    key = { player -> player.name } // Chiave stabile per animazioni fluide
+                                ) { p ->
+                                    val isLeader = p.score == maxScore && maxScore > 0
+
+                                    PlayerScoreCard(
+                                        player = p,
+                                        isLeader = isLeader,
+                                        positiveStep = viewModel.longPressPositiveStep,
+                                        negativeStep = viewModel.longPressNegativeStep,
+                                        totalPlayers = playerCount,
+                                        isExpandedMode = false,
+                                        onScoreChange = { amount ->
+                                            viewModel.updatePlayerScore(p, amount)
+                                        },
+                                        onScoreClick = { playerForManualEdit = p }
+                                    )
+                                }
                             }
                         }
                     }
