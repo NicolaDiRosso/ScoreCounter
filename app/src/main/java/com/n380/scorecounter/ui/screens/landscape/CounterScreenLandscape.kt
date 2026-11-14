@@ -352,6 +352,7 @@ fun CounterScreenLandscape(
                         isLeader = maxScore > 0 && player.score == maxScore,
                         positiveStep = viewModel.longPressPositiveStep,
                         negativeStep = viewModel.longPressNegativeStep,
+                        totalPlayers = displayedPlayers.size,
                         onScoreChange = { amount ->
                             viewModel.updatePlayerScore(player, amount)
                         },

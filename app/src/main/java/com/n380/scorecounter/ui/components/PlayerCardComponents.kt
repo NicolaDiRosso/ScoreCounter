@@ -252,8 +252,11 @@
      * COMPONENTE: PlayerScoreCard (Stile Material You Accent)
      * ====================================================================
      * Questa card viene usata nella schermata della Sfida in corso.
-     * Mantiene il look minimale con la Accent Bar, ma include i controlli
-     * "Gamepad" (+ e -) per gestire i punteggi.
+     * Supporta una DOPPIA MODALITÀ ADATTIVA in base al numero di partecipanti:
+     * - MODALITÀ ESPANSA (1-4 giocatori): Layout verticale arioso con nome in
+     *   alto a sinistra, pulsanti ampi ed ergonomici e punteggio gigante al centro.
+     * - MODALITÀ COMPATTA (5+ giocatori): Layout su singola riga ad alta densità
+     *   informativa per evitare scrolling eccessivo e mantenere tutto compatto.
      * ====================================================================
      */
     @OptIn(ExperimentalFoundationApi::class)
@@ -263,6 +266,8 @@
         isLeader: Boolean = false,
         positiveStep: Int = 10,
         negativeStep: Int = 5,
+        totalPlayers: Int = 0,
+        isExpandedMode: Boolean = totalPlayers in 1..4,
         onScoreChange: (Int) -> Unit,
         onScoreClick: () -> Unit
     ) {
@@ -284,6 +289,9 @@
             // attiviamo la modalità compattata ricalcolando le misure in modo proporzionale.
             val isCompact = availableWidth < 320.dp || isLandscape
 
+            // ====================================================================
+            // 📏 MISURE E TOKEN DI DESIGN PER IL LAYOUT COMPATTO (5+ GIOCATORI)
+            // ====================================================================
             // size 42.dp per impostare la dimensione fissa del pulsante nei layout compatti e 48.dp nei layout estesi
             val buttonSize = if (isCompact) 42.dp else 48.dp
             // size 20.dp per impostare la dimensione fissa dell'icona del pulsante
@@ -297,9 +305,25 @@
             // padding 10.dp per il margine interno verticale della card
             val verticalPadding = if (isCompact) 10.dp else 12.dp
 
+            // ====================================================================
+            // 🎨 TOKEN E DIMENSIONI PER IL LAYOUT ESPANSO (1-4 GIOCATORI)
+            // ====================================================================
+            // Pulsanti ergonomici in stile Material 3 Expressive: ampi e facilmente raggiungibili
+            val expandedButtonWidth = if (isCompact) 64.dp else 78.dp
+            // Altezza confortevole per il tocco delle dita
+            val expandedButtonHeight = if (isCompact) 46.dp else 52.dp
+            // Raggio di curvatura arrotondato per i pulsanti espansi
+            val expandedButtonShape = RoundedCornerShape(16.dp)
+            // Dimensione dell'icona proporzionata ai pulsanti espansi
+            val expandedIconSize = if (isCompact) 22.dp else 26.dp
+            // Spaziatura verticale esterna della card: leggermente maggiore in modalità espansa per dare respiro
+            val cardVerticalPadding = if (isExpandedMode) 6.dp else 4.dp
+
             Card(
-                // Il Modifier gestisce lo spazio fisico: occupa tutta la larghezza e metti un margine di 4dp sopra e sotto
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                // Il Modifier gestisce lo spazio fisico: occupa tutta la larghezza e applica il margine dinamico
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = cardVerticalPadding),
 
                 // Lo sfondo della card prende il colore del giocatore sbiadito al 30% (Effetto Vetro/Pastello)
                 colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.30f)),
@@ -309,7 +333,7 @@
                 // ----------------------------------------
                 // Diciamo al parametro 'border' di prendere il risultato di questa scelta logica:
                 border = if (isLeader) {
-                    // CASO VERO: Se il giocatore è in testa, crea un bordo spesso (3.dp)
+                    // CASO VERO: Se il giocatore è in testa, crea un bordo spesso (4.dp)
                     // e usa 'playerColor' puro al 100% di saturazione. Contrasto perfetto!
                     BorderStroke(4.dp, playerColor)
                 } else {
@@ -338,157 +362,330 @@
                             .background(playerColor)
                     )
 
-                    // ---> CONTENUTO DELLA CARD <---
-                    // padding 10.dp per aggiungere un margine interno proporzionato all'ingombro della card
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 1. BLOCCO NOME E CORONA
-                        // padding 8.dp per garantire un distanziamento minimo prima dei controlli del punteggio
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    // 🧠 SWITCH LOGICO DI RENDERING: MODALITÀ ESPANSA vs COMPATTA
+                    if (isExpandedMode) {
+                        // ====================================================================
+                        // 🌟 MODALITÀ ESPANSA (1 a 4 Giocatori) - Design Material 3 Expressive
+                        // ====================================================================
+                        // Quando il numero di giocatori è contenuto (1-4), sfruttiamo lo spazio verticale
+                        // disponibile per offrire un'interfaccia ariosa, altamente ergonomica e d'impatto.
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = horizontalPadding,
+                                    end = horizontalPadding,
+                                    top = if (isCompact) 10.dp else 14.dp,
+                                    bottom = if (isCompact) 10.dp else 14.dp
+                                )
                         ) {
-                            val nameStyle = when {
-                                isCompact || fontScale > 1.15f -> MaterialTheme.typography.titleMedium
-                                else -> MaterialTheme.typography.titleLarge
-                            }
-
-                            AutoResizedText(
-                                text = player.name,
-                                style = nameStyle,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                        }
-
-                        // 2. BLOCCO CONTROLLI ANCORATO E OMOGENEO (Limite Fisso Insuperabile)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-
-                            // PULSANTE MENO (Ancorato)
-                            // size 42.dp per impostare una dimensione fissa del pulsante ed evitare disomogeneità visive
-                            Box(
-                                modifier = Modifier
-                                    .size(buttonSize)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.errorContainer)
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .combinedClickable(
-                                        onClick = {
-                                            onScoreChange(-1)
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        },
-                                        onLongClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onScoreChange(-negativeStep)
-                                        }
-                                    ),
-                                contentAlignment = Alignment.Center
+                            // ---> 1. NOME DEL GIOCATORE (In alto a sinistra) <---
+                            // Posizionato in alto a sinistra per fungere da etichetta chiara e pulita,
+                            // rimanendo visivamente gerarchizzato in secondo piano rispetto al punteggio centrale.
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Remove,
-                                    contentDescription = "Diminuisci",
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                                    // size 20.dp per impostare la dimensione fissa dell'icona
-                                    modifier = Modifier.size(iconSize)
+                                val nameStyle = when {
+                                    isCompact || fontScale > 1.15f -> MaterialTheme.typography.titleMedium
+                                    else -> MaterialTheme.typography.titleLarge
+                                }
+
+                                AutoResizedText(
+                                    text = player.name,
+                                    style = nameStyle,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                             }
 
-                            // ---> PUNTEGGIO CON ANCORAGGIO FISSO (Zero Spostamenti) <---
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    // width 46.dp per bloccare rigidamente la larghezza del contenitore senza spingere il pulsante meno
-                                    .width(scoreBoxWidth)
-                                    // padding 2.dp per aggiungere un margine minimo di sicurezza tra punteggio e pulsanti
-                                    .padding(horizontal = 2.dp)
-                                    .clickable { onScoreClick() }
-                            ) {
-                                AnimatedContent(
-                                    targetState = player.score,
-                                    transitionSpec = {
-                                        if (targetState > initialState) {
-                                            (slideInVertically(animationSpec = tween(300)) { height -> height } + fadeIn(
-                                                animationSpec = tween(300)
-                                            )) togetherWith
-                                                    (slideOutVertically(animationSpec = tween(300)) { height -> -height } + fadeOut(
-                                                        animationSpec = tween(300)
-                                                    ))
-                                        } else {
-                                            (slideInVertically(animationSpec = tween(300)) { height -> -height } + fadeIn(
-                                                animationSpec = tween(300)
-                                            )) togetherWith
-                                                    (slideOutVertically(animationSpec = tween(300)) { height -> height } + fadeOut(
-                                                        animationSpec = tween(300)
-                                                    ))
-                                        }
-                                    },
-                                    label = "ScoreAnimation"
-                                ) { animatedScore ->
-                                    val scoreText = animatedScore.toString()
-                                    val scoreStyle = when {
-                                        isCompact || fontScale > 1.15f -> when {
-                                            scoreText.length <= 2 -> MaterialTheme.typography.titleLarge
-                                            scoreText.length == 3 -> MaterialTheme.typography.titleMedium
-                                            else -> MaterialTheme.typography.bodyMedium
-                                        }
-                                        else -> when {
-                                            scoreText.length <= 2 -> MaterialTheme.typography.headlineMedium
-                                            scoreText.length == 3 -> MaterialTheme.typography.titleLarge
-                                            else -> MaterialTheme.typography.titleMedium
-                                        }
-                                    }
+                            // Distanziatore proporzionato tra l'intestazione del nome e la fascia comandi
+                            Spacer(modifier = Modifier.height(if (isCompact) 6.dp else 10.dp))
 
-                                    Text(
-                                        text = scoreText,
-                                        style = scoreStyle,
-                                        fontWeight = FontWeight.Black,
-                                        color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
-                                        maxLines = 1
+                            // ---> 2. FASCIA PRINCIPALE: CONTROLLI GAMEPAD E PUNTEGGIO CENTRALE <---
+                            // Disposizione orizzontale simmetrica:
+                            // [-] a sinistra, Punteggio grande in rilievo al centro, [+] a destra
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // PULSANTE MENO (Modalità Espansa: ampio, ergonomico e Material 3 Expressive)
+                                Box(
+                                    modifier = Modifier
+                                        .width(expandedButtonWidth)
+                                        .height(expandedButtonHeight)
+                                        .clip(expandedButtonShape)
+                                        .background(MaterialTheme.colorScheme.errorContainer)
+                                        .border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
+                                            shape = expandedButtonShape
+                                        )
+                                        .combinedClickable(
+                                            onClick = {
+                                                onScoreChange(-1)
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onScoreChange(-negativeStep)
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Remove,
+                                        contentDescription = "Diminuisci",
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        modifier = Modifier.size(expandedIconSize)
+                                    )
+                                }
+
+                                // PUNTEGGIO IN PRIMO PIANO (Centrato, enfatico e con transizione animata)
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(horizontal = 4.dp)
+                                        .clickable { onScoreClick() }
+                                ) {
+                                    AnimatedContent(
+                                        targetState = player.score,
+                                        transitionSpec = {
+                                            if (targetState > initialState) {
+                                                (slideInVertically(animationSpec = tween(300)) { height -> height } + fadeIn(
+                                                    animationSpec = tween(300)
+                                                )) togetherWith
+                                                        (slideOutVertically(animationSpec = tween(300)) { height -> -height } + fadeOut(
+                                                            animationSpec = tween(300)
+                                                        ))
+                                            } else {
+                                                (slideInVertically(animationSpec = tween(300)) { height -> -height } + fadeIn(
+                                                    animationSpec = tween(300)
+                                                )) togetherWith
+                                                        (slideOutVertically(animationSpec = tween(300)) { height -> height } + fadeOut(
+                                                            animationSpec = tween(300)
+                                                        ))
+                                            }
+                                        },
+                                        label = "ScoreAnimationExpanded"
+                                    ) { animatedScore ->
+                                        val scoreText = animatedScore.toString()
+                                        val scoreStyle = when {
+                                            isCompact || fontScale > 1.15f -> when {
+                                                scoreText.length <= 2 -> MaterialTheme.typography.headlineLarge
+                                                scoreText.length == 3 -> MaterialTheme.typography.headlineMedium
+                                                else -> MaterialTheme.typography.titleLarge
+                                            }
+                                            else -> when {
+                                                scoreText.length <= 2 -> MaterialTheme.typography.displayMedium
+                                                scoreText.length == 3 -> MaterialTheme.typography.displaySmall
+                                                scoreText.length == 4 -> MaterialTheme.typography.headlineLarge
+                                                else -> MaterialTheme.typography.headlineMedium
+                                            }
+                                        }
+
+                                        Text(
+                                            text = scoreText,
+                                            style = scoreStyle,
+                                            fontWeight = FontWeight.Black,
+                                            color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+
+                                // PULSANTE PIÙ (Modalità Espansa: ampio, ergonomico e Material 3 Expressive)
+                                Box(
+                                    modifier = Modifier
+                                        .width(expandedButtonWidth)
+                                        .height(expandedButtonHeight)
+                                        .clip(expandedButtonShape)
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                        .border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                                            shape = expandedButtonShape
+                                        )
+                                        .combinedClickable(
+                                            onClick = {
+                                                onScoreChange(1)
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onScoreChange(positiveStep)
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Aumenta",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.size(expandedIconSize)
                                     )
                                 }
                             }
-
-                            // PULSANTE PIÙ (Ancorato)
-                            // size 42.dp per impostare una dimensione fissa del pulsante nei layout compatti e 48.dp in quelli estesi
-                            Box(
-                                modifier = Modifier
-                                    .size(buttonSize)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .combinedClickable(
-                                        onClick = {
-                                            onScoreChange(1)
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        },
-                                        onLongClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onScoreChange(positiveStep)
-                                        }
-                                    ),
-                                contentAlignment = Alignment.Center
+                        }
+                    } else {
+                        // ====================================================================
+                        // 📊 MODALITÀ COMPATTA (5 o più Giocatori) - Layout Esistente ad Alta Densità
+                        // ====================================================================
+                        // Quando ci sono più di 4 giocatori, preserviamo rigorosamente il layout a riga singola
+                        // con ancoraggio fisso per garantire la massima densità informativa ed evitare overflow verticali.
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // 1. BLOCCO NOME E CORONA
+                            // padding 8.dp per garantire un distanziamento minimo prima dei controlli del punteggio
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f).padding(end = 8.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Add,
-                                    contentDescription = "Aumenta",
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    // size 20.dp per impostare la dimensione fissa dell'icona
-                                    modifier = Modifier.size(iconSize)
+                                val nameStyle = when {
+                                    isCompact || fontScale > 1.15f -> MaterialTheme.typography.titleMedium
+                                    else -> MaterialTheme.typography.titleLarge
+                                }
+
+                                AutoResizedText(
+                                    text = player.name,
+                                    style = nameStyle,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
+                            }
+
+                            // 2. BLOCCO CONTROLLI ANCORATO E OMOGENEO (Limite Fisso Insuperabile)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                // PULSANTE MENO (Ancorato)
+                                // size 42.dp per impostare una dimensione fissa del pulsante ed evitare disomogeneità visive
+                                Box(
+                                    modifier = Modifier
+                                        .size(buttonSize)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.errorContainer)
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                        .combinedClickable(
+                                            onClick = {
+                                                onScoreChange(-1)
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onScoreChange(-negativeStep)
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Remove,
+                                        contentDescription = "Diminuisci",
+                                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                                        // size 20.dp per impostare la dimensione fissa dell'icona
+                                        modifier = Modifier.size(iconSize)
+                                    )
+                                }
+
+                                // ---> PUNTEGGIO CON ANCORAGGIO FISSO (Zero Spostamenti) <---
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        // width 46.dp per bloccare rigidamente la larghezza del contenitore senza spingere il pulsante meno
+                                        .width(scoreBoxWidth)
+                                        // padding 2.dp per aggiungere un margine minimo di sicurezza tra punteggio e pulsanti
+                                        .padding(horizontal = 2.dp)
+                                        .clickable { onScoreClick() }
+                                ) {
+                                    AnimatedContent(
+                                        targetState = player.score,
+                                        transitionSpec = {
+                                            if (targetState > initialState) {
+                                                (slideInVertically(animationSpec = tween(300)) { height -> height } + fadeIn(
+                                                    animationSpec = tween(300)
+                                                )) togetherWith
+                                                        (slideOutVertically(animationSpec = tween(300)) { height -> -height } + fadeOut(
+                                                            animationSpec = tween(300)
+                                                        ))
+                                            } else {
+                                                (slideInVertically(animationSpec = tween(300)) { height -> -height } + fadeIn(
+                                                    animationSpec = tween(300)
+                                                )) togetherWith
+                                                        (slideOutVertically(animationSpec = tween(300)) { height -> height } + fadeOut(
+                                                            animationSpec = tween(300)
+                                                        ))
+                                            }
+                                        },
+                                        label = "ScoreAnimation"
+                                    ) { animatedScore ->
+                                        val scoreText = animatedScore.toString()
+                                        val scoreStyle = when {
+                                            isCompact || fontScale > 1.15f -> when {
+                                                scoreText.length <= 2 -> MaterialTheme.typography.titleLarge
+                                                scoreText.length == 3 -> MaterialTheme.typography.titleMedium
+                                                else -> MaterialTheme.typography.bodyMedium
+                                            }
+                                            else -> when {
+                                                scoreText.length <= 2 -> MaterialTheme.typography.headlineMedium
+                                                scoreText.length == 3 -> MaterialTheme.typography.titleLarge
+                                                else -> MaterialTheme.typography.titleMedium
+                                            }
+                                        }
+
+                                        Text(
+                                            text = scoreText,
+                                            style = scoreStyle,
+                                            fontWeight = FontWeight.Black,
+                                            color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+
+                                // PULSANTE PIÙ (Ancorato)
+                                // size 42.dp per impostare una dimensione fissa del pulsante nei layout compatti e 48.dp in quelli estesi
+                                Box(
+                                    modifier = Modifier
+                                        .size(buttonSize)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.primaryContainer)
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                        .combinedClickable(
+                                            onClick = {
+                                                onScoreChange(1)
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onScoreChange(positiveStep)
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Add,
+                                        contentDescription = "Aumenta",
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        // size 20.dp per impostare la dimensione fissa dell'icona
+                                        modifier = Modifier.size(iconSize)
+                                    )
+                                }
                             }
                         }
                     }
