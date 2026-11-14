@@ -248,19 +248,19 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
                                     )
                                 }
 
-                                // --- AREA PREMI (Retrocompatibile) ---
-                                //  KOTLIN EXTENSION: Usiamo i metodi creati nel file Models per calcolare i dati.
-                                // 'remember(match)' assicura che il calcolo avvenga solo quando cambia la partita selezionata.
-                                val storiciCecchino =
-                                    remember(match) { match.getHistoricalCecchino() }
-                                val storiciInarrestabile =
-                                    remember(match) { match.getHistoricalInarrestabile() }
-                                val storiciGambero =
-                                    remember(match) { match.getHistoricalGambero() }
+                                // Calcolo di tutti i premi storici della partita tramite le extension functions definite nel modello dati
+                                val storiciCecchino = remember(match) { match.getHistoricalCecchino() }
+                                val storiciInarrestabile = remember(match) { match.getHistoricalInarrestabile() }
+                                val storiciGambero = remember(match) { match.getHistoricalGambero() }
                                 val storiciFenice = remember(match) { match.getHistoricalFenice() }
+                                val storiciDittatore = remember(match) { match.getHistoricalDittatore() }
+                                val storiciPredatore = remember(match) { match.getHistoricalPredatore() }
+                                val storiciTestaATesta = remember(match) { match.getHistoricalTestaATesta() }
+                                val storiciLumaca = remember(match) { match.getHistoricalLumaca() }
+                                val storiciDiesel = remember(match) { match.getHistoricalDiesel() }
 
-                                // LOGICA CONDIZIONALE: Se tutti i calcoli sono 'null' (partite vecchie), il blocco sparisce.
-                                if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
+                                // Condizione di rendering: se almeno un premio è presente, viene visualizzata l'intera sezione dei riconoscimenti
+                                if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null || storiciDittatore != null || storiciPredatore != null || storiciTestaATesta != null || storiciLumaca != null || storiciDiesel != null) {
 
                                     // ====================================================================
                                     // --- SEZIONE: PREMI PARTITA (ICONIZZATA E PULSANTE A DESTRA) ---
@@ -335,11 +335,9 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
                                     storiciCecchino?.let { (player, punti) ->
                                         AwardCard(
                                             icon = "🎯",
-                                            title = stringResource(R.string.premio_cecchino), // 🌍 I18N
+                                            title = stringResource(R.string.premio_cecchino),
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            // 🧠 LEZIONE I18N: Anche per il "valueText" riutilizziamo il formato %d pt che abbiamo
-                                            // già creato precedentemente nel file XML, infilandoci in mezzo la variabile matematica "punti".
                                             valueText = stringResource(R.string.label_punti_positivi, punti)
                                         )
                                     }
@@ -348,10 +346,10 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
                                     storiciInarrestabile?.let { (player, combo) ->
                                         AwardCard(
                                             icon = "🔥",
-                                            title = stringResource(R.string.premio_inarrestabile), // 🌍 I18N
+                                            title = stringResource(R.string.premio_inarrestabile),
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = stringResource(R.string.label_combo, combo) // 🌍 I18N
+                                            valueText = stringResource(R.string.label_combo, combo)
                                         )
                                     }
 
@@ -359,10 +357,10 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
                                     storiciGambero?.let { (player, punti) ->
                                         AwardCard(
                                             icon = "🦞",
-                                            title = stringResource(R.string.premio_gambero), // 🌍 I18N
+                                            title = stringResource(R.string.premio_gambero),
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = stringResource(R.string.label_punti_negativi, punti) // 🌍 I18N
+                                            valueText = stringResource(R.string.label_punti_negativi, punti)
                                         )
                                     }
 
@@ -370,10 +368,65 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
                                     storiciFenice?.let { (player, punti) ->
                                         AwardCard(
                                             icon = "🦅",
-                                            title = stringResource(R.string.premio_fenice), // 🌍 I18N
+                                            title = stringResource(R.string.premio_fenice),
                                             playerName = player.name,
                                             playerColorInt = player.color,
-                                            valueText = stringResource(R.string.label_punti_positivi, punti) // 🌍 I18N
+                                            valueText = stringResource(R.string.label_punti_positivi, punti)
+                                        )
+                                    }
+
+                                    // --- CARD PREMIO: IL DITTATORE 👑 ---
+                                    storiciDittatore?.let { (player, turni) ->
+                                        AwardCard(
+                                            icon = "👑",
+                                            title = stringResource(R.string.premio_dittatore),
+                                            playerName = player.name,
+                                            playerColorInt = player.color,
+                                            valueText = stringResource(R.string.label_turni, turni)
+                                        )
+                                    }
+
+                                    // --- CARD PREMIO: IL PREDATORE 🐺 ---
+                                    storiciPredatore?.let { (player, sorpassi) ->
+                                        AwardCard(
+                                            icon = "🐺",
+                                            title = stringResource(R.string.premio_predatore),
+                                            playerName = player.name,
+                                            playerColorInt = player.color,
+                                            valueText = stringResource(R.string.label_sorpassi, sorpassi)
+                                        )
+                                    }
+
+                                    // --- CARD PREMIO: TESTA A TESTA 🤝 ---
+                                    storiciTestaATesta?.let { (p1, p2) ->
+                                        AwardCard(
+                                            icon = "🤝",
+                                            title = stringResource(R.string.premio_testa_a_testa),
+                                            playerName = stringResource(R.string.label_testa_a_testa_valore, p1.name, p2.name),
+                                            playerColorInt = p1.color,
+                                            valueText = ""
+                                        )
+                                    }
+
+                                    // --- CARD PREMIO: LA LUMACA 🐌 ---
+                                    storiciLumaca?.let { (player, variazioni) ->
+                                        AwardCard(
+                                            icon = "🐌",
+                                            title = stringResource(R.string.premio_lumaca),
+                                            playerName = player.name,
+                                            playerColorInt = player.color,
+                                            valueText = stringResource(R.string.label_variazioni, variazioni)
+                                        )
+                                    }
+
+                                    // --- CARD PREMIO: IL DIESEL 🚂 ---
+                                    storiciDiesel?.let { (player, percentuale) ->
+                                        AwardCard(
+                                            icon = "🚂",
+                                            title = stringResource(R.string.premio_diesel),
+                                            playerName = player.name,
+                                            playerColorInt = player.color,
+                                            valueText = stringResource(R.string.label_percentuale, percentuale)
                                         )
                                     }
                                 }

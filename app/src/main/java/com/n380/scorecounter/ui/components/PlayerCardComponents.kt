@@ -686,6 +686,9 @@
     ) {
         val playerColor = Color(playerColorInt)
 
+        // Verifica booleana per determinare se il testo del badge esiste e non è vuoto (es. esclude il premio Testa a testa che non ha un valore numerico)
+        val hasValue = valueText.isNotBlank()
+
         // 🎨 MATERIAL 3 EXPRESSIVE: La Card dei Premi
         Card(
             modifier = modifier.fillMaxWidth(),
@@ -696,23 +699,19 @@
             border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
         ) {
             // ====================================================================
-            // 🧠 LEZIONE TEORICA COMPOSE: LAYOUT A PESI PERCENTUALI REATTIVI (18% / 54% / 28%)
+            // 🧠 LEZIONE TEORICA COMPOSE: LAYOUT A PESI PERCENTUALI REATTIVI
             // ====================================================================
-            // Per garantire che la card mantenga proporzioni impeccabili sia su smartphone (colonne strette)
-            // che su tablet (colonne ampie), non usiamo dimensioni fisse in dp per le icone o i badge.
-            // Dividiamo la Row interna in 3 blocchi con pesi percentuali flessibili:
-            // - 18% (weight 0.18f): Box dell'Icona Emoji
-            // - 54% (weight 0.54f): Colonna Testi (Titolo Premio + Nome Giocatore)
-            // - 28% (weight 0.28f): Card Badge Punteggio/Combo
+            // Gestione dinamica dei pesi: se il badge numerico è presente, dividiamo lo spazio in tre sezioni (18% / 54% / 28%).
+            // Se il badge è assente (es. Testa a testa), espandiamo lo spazio dei testi occupando l'area rimanente (22% / 78%).
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 1. BLOCCO ICONA EMOJI (~18% di larghezza della card)
+                // 1. BLOCCO ICONA EMOJI (Adattivo in base alla presenza del badge)
                 Box(
-                    modifier = Modifier.weight(0.18f),
+                    modifier = Modifier.weight(if (hasValue) 0.18f else 0.22f),
                     contentAlignment = Alignment.Center
                 ) {
                     AutoResizedText(
@@ -721,10 +720,10 @@
                     )
                 }
 
-                // 2. BLOCCO TESTI E DETTAGLI (~54% di larghezza della card)
+                // 2. BLOCCO TESTI E DETTAGLI (Adattivo in base alla presenza del badge)
                 Column(
                     modifier = Modifier
-                        .weight(0.54f)
+                        .weight(if (hasValue) 0.54f else 0.78f)
                         .padding(horizontal = 6.dp)
                 ) {
                     AutoResizedText(
@@ -741,24 +740,26 @@
                     )
                 }
 
-                // 3. BLOCCO BADGE PUNTEGGIO/COMBO (~28% di larghezza della card)
-                Card(
-                    modifier = Modifier.weight(0.28f),
-                    colors = CardDefaults.cardColors(containerColor = playerColor),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp, horizontal = 4.dp),
-                        contentAlignment = Alignment.Center
+                // 3. BLOCCO BADGE PUNTEGGIO/COMBO (Renderizzato condizionalmente solo se valueText non è vuoto)
+                if (hasValue) {
+                    Card(
+                        modifier = Modifier.weight(0.28f),
+                        colors = CardDefaults.cardColors(containerColor = playerColor),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
-                        AutoResizedText(
-                            text = valueText,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.labelLarge
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp, horizontal = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AutoResizedText(
+                                text = valueText,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
                     }
                 }
             }
