@@ -699,19 +699,20 @@
             border = BorderStroke(1.dp, playerColor.copy(alpha = 0.3f))
         ) {
             // ====================================================================
-            // 🧠 LEZIONE TEORICA COMPOSE: LAYOUT A PESI PERCENTUALI REATTIVI
+            // 🧠 LEZIONE TEORICA COMPOSE: LAYOUT A PESI PERCENTUALI FISSI (18% / 54% / 28%)
             // ====================================================================
-            // Gestione dinamica dei pesi: se il badge numerico è presente, dividiamo lo spazio in tre sezioni (18% / 54% / 28%).
-            // Se il badge è assente (es. Testa a testa), espandiamo lo spazio dei testi occupando l'area rimanente (22% / 78%).
+            // Per garantire che la colonna dei testi si trovi sempre esattamente alla stessa
+            // coordinata orizzontale su qualsiasi card e risoluzione (anche quando manca il badge numerico
+            // come nel premio "Testa a testa"), manteniamo pesi percentuali fissi e costanti (18% / 54% / 28%).
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 1. BLOCCO ICONA EMOJI (Adattivo in base alla presenza del badge)
+                // 1. BLOCCO ICONA EMOJI (18% di larghezza della card)
                 Box(
-                    modifier = Modifier.weight(if (hasValue) 0.18f else 0.22f),
+                    modifier = Modifier.weight(0.18f),
                     contentAlignment = Alignment.Center
                 ) {
                     AutoResizedText(
@@ -720,10 +721,10 @@
                     )
                 }
 
-                // 2. BLOCCO TESTI E DETTAGLI (Adattivo in base alla presenza del badge)
+                // 2. BLOCCO TESTI E DETTAGLI (54% di larghezza della card, rigorosamente allineato)
                 Column(
                     modifier = Modifier
-                        .weight(if (hasValue) 0.54f else 0.78f)
+                        .weight(0.54f)
                         .padding(horizontal = 6.dp)
                 ) {
                     AutoResizedText(
@@ -740,7 +741,7 @@
                     )
                 }
 
-                // 3. BLOCCO BADGE PUNTEGGIO/COMBO (Renderizzato condizionalmente solo se valueText non è vuoto)
+                // 3. BLOCCO BADGE PUNTEGGIO/COMBO o Spaziatore Neutro (28% di larghezza della card)
                 if (hasValue) {
                     Card(
                         modifier = Modifier.weight(0.28f),
@@ -761,6 +762,9 @@
                             )
                         }
                     }
+                } else {
+                    // Spaziatore invisibile con lo stesso peso (0.28f) per preservare l'allineamento geometrico perfetto della griglia
+                    Spacer(modifier = Modifier.weight(0.28f))
                 }
             }
         }
