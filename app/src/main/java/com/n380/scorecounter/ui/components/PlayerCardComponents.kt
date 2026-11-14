@@ -22,6 +22,7 @@
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.style.TextOverflow
+    import androidx.compose.ui.text.style.TextAlign
     import androidx.compose.ui.text.TextStyle
     import androidx.compose.ui.unit.dp
     import androidx.compose.ui.unit.Dp
@@ -352,54 +353,58 @@
             // ====================================================================
             // 🎨 SCALA PROPORZIONALE ADATTIVA PER LA MODALITÀ ESPANSA (1-4 GIOCATORI)
             // ====================================================================
-            // 🧠 RISOLUZIONE PROBLEMA SPATIALE & ERGONOMICO:
+            // 🧠 RISOLUZIONE PROBLEMA SPATIALE & ERGONOMICO (DISCIPLINA ORIZZONTALE):
             // Quando ci sono 2 o 3 giocatori (o display molto alti), le card diventano
-            // notevolmente più alte (150-240dp). Se i tasti e il punteggio rimanessero fissi,
-            // apparirebbero come piccoli elementi sproporzionati e galleggianti nel vuoto.
+            // notevolmente più alte (150-240dp). Tuttavia, la larghezza del display rimane identica!
+            // I pulsanti devono espandersi verticalmente per un'ergonomia touch ideale senza
+            // allargarsi eccessivamente in orizzontale, garantendo ampio respiro al punteggio centrale
+            // ed evitando che punteggi a 3 o 4 cifre (es. 148, 1000, -25) vengano troncati.
             // Calcoliamo dinamicamente 3 livelli di scala (Tier):
-            // - TIER 3 (2 Giocatori o h >= 190dp): Pulsanti maestosi (112x82dp), icone 40dp, punteggio 64sp
-            // - TIER 2 (3 Giocatori o h in 135..189dp): Pulsanti medi (98x68dp), icone 34dp, punteggio 50sp
-            // - TIER 1 (4 Giocatori o h < 135dp): Pulsanti compatti (80x52dp), icone 26dp, punteggio 38sp
+            // - TIER 3 (2 Giocatori o h >= 190dp): Pulsanti squircle (86x74dp), icone 34dp, punteggio base 56sp
+            // - TIER 2 (3 Giocatori o h in 135..189dp): Pulsanti medi (80x64dp), icone 30dp, punteggio base 48sp
+            // - TIER 1 (4 Giocatori o h < 135dp): Pulsanti compatti (74x52dp), icone 26dp, punteggio base 38sp
             val expandedMetrics = when {
                 isCompact -> ExpandedCardMetrics(
-                    buttonWidth = 68.dp,
-                    buttonHeight = 46.dp,
-                    iconSize = 24.dp,
-                    buttonCorner = 16.dp,
+                    buttonWidth = 66.dp,
+                    buttonHeight = 44.dp,
+                    iconSize = 22.dp,
+                    buttonCorner = 14.dp,
                     accentWidth = 8.dp,
                     nameStyle = MaterialTheme.typography.titleLarge,
-                    baseScoreFontSize = 36.sp
+                    baseScoreFontSize = 34.sp
                 )
                 totalPlayers == 2 || availableHeight >= 190.dp -> ExpandedCardMetrics(
-                    buttonWidth = 112.dp,
-                    buttonHeight = 82.dp,
-                    iconSize = 40.dp,
-                    buttonCorner = 24.dp,
-                    accentWidth = 14.dp,
-                    nameStyle = when {
-                        fontScale > 1.15f -> MaterialTheme.typography.headlineSmall
-                        else -> MaterialTheme.typography.headlineMedium
-                    },
-                    baseScoreFontSize = 64.sp
-                )
-                totalPlayers == 3 || (availableHeight in 135.dp..189.dp) -> ExpandedCardMetrics(
-                    buttonWidth = 98.dp,
-                    buttonHeight = 68.dp,
+                    // Larghezza contenuta a 86.dp (invece di 112.dp) per liberare oltre 50.dp al punteggio
+                    buttonWidth = 86.dp,
+                    // Altezza generosa a 74.dp per touch target comodissimo con i pollici
+                    buttonHeight = 74.dp,
                     iconSize = 34.dp,
                     buttonCorner = 20.dp,
                     accentWidth = 12.dp,
                     nameStyle = when {
+                        fontScale > 1.15f -> MaterialTheme.typography.headlineSmall
+                        else -> MaterialTheme.typography.headlineMedium
+                    },
+                    baseScoreFontSize = 56.sp
+                )
+                totalPlayers == 3 || (availableHeight in 135.dp..189.dp) -> ExpandedCardMetrics(
+                    buttonWidth = 80.dp,
+                    buttonHeight = 64.dp,
+                    iconSize = 30.dp,
+                    buttonCorner = 18.dp,
+                    accentWidth = 10.dp,
+                    nameStyle = when {
                         fontScale > 1.15f -> MaterialTheme.typography.titleLarge
                         else -> MaterialTheme.typography.headlineSmall
                     },
-                    baseScoreFontSize = 50.sp
+                    baseScoreFontSize = 48.sp
                 )
                 else -> ExpandedCardMetrics(
-                    buttonWidth = 80.dp,
+                    buttonWidth = 74.dp,
                     buttonHeight = 52.dp,
                     iconSize = 26.dp,
                     buttonCorner = 16.dp,
-                    accentWidth = 10.dp,
+                    accentWidth = 8.dp,
                     nameStyle = when {
                         fontScale > 1.15f -> MaterialTheme.typography.titleMedium
                         else -> MaterialTheme.typography.titleLarge
@@ -612,16 +617,17 @@
                         )
                     }
 
-                    // PUNTEGGIO CENTRALE (Dinamico, enfatico e con transizione animata)
+                    // PUNTEGGIO CENTRALE (Dinamico, enfatico, perfettamente centrato e protetto da troncamenti)
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = 6.dp)
+                            .padding(horizontal = 4.dp)
                             .clickable { onScoreClick() }
                     ) {
                         AnimatedContent(
                             targetState = player.score,
+                            modifier = Modifier.fillMaxWidth(),
                             transitionSpec = {
                                 if (targetState > initialState) {
                                     (slideInVertically(animationSpec = tween(300)) { height -> height } + fadeIn(
@@ -642,21 +648,28 @@
                             label = "ScoreAnimationExpanded"
                         ) { animatedScore ->
                             val scoreText = animatedScore.toString()
-                            // Scala progressiva del font in base al numero di cifre
-                            val scoreFontSize = when {
+                            // 🧠 RIDUZIONE PROPORZIONALE PREVENTIVA DEL FONT:
+                            // Calcoliamo la dimensione iniziale in base al numero di caratteri (gestendo valori negativi o 3+ cifre).
+                            val targetFontSize = when {
                                 scoreText.length <= 2 -> baseScoreFontSize
-                                scoreText.length == 3 -> (baseScoreFontSize.value * 0.85f).sp
-                                scoreText.length == 4 -> (baseScoreFontSize.value * 0.70f).sp
-                                else -> (baseScoreFontSize.value * 0.55f).sp
+                                scoreText.length == 3 -> (baseScoreFontSize.value * 0.72f).sp
+                                scoreText.length == 4 -> (baseScoreFontSize.value * 0.55f).sp
+                                else -> (baseScoreFontSize.value * 0.42f).sp
                             }
 
-                            Text(
+                            // 🧠 PROTEZIONE ANTI-TRONCAMENTO (AutoResizedText):
+                            // Se anche con la riduzione preventiva il testo supera la larghezza disponibile
+                            // (es. display stretti o accessibility font scale alto), AutoResizedText riduce il font
+                            // in modo reattivo garantendo che NESSUNA cifra (es. il '148' di Marco) venga mai tagliata!
+                            AutoResizedText(
                                 text = scoreText,
-                                fontSize = scoreFontSize,
-                                lineHeight = (scoreFontSize.value * 1.08f).sp,
-                                fontWeight = FontWeight.Black,
+                                style = TextStyle(
+                                    fontSize = targetFontSize,
+                                    fontWeight = FontWeight.Black,
+                                    textAlign = TextAlign.Center
+                                ),
                                 color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }
