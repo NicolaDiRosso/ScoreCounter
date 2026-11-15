@@ -1410,25 +1410,6 @@ fun HomeScreen(
                                         }
                                     }
                                 }
-
-                                // --- LEZIONE: COPYRIGHT NEL FLUSSO SCORREVOLE ---
-                                // Inserendo il copyright come 'item' finale della LazyColumn,
-                                // beneficerà automaticamente del 'contentPadding' che abbiamo impostato sopra.
-                                // Non serve più forzare un padding enorme dal basso, si posizionerà da solo
-                                // in modo perfetto sotto all'ultima card e sopra all'ingombro del FAB.
-                                item {
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Text(
-                                        text = stringResource(R.string.testo_copyright), // Testo del copyright a fondo pagina
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                            alpha = 0.6f
-                                        ),
-                                        // Abbiamo rimosso padding(bottom = 80.dp), mettiamo solo 24.dp per staccarlo dall'ultima card
-                                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
                             }
                         }
                     }
