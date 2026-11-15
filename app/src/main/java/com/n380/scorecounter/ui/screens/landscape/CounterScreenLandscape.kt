@@ -315,51 +315,158 @@ fun CounterScreenLandscape(
         }
 
         // ====================================================================
-        // 📋 PANNELLO DI DESTRA (0.76f larghezza): GRIGLIA ADATTIVA GIOCATORI
+        // 📋 PANNELLO DI DESTRA (0.76f larghezza): TAVOLO RESPONSIVO ADATTIVO
         // ====================================================================
         Card(
             modifier = Modifier
-                .weight(0.76f) // 🧠 UX FIX: Allargato al 76% per dare massimo respiro ai nomi
+                .weight(0.76f) // 🧠 Allargato al 76% per dare massimo respiro e armonia al tavolo
                 .fillMaxHeight(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
             shape = RoundedCornerShape(24.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 220.dp),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
+            // Verifichiamo se l'impostazione "Ordinamento dinamico classifica" è attiva:
+            // 1. Ordine discendente per punteggio (compareByDescending { it.score })
+            // 2. A parità di punteggio, l'ultimo ad aver segnato sale in cima (thenByDescending { it.lastScoreUpdateTime })
+            val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
+                viewModel.players.sortedWith(
+                    compareByDescending<Player> { it.score }
+                        .thenByDescending { it.lastScoreUpdateTime }
+                )
+            } else {
+                viewModel.players
+            }
+
+            val tablePadding = 12.dp // Margine perimetrale uniforme sui 4 lati del tavolo da gioco
+            val spacingBetweenCards = 10.dp // Spaziatura uniforme tra le varie card e righe
+
+            // 🧠 ARCHITETTURA RESPONSIVA ADATTIVA (BoxWithConstraints):
+            // Misuriamo l'altezza e la larghezza reali a disposizione all'interno del tavolo.
+            // Calcoliamo matematicamente la suddivisione delle righe e delle colonne per riempire
+            // l'intero spazio verticale disponibile tramite Modifier.weight(1f), eliminando qualsiasi
+            // vuoto asimmetrico inferiore ed adattando la scala dei pulsanti e del punteggio.
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(tablePadding)
             ) {
-                // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
-                // Applichiamo lo stesso ordinamento dinamico anche nella versione landscape.
-                val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
-                    viewModel.players.sortedWith(
-                        compareByDescending<Player> { it.score }
-                            .thenByDescending { it.lastScoreUpdateTime }
-                    )
-                } else {
-                    viewModel.players
+                val availableWidth = maxWidth
+                val availableHeight = maxHeight
+                val playerCount = displayedPlayers.size
+
+                // 🧠 RILEVAZIONE SCHERMO AMPIO (Tablet o Foldable aperto in orizzontale):
+                // Se la larghezza a disposizione del tavolo è >= 800.dp, possiamo sfruttare 3 o 4 colonne.
+                val isWideDisplay = availableWidth >= 800.dp
+
+                // 🧠 CALCOLO DINAMICO DEL NUMERO DI COLONNE:
+                // - 1 giocatore: 1 colonna singola che riempie il tavolo
+                // - Smartphone landscape standard: 2 colonne affiancate bilanciate
+                // - Tablet ampi landscape: 3 colonne (per 5-6 giocatori) o 4 colonne (per 7-8 giocatori)
+                val numColumns = when {
+                    playerCount <= 1 -> 1
+                    isWideDisplay && playerCount in 5..6 -> 3
+                    isWideDisplay && playerCount in 7..8 -> 4
+                    else -> 2
                 }
 
-                items(
-                    items = displayedPlayers,
-                    key = { player -> player.name }
-                ) { player ->
-                    PlayerScoreCard(
-                        player = player,
-                        isLeader = maxScore > 0 && player.score == maxScore,
-                        positiveStep = viewModel.longPressPositiveStep,
-                        negativeStep = viewModel.longPressNegativeStep,
-                        totalPlayers = displayedPlayers.size,
-                        onScoreChange = { amount ->
-                            viewModel.updatePlayerScore(player, amount)
-                        },
-                        onScoreClick = {
-                            onPlayerForManualEditChange(player)
+                // 🧠 CALCOLO DEL NUMERO DI RIGHE E DELL'ALTEZZA DISPONIBILE PER CIASCUNA RIGA:
+                val numRows = (playerCount + numColumns - 1) / numColumns
+                val totalSpacing = spacingBetweenCards * (numRows - 1).coerceAtLeast(0)
+                val rowHeight = if (numRows > 0) (availableHeight - totalSpacing) / numRows else availableHeight
+
+                // 🧠 SOGLIA MODALITÀ ESPANSA vs COMPATTA (Altezza Minima Ergonomica):
+                // Una card espansa con nome in alto e controlli gamepad in basso necessita di almeno 110.dp di altezza.
+                // - rowHeight >= 110.dp (1-4 giocatori su smartphone, o fino a 8 su tablet): Modalità Espansa (Tier 2 o Tier 3)
+                // - rowHeight < 110.dp (5-8 giocatori su smartphone): Modalità Compatta che riempie l'altezza assegnata
+                val isExpandedMode = rowHeight >= 110.dp
+
+                // 🧠 VERIFICA ADATTAMENTO SENZA SCORRIMENTO (Zero Vuoti Inferiori):
+                // Fino a 8 giocatori (o con altezza riga >= 46.dp), distribuiamo lo spazio con weight(1f).
+                // Con 9 o più giocatori (o schermi minuscoli), attiviamo la griglia con scorrimento fluido.
+                val fitsWithoutScroll = playerCount in 1..8 && rowHeight >= 46.dp
+
+                if (fitsWithoutScroll) {
+                    // 🌟 DISTRIBUZIONE UNIFORME DELLO SPAZIO (ZERO VUOTI INFERIORI):
+                    // Suddividiamo i giocatori in blocchi di righe (chunked).
+                    // Assegnando Modifier.weight(1f) a ogni riga, queste occupano esattamente
+                    // tutta l'altezza del tavolo, espandendosi proporzionalmente ed eliminando il vuoto inferiore!
+                    val playerRows = displayedPlayers.chunked(numColumns)
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                    ) {
+                        playerRows.forEach { rowPlayers ->
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                            ) {
+                                rowPlayers.forEach { player ->
+                                    key(player.name) {
+                                        val isLeader = maxScore > 0 && player.score == maxScore
+                                        PlayerScoreCard(
+                                            player = player,
+                                            isLeader = isLeader,
+                                            positiveStep = viewModel.longPressPositiveStep,
+                                            negativeStep = viewModel.longPressNegativeStep,
+                                            totalPlayers = playerCount,
+                                            isExpandedMode = isExpandedMode,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
+                                            onScoreChange = { amount ->
+                                                viewModel.updatePlayerScore(player, amount)
+                                            },
+                                            onScoreClick = {
+                                                onPlayerForManualEditChange(player)
+                                            }
+                                        )
+                                    }
+                                }
+
+                                // 🧠 BILANCIAMENTO VISIVO PER RIGHE INCOMPLETE:
+                                // Se l'ultima riga ha meno partecipanti rispetto al numero di colonne (es. 3 giocatori in 2 colonne),
+                                // inseriamo uno o più Spacer con weight(1f) per mantenere le colonne simmetriche
+                                // evitando che l'ultima card diventi sproporzionatamente larga.
+                                repeat(numColumns - rowPlayers.size) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
                         }
-                    )
+                    }
+                } else {
+                    // 📊 SCORRIMENTO DINAMICO AD ALTA DENSITÀ (9+ GIOCATORI):
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 220.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(spacingBetweenCards),
+                        verticalArrangement = Arrangement.spacedBy(spacingBetweenCards)
+                    ) {
+                        items(
+                            items = displayedPlayers,
+                            key = { player -> player.name }
+                        ) { player ->
+                            val isLeader = maxScore > 0 && player.score == maxScore
+                            PlayerScoreCard(
+                                player = player,
+                                isLeader = isLeader,
+                                positiveStep = viewModel.longPressPositiveStep,
+                                negativeStep = viewModel.longPressNegativeStep,
+                                totalPlayers = displayedPlayers.size,
+                                isExpandedMode = false,
+                                modifier = Modifier.fillMaxWidth(),
+                                onScoreChange = { amount ->
+                                    viewModel.updatePlayerScore(player, amount)
+                                },
+                                onScoreClick = {
+                                    onPlayerForManualEditChange(player)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

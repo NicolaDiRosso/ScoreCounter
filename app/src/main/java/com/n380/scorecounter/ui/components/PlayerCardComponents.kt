@@ -324,31 +324,44 @@
             val availableHeight = maxHeight
             val configuration = LocalConfiguration.current
             val fontScale = configuration.fontScale
-            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-            // 🧠 LOGICA ADATTIVA CON ANCORAGGIO FISSO:
-            // Se la card si trova in uno stato compatto (es. griglia landscape o larghezza < 320.dp),
-            // attiviamo la modalità compattata ricalcolando le misure in modo proporzionale.
-            val isCompact = availableWidth < 320.dp || isLandscape
-
+            // 🧠 RILEVAZIONE ALTEZZA VINCOLATA:
             // Rileviamo se l'altezza assegnata alla card è finita/vincolata (es. tramite Modifier.weight(1f))
             val hasBoundedHeight = availableHeight < Dp.Infinity
 
+            // 🧠 LOGICA ADATTIVA (RISOLUZIONE BUG LANDSCAPE):
+            // In precedenza 'isCompact = availableWidth < 320.dp || isLandscape' forzava la modalità compatta
+            // in orizzontale anche con 2 o 3 giocatori (dove l'altezza è 160-320dp!), causando card schiacciate
+            // e pulsanti minuscoli (44dp).
+            // Ora 'isCompact' valuta le reali dimensioni geometriche della card:
+            // è compatta solo se la larghezza è < 240.dp o se l'altezza reale assegnata è < 110.dp.
+            val isCompact = availableWidth < 240.dp || (hasBoundedHeight && availableHeight < 110.dp)
+
             // ====================================================================
-            // 📏 MISURE E TOKEN DI DESIGN PER IL LAYOUT COMPATTO (5+ GIOCATORI)
+            // 📏 MISURE E TOKEN DI DESIGN PER IL LAYOUT COMPATTO
             // ====================================================================
-            // size 42.dp per impostare la dimensione fissa del pulsante nei layout compatti e 48.dp nei layout estesi
-            val buttonSize = if (isCompact) 42.dp else 48.dp
-            // size 20.dp per impostare la dimensione fissa dell'icona del pulsante
-            val iconSize = if (isCompact) 20.dp else 24.dp
-            // width 46.dp per ancorare la larghezza fissa della zona punteggio ed evitare lo spostamento del pulsante meno
-            val scoreBoxWidth = if (isCompact) 46.dp else 54.dp
-            // width 8.dp per impostare lo spessore della barra laterale d'accento
+            // Scaliamo proporzionalmente i pulsanti se la card compatta riceve un'altezza confortevole
+            val buttonSize = when {
+                !hasBoundedHeight -> if (isCompact) 42.dp else 48.dp
+                availableHeight >= 90.dp -> 48.dp
+                availableHeight >= 70.dp -> 44.dp
+                else -> 38.dp
+            }
+            val iconSize = when {
+                !hasBoundedHeight -> if (isCompact) 20.dp else 24.dp
+                availableHeight >= 90.dp -> 24.dp
+                availableHeight >= 70.dp -> 22.dp
+                else -> 18.dp
+            }
+            val scoreBoxWidth = when {
+                !hasBoundedHeight -> if (isCompact) 46.dp else 54.dp
+                availableHeight >= 90.dp -> 58.dp
+                availableHeight >= 70.dp -> 50.dp
+                else -> 44.dp
+            }
             val accentWidth = if (isCompact) 8.dp else 10.dp
-            // padding 10.dp per il margine interno orizzontale della card
             val horizontalPadding = if (isCompact) 10.dp else 12.dp
-            // padding 10.dp per il margine interno verticale della card
-            val verticalPadding = if (isCompact) 10.dp else 12.dp
+            val verticalPadding = if (isCompact) 8.dp else 12.dp
 
             // ====================================================================
             // 🎨 SCALA PROPORZIONALE ADATTIVA PER LA MODALITÀ ESPANSA (1-4 GIOCATORI)
@@ -419,14 +432,15 @@
             Card(
                 // 🧠 GESTIONE DIMENSIONE FISICA:
                 // Se la card riceve un vincolo di altezza (es. weight(1f)), occupa tutto lo spazio (fillMaxSize)
-                // garantendo che tutte le card abbiano esattamente la stessa altezza senza vuoti asimmetrici.
+                // garantendo che tutte le card abbiano esattamente la stessa altezza senza vuoti asimmetrici,
+                // sia in modalità espansa che in modalità compatta!
                 // In una lista a scorrimento (unbounded height), usa invece le dimensioni intrinseche.
-                modifier = if (isExpandedMode && hasBoundedHeight) {
+                modifier = if (hasBoundedHeight) {
                     Modifier.fillMaxSize()
                 } else {
                     Modifier
                         .fillMaxWidth()
-                        .padding(vertical = if (isExpandedMode) 4.dp else 4.dp)
+                        .padding(vertical = 4.dp)
                 },
 
                 // Lo sfondo della card prende il colore del giocatore sbiadito al 30% (Effetto Vetro/Pastello)
@@ -450,7 +464,7 @@
                 shape = RoundedCornerShape(20.dp)
             ) {
                 Row(
-                    modifier = if (isExpandedMode && hasBoundedHeight) {
+                    modifier = if (hasBoundedHeight) {
                         Modifier.fillMaxSize()
                     } else {
                         Modifier
@@ -492,6 +506,8 @@
                         CompactScoreCardContent(
                             player = player,
                             isCompact = isCompact,
+                            hasBoundedHeight = hasBoundedHeight,
+                            availableHeight = availableHeight,
                             fontScale = fontScale,
                             horizontalPadding = horizontalPadding,
                             verticalPadding = verticalPadding,
@@ -586,15 +602,18 @@
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // PULSANTE MENO (Dinamico e proporzionato all'altezza della card)
+                    // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
+                    // Usiamo 'MaterialTheme.colorScheme.error' e 'onError' (colore solido e saturo) al posto di 'errorContainer'
+                    // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
                     Box(
                         modifier = Modifier
                             .width(buttonWidth)
                             .height(buttonHeight)
                             .clip(buttonShape)
-                            .background(MaterialTheme.colorScheme.errorContainer)
+                            .background(MaterialTheme.colorScheme.error)
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
+                                color = MaterialTheme.colorScheme.onError.copy(alpha = 0.3f),
                                 shape = buttonShape
                             )
                             .combinedClickable(
@@ -612,7 +631,7 @@
                         Icon(
                             imageVector = Icons.Filled.Remove,
                             contentDescription = "Diminuisci",
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            tint = MaterialTheme.colorScheme.onError,
                             modifier = Modifier.size(iconSize)
                         )
                     }
@@ -675,15 +694,18 @@
                     }
 
                     // PULSANTE PIÙ (Dinamico e proporzionato all'altezza della card)
+                    // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
+                    // Usiamo 'MaterialTheme.colorScheme.primary' e 'onPrimary' (colore solido e saturo) al posto di 'primaryContainer'
+                    // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
                     Box(
                         modifier = Modifier
                             .width(buttonWidth)
                             .height(buttonHeight)
                             .clip(buttonShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .background(MaterialTheme.colorScheme.primary)
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f),
                                 shape = buttonShape
                             )
                             .combinedClickable(
@@ -701,7 +723,7 @@
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = "Aumenta",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(iconSize)
                         )
                     }
@@ -724,6 +746,8 @@
     private fun CompactScoreCardContent(
         player: Player,
         isCompact: Boolean,
+        hasBoundedHeight: Boolean = false,
+        availableHeight: Dp = Dp.Infinity,
         fontScale: Float,
         horizontalPadding: Dp,
         verticalPadding: Dp,
@@ -737,9 +761,15 @@
         onScoreClick: () -> Unit
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+            modifier = if (hasBoundedHeight) {
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+            } else {
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+            },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -750,6 +780,7 @@
                 modifier = Modifier.weight(1f).padding(end = 8.dp)
             ) {
                 val nameStyle = when {
+                    hasBoundedHeight && availableHeight >= 90.dp -> MaterialTheme.typography.titleLarge
                     isCompact || fontScale > 1.15f -> MaterialTheme.typography.titleMedium
                     else -> MaterialTheme.typography.titleLarge
                 }
@@ -767,15 +798,17 @@
             Row(verticalAlignment = Alignment.CenterVertically) {
 
                 // PULSANTE MENO (Ancorato)
-                // size 42.dp per impostare una dimensione fissa del pulsante ed evitare disomogeneità visive
+                // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
+                // Usiamo 'MaterialTheme.colorScheme.error' e 'onError' (colore solido e saturo) al posto di 'errorContainer'
+                // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
                 Box(
                     modifier = Modifier
                         .size(buttonSize)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .background(MaterialTheme.colorScheme.error)
                         .border(
                             1.dp,
-                            MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.2f),
+                            MaterialTheme.colorScheme.onError.copy(alpha = 0.3f),
                             RoundedCornerShape(12.dp)
                         )
                         .combinedClickable(
@@ -793,17 +826,17 @@
                     Icon(
                         imageVector = Icons.Filled.Remove,
                         contentDescription = "Diminuisci",
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        tint = MaterialTheme.colorScheme.onError,
                         // size 20.dp per impostare la dimensione fissa dell'icona
                         modifier = Modifier.size(iconSize)
                     )
                 }
 
-                // ---> PUNTEGGIO CON ANCORAGGIO FISSO (Zero Spostamenti) <---
+                // ---> PUNTEGGIO CON ANCORAGGIO FISSO (Zero Spostamenti e Auto-Resize) <---
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        // width 46.dp per bloccare rigidamente la larghezza del contenitore senza spingere il pulsante meno
+                        // width bloccata con scoreBoxWidth calibrata dinamicamente in base all'altezza della card
                         .width(scoreBoxWidth)
                         // padding 2.dp per aggiungere un margine minimo di sicurezza tra punteggio e pulsanti
                         .padding(horizontal = 2.dp)
@@ -811,6 +844,7 @@
                 ) {
                     AnimatedContent(
                         targetState = player.score,
+                        modifier = Modifier.fillMaxWidth(),
                         transitionSpec = {
                             if (targetState > initialState) {
                                 (slideInVertically(animationSpec = tween(300)) { height -> height } + fadeIn(
@@ -832,6 +866,11 @@
                     ) { animatedScore ->
                         val scoreText = animatedScore.toString()
                         val scoreStyle = when {
+                            hasBoundedHeight && availableHeight >= 90.dp -> when {
+                                scoreText.length <= 2 -> MaterialTheme.typography.headlineMedium
+                                scoreText.length == 3 -> MaterialTheme.typography.titleLarge
+                                else -> MaterialTheme.typography.titleMedium
+                            }
                             isCompact || fontScale > 1.15f -> when {
                                 scoreText.length <= 2 -> MaterialTheme.typography.titleLarge
                                 scoreText.length == 3 -> MaterialTheme.typography.titleMedium
@@ -844,26 +883,28 @@
                             }
                         }
 
-                        Text(
+                        AutoResizedText(
                             text = scoreText,
-                            style = scoreStyle,
+                            style = scoreStyle.copy(textAlign = TextAlign.Center),
                             fontWeight = FontWeight.Black,
                             color = if (player.isOnFire) Color(0xFFF3AF38) else MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
 
                 // PULSANTE PIÙ (Ancorato)
-                // size 42.dp per impostare una dimensione fissa del pulsante nei layout compatti e 48.dp in quelli estesi
+                // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
+                // Usiamo 'MaterialTheme.colorScheme.primary' e 'onPrimary' (colore solido e saturo) al posto di 'primaryContainer'
+                // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
                 Box(
                     modifier = Modifier
                         .size(buttonSize)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(MaterialTheme.colorScheme.primary)
                         .border(
                             1.dp,
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f),
                             RoundedCornerShape(12.dp)
                         )
                         .combinedClickable(
@@ -881,7 +922,7 @@
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = "Aumenta",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         // size 20.dp per impostare la dimensione fissa dell'icona
                         modifier = Modifier.size(iconSize)
                     )
