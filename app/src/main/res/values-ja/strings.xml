@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">カスタム値</string>
     <string name="opt_ordinamento_classifica">順位の動的ソート</string>
     <string name="desc_ordinamento_classifica">対戦中にスコアの高い順にプレイヤーを自動並べ替え</string>
+    <string name="opt_nascondi_premi">対戦アワードを非表示</string>
+    <string name="desc_nascondi_premi">対戦の分析および結果画面でアワードセクションとトロフィーを非表示にします</string>
     <string name="btn_chiudi_impostazioni">閉じる</string>
     <string name="desc_impostazioni_icon">設定</string>
 </resources>

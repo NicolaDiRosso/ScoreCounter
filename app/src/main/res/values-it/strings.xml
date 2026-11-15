@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">Valore personalizzato</string>
     <string name="opt_ordinamento_classifica">Ordinamento dinamico classifica</string>
     <string name="desc_ordinamento_classifica">Riordina automaticamente i giocatori in testa durante la partita</string>
+    <string name="opt_nascondi_premi">Nascondi premi delle partite</string>
+    <string name="desc_nascondi_premi">Nascondi la sezione e i trofei assegnati a fine sfida nell\'analisi e nei risultati</string>
     <string name="btn_chiudi_impostazioni">Chiudi</string>
     <string name="desc_impostazioni_icon">Impostazioni</string>
 </resources>

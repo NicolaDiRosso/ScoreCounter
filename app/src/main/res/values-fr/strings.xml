@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">Valeur personnalisée</string>
     <string name="opt_ordinamento_classifica">Tri dynamique du classement</string>
     <string name="desc_ordinamento_classifica">Réordonner automatiquement les joueurs selon le score en temps réel</string>
+    <string name="opt_nascondi_premi">Masquer les trophées de partie</string>
+    <string name="desc_nascondi_premi">Masquer la section des récompenses dans l\'analyse et les résultats de la partie</string>
     <string name="btn_chiudi_impostazioni">Fermer</string>
     <string name="desc_impostazioni_icon">Paramètres</string>
 </resources>

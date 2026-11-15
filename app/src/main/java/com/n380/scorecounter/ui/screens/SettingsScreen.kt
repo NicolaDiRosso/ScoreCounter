@@ -600,6 +600,24 @@ fun SettingsScreen(
                                 viewModel.setDynamicLeaderboardSortingPreference(checked)
                             }
                         )
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // ------------------------------------------------------------
+                        // C.4: NASCONDI PREMI DI PARTITA (Interruttore Switch On/Off)
+                        // ------------------------------------------------------------
+                        SettingsSwitchItem(
+                            title = stringResource(R.string.opt_nascondi_premi),
+                            subtitle = stringResource(R.string.desc_nascondi_premi),
+                            isChecked = viewModel.hideMatchAwards,
+                            onCheckedChange = { checked ->
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                viewModel.setHideMatchAwardsPreference(checked)
+                            }
+                        )
                     }
                 }
             }

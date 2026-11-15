@@ -50,6 +50,7 @@ import com.n380.scorecounter.ui.components.*
 @Composable
 fun MatchAnalysisOverlayLandscape(
     match: MatchRecord,
+    hideMatchAwards: Boolean = false,
     showAwardsInfoDialog: Boolean,
     onShowAwardsInfoDialogChange: (Boolean) -> Unit,
     showChartInfoDialog: Boolean,
@@ -140,8 +141,8 @@ fun MatchAnalysisOverlayLandscape(
 
                             Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
 
-                            // Sezione Premi Partita
-                            if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null) {
+                            // Sezione Premi Partita (Visualizzata solo se l'impostazione "Nascondi premi di partita" è disattivata)
+                            if (!hideMatchAwards && (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null || storiciDittatore != null || storiciPredatore != null || storiciTestaATesta != null || storiciLumaca != null || storiciDiesel != null)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically

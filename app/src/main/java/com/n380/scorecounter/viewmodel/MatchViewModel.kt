@@ -168,6 +168,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var dynamicLeaderboardSorting by mutableStateOf(false)
         private set
 
+    // 8. NASCONDI PREMI DI PARTITA:
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Memorizza se l'utente desidera nascondere la sezione e le card dei premi assegnati
+     * a fine sfida nelle schermate di analisi e risultati della partita.
+     * - Di default è FALSE (disattivato al primo avvio) per mostrare sempre i premi di sfida.
+     * - Non influenza GlobalStatsScreen che continua a mostrare tutti i dati e i record generali.
+     */
+    private val hideMatchAwardsKey = booleanPreferencesKey("hide_match_awards_preference")
+    var hideMatchAwards by mutableStateOf(false)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -312,6 +324,31 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 dynamicLeaderboardSorting = false
+            }
+
+            // CARICAMENTO PREFERENZA NASCONDI PREMI DI PARTITA
+            try {
+                val savedHideAwards = preferences[hideMatchAwardsKey]
+                if (savedHideAwards != null) {
+                    hideMatchAwards = savedHideAwards
+                }
+            } catch (_: Exception) {
+                hideMatchAwards = false
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA NASCONDI PREMI DI PARTITA
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato booleano `hideMatchAwards` in memoria.
+     * 2. Scrive la preferenza asincronamente nel DataStore su disco.
+     */
+    fun setHideMatchAwardsPreference(enabled: Boolean) {
+        hideMatchAwards = enabled
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[hideMatchAwardsKey] = enabled
             }
         }
     }

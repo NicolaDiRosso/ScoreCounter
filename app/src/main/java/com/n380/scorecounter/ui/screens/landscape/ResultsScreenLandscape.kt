@@ -314,8 +314,8 @@ fun ResultsScreenLandscape(
                         )
                     }
 
-                    // AREA PREMI PARTITA
-                    if (cecchinoStat != null || inarrestabileStat != null || gamberoStat != null || feniceStat != null) {
+                    // AREA PREMI PARTITA (Nascosta se l'impostazione "Nascondi premi di partita" è attiva)
+                    if (!viewModel.hideMatchAwards && (cecchinoStat != null || inarrestabileStat != null || gamberoStat != null || feniceStat != null || dittatoreStat != null || predatoreStat != null || testaATestaStat != null || lumacaStat != null || dieselStat != null)) {
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(

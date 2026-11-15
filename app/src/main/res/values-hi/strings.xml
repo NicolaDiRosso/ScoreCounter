@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">कस्टम मान</string>
     <string name="opt_ordinamento_classifica">डायनामिक लीडरबोर्ड सॉर्टिंग</string>
     <string name="desc_ordinamento_classifica">मैच के दौरान स्कोर के अनुसार खिलाड़ियों को स्वतः क्रमबद्ध करें</string>
+    <string name="opt_nascondi_premi">मैच पुरस्कार छिपाएं</string>
+    <string name="desc_nascondi_premi">मैच विश्लेषण और परिणामों में पुरस्कार अनुभाग और ट्रॉफियां छिपाएं</string>
     <string name="btn_chiudi_impostazioni">बंद करें</string>
     <string name="desc_impostazioni_icon">सेटिंग्स</string>
 </resources>

@@ -48,6 +48,7 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
     @Composable
     fun MatchAnalysisOverlay(
         match: MatchRecord,
+        hideMatchAwards: Boolean = false,
         onClose: () -> Unit // Funzione lambda chiamata quando si preme "Chiudi Analisi"
     ) {
         val haptic = LocalHapticFeedback.current
@@ -67,6 +68,7 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
             // ====================================================================
             MatchAnalysisOverlayLandscape(
                 match = match,
+                hideMatchAwards = hideMatchAwards,
                 showAwardsInfoDialog = showAwardsInfoDialog,
                 onShowAwardsInfoDialogChange = { showAwardsInfoDialog = it },
                 showChartInfoDialog = showChartInfoDialog,
@@ -259,8 +261,8 @@ import com.n380.scorecounter.ui.components.ChartGuideDialog
                                 val storiciLumaca = remember(match) { match.getHistoricalLumaca() }
                                 val storiciDiesel = remember(match) { match.getHistoricalDiesel() }
 
-                                // Condizione di rendering: se almeno un premio è presente, viene visualizzata l'intera sezione dei riconoscimenti
-                                if (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null || storiciDittatore != null || storiciPredatore != null || storiciTestaATesta != null || storiciLumaca != null || storiciDiesel != null) {
+                                // Condizione di rendering: visualizza la sezione dei premi solo se l'impostazione "Nascondi premi di partita" è disattivata e se almeno un premio è presente
+                                if (!hideMatchAwards && (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null || storiciDittatore != null || storiciPredatore != null || storiciTestaATesta != null || storiciLumaca != null || storiciDiesel != null)) {
 
                                     // ====================================================================
                                     // --- SEZIONE: PREMI PARTITA (ICONIZZATA E PULSANTE A DESTRA) ---

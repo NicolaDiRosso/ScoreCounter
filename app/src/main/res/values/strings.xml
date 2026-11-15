@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">Custom value</string>
     <string name="opt_ordinamento_classifica">Dynamic leaderboard sorting</string>
     <string name="desc_ordinamento_classifica">Automatically reorder players by score during match</string>
+    <string name="opt_nascondi_premi">Hide match awards</string>
+    <string name="desc_nascondi_premi">Hide the awards section and trophies in match analysis and results screens</string>
     <string name="btn_chiudi_impostazioni">Close</string>
     <string name="desc_impostazioni_icon">Settings</string>
 </resources>

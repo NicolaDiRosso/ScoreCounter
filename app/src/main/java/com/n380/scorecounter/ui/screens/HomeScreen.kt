@@ -1498,6 +1498,7 @@ fun HomeScreen(
                 // dicendogli cosa fare quando l'utente preme il tasto "Chiudi".
                 MatchAnalysisOverlay(
                     match = match,
+                    hideMatchAwards = viewModel.hideMatchAwards,
                     onClose = {
                         expandedMatchIndex =
                             -1 // 🧠 STATE: Cambiando l'indice a -1, la Home nasconde l'overlay.

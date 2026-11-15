@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">Benutzerdefinierter Wert</string>
     <string name="opt_ordinamento_classifica">Dynamische Ranglistensortierung</string>
     <string name="desc_ordinamento_classifica">Spieler während des Spiels automatisch nach Punktstand sortieren</string>
+    <string name="opt_nascondi_premi">Spielauszeichnungen ausblenden</string>
+    <string name="desc_nascondi_premi">Auszeichnungen und Trophäen in Spielanalyse und Ergebnissen ausblenden</string>
     <string name="btn_chiudi_impostazioni">Schließen</string>
     <string name="desc_impostazioni_icon">Einstellungen</string>
 </resources>

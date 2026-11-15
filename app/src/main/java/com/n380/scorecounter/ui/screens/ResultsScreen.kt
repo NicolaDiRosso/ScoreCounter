@@ -561,9 +561,9 @@ fun ResultsScreen(
                                 }
                             }
 
-                            // 🧠 KOTLIN LOGICA REATTIVA:
-                            // Aggiunto anche il controllo sul quarto premio (ritornoDiFiammaStat)
-                            if (cecchinoStat != null || inarrestabileStat != null || gamberoStat != null || feniceStat != null) {
+                            // 🧠 CONTROLLO PREFERENZE (Nascondi Premi di Partita):
+                            // Se l'impostazione "Nascondi premi di partita" è attiva, l'intera sezione dei trofei e il pulsante info vengono nascosti.
+                            if (!viewModel.hideMatchAwards && (cecchinoStat != null || inarrestabileStat != null || gamberoStat != null || feniceStat != null || dittatoreStat != null || predatoreStat != null || testaATestaStat != null || lumacaStat != null || dieselStat != null)) {
 
                                 // Diamo un respiro di 12.dp per separare bene il blocco del grafico da quello dei premi
                                 Spacer(modifier = Modifier.height(12.dp))

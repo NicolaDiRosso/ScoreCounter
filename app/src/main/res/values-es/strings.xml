@@ -410,6 +410,8 @@
     <string name="hint_valore_personalizzato">Valor personalizado</string>
     <string name="opt_ordinamento_classifica">Orden dinámico de clasificación</string>
     <string name="desc_ordinamento_classifica">Reordena automáticamente a los jugadores por puntuación en la partida</string>
+    <string name="opt_nascondi_premi">Ocultar premios de la partida</string>
+    <string name="desc_nascondi_premi">Ocultar la sección de premios y trofeos en el análisis y resultados de la partida</string>
     <string name="btn_chiudi_impostazioni">Cerrar</string>
     <string name="desc_impostazioni_icon">Ajustes</string>
 </resources>
