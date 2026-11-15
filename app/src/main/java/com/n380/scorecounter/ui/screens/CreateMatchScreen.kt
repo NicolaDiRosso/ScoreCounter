@@ -1317,48 +1317,68 @@ fun CreateMatchScreen(
                                                         .padding(start = 10.dp)
                                                 )
 
-                                                // Tasto Azione Modifica Nome
-                                                TonalActionPill(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                        favToEdit = fav
-                                                    },
-                                                    modifier = Modifier.padding(end = 4.dp)
+                                                // Tasto Azione Modifica Nome (Dimensioni 48x48dp per coerenza con il tavolo partecipanti)
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier
+                                                        .size(48.dp) // Dimensione fissa 48x48dp identica alla card del tavolo
+                                                        .clip(RoundedCornerShape(12.dp)) // Arrotondamento angoli a 12dp
+                                                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)) // Sfondo semi-trasparente
+                                                        .border(
+                                                            width = 1.dp,
+                                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                                            shape = RoundedCornerShape(12.dp)
+                                                        )
+                                                        .clickable {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Feedback aptico di conferma
+                                                            favToEdit = fav // Assegna il preferito da modificare
+                                                        }
                                                 ) {
                                                     Icon(
-                                                        imageVector = Icons.Filled.Edit,
+                                                        imageVector = Icons.Filled.Edit, // Icona matita
                                                         contentDescription = stringResource(R.string.desc_modifica_icon),
-                                                        tint = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.size(20.dp)
+                                                        tint = MaterialTheme.colorScheme.primary, // Colore primario per modifica
+                                                        modifier = Modifier.size(24.dp) // Dimensione standard icona 24dp
                                                     )
                                                 }
 
-                                                // Tasto Azione Eliminazione (Rosso con Undo Snackbar)
-                                                TonalActionPill(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                        val removedIndex = index
-                                                        val removedFav = fav
-                                                        viewModel.removeFavorite(fav)
-                                                        coroutineScope.launch {
-                                                            dialogSnackbarHostState.currentSnackbarData?.dismiss()
-                                                            val result = dialogSnackbarHostState.showSnackbar(
-                                                                message = msgFavRimosso,
-                                                                actionLabel = btnAnnullaFav,
-                                                                duration = SnackbarDuration.Short
-                                                            )
-                                                            if (result == SnackbarResult.ActionPerformed) {
-                                                                viewModel.restoreFavorite(removedIndex, removedFav)
+                                                Spacer(modifier = Modifier.width(4.dp)) // Spaziatura di 4dp tra i due pulsanti
+
+                                                // Tasto Azione Eliminazione (Dimensioni 48x48dp, colore errore e supporto Undo)
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier
+                                                        .size(48.dp) // Dimensione fissa 48x48dp identica alla card del tavolo
+                                                        .clip(RoundedCornerShape(12.dp)) // Arrotondamento angoli a 12dp
+                                                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)) // Sfondo semi-trasparente
+                                                        .border(
+                                                            width = 1.dp,
+                                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                                            shape = RoundedCornerShape(12.dp)
+                                                        )
+                                                        .clickable {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Feedback aptico di conferma
+                                                            val removedIndex = index
+                                                            val removedFav = fav
+                                                            viewModel.removeFavorite(fav) // Rimuove temporaneamente il preferito
+                                                            coroutineScope.launch {
+                                                                dialogSnackbarHostState.currentSnackbarData?.dismiss()
+                                                                val result = dialogSnackbarHostState.showSnackbar(
+                                                                    message = msgFavRimosso,
+                                                                    actionLabel = btnAnnullaFav,
+                                                                    duration = SnackbarDuration.Short
+                                                                )
+                                                                if (result == SnackbarResult.ActionPerformed) {
+                                                                    viewModel.restoreFavorite(removedIndex, removedFav) // Ripristina in caso di Undo
+                                                                }
                                                             }
                                                         }
-                                                    },
-                                                    baseColor = MaterialTheme.colorScheme.error
                                                 ) {
                                                     Icon(
-                                                        imageVector = Icons.Filled.Delete,
+                                                        imageVector = Icons.Filled.Delete, // Icona cestino
                                                         contentDescription = stringResource(R.string.desc_elimina_icon),
-                                                        tint = MaterialTheme.colorScheme.error,
-                                                        modifier = Modifier.size(20.dp)
+                                                        tint = MaterialTheme.colorScheme.error, // Colore errore (rosso) per eliminazione
+                                                        modifier = Modifier.size(24.dp) // Dimensione standard icona 24dp
                                                     )
                                                 }
                                             }
@@ -1536,50 +1556,72 @@ fun CreateMatchScreen(
                                                         .padding(start = 12.dp)
                                                 )
 
-                                                TonalActionPill(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                        favToEdit = fav
-                                                    },
-                                                    modifier = Modifier.padding(end = 6.dp)
+                                                // Tasto Azione Modifica Nome (Dimensioni 48x48dp per coerenza con il tavolo partecipanti)
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier
+                                                        .size(48.dp) // Dimensione fissa 48x48dp identica alla card del tavolo
+                                                        .clip(RoundedCornerShape(12.dp)) // Arrotondamento angoli a 12dp
+                                                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)) // Sfondo semi-trasparente
+                                                        .border(
+                                                            width = 1.dp,
+                                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                                            shape = RoundedCornerShape(12.dp)
+                                                        )
+                                                        .clickable {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Feedback aptico di conferma
+                                                            favToEdit = fav // Assegna il preferito da modificare
+                                                        }
                                                 ) {
                                                     Icon(
-                                                        imageVector = Icons.Filled.Edit,
+                                                        imageVector = Icons.Filled.Edit, // Icona matita
                                                         contentDescription = stringResource(R.string.desc_modifica_icon),
-                                                        tint = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.size(22.dp)
+                                                        tint = MaterialTheme.colorScheme.primary, // Colore primario per modifica
+                                                        modifier = Modifier.size(24.dp) // Dimensione standard icona 24dp
                                                     )
                                                 }
 
-                                                TonalActionPill(
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                        val removedIndex = index
-                                                        val removedFav = fav
-                                                        viewModel.removeFavorite(fav)
-                                                        coroutineScope.launch {
-                                                            dialogSnackbarHostState.currentSnackbarData?.dismiss()
-                                                            val result =
-                                                                dialogSnackbarHostState.showSnackbar(
-                                                                    message = msgFavRimosso,
-                                                                    actionLabel = btnAnnullaFav,
-                                                                    duration = SnackbarDuration.Short
-                                                                )
-                                                            if (result == SnackbarResult.ActionPerformed) {
-                                                                viewModel.restoreFavorite(
-                                                                    removedIndex,
-                                                                    removedFav
-                                                                )
+                                                Spacer(modifier = Modifier.width(4.dp)) // Spaziatura di 4dp tra i due pulsanti
+
+                                                // Tasto Azione Eliminazione (Dimensioni 48x48dp, colore errore e supporto Undo)
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier
+                                                        .size(48.dp) // Dimensione fissa 48x48dp identica alla card del tavolo
+                                                        .clip(RoundedCornerShape(12.dp)) // Arrotondamento angoli a 12dp
+                                                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)) // Sfondo semi-trasparente
+                                                        .border(
+                                                            width = 1.dp,
+                                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                                            shape = RoundedCornerShape(12.dp)
+                                                        )
+                                                        .clickable {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm) // Feedback aptico di conferma
+                                                            val removedIndex = index
+                                                            val removedFav = fav
+                                                            viewModel.removeFavorite(fav) // Rimuove temporaneamente il preferito
+                                                            coroutineScope.launch {
+                                                                dialogSnackbarHostState.currentSnackbarData?.dismiss()
+                                                                val result =
+                                                                    dialogSnackbarHostState.showSnackbar(
+                                                                        message = msgFavRimosso,
+                                                                        actionLabel = btnAnnullaFav,
+                                                                        duration = SnackbarDuration.Short
+                                                                    )
+                                                                if (result == SnackbarResult.ActionPerformed) {
+                                                                    viewModel.restoreFavorite(
+                                                                        removedIndex,
+                                                                        removedFav
+                                                                    )
+                                                                }
                                                             }
                                                         }
-                                                    },
-                                                    baseColor = MaterialTheme.colorScheme.error
                                                 ) {
                                                     Icon(
-                                                        imageVector = Icons.Filled.Delete,
+                                                        imageVector = Icons.Filled.Delete, // Icona cestino
                                                         contentDescription = stringResource(R.string.desc_elimina_icon),
-                                                        tint = MaterialTheme.colorScheme.error,
-                                                        modifier = Modifier.size(22.dp)
+                                                        tint = MaterialTheme.colorScheme.error, // Colore errore (rosso) per eliminazione
+                                                        modifier = Modifier.size(24.dp) // Dimensione standard icona 24dp
                                                     )
                                                 }
                                             }
