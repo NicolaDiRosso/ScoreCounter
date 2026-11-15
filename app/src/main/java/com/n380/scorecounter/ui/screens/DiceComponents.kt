@@ -12,7 +12,6 @@ import androidx.compose.animation.core.spring // Funzione per creare un'animazio
 import androidx.compose.animation.core.tween // Funzione per configurare la durata in millisecondi delle transizioni
 import androidx.compose.foundation.BorderStroke // Strumento per tracciare bordi attorno ai componenti Surface e Card
 import androidx.compose.foundation.background // Modificatore per applicare colori o sfumature di sfondo
-import androidx.compose.foundation.clickable // Modificatore per rendere un elemento della UI reattivo ai tocchi
 import androidx.compose.foundation.layout.* // Import di massa per layout (Box, Row, Column, Size, Padding, Alignment)
 import androidx.compose.foundation.rememberScrollState // Ricorda lo stato dello scorrimento per contenitori scorrevoli
 import androidx.compose.foundation.shape.RoundedCornerShape // Permette di creare angoli arrotondati o forme "squircle"

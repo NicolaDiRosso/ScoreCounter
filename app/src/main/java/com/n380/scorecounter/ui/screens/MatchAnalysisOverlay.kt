@@ -6,7 +6,6 @@
     import androidx.compose.foundation.shape.RoundedCornerShape
     import androidx.compose.foundation.verticalScroll
     import androidx.compose.material.icons.Icons
-    import androidx.compose.material.icons.filled.Check
     import androidx.compose.material.icons.filled.Close
     import androidx.compose.material.icons.filled.EmojiEvents
     import androidx.compose.material.icons.filled.Info
@@ -22,9 +21,6 @@
     import androidx.compose.ui.res.stringResource // 🌍 I18N: Import per il sistema di traduzione nativo Android
     import android.content.res.Configuration
     import androidx.compose.ui.platform.LocalConfiguration
-    import androidx.compose.ui.window.Dialog
-    import androidx.compose.ui.window.DialogProperties
-    import androidx.compose.ui.text.style.TextAlign
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.unit.dp
     import com.n380.scorecounter.R // 🌍 I18N: Accesso all'indice (R)estources
@@ -35,8 +31,8 @@
     import com.n380.scorecounter.ui.components.ScoreChart
     import com.n380.scorecounter.ui.components.formatTime
     import com.n380.scorecounter.ui.screens.landscape.MatchAnalysisOverlayLandscape
-import com.n380.scorecounter.ui.screens.landscape.AwardsGuideDialog
-import com.n380.scorecounter.ui.components.ChartGuideDialog
+    import com.n380.scorecounter.ui.screens.landscape.AwardsGuideDialog
+    import com.n380.scorecounter.ui.components.ChartGuideDialog
 
     /**
      * ====================================================================

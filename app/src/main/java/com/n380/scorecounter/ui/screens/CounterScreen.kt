@@ -1,19 +1,15 @@
     package com.n380.scorecounter.ui.screens
 
-    import android.app.Activity
     import com.n380.scorecounter.ui.components.AutoResizedText
-    import android.view.WindowManager
     import androidx.activity.compose.BackHandler
     import androidx.compose.foundation.BorderStroke
     import androidx.compose.foundation.layout.*
     import androidx.compose.foundation.layout.Arrangement
     import androidx.compose.foundation.lazy.LazyColumn
     import androidx.compose.foundation.lazy.items
-    import androidx.compose.foundation.rememberScrollState
     import androidx.compose.foundation.shape.RoundedCornerShape
     import androidx.compose.foundation.text.KeyboardActions
     import androidx.compose.foundation.text.KeyboardOptions
-    import androidx.compose.foundation.verticalScroll
     import androidx.compose.material.icons.Icons
     import androidx.compose.material.icons.automirrored.filled.ExitToApp
     import androidx.compose.material.icons.filled.*
@@ -29,8 +25,6 @@
     import android.content.res.Configuration
     import androidx.compose.ui.platform.LocalConfiguration
     import androidx.compose.ui.platform.LocalContext
-    import androidx.compose.ui.window.Dialog
-    import androidx.compose.ui.window.DialogProperties
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.lifecycle.compose.LocalLifecycleOwner
     import androidx.compose.ui.res.stringResource // 🌍 I18N: Import fondamentale per le traduzioni UI
@@ -47,7 +41,7 @@
     import com.n380.scorecounter.R // 🌍 I18N: Import per l'accesso ai file di risorsa XML
     import com.n380.scorecounter.model.Player
     import com.n380.scorecounter.ui.components.PlayerScoreCard
-import com.n380.scorecounter.ui.components.FeatureInfoDialog
+    import com.n380.scorecounter.ui.components.FeatureInfoDialog
     import com.n380.scorecounter.ui.components.formatTime
     import com.n380.scorecounter.ui.screens.landscape.CounterScreenLandscape
     import com.n380.scorecounter.viewmodel.MatchViewModel

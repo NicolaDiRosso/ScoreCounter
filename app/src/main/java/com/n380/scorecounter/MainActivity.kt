@@ -3,11 +3,9 @@ package com.n380.scorecounter
 // ====================================================================
 // 1. AREA IMPORTAZIONI (Solo quelle necessarie per l'avvio!)
 // ====================================================================
-import android.app.LocaleManager
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.os.LocaleList
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler

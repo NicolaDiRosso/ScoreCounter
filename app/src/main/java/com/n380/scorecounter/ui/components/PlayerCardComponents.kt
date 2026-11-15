@@ -17,7 +17,6 @@
     import androidx.compose.ui.draw.clip
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-    import android.content.res.Configuration
     import androidx.compose.ui.platform.LocalConfiguration
     import androidx.compose.ui.platform.LocalHapticFeedback
     import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +27,6 @@
     import androidx.compose.ui.unit.Dp
     import androidx.compose.ui.unit.sp
     import androidx.compose.ui.unit.TextUnit
-    import androidx.compose.ui.graphics.Shape
     import androidx.compose.ui.hapticfeedback.HapticFeedback
     import androidx.compose.foundation.shape.RoundedCornerShape
 
