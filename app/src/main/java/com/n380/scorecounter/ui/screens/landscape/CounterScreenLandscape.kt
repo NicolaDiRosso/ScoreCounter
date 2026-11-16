@@ -71,7 +71,12 @@ fun CounterScreenLandscape(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
-    // Calcolo del punteggio massimo corrente per la corona del leader
+    // Calcolo del punteggio rilevante per il leader in base al criterio di vittoria attivo
+    val winningScore = if (viewModel.isLowestScoreWins) {
+        viewModel.players.minOfOrNull { it.score } ?: 0
+    } else {
+        viewModel.players.maxOfOrNull { it.score } ?: 0
+    }
     val maxScore = viewModel.players.maxOfOrNull { it.score } ?: 0
 
     Row(
@@ -331,8 +336,13 @@ fun CounterScreenLandscape(
             // 2. A parità di punteggio, l'ultimo ad aver segnato sale in cima (thenByDescending { it.lastScoreUpdateTime })
             val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
                 viewModel.players.sortedWith(
-                    compareByDescending<Player> { it.score }
-                        .thenByDescending { it.lastScoreUpdateTime }
+                    if (viewModel.isLowestScoreWins) {
+                        compareBy<Player> { it.score }
+                            .thenByDescending { it.lastScoreUpdateTime }
+                    } else {
+                        compareByDescending<Player> { it.score }
+                            .thenByDescending { it.lastScoreUpdateTime }
+                    }
                 )
             } else {
                 viewModel.players
@@ -406,7 +416,7 @@ fun CounterScreenLandscape(
                             ) {
                                 rowPlayers.forEach { player ->
                                     key(player.name) {
-                                        val isLeader = maxScore > 0 && player.score == maxScore
+                                        val isLeader = if (viewModel.isLowestScoreWins) player.score == winningScore else (winningScore > 0 && player.score == winningScore)
                                         PlayerScoreCard(
                                             player = player,
                                             isLeader = isLeader,
@@ -449,7 +459,7 @@ fun CounterScreenLandscape(
                             items = displayedPlayers,
                             key = { player -> player.name }
                         ) { player ->
-                            val isLeader = maxScore > 0 && player.score == maxScore
+                            val isLeader = if (viewModel.isLowestScoreWins) player.score == winningScore else (winningScore > 0 && player.score == winningScore)
                             PlayerScoreCard(
                                 player = player,
                                 isLeader = isLeader,

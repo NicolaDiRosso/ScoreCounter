@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">प्रत्येक डॉट स्कोर किया गया एक बिंदु है। यदि रेखा सपाट है, तो इसका मतलब है कि उस समय के दौरान किसी ने स्कोर नहीं किया।</string>
     <string name="titolo_guida_sorpassi">⚔️ ओवरटेक (Overtakes)</string>
     <string name="msg_guida_sorpassi">जब दो रेखाएं आपस में कटती हैं, तो इसका मतलब है कि रैंकिंग में कोई टाई या नेतृत्व परिवर्तन हुआ था!</string>
-    <string name="label_durata_totale">कुल अवधि: %s</string>
     <string name="btn_chiudi_analisi">विश्लेषण बंद करें</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">मैच विश्लेषण और परिणामों में पुरस्कार अनुभाग और ट्रॉफियां छिपाएं</string>
     <string name="btn_chiudi_impostazioni">बंद करें</string>
     <string name="desc_impostazioni_icon">सेटिंग्स</string>
+    <string name="label_criterio_vittoria">विजेता स्कोर:</string>
+    <string name="opt_piu_alto">उच्चतम</string>
+    <string name="opt_piu_basso">न्यूनतम</string>
+    <string name="label_criterio_basso">मानदंड: न्यूनतम स्कोर</string>
+    <string name="label_criterio_alto">मानदंड: उच्चतम स्कोर</string>
+    <string name="badge_storico_basso">न्यूनतम स्कोर</string>
+    <string name="badge_punteggio_minimo">न्यूनतम स्कोर</string>
+    <string name="badge_punteggio_massimo">उच्चतम स्कोर</string>
 </resources>

@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">各ドットは得点した瞬間です。線が平らな場合、その間は誰も得点していないことを意味します。</string>
     <string name="titolo_guida_sorpassi">⚔️ デッドヒート</string>
     <string name="msg_guida_sorpassi">2つの線が交差する場合、同点または順位の逆転があったことを意味します！</string>
-    <string name="label_durata_totale">合計時間: %s</string>
     <string name="btn_chiudi_analisi">分析を閉じる</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">対戦の分析および結果画面でアワードセクションとトロフィーを非表示にします</string>
     <string name="btn_chiudi_impostazioni">閉じる</string>
     <string name="desc_impostazioni_icon">設定</string>
+    <string name="label_criterio_vittoria">勝利スコア：</string>
+    <string name="opt_piu_alto">最高点</string>
+    <string name="opt_piu_basso">最低点</string>
+    <string name="label_criterio_basso">基準：最低スコア</string>
+    <string name="label_criterio_alto">基準：最高スコア</string>
+    <string name="badge_storico_basso">最低スコア</string>
+    <string name="badge_punteggio_minimo">最低スコア</string>
+    <string name="badge_punteggio_massimo">最高スコア</string>
 </resources>

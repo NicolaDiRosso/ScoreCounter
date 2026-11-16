@@ -9,8 +9,10 @@
     import androidx.compose.material.icons.filled.Close
     import androidx.compose.material.icons.filled.EmojiEvents
     import androidx.compose.material.icons.filled.Info
+    import androidx.compose.material.icons.filled.Schedule
     import androidx.compose.material.icons.filled.ShowChart
-    import androidx.compose.material.icons.filled.Timer
+    import androidx.compose.material.icons.automirrored.filled.TrendingDown
+    import androidx.compose.material.icons.automirrored.filled.TrendingUp
     import androidx.compose.material3.*
     import androidx.compose.runtime.*
     import androidx.compose.runtime.saveable.rememberSaveable
@@ -113,36 +115,87 @@
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.Start // Allineato a sinistra sul bordo sinistro come tutte le altre finestre dell'app
                         ) {
                             Text(
-                                // 🧠 LEZIONE I18N: Lettura stringa fissa
-                                // Invece di scrivere in hardcode "Analisi Partita", usiamo la funzione
-                                // che va a leggere il dizionario associato alla lingua del dispositivo.
                                 text = stringResource(R.string.titolo_analisi_partita),
-                                style = MaterialTheme.typography.displaySmall, // <-- Tornato gigante!
+                                style = MaterialTheme.typography.displaySmall, // Dimensione originale in stile Material
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary // Colore primario Material
                             )
                             AutoResizedText(
-                                text = match.title, // Non si traduce: è un input libero dell'utente
-                                style = MaterialTheme.typography.titleLarge, // <-- Grandezza equilibrata
+                                text = match.title,
+                                style = MaterialTheme.typography.headlineSmall, // Nome della partita ingrandito
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                // 🧠 LEZIONE I18N: Stringa formattata con due segnaposto multipli (%1$s, %2$d)
-                                // Nel vecchio codice si aveva: "🏆 Vinta da ${match.winnerName} con ${match.winningScore} pt".
-                                // Per tradurla, nel file XML creeremo una stringa con due "buchi numerati":
-                                // <string name="label_vinta_da_con_punti">🏆 Vinta da %1$s con %2$d pt</string>
-                                // %1$s: Qui andrà il PRIMO parametro di tipo testuale (Stringa -> il nome).
-                                // %2$d: Qui andrà il SECONDO parametro numerico (Decimal -> il punteggio).
-                                // Perché numerarli? Perché in lingue come il giapponese l'ordine grammaticale potrebbe essere invertito!
                                 text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.secondary, // <-- Niente più grigio! Colore d'accento
-                                modifier = Modifier.padding(top = 4.dp)
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                             )
+
+                            // 🧠 PILLOLE INFORMATIVE ADATTIVE (Tempo di gioco e Criterio Punteggio Minimo/Massimo)
+                            // Allineate a sinistra sotto al vincitore in modalità Portrait
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (match.durationSeconds > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Schedule,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Text(
+                                                text = formatTime(match.durationSeconds),
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+
+                                val isLowest = match.isLowestScoreWins
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = if (isLowest) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isLowest) Icons.AutoMirrored.Filled.TrendingDown else Icons.AutoMirrored.Filled.TrendingUp,
+                                            contentDescription = null,
+                                            tint = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(if (isLowest) R.string.badge_punteggio_minimo else R.string.badge_punteggio_massimo),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
                         }
 
                         // ====================================================================
@@ -427,33 +480,6 @@
                                             valueText = stringResource(R.string.label_percentuale, percentuale)
                                         )
                                     }
-                                }
-
-                                /// ====================================================================
-                                // Footer informativo sulla durata
-                                // 🧠 UX & MATERIAL 3: Coerenza dei Colori. L'utente ha giustamente
-                                // notato che il grigio "spegne" questa informazione. Usiamo il colore
-                                // 'primary' per legarlo visivamente al bottone di chiusura sottostante!
-                                // ====================================================================
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                    horizontalArrangement = Arrangement.Center, // Bello centrato
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Timer,
-                                        contentDescription = "Durata",
-                                        tint = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                    AutoResizedText(
-                                        // 🧠 LEZIONE I18N: Riutilizzo del Segnaposto per stringa (Time Formatter)
-                                        text = stringResource(R.string.label_durata_totale, formatTime(match.durationSeconds)), // 🌍 I18N: "%s"
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.primary, // <-- Niente più grigio
-                                        modifier = Modifier.padding(start = 6.dp)
-                                    )
                                 }
                             }
                         }

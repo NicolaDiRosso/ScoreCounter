@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">Ogni pallino è un punto segnato. Se la linea va dritta (piatta), significa che in quel momento nessuno ha fatto punti.</string>
     <string name="titolo_guida_sorpassi">⚔️ Sorpassi</string>
     <string name="msg_guida_sorpassi">Quando due linee si incrociano, significa che c\'è stato un pareggio o un sorpasso in classifica!</string>
-    <string name="label_durata_totale"> Durata totale: %s</string>
     <string name="btn_chiudi_analisi">Chiudi analisi</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">Nascondi la sezione e i trofei assegnati a fine sfida nell\'analisi e nei risultati</string>
     <string name="btn_chiudi_impostazioni">Chiudi</string>
     <string name="desc_impostazioni_icon">Impostazioni</string>
+    <string name="label_criterio_vittoria">Punteggio vincente:</string>
+    <string name="opt_piu_alto">Più alto</string>
+    <string name="opt_piu_basso">Più basso</string>
+    <string name="label_criterio_basso">Criterio: Punteggio più basso</string>
+    <string name="label_criterio_alto">Criterio: Punteggio più alto</string>
+    <string name="badge_storico_basso">Punteggio più basso</string>
+    <string name="badge_punteggio_minimo">Punteggio minimo</string>
+    <string name="badge_punteggio_massimo">Punteggio massimo</string>
 </resources>

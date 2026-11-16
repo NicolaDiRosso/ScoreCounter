@@ -27,6 +27,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.drawToBitmap
@@ -80,7 +83,12 @@ fun ResultsScreen(
      * Questa formula risponde a quella domanda. Si legge così in italiano:
      * "Prendi ogni singolo player, guarda la freccia -> e restituiscimi il suo player.score".
      */
-    val rankedPlayers = viewModel.players.sortedByDescending { player -> player.score }
+    // Classifica ordinata in base al criterio di vittoria attivo (crescente per punteggio minore, decrescente per punteggio maggiore)
+    val rankedPlayers = if (viewModel.isLowestScoreWins) {
+        viewModel.players.sortedBy { player -> player.score }
+    } else {
+        viewModel.players.sortedByDescending { player -> player.score }
+    }
 
     val haptic = LocalHapticFeedback.current
 
@@ -279,7 +287,8 @@ fun ResultsScreen(
                                     cecchinoData = mappedCecchino,
                                     inarrestabileData = mappedInarrestabile,
                                     gamberoData = mappedGambero,
-                                    feniceData = mappedFenice
+                                    feniceData = mappedFenice,
+                                    isLowestScoreWins = viewModel.isLowestScoreWins
                                 )
 
                                 // 📸 CATTURA E CONDIVISIONE COMBINATA
@@ -396,21 +405,71 @@ fun ResultsScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    if (viewModel.matchDurationSeconds > 0) {
-                        // ==========================================================
-                        // 🧠 LEZIONE TEORICA I18N: Segnaposto di tipo String (%s)
-                        // ==========================================================
-                        // A differenza del dado dove usavamo %d (per numeri interi decimali),
-                        // qui formatTime() restituisce un testo (es. "05:30").
-                        // Per i testi, il segnaposto da usare nel file XML è '%s' (String).
-                        // Nel file strings.xml scriveremo: "⏱️ Tempo di gioco: %s"
-                        // ==========================================================
-                        AutoResizedText(
-                            text = stringResource(R.string.label_tempo_gioco, formatTime(viewModel.matchDurationSeconds)), // 🌍 I18N
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                            // Rimosso il padding(bottom = 8.dp) che c'era qui prima, per compattare il testo
-                        )
+                    // 🧠 PILLOLE INFORMATIVE ADATTIVE (Tempo di gioco e Criterio Punteggio Minimo)
+                    // Utilizziamo una Row centrata orizzontalmente per mostrare badge compatti in stile Material 3
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Riquadro 1: Durata della partita (Mostrato se i secondi registrati sono maggiori di zero)
+                        if (viewModel.matchDurationSeconds > 0) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Schedule,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = formatTime(viewModel.matchDurationSeconds),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        // 🧠 GESTIONE CONDIZIONALE DEL CRITERIO DI VITTORIA (Sempre visibile in entrambe le modalità):
+                        // - Se la partita usa la modalità "Punteggio più basso" (isLowestScoreWins = true), coloriamo la pillola
+                        //   con un tono accentato di risalto (tertiaryContainer) e l'icona "TrendingDown".
+                        // - Se la partita usa la modalità standard "Punteggio più alto" (isLowestScoreWins = false), mostriamo
+                        //   esattamente la stessa forma geometrica ma con uno stile discreto e neutro (surfaceVariant) e l'icona "TrendingUp".
+                        val isLowest = viewModel.isLowestScoreWins
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (isLowest) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (isLowest) Icons.AutoMirrored.Filled.TrendingDown else Icons.AutoMirrored.Filled.TrendingUp,
+                                    contentDescription = null,
+                                    tint = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = stringResource(if (isLowest) R.string.badge_punteggio_minimo else R.string.badge_punteggio_massimo),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
 

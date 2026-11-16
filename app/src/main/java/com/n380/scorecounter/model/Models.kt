@@ -63,7 +63,9 @@ package com.n380.scorecounter.model
         // Salviamo la durata della partita (Il default 0L previene errori coi vecchi salvataggi!)
         val durationSeconds: Long = 0L,
         // ---> NUOVO: Salviamo il millisecondo esatto della chiusura della partita per ricavare la Data
-        val timestamp: Long = 0L
+        val timestamp: Long = 0L,
+        // Criterio di vittoria: true se vince il punteggio minore, false se vince il punteggio maggiore
+        val isLowestScoreWins: Boolean = false
     )
 
     // ---> NUOVO: Modello per il backup salva-vita della partita in corso <---
@@ -71,7 +73,9 @@ package com.n380.scorecounter.model
         val title: String,
         val target: String,
         val players: List<PlayerRecord>,
-        val seconds: Long
+        val seconds: Long,
+        // Criterio di vittoria per la partita in sospeso salvata nel backup
+        val isLowestScoreWins: Boolean = false
     )
 
     // ====================================================================

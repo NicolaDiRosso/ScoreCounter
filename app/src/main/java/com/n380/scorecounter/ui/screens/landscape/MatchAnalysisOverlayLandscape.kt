@@ -9,8 +9,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.ShowChart
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -98,7 +100,7 @@ fun MatchAnalysisOverlayLandscape(
                         text = stringResource(R.string.titolo_analisi_partita),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.primary, // Colore Material primario per il titolo della finestra
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 6.dp, start = 2.dp)
@@ -124,9 +126,9 @@ fun MatchAnalysisOverlayLandscape(
                             Column(horizontalAlignment = Alignment.Start) {
                                 AutoResizedText(
                                     text = match.title,
-                                    style = MaterialTheme.typography.titleLarge,
+                                    style = MaterialTheme.typography.headlineSmall, // Nome della partita ingrandito
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.onBackground // Colore bianco o nero in base al tema dell'app
                                 )
                                 Text(
                                     text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
@@ -136,6 +138,66 @@ fun MatchAnalysisOverlayLandscape(
                             }
 
                             Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                            // 🧠 PILLOLE INFORMATIVE ADATTIVE (Tempo di gioco e Criterio Punteggio Minimo/Massimo)
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (match.durationSeconds > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Schedule,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Text(
+                                                text = formatTime(match.durationSeconds),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+
+                                val isLowest = match.isLowestScoreWins
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = if (isLowest) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isLowest) Icons.AutoMirrored.Filled.TrendingDown else Icons.AutoMirrored.Filled.TrendingUp,
+                                            contentDescription = null,
+                                            tint = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(if (isLowest) R.string.badge_punteggio_minimo else R.string.badge_punteggio_massimo),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
 
                             // Sezione Premi Partita (Visualizzata solo se l'impostazione "Nascondi premi di partita" è disattivata)
                             if (!hideMatchAwards && (storiciCecchino != null || storiciInarrestabile != null || storiciGambero != null || storiciFenice != null || storiciDittatore != null || storiciPredatore != null || storiciTestaATesta != null || storiciLumaca != null || storiciDiesel != null)) {
@@ -259,26 +321,6 @@ fun MatchAnalysisOverlayLandscape(
                                         valueText = stringResource(R.string.label_percentuale, percentuale)
                                     )
                                 }
-                            }
-
-                            // Footer Durata
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                                horizontalArrangement = Arrangement.Start,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Timer,
-                                    contentDescription = "Durata",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                AutoResizedText(
-                                    text = stringResource(R.string.label_durata_totale, formatTime(match.durationSeconds)),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
                             }
                         }
                     }

@@ -553,8 +553,12 @@
                 }
 
                 // ---> CALCOLO DELLA CORONA DEL LEADER IN TEMPO REALE <---
-                // Per assegnare la corona, dobbiamo sapere chi ha il punteggio più alto in questo esatto millisecondo.
-                // La funzione maxOfOrNull scansiona tutti i giocatori e trova il punteggio massimo (se sono tutti a 0, assegna 0 di default).
+                // Calcoliamo il punteggio rilevante per il leader in base al criterio di vittoria attivo (minimo se vince il più basso, massimo altrimenti)
+                val winningScore = if (viewModel.isLowestScoreWins) {
+                    viewModel.players.minOfOrNull { it.score } ?: 0
+                } else {
+                    viewModel.players.maxOfOrNull { it.score } ?: 0
+                }
                 val maxScore = viewModel.players.maxOfOrNull { it.score } ?: 0
 
                 // ---> CONTROLLO VITTORIA AUTOMATICA <---
@@ -609,17 +613,18 @@
                         val availableWidth = maxWidth
                         val availableHeight = maxHeight
 
-                        // 🧠 LOGICA DIDATTICA (Ordinamento Dinamico Classifica):
-                        // Verifichiamo se l'impostazione "Ordinamento dinamico classifica" è attiva.
-                        // Se attiva, ordiniamo i giocatori:
-                        // 1. Primariamente per punteggio discendente (`compareByDescending { it.score }`).
-                        // 2. Secondariamente (in caso di parità) per timestamp di ultimo aggiornamento (`thenByDescending { it.lastScoreUpdateTime }`),
-                        //    garantendo che l'ultimo giocatore ad aver segnato salga in cima tra i pari merito.
-                        // Se disattiva, manteniamo l'ordine originale della lista.
+                        // 🧠 LOGICA (Ordinamento Dinamico Classifica):
+                        // Se l'ordinamento dinamico è attivo, ordiniamo per punteggio in base al criterio di vittoria
+                        // (crescente se vince il punteggio minore, decrescente altrimenti) e per timestamp di ultimo aggiornamento.
                         val displayedPlayers = if (viewModel.dynamicLeaderboardSorting) {
                             viewModel.players.sortedWith(
-                                compareByDescending<Player> { it.score }
-                                    .thenByDescending { it.lastScoreUpdateTime }
+                                if (viewModel.isLowestScoreWins) {
+                                    compareBy<Player> { it.score }
+                                        .thenByDescending { it.lastScoreUpdateTime }
+                                } else {
+                                    compareByDescending<Player> { it.score }
+                                        .thenByDescending { it.lastScoreUpdateTime }
+                                }
                             )
                         } else {
                             viewModel.players
@@ -673,7 +678,7 @@
                                     ) {
                                         leftPlayers.forEach { p ->
                                             key(p.name) {
-                                                val isLeader = p.score == maxScore && maxScore > 0
+                                                val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
                                                 PlayerScoreCard(
                                                     player = p,
                                                     isLeader = isLeader,
@@ -699,7 +704,7 @@
                                     ) {
                                         rightPlayers.forEach { p ->
                                             key(p.name) {
-                                                val isLeader = p.score == maxScore && maxScore > 0
+                                                val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
                                                 PlayerScoreCard(
                                                     player = p,
                                                     isLeader = isLeader,
@@ -732,7 +737,7 @@
                                 ) {
                                     displayedPlayers.forEach { p ->
                                         key(p.name) {
-                                            val isLeader = p.score == maxScore && maxScore > 0
+                                            val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
                                             val cardModifier = if (playerCount == 1) {
                                                 Modifier
                                                     .fillMaxWidth()
@@ -769,7 +774,7 @@
                                     items = displayedPlayers,
                                     key = { player -> player.name } // Chiave stabile per animazioni fluide
                                 ) { p ->
-                                    val isLeader = p.score == maxScore && maxScore > 0
+                                    val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
 
                                     PlayerScoreCard(
                                         player = p,

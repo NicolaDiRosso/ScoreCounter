@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">Each dot is a point scored. If the line is flat, it means no one scored during that time.</string>
     <string name="titolo_guida_sorpassi">⚔️ Overtakes</string>
     <string name="msg_guida_sorpassi">When two lines cross, it means there was a tie or a lead change!</string>
-    <string name="label_durata_totale"> Total duration: %s</string>
     <string name="btn_chiudi_analisi">Close analysis</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">Hide the awards section and trophies in match analysis and results screens</string>
     <string name="btn_chiudi_impostazioni">Close</string>
     <string name="desc_impostazioni_icon">Settings</string>
+    <string name="label_criterio_vittoria">Winning score:</string>
+    <string name="opt_piu_alto">Highest</string>
+    <string name="opt_piu_basso">Lowest</string>
+    <string name="label_criterio_basso">Criterion: Lowest score</string>
+    <string name="label_criterio_alto">Criterion: Highest score</string>
+    <string name="badge_storico_basso">Lowest score</string>
+    <string name="badge_punteggio_minimo">Lowest score</string>
+    <string name="badge_punteggio_massimo">Highest score</string>
 </resources>

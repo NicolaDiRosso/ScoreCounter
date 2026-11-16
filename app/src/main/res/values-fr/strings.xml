@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">Chaque point est une marque. Si la ligne est plate, cela signifie que personne n\'a marqué de points à ce moment-là.</string>
     <string name="titolo_guida_sorpassi">⚔️ Dépassements</string>
     <string name="msg_guida_sorpassi">Quand deux lignes se croisent, cela signifie qu\'il y a eu une égalité ou un changement de leader !</string>
-    <string name="label_durata_totale">Durée totale : %s</string>
     <string name="btn_chiudi_analisi">Fermer l\'analyse</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">Masquer la section des récompenses dans l\'analyse et les résultats de la partie</string>
     <string name="btn_chiudi_impostazioni">Fermer</string>
     <string name="desc_impostazioni_icon">Paramètres</string>
+    <string name="label_criterio_vittoria">Score gagnant:</string>
+    <string name="opt_piu_alto">Plus élevé</string>
+    <string name="opt_piu_basso">Plus bas</string>
+    <string name="label_criterio_basso">Critère: Score le plus bas</string>
+    <string name="label_criterio_alto">Critère: Score le plus élevé</string>
+    <string name="badge_storico_basso">Score le plus bas</string>
+    <string name="badge_punteggio_minimo">Score minimum</string>
+    <string name="badge_punteggio_massimo">Score maximum</string>
 </resources>

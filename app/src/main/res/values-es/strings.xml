@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">Cada punto es una anotación. Si la línea se mantiene plana, significa que nadie sumó puntos en ese momento.</string>
     <string name="titolo_guida_sorpassi">⚔️ Adelantamientos</string>
     <string name="msg_guida_sorpassi">Cuando dos líneas se cruzan, ¡significa que hubo un empate o un cambio de líder en la clasificación!</string>
-    <string name="label_durata_totale">Duración total: %s</string>
     <string name="btn_chiudi_analisi">Cerrar análisis</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">Ocultar la sección de premios y trofeos en el análisis y resultados de la partida</string>
     <string name="btn_chiudi_impostazioni">Cerrar</string>
     <string name="desc_impostazioni_icon">Ajustes</string>
+    <string name="label_criterio_vittoria">Puntuación ganadora:</string>
+    <string name="opt_piu_alto">Más alta</string>
+    <string name="opt_piu_basso">Más baja</string>
+    <string name="label_criterio_basso">Criterio: Puntuación más baja</string>
+    <string name="label_criterio_alto">Criterio: Puntuación más alta</string>
+    <string name="badge_storico_basso">Puntuación más baja</string>
+    <string name="badge_punteggio_minimo">Puntuación mínima</string>
+    <string name="badge_punteggio_massimo">Puntuación máxima</string>
 </resources>

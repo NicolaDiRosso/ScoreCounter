@@ -46,6 +46,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // Di default è un classico dado a 6 facce (D6).
     var diceSides by mutableIntStateOf(6)
 
+    // Criterio di vittoria della partita in corso: false = Vince il punteggio più alto (default), true = Vince il punteggio più basso
+    var isLowestScoreWins by mutableStateOf(false)
+
     // 🧠 LOGICA DI VALIDAZIONE: FINE PARTITA
     // Questa proprietà calcolata controlla se il pulsante "Fine Partita" deve essere attivo.
     // Restituisce true se ALMENO UN giocatore ha una cronologia punteggi superiore a 1.
@@ -967,16 +970,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     // ---> LA FUNZIONE DI SALVATAGGIO DEFINITIVA <---
     fun saveCurrentMatch() {
-        // Kotlin scansiona tutta la lista e mi trova subito l'oggetto (Player) che ha la variabile 'score' più alta in assoluto!
-        val winner = players.maxByOrNull { it.score }
+        // Selezione del vincitore in base al criterio di vittoria attivo (minimo o massimo)
+        val winner = if (isLowestScoreWins) {
+            players.minByOrNull { it.score }
+        } else {
+            players.maxByOrNull { it.score }
+        }
 
         // Salviamo solo se c'è effettivamente un vincitore (non possiamo salvare partite vuote)
         if (winner != null) {
             val finalTitle = if (matchTitle.isEmpty()) "Sfida Senza Nome" else matchTitle
 
-            // 1. Prima di salvare nel DB, congeliamo i dati calcolati:
-            // "map" cicla tutta la lista di Player(attivi per la partita) e per ognuno restituisce un PlayerRecord(statico, non modificabile).
-            // Subito dopo li ordina (sortedByDescending) mettendo in cima chi ha più punti, in modo che il file su disco sia già perfettamente in ordine!
+            // Congelamento della classifica finale ordinata correttamente in base al criterio di vittoria
             val snapshotOfPlayers = players.map { activePlayer ->
                 PlayerRecord(
                     name = activePlayer.name,
@@ -986,16 +991,19 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     fireComboCount = activePlayer.fireComboCount,
                     color = activePlayer.color// ---> FIX DATABASE: Salviamo il colore su disco per lo Storico
                 )
-            }.sortedByDescending { it.score }
+            }.run {
+                if (isLowestScoreWins) sortedBy { it.score } else sortedByDescending { it.score }
+            }
 
-            // 2. Creiamo il record della Partita completo
+            // Creazione del record della partita completo includendo lo stato isLowestScoreWins
             val record = MatchRecord(
                 title = finalTitle,
                 winnerName = winner.name,
                 winningScore = winner.score,
                 allPlayers = snapshotOfPlayers, // Passiamo al database l'intera classifica congelata
                 durationSeconds = matchDurationSeconds, // Salviamo i secondi del cronometro!
-                timestamp = System.currentTimeMillis() // Salviamo il millisecondo esatto della chiusura per la data
+                timestamp = System.currentTimeMillis(), // Salviamo il millisecondo esatto della chiusura per la data
+                isLowestScoreWins = isLowestScoreWins // Salviamo il criterio di vittoria sul disco
             )
 
             // history.add(0, ...) Inseriamo la nuova partita salvata IN CIMA alla lista grafica (Posizione 0), non in fondo!

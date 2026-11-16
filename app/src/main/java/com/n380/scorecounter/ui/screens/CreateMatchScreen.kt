@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -482,6 +484,70 @@ fun CreateMatchScreen(
                             Spacer(modifier = Modifier.height(7.dp))
 
                             // INPUT: PUNTEGGIO OBIETTIVO (Filtro numerico)
+                            // ====================================================================
+                            // SELETTORE CRITERIO DI VITTORIA (Più alto vs Più basso)
+                            // ====================================================================
+                            // Etichetta descrittiva del selettore delle regole di gioco
+                            AutoResizedText(
+                                text = stringResource(R.string.label_criterio_vittoria),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 6.dp, start = 4.dp)
+                            )
+
+                            // Componente Material 3 SingleChoiceSegmentedButtonRow a larghezza piena per la selezione mutuamente esclusiva
+                            SingleChoiceSegmentedButtonRow(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                // Pulsante 1: Vince il punteggio più alto (Selezionato di default quando isLowestScoreWins è false)
+                                SegmentedButton(
+                                    selected = !viewModel.isLowestScoreWins,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        viewModel.isLowestScoreWins = false
+                                    },
+                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.TrendingUp,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                ) {
+                                    AutoResizedText(
+                                        text = stringResource(R.string.opt_piu_alto),
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+
+                                // Pulsante 2: Vince il punteggio più basso (Selezionato quando isLowestScoreWins è true)
+                                SegmentedButton(
+                                    selected = viewModel.isLowestScoreWins,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        viewModel.isLowestScoreWins = true
+                                    },
+                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.TrendingDown,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                ) {
+                                    AutoResizedText(
+                                        text = stringResource(R.string.opt_piu_basso),
+                                        fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
                             OutlinedTextField(
                                 value = viewModel.targetScore,
                                 onValueChange = { newValue ->

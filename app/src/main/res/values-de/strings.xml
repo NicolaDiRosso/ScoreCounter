@@ -262,7 +262,6 @@
     <string name="msg_guida_pallini">Jeder Punkt ist ein erzielter Treffer. Wenn die Linie flach verläuft, bedeutet das, dass in dieser Zeit niemand gepunktet hat.</string>
     <string name="titolo_guida_sorpassi">⚔️ Überholmanöver</string>
     <string name="msg_guida_sorpassi">Wenn sich zwei Linien kreuzen, bedeutet das, dass es einen Gleichstand oder einen Führungswechsel in der Rangliste gab!</string>
-    <string name="label_durata_totale">Gesamtdauer: %s</string>
     <string name="btn_chiudi_analisi">Analyse schließen</string>
 
     <!-- ==================================================================== -->
@@ -414,4 +413,12 @@
     <string name="desc_nascondi_premi">Auszeichnungen und Trophäen in Spielanalyse und Ergebnissen ausblenden</string>
     <string name="btn_chiudi_impostazioni">Schließen</string>
     <string name="desc_impostazioni_icon">Einstellungen</string>
+    <string name="label_criterio_vittoria">Siegpunktzahl:</string>
+    <string name="opt_piu_alto">Höchste</string>
+    <string name="opt_piu_basso">Niedrigste</string>
+    <string name="label_criterio_basso">Kriterium: Niedrigste Punktzahl</string>
+    <string name="label_criterio_alto">Kriterium: Höchste Punktzahl</string>
+    <string name="badge_storico_basso">Niedrigste Punktzahl</string>
+    <string name="badge_punteggio_minimo">Mindestpunktzahl</string>
+    <string name="badge_punteggio_massimo">Höchste Punktzahl</string>
 </resources>

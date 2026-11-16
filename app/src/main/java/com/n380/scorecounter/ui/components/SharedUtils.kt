@@ -901,11 +901,17 @@
         cecchinoData: Pair<String, Int>?,
         inarrestabileData: Pair<String, Int>?,
         gamberoData: Pair<String, Int>?,
-        feniceData: Pair<String, Int>?
+        feniceData: Pair<String, Int>?,
+        isLowestScoreWins: Boolean = false
     ): String {
         return buildString {
             // Appende il titolo della sfida
             appendLine("🏆 ${context.getString(R.string.share_title_prefix)} $title")
+
+            // Inclusione esplicita del criterio di vittoria se la partita usava la modalità punteggio più basso
+            if (isLowestScoreWins) {
+                appendLine("🎯 ${context.getString(R.string.label_criterio_basso)}")
+            }
 
             // Logica condizionale per l'inclusione del tempo di gioco
             if (durationSeconds > 0) {
