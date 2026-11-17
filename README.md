@@ -1,4 +1,4 @@
-[🇮🇹 Leggi in Italiano](README-it.md) | [🇬🇧 Read in English](README.md)
+[🇮🇹 Leggi in Italiano](README-it.md) 
 
 # 🎮 ScoreCounter
 
