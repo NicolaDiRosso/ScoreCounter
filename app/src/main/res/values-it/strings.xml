@@ -15,9 +15,9 @@
     <string name="btn_donazione_paypal">Dona con PayPal</string>
     <string name="titolo_donazione">Sostieni ScoreCounter</string>
     <string name="msg_donazione_saluto">Ciao, sono Nicola! 👋</string>
-    <string name="msg_donazione_intro">Sono uno studente di Ingegneria Informatica. Ho creato questa app nel tempo libero per contare i punti con i miei amici in modo semplice, bello e pulito. È nata come un piccolo progetto personale, ma ho deciso di pubblicarla per condividerla con tutti.</string>
+    <string name="msg_donazione_intro">Sono uno studente di Ingegneria Informatica. Ho creato questa app nel tempo libero per segnare i punti con gli amici in modo semplice e pulito, decidendo poi di condividerla con tutti.</string>
     <string name="msg_donazione_promessa">L\'app è e resterà per sempre senza pubblicità!</string>
-    <string name="msg_donazione_scopo">Se l\'app ti piace e vuoi sostenere lo sviluppo di ScoreCounter, una piccola donazione (anche solo un caffè ☕) è un bellissimo modo per mostrare il tuo supporto!</string>
+    <string name="msg_donazione_scopo">Se ti è utile e vuoi darmi una mano a migliorarla, puoi offrirmi un caffè ☕ con una piccola donazione.</string>
     <string name="msg_donazione_grazie">Grazie di cuore anche solo per aver dato un\'occasione alla mia app. Per me significa tanto. ❤️</string>
     <string name="btn_donazione_chiudi">Grazie!</string>
 
@@ -343,8 +343,6 @@
     <string name="titolo_importa_backup">📥 Importa salvataggi</string>
     <string name="msg_importa_backup">Ripristina i tuoi dati selezionando un file di backup .json salvato in precedenza.</string>
     <string name="btn_importa_file">Importa da file</string>
-    <string name="titolo_privacy_backup">🔒 Formato libero e trasparente</string>
-    <string name="msg_privacy_backup">I file di backup sono salvati in formato JSON chiaro e non cifrato, lasciandoti il pieno controllo e la proprietà dei tuoi dati senza vincoli.</string>
     <string name="titolo_conferma_import">Modalità di ripristino</string>
     <string name="desc_dettagliata_import">Scegli come inserire le partite e i giocatori del file di backup nella memoria dell\'app:</string>
     <string name="msg_conferma_import">Come desideri applicare i dati del backup sul dispositivo?</string>

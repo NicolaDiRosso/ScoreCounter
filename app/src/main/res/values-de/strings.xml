@@ -15,9 +15,9 @@
     <string name="btn_donazione_paypal">Mit PayPal spenden</string>
     <string name="titolo_donazione">ScoreCounter unterstützen</string>
     <string name="msg_donazione_saluto">Hi, ich bin Nicola! 👋</string>
-    <string name="msg_donazione_intro">Ich bin Student der Informationstechnik. Ich habe diese App in meiner Freizeit entwickelt, um die Punkte mit meinen Freunden auf einfache, schöne und saubere Weise zu zählen. Es begann als kleines persönliches Projekt, aber ich habe mich entschieden, es zu veröffentlichen, um es mit allen zu teilen.</string>
+    <string name="msg_donazione_intro">Ich bin Informatik-Ingenieurstudent. Ich habe diese App in meiner Freizeit entwickelt, um Punkte mit Freunden einfach und übersichtlich zu zählen, und beschlossen, sie mit allen zu teilen.</string>
     <string name="msg_donazione_promessa">Die App ist und bleibt für immer werbefrei!</string>
-    <string name="msg_donazione_scopo">Wenn dir die App gefällt und du die Entwicklung von ScoreCounter unterstützen möchtest, ist eine kleine Spende (selbst nur ein Kaffee ☕) eine tolle Möglichkeit, deine Unterstützung zu zeigen!</string>
+    <string name="msg_donazione_scopo">Wenn dir die App gefällt und du mir helfen möchtest, sie weiterzuentwickeln, kannst du mir mit einer kleinen Spende einen Kaffee ☕ ausgeben.</string>
     <string name="msg_donazione_grazie">Vielen Dank von ganzem Herzen, dass du meiner App eine Chance gibst. Das bedeutet mir sehr viel. ❤️</string>
     <string name="btn_donazione_chiudi">Danke!</string>
 
@@ -343,8 +343,6 @@
     <string name="titolo_importa_backup">📥 Sicherung importieren</string>
     <string name="msg_importa_backup">Stelle deine Daten wieder her, indem du eine zuvor gespeicherte .json-Backup-Datei auswählst.</string>
     <string name="btn_importa_file">Aus Datei importieren</string>
-    <string name="titolo_privacy_backup">🔒 Offenes &amp; unverschlüsseltes Format</string>
-    <string name="msg_privacy_backup">Sicherungsdateien werden im Klartext-JSON-Format gespeichert, damit du die volle Kontrolle über deine Daten hast.</string>
     <string name="titolo_conferma_import">Wiederherstellungsmodus</string>
     <string name="desc_dettagliata_import">Wähle, wie die Spiele und Spieler aus der Sicherungsdatei angewendet werden sollen:</string>
     <string name="msg_conferma_import">Wie möchtest du die Sicherungsdaten anwenden?</string>

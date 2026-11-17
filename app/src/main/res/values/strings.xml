@@ -15,9 +15,9 @@
     <string name="btn_donazione_paypal">Donate with PayPal</string>
     <string name="titolo_donazione">Support ScoreCounter</string>
     <string name="msg_donazione_saluto">Hi, I\'m Nicola! 👋</string>
-    <string name="msg_donazione_intro">I\'m a Computer Engineering student. I created this app in my spare time to keep track of scores with my friends in a simple, beautiful, and clean way. It started as a small personal project, but I decided to share it with everyone.</string>
+    <string name="msg_donazione_intro">I\'m a Computer Engineering student. I built this app in my free time to keep score with friends in a simple and clean way, and decided to share it with everyone.</string>
     <string name="msg_donazione_promessa">This app is and will always remain ad-free!</string>
-    <string name="msg_donazione_scopo">If you like the app and want to support ScoreCounter\'s development, a small donation (even just a coffee ☕) is a wonderful way to show your support!</string>
+    <string name="msg_donazione_scopo">If you find it useful and want to help me improve it, you can buy me a coffee ☕ with a small donation.</string>
     <string name="msg_donazione_grazie">Thank you from the bottom of my heart just for giving my app a chance. It means the world to me. ❤️</string>
     <string name="btn_donazione_chiudi">Thanks!</string>
 
@@ -343,8 +343,6 @@
     <string name="titolo_importa_backup">📥 Import backups</string>
     <string name="msg_importa_backup">Restore your data by selecting a previously saved .json backup file.</string>
     <string name="btn_importa_file">Import from file</string>
-    <string name="titolo_privacy_backup">🔒 Open &amp; unencrypted format</string>
-    <string name="msg_privacy_backup">Backup files are saved in clear, unencrypted JSON format, giving you full control and ownership over your data without proprietary lock-in.</string>
     <string name="titolo_conferma_import">Restore mode</string>
     <string name="desc_dettagliata_import">Choose how to apply the matches and players from the backup file into the app\'s memory:</string>
     <string name="msg_conferma_import">How would you like to apply the backup data to your device?</string>

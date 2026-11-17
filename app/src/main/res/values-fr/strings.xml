@@ -15,9 +15,9 @@
     <string name="btn_donazione_paypal">Faire un don avec PayPal</string>
     <string name="titolo_donazione">Soutenir ScoreCounter</string>
     <string name="msg_donazione_saluto">Salut, je suis Nicola! 👋</string>
-    <string name="msg_donazione_intro">Je suis étudiant en ingénierie informatique. J\'ai créé cette application pendant mon temps libre pour compter les scores avec mes amis de manière simple, belle et propre. C\'était au départ un petit projet personnel, mais j\'ai décidé de la publier pour la partager avec tout le monde.</string>
+    <string name="msg_donazione_intro">Je suis étudiant en génie informatique. J\'ai créé cette application sur mon temps libre pour compter les points entre amis de façon simple et épurée, puis j\'ai décidé de la partager avec tout le monde.</string>
     <string name="msg_donazione_promessa">L\'application est et restera toujours sans publicité !</string>
-    <string name="msg_donazione_scopo">Si vous aimez l\'application et souhaitez soutenir le développement de ScoreCounter, un petit don (même juste un café ☕) est un merveilleux moyen de montrer votre soutien !</string>
+    <string name="msg_donazione_scopo">Si elle vous est utile et che vous souhaitez m\'aider à l\'améliorer, vous pouvez m\'offrir un café ☕ avec un petit don.</string>
     <string name="msg_donazione_grazie">Merci du fond du cœur d\'avoir donné une chance à mon application. Cela compte énormément pour moi. ❤️</string>
     <string name="btn_donazione_chiudi">Merci !</string>
 
@@ -343,8 +343,6 @@
     <string name="titolo_importa_backup">📥 Importer des sauvegardes</string>
     <string name="msg_importa_backup">Restaurez vos données en sélectionnant un fichier de sauvegarde .json précédemment enregistré.</string>
     <string name="btn_importa_file">Importer depuis fichier</string>
-    <string name="titolo_privacy_backup">🔒 Format ouvert et non chiffré</string>
-    <string name="msg_privacy_backup">Les fichiers de sauvegarde sont enregistrés au format JSON en clair, vous laissant le contrôle total sur vos données sans restrictions.</string>
     <string name="titolo_conferma_import">Mode de restauration</string>
     <string name="desc_dettagliata_import">Choisissez comment appliquer les parties et joueurs du fichier de sauvegarde :</string>
     <string name="msg_conferma_import">Comment souhaitez-vous appliquer les données de la sauvegarde ?</string>

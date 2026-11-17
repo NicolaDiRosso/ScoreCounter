@@ -15,9 +15,9 @@
     <string name="btn_donazione_paypal">PayPalで寄付</string>
     <string name="titolo_donazione">ScoreCounterを支援する</string>
     <string name="msg_donazione_saluto">こんにちは、ニコラです！👋</string>
-    <string name="msg_donazione_intro">私は情報工学を学ぶ学生です。暇な時間を利用して、友達とシンプルかつクリーンにスコアを記録できるこのアプリを作りました。最初は小さな個人プロジェクトとして始まりましたが、みんなと共有するために公開することにしました。</string>
+    <string name="msg_donazione_intro">私は情報工学を学ぶ学生です。友達とシンプルで分かりやすく点数を記録するために空き時間で作ったアプリですが、皆さんにも使ってもらいたくて公開しました。</string>
     <string name="msg_donazione_promessa">このアプリは今後もずっと広告なしで利用できます！</string>
-    <string name="msg_donazione_scopo">アプリを気に入っていただけてScoreCounterの開発を応援したい場合、少額の寄付（コーヒー1杯分程度 ☕）は開発へのサポートを示す素晴らしい方法になります！</string>
+    <string name="msg_donazione_scopo">役に立ったら、少額の寄付でコーヒー ☕ を一杯ご馳走していただけると開発の励みになります。</string>
     <string name="msg_donazione_grazie">アプリを試してくれたことだけでも、心から感謝します。私にとって大きな意味があります。❤️</string>
     <string name="btn_donazione_chiudi">ありがとう！</string>
 
@@ -343,8 +343,6 @@
     <string name="titolo_importa_backup">📥 バックアップのインポート</string>
     <string name="msg_importa_backup">以前に保存した.jsonバックアップファイルを選択してデータを復元します。</string>
     <string name="btn_importa_file">ファイルから取り込み</string>
-    <string name="titolo_privacy_backup">🔒 透明性の高い非暗号化フォーマット</string>
-    <string name="msg_privacy_backup">バックアップファイルはテキスト形式のJSONで保存され、データに対する完全な所有権を維持できます。</string>
     <string name="titolo_conferma_import">復元モード</string>
     <string name="desc_dettagliata_import">バックアップファイルから試合とプレイヤーを適用する方法を選択してください:</string>
     <string name="msg_conferma_import">バックアップデータをどのように適用しますか？</string>

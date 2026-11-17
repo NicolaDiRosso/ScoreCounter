@@ -15,9 +15,9 @@
     <string name="btn_donazione_paypal">PayPal के साथ दान करें</string>
     <string name="titolo_donazione">ScoreCounter का समर्थन करें</string>
     <string name="msg_donazione_saluto">नमस्ते, मैं निकोला हूँ! 👋</string>
-    <string name="msg_donazione_intro">मैं कंप्यूटर इंजीनियरिंग का छात्र हूँ। मैंने अपने खाली समय में अपने दोस्तों के साथ स्कोर को सरल, सुंदर और साफ तरीके से रिकॉर्ड करने के लिए यह ऐप बनाया है। यह एक छोटे व्यक्तिगत प्रोजेक्ट के रूप में शुरू हुआ था, लेकिन मैंने इसे सभी के साथ साझा करने का फैसला किया।</string>
+    <string name="msg_donazione_intro">मैं कंप्यूटर इंजीनियरिंग का छात्र हूँ। मैंने अपने खाली समय में दोस्तों के साथ सरल और साफ-सुथरे तरीके से स्कोर गिनने के लिए यह ऐप बनाया, और फिर इसे सभी के साथ साझा करने का फैसला किया।</string>
     <string name="msg_donazione_promessa">यह ऐप है और हमेशा विज्ञापन-मुक्त रहेगा!</string>
-    <string name="msg_donazione_scopo">यदि आपको ऐप पसंद है और आप ScoreCounter के विकास का समर्थन करना चाहते हैं, तो एक छोटा सा योगदान (भले ही सिर्फ एक कॉफी ☕!) अपना समर्थन दिखाने का एक शानदार तरीका है!</string>
+    <string name="msg_donazione_scopo">यदि यह आपके लिए उपयोगी है और आप इसे बेहतर बनाने में मेरी मदद करना चाहते हैं, तो आप एक छोटे से दान के साथ मुझे एक कॉफ़ी ☕ पिला सकते हैं।</string>
     <string name="msg_donazione_grazie">मेरे ऐप को एक मौका देने के लिए ही आपका तहे दिल से शुक्रिया। यह मेरे लिए बहुत मायने रखता है। ❤️</string>
     <string name="btn_donazione_chiudi">धन्यवाद!</string>
 
@@ -343,8 +343,6 @@
     <string name="titolo_importa_backup">📥 बैकअप आयात करें</string>
     <string name="msg_importa_backup">पहले से सहेजी गई .json बैकअप फ़ाइल चुनकर अपना डेटा पुनर्स्थापित करें।</string>
     <string name="btn_importa_file">फ़ाइल से आयात करें</string>
-    <string name="titolo_privacy_backup">🔒 खुला और पारदर्शी प्रारूप</string>
-    <string name="msg_privacy_backup">बैकअप फ़ाइलें स्पष्ट JSON प्रारूप में सहेजी जाती हैं, जिससे आपको अपने डेटा पर पूरा नियंत्रण मिलता है।</string>
     <string name="titolo_conferma_import">पुनर्प्राप्ति मोड</string>
     <string name="desc_dettagliata_import">चुनें कि बैकअप फ़ाइल से मैचों और खिलाड़ियों को कैसे लागू किया जाए:</string>
     <string name="msg_conferma_import">आप बैकअप डेटा कैसे लागू करना चाहते हैं?</string>
