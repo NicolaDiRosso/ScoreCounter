@@ -427,4 +427,6 @@
     <string name="badge_punteggio_minimo">न्यूनतम स्कोर</string>
     <string name="badge_punteggio_massimo">उच्चतम स्कोर</string>
     <string name="btn_indietro">पीछे</string>
+    <string name="btn_github">GitHub</string>
+    <string name="btn_privacy_policy">गोपनीयता</string>
 </resources>

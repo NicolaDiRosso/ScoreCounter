@@ -427,4 +427,6 @@
     <string name="badge_punteggio_minimo">最低スコア</string>
     <string name="badge_punteggio_massimo">最高スコア</string>
     <string name="btn_indietro">戻る</string>
+    <string name="btn_github">GitHub</string>
+    <string name="btn_privacy_policy">プライバシー</string>
 </resources>

@@ -427,4 +427,6 @@
     <string name="badge_punteggio_minimo">Score minimum</string>
     <string name="badge_punteggio_massimo">Score maximum</string>
     <string name="btn_indietro">Retour</string>
+    <string name="btn_github">GitHub</string>
+    <string name="btn_privacy_policy">Confidentialité</string>
 </resources>

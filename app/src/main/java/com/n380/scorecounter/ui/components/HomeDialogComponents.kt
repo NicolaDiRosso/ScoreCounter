@@ -189,10 +189,10 @@ private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
                     }
                 }
 
-                // PULSANTI DI AZIONE
+                // PULSANTI DI AZIONE (Email Feedback + Link esterni GitHub & Privacy Policy)
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedButton(
                         onClick = {
@@ -205,20 +205,64 @@ private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp),
-                        shape = RoundedCornerShape(20.dp),
+                            .height(44.dp),
+                        shape = RoundedCornerShape(16.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Email,
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
-                        Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(6.dp))
                         AutoResizedText(
                             text = stringResource(R.string.btn_invia_segnalazione),
                             style = MaterialTheme.typography.labelLarge
                         )
+                    }
+
+                    // Riga con i due link esterni: GitHub e Informativa sulla Privacy
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NicolaDiRosso/ScoreCounter"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_github),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n380/ScoreCounter#-etica-privacy-e-trasparenza"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_privacy_policy),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
 
                     Button(
@@ -228,13 +272,13 @@ private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp),
+                            .height(46.dp),
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(Modifier.width(8.dp))
                         AutoResizedText(
@@ -333,7 +377,7 @@ private fun AboutAppDialogLandscape(onDismiss: () -> Unit) {
                     }
                 }
 
-                // PANNELLO DESTRO (~72%): Schede Informative + Email Feedback (Senza table wrapper superfluo)
+                // PANNELLO DESTRO (~72%): Schede Informative + Email Feedback + Link GitHub & Privacy (Senza table wrapper superfluo)
                 Column(
                     modifier = Modifier
                         .weight(0.72f)
@@ -428,6 +472,50 @@ private fun AboutAppDialogLandscape(onDismiss: () -> Unit) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(R.string.btn_invia_segnalazione), style = MaterialTheme.typography.labelMedium)
                             }
+                        }
+                    }
+
+                    // Riga con i due link esterni (GitHub & Privacy Policy) in Landscape
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n380/ScoreCounter"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(38.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_github),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n380/ScoreCounter#-etica-privacy-e-trasparenza"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(38.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.btn_privacy_policy),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                 }
@@ -807,7 +895,7 @@ private fun DonationDialogLandscape(onDismiss: () -> Unit) {
                         }
                     }
 
-                    // Scheda 3: Scopo e Grazie
+                    // Scheda 3: Privacy & Ringraziamenti
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
