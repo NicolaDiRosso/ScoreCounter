@@ -1,0 +1,135 @@
+[🇮🇹 Leggi in Italiano](README-it.md) | [🇬🇧 Read in English](README.md)
+
+# 🎮 ScoreCounter
+
+> Un segnapunti universale, trasparente e in perfetto stile Material You.
+
+ScoreCounter nasce con una filosofia chiara: offrire uno strumento universale, rapido e senza fronzoli per tenere traccia dei punteggi di qualsiasi gioco da tavolo, torneo di carte o sfida in compagnia. L'obiettivo è permetterti di concentrarti sulla partita, delegando i calcoli a un'interfaccia progettata per essere immediata e intuitiva. 
+
+Interamente sviluppata seguendo le linee guida del **Material Design 3 (Material You)**, l'app si adatta dinamicamente ai colori di sistema del tuo dispositivo, garantendo un'esperienza visiva coerente, moderna e arricchita da feedback aptici (vibrazioni) per ogni interazione.
+
+## 🎯 Esperienza di Gioco
+L'applicazione evita l'inserimento di opzioni superflue che potrebbero distrarre dal gioco, offrendo esattamente ciò che serve quando serve:
+* **Gestione Flessibile:** Che sia una partita a due o un torneo di gruppo, puoi aggiungere un numero illimitato di giocatori. È possibile richiamare istantaneamente i giocatori già salvati in rubrica o crearne di nuovi sul momento, assegnando punteggi senza alcun limite numerico.
+* **Strumenti al Tavolo:** Durante la partita, hai a disposizione strumenti essenziali e non invasivi, come un **timer personalizzabile** per gestire i turni e un **dado virtuale** (anch'esso configurabile) per risolvere spareggi o decidere chi inizia. 
+* **Tutto Sotto Controllo:** L'interfaccia principale è studiata per permettere tocchi rapidi e sicuri, riducendo al minimo gli errori di digitazione durante le fasi più concitate.
+
+## 📊 Analisi e Condivisione
+Alla fine della partita, ScoreCounter trasforma i semplici numeri in un vero e proprio resoconto sportivo:
+* **Grafici Interattivi:** Analizza l'andamento della sfida attraverso un grafico vettoriale dettagliato. La funzione di zoom temporale permette di ingrandire e analizzare quarti specifici della partita per studiare rimonte e sorpassi.
+* **Assegnazione Premi:** Il motore interno valuta matematicamente la partita e assegna automaticamente titoli divertenti in base alle prestazioni reali (es. il colpo più alto, la striscia positiva, la rimonta più grande).
+* **Statistiche Globali:** Una sezione dedicata permette di consultare lo storico di tutte le partite passate e visualizzare le statistiche generali accumulate nel tempo.
+* **Condivisione:** I risultati finali, i premi e l'andamento della partita possono essere condivisi facilmente con gli amici al termine della sfida.
+
+## 🛡️ Etica, Privacy e Trasparenza
+ScoreCounter è costruita attorno al rispetto assoluto per l'utente. 
+* **100% Offline e Privata:** L'app non richiede permessi di rete, non utilizza cookie di terze parti e non effettua alcun tracciamento. I tuoi dati rimangono esclusivamente sul tuo dispositivo.
+* **Zero Pubblicità, per sempre:** Non sono presenti banner, pop-up o inserzioni pubblicitarie di alcun tipo.
+* **Backup Trasparenti:** In linea con la filosofia open, il sistema di salvataggio permette di esportare un backup completo dei propri dati sotto forma di file **JSON locale**. I file non sono criptati e risultano completamente leggibili, garantendo la massima trasparenza su quali dati l'app sta effettivamente salvando.
+
+## 🛠️ Architettura Tecnica
+Dietro la semplicità dell'interfaccia si nasconde un'architettura Android moderna e solida:
+* **Linguaggio:** [Kotlin](https://kotlinlang.org/)
+* **UI:** [Jetpack Compose](https://developer.android.com/jetpack/compose) nativo (No XML).
+* **Persistenza:** DataStore e Gson per una gestione snella e affidabile dello stato.
+* **Filesystem:** Storage Access Framework (SAF) per l'esportazione sicura dei backup JSON.
+
+## 📸 Galleria dell'applicazione
+
+### 🏠 1. Home e storico
+*Il centro di comando: avvia sfide rapide con un tocco o rivivi le glorie passate esplorando la tua Hall of Fame personale.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Home page con storico</b><br>
+      <img src="https://github.com/user-attachments/assets/cd9057bb-efcb-414f-966a-9e37c65829f7" width="250" alt="Home Screen con sfide rapide"/>
+    </td>
+     <td align="center">
+      <b>Storico per ogni partita</b><br>
+      <img src="https://github.com/user-attachments/assets/7a0413c3-8c18-44c7-b6cf-585b07665362" width="250" alt="Storico partite e record assoluti"/>
+    </td>
+    <td align="center">
+      <b>Statistiche globali</b><br>
+      <img src="https://github.com/user-attachments/assets/93c887f7-6208-4e8b-a6e9-89f9de038c69" width="250" alt="Statistiche globali e record"/>
+    </td>
+  </tr>
+</table>
+
+### ⚙️ 2. Creazione della sfida
+*Aggiungi il nome della sfida, imposta le tue regole, inserisci i giocatori e personalizza i loro colori.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Configura la partita</b><br>
+      <img src="https://github.com/user-attachments/assets/1c6c53cb-6970-4330-a173-8cca3ec6de0c" width="250" alt="Schermata di creazione match"/>
+    </td>
+    <td align="center">
+      <b>Personalizza i giocatori</b><br>
+      <img src="https://github.com/user-attachments/assets/3ab525cf-1d63-4a7a-96bf-a5cc16bf1d29" width="250" alt="Personalizzazione giocatore"/>
+    </td>
+    <td align="center">
+      <b>Gestisci i preferiti</b><br>
+      <img src="https://github.com/user-attachments/assets/cf836352-8d5d-4357-b00d-951c03e24f72" width="250" alt="Pannello gestione giocatori preferiti"/>
+    </td>
+  </tr>
+</table>
+
+### 🎲 3. La sfida (contatore)
+*Design "Table-First" per non perdere mai il focus: gestisci i punti con ergonomia e usa gli strumenti integrati.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Tieni il conto dei punti</b><br>
+      <img src="https://github.com/user-attachments/assets/d4042687-c7ca-4792-8352-abb2a27ffe4c" width="250" alt="Match in corso con effetto On Fire"/>
+    </td>
+    <td align="center">
+      <b>Gestisci i tempi di gioco</b><br>
+      <img src="https://github.com/user-attachments/assets/ca8f31bb-49e9-45f7-a476-7bca8d4cb653" width="250" alt="Impostazione del timer" />
+    </td>
+  <td align="center">
+      <b>Risolvi le dispute</b><br>
+      <img src="https://github.com/user-attachments/assets/1c88bbe4-e734-4e55-ad4a-4a4c03d19b09" width="250" alt="Popup del dado virtuale" />
+    </td>
+  </tr>
+</table>
+
+### 🏆 4. Risultati e analisi
+*Molto più di un semplice punteggio: scopri i premi speciali, analizza l'andamento sul grafico temporale e condividi l'esito.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Analizza il grafico della partita</b><br>
+      <img src="https://github.com/user-attachments/assets/b2a1f603-88b2-444a-a206-5ec46777c449" width="250" alt="Classifica finale con grafico della partita"/>
+    </td>
+    <td align="center">
+      <b>Scopri le medaglie assegnate</b><br>
+      <img src="https://github.com/user-attachments/assets/9b057635-275f-43ff-b18a-307d49fb62a3" width="250" alt="Premi speciali e medaglie"/>
+    </td>
+  <td align="center">
+      <b>Comprendi i riconoscimenti</b><br>
+      <img src="https://github.com/user-attachments/assets/cc8ef7f8-f9ba-4865-95cd-178c60d16221" width="250" alt="Dettaglio dei premi assegnati"/>
+    </td>
+  </tr>
+</table>
+
+### 🖥️ 5. Layout orizzontale e tablet
+*Interfaccia completamente adattiva che sfrutta griglie e split-screen per massimizzare lo spazio in modalità landscape.*
+<table>
+  <tr>
+    <td align="center">
+      <b>Home in orizzontale</b><br>
+      <img src="https://github.com/user-attachments/assets/dc987757-c633-4e29-90f6-ab34a87d1f6a" width="300" alt="Home in landscape"/>
+    </td>
+    <td align="center">
+      <b>Contatore in orizzontale</b><br>
+      <img src="https://github.com/user-attachments/assets/c0c63d81-5334-46f1-bbf6-c1bc380e7460" width="300" alt="Sfida in landscape"/>
+    </td>
+  <td align="center">
+      <b>Grafico espanso</b><br>
+      <img src="https://github.com/user-attachments/assets/786c89bc-74ca-42b8-b25d-5e46124987a0" width="300" alt="Risultati in landscape"/>
+    </td>
+  </tr>
+</table>
+
+<br>
+<p align="center">© 2026 Creato da NicolA380</p>
