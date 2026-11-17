@@ -10,8 +10,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.VideogameAsset
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -236,8 +238,17 @@ private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
                                 .weight(1f)
                                 .height(40.dp),
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                            contentPadding = PaddingValues(horizontal = 12.dp)
                         ) {
+                            // Il contenuto di OutlinedButton è un RowScope centrato: icona e testo restano allineati al centro
+                            Icon(
+                                imageVector = Icons.Default.Code,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.width(6.dp))
                             AutoResizedText(
                                 text = stringResource(R.string.btn_github),
                                 style = MaterialTheme.typography.labelMedium,
@@ -248,15 +259,24 @@ private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
                         OutlinedButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n380/ScoreCounter#-etica-privacy-e-trasparenza"))
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NicolaDiRosso/ScoreCounter/blob/master/PRIVACY_POLICY.md"))
                                 try { context.startActivity(intent) } catch (e: Exception) {}
                             },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp),
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                            contentPadding = PaddingValues(horizontal = 12.dp)
                         ) {
+                            // Il contenuto di OutlinedButton è un RowScope centrato: icona e testo restano allineati al centro
+                            Icon(
+                                imageVector = Icons.Default.Policy,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.width(6.dp))
                             AutoResizedText(
                                 text = stringResource(R.string.btn_privacy_policy),
                                 style = MaterialTheme.typography.labelMedium,
@@ -264,7 +284,6 @@ private fun AboutAppDialogPortrait(onDismiss: () -> Unit) {
                             )
                         }
                     }
-
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -483,15 +502,24 @@ private fun AboutAppDialogLandscape(onDismiss: () -> Unit) {
                         OutlinedButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n380/ScoreCounter"))
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NicolaDiRosso/ScoreCounter"))
                                 try { context.startActivity(intent) } catch (e: Exception) {}
                             },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(38.dp),
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
+                            // Il layout interno di OutlinedButton centra automaticamente icona e testo
+                            Icon(
+                                imageVector = Icons.Default.Code,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.width(4.dp))
                             AutoResizedText(
                                 text = stringResource(R.string.btn_github),
                                 style = MaterialTheme.typography.labelSmall,
@@ -502,15 +530,24 @@ private fun AboutAppDialogLandscape(onDismiss: () -> Unit) {
                         OutlinedButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/n380/ScoreCounter#-etica-privacy-e-trasparenza"))
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/NicolaDiRosso/ScoreCounter/blob/master/PRIVACY_POLICY.md"))
                                 try { context.startActivity(intent) } catch (e: Exception) {}
                             },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(38.dp),
                             shape = RoundedCornerShape(14.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
+                            // Il layout interno di OutlinedButton centra automaticamente icona e testo
+                            Icon(
+                                imageVector = Icons.Default.Policy,
+                                contentDescription = null,
+                                modifier = Modifier.size(15.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.width(4.dp))
                             AutoResizedText(
                                 text = stringResource(R.string.btn_privacy_policy),
                                 style = MaterialTheme.typography.labelSmall,
