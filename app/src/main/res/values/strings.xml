@@ -350,7 +350,7 @@
     <string name="msg_conferma_import">How would you like to apply the backup data to your device?</string>
     <string name="btn_unisci_dati">Merge with current data</string>
     <string name="btn_sostituisci_dati">Replace all current data</string>
-    <string name="titolo_dialog_esporta_scelta">Choose export method</string>
+    <string name="titolo_dialog_esporta_scelta">Export mode</string>
     <string name="opt_salva_dispositivo">Save to device</string>
     <string name="desc_salva_dispositivo">Save the .json file to a folder on your phone</string>
     <string name="opt_condividi_backup">Share file</string>
@@ -428,4 +428,5 @@
     <string name="badge_storico_basso">Lowest score</string>
     <string name="badge_punteggio_minimo">Lowest score</string>
     <string name="badge_punteggio_massimo">Highest score</string>
+    <string name="btn_indietro">Back</string>
 </resources>

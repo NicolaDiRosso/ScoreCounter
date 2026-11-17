@@ -350,7 +350,7 @@
     <string name="msg_conferma_import">バックアップデータをどのように適用しますか？</string>
     <string name="btn_unisci_dati">現在のデータと統合する</string>
     <string name="btn_sostituisci_dati">すべてのデータを置き換える</string>
-    <string name="titolo_dialog_esporta_scelta">エクスポート方法を選択</string>
+    <string name="titolo_dialog_esporta_scelta">エクスポートモード</string>
     <string name="opt_salva_dispositivo">デバイスに保存</string>
     <string name="desc_salva_dispositivo">スマートフォンのフォルダに.jsonファイルを保存します</string>
     <string name="opt_condividi_backup">ファイルを共有</string>
@@ -428,4 +428,5 @@
     <string name="badge_storico_basso">最低スコア</string>
     <string name="badge_punteggio_minimo">最低スコア</string>
     <string name="badge_punteggio_massimo">最高スコア</string>
+    <string name="btn_indietro">戻る</string>
 </resources>

@@ -350,7 +350,7 @@
     <string name="msg_conferma_import">Wie möchtest du die Sicherungsdaten anwenden?</string>
     <string name="btn_unisci_dati">Mit aktuellen Daten zusammenführen</string>
     <string name="btn_sostituisci_dati">Alle aktuellen Daten ersetzen</string>
-    <string name="titolo_dialog_esporta_scelta">Exportmethode wählen</string>
+    <string name="titolo_dialog_esporta_scelta">Exportmodus</string>
     <string name="opt_salva_dispositivo">Auf Gerät speichern</string>
     <string name="desc_salva_dispositivo">Speichere die .json-Datei in einem Ordner auf deinem Telefon</string>
     <string name="opt_condividi_backup">Datei teilen</string>
@@ -428,4 +428,5 @@
     <string name="badge_storico_basso">Niedrigste Punktzahl</string>
     <string name="badge_punteggio_minimo">Mindestpunktzahl</string>
     <string name="badge_punteggio_massimo">Höchste Punktzahl</string>
+    <string name="btn_indietro">Zurück</string>
 </resources>

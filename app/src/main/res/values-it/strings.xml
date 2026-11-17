@@ -350,7 +350,7 @@
     <string name="msg_conferma_import">Come desideri applicare i dati del backup sul dispositivo?</string>
     <string name="btn_unisci_dati">Unisci ai dati attuali</string>
     <string name="btn_sostituisci_dati">Sostituisci tutti i dati</string>
-    <string name="titolo_dialog_esporta_scelta">Scegli modalità di esportazione</string>
+    <string name="titolo_dialog_esporta_scelta">Modalità di esportazione</string>
     <string name="opt_salva_dispositivo">Salva sul dispositivo</string>
     <string name="desc_salva_dispositivo">Salva il file .json in una cartella del telefono</string>
     <string name="opt_condividi_backup">Condividi file</string>
@@ -428,4 +428,5 @@
     <string name="badge_storico_basso">Punteggio più basso</string>
     <string name="badge_punteggio_minimo">Punteggio minimo</string>
     <string name="badge_punteggio_massimo">Punteggio massimo</string>
+    <string name="btn_indietro">Indietro</string>
 </resources>

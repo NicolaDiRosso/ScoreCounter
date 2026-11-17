@@ -350,7 +350,7 @@
     <string name="msg_conferma_import">¿Cómo deseas aplicar los datos de la copia de seguridad?</string>
     <string name="btn_unisci_dati">Combinar con datos actuales</string>
     <string name="btn_sostituisci_dati">Reemplazar todos los datos</string>
-    <string name="titolo_dialog_esporta_scelta">Elegir método de exportación</string>
+    <string name="titolo_dialog_esporta_scelta">Modo de exportación</string>
     <string name="opt_salva_dispositivo">Guardar en el dispositivo</string>
     <string name="desc_salva_dispositivo">Guarda el archivo .json en una carpeta del teléfono</string>
     <string name="opt_condividi_backup">Compartir archivo</string>
@@ -428,4 +428,5 @@
     <string name="badge_storico_basso">Puntuación más baja</string>
     <string name="badge_punteggio_minimo">Puntuación mínima</string>
     <string name="badge_punteggio_massimo">Puntuación máxima</string>
+    <string name="btn_indietro">Atrás</string>
 </resources>

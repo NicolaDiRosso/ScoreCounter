@@ -3,19 +3,22 @@ package com.n380.scorecounter.ui.components
 import android.content.res.Configuration
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FolderZip
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Upload
@@ -25,6 +28,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -43,25 +47,19 @@ import java.util.Locale
 
 /**
  * ====================================================================
+ * STATO DELLA NAVIGAZIONE INTERNA AL DIALOGO DI BACKUP
+ * ====================================================================
+ * - MAIN: Vista principale con le schede di esportazione, importazione e privacy.
+ * - EXPORT_CHOICE: Sotto-vista animata per la scelta tra "Salva sul dispositivo" e "Condividi file".
+ */
+private enum class ExportScreen { MAIN, EXPORT_CHOICE }
+
+/**
+ * ====================================================================
  * COMPONENTE UI: DIALOGO BACKUP E RIPRISTINO DATI (JSON)
  * ====================================================================
- * 🧠 LEZIONE TEORICA E ARCHITETTURA ANDROID COMPOSE:
- * Questo file gestisce l'intero flusso di esportazione e importazione dei salvataggi dell'app.
- *
- * Concetti Chiave Spiegati nel Dettaglio:
- * 1. STORAGE ACCESS FRAMEWORK (SAF): Sistema di sicurezza nativo di Android che consente
- *    all'utente di salvare o leggere file in qualunque cartella del dispositivo (Download, Google Drive, ecc.)
- *    senza che l'app debba richiedere permessi speciali o invasivi di lettura memoria.
- * 2. rememberLauncherForActivityResult: Registro di Compose che ascolta l'apertura e il ritorno
- *    dalle schermate di sistema di selezione dei file (CreateDocument per creare, OpenDocument per aprire).
- * 3. State Hoisting (Sollevamento dello Stato): Il dialogo notifica alla schermata padre (HomeScreen)
- *    l'avvenuto successo tramite la lambda `onImportSuccess(String)`, che chiude i popup e mostra la Snackbar in Home.
- * 4. Responsive UI per Smartphone Landscape: Su schermi piccoli in orizzontale, i sotto-dialoghi
- *    utilizzano un layout a 2 colonne affiancate (Row) per evitare che i testi vengano tagliati dai pulsanti.
- *
- * @param viewModel Il cervello reattivo dell'applicazione contenente i dati e la logica di I/O.
- * @param onDismiss Lambda di callback per chiudere semplicemente il dialogo principali.
- * @param onImportSuccess Lambda invocata al completamento dell'importazione per notificare la Home e mostrare il banner.
+ * Gestisce l'intero flusso di esportazione e importazione dei salvataggi dell'app
+ * con navigazione interna a scorrimento orizzontale (AnimatedContent) e altezza dinamica.
  */
 @Composable
 fun BackupRestoreDialog(
@@ -142,14 +140,20 @@ fun BackupRestoreDialog(
         }
     }
 
-    // ====================================================================
-    // RENDER DEL DIALOGO PRINCIPALE (In base all'orientamento dello schermo)
-    // ====================================================================
+    // RENDER PRINCIPALE IN BASE ALL'ORIENTAMENTO
     if (isLandscape) {
         BackupRestoreDialogLandscape(
-            onExportClick = {
+            onExportSaveClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                showExportChoiceDialog = true
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                exportLauncher.launch("ScoreCounter_Backup_$timeStamp.json")
+            },
+            onExportShareClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                val backupFileName = "ScoreCounter_Backup_$timeStamp.json"
+                val jsonString = viewModel.generateBackupJsonString()
+                shareBackupJsonFile(context, jsonString, backupFileName)
             },
             onImportClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -159,9 +163,17 @@ fun BackupRestoreDialog(
         )
     } else {
         BackupRestoreDialogPortrait(
-            onExportClick = {
+            onExportSaveClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                showExportChoiceDialog = true
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                exportLauncher.launch("ScoreCounter_Backup_$timeStamp.json")
+            },
+            onExportShareClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                val backupFileName = "ScoreCounter_Backup_$timeStamp.json"
+                val jsonString = viewModel.generateBackupJsonString()
+                shareBackupJsonFile(context, jsonString, backupFileName)
             },
             onImportClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -171,26 +183,21 @@ fun BackupRestoreDialog(
         )
     }
 
-    // ====================================================================
-    // SOTTO-DIALOGO ESPORTAZIONE: SCEGLI TRA "SALVA SUL DISPOSITIVO" E "CONDIVIDI"
-    // ====================================================================
-    if (showExportChoiceDialog) {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val backupFileName = "ScoreCounter_Backup_$timeStamp.json"
-
+    // SOTTO-DIALOGO 1: SCELTA MODALITÀ DI RIPRISTINO (Unisci vs Sostituisci)
+    pendingImportUri?.let { uri ->
         AlertDialog(
-            onDismissRequest = { showExportChoiceDialog = false },
+            onDismissRequest = { pendingImportUri = null },
             icon = {
                 Icon(
-                    imageVector = Icons.Filled.Upload,
+                    imageVector = Icons.Filled.FolderZip,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(36.dp)
                 )
             },
             title = {
                 Text(
-                    text = stringResource(R.string.titolo_dialog_esporta_scelta),
+                    text = stringResource(R.string.titolo_conferma_import),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,
@@ -198,499 +205,48 @@ fun BackupRestoreDialog(
                 )
             },
             text = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                Text(
+                    text = stringResource(R.string.desc_dettagliata_import),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    // OPZIONE 1: Salva sul dispositivo (SAF File Saver)
-                    Surface(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showExportChoiceDialog = false
-                            exportLauncher.launch(backupFileName)
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Download,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.opt_salva_dispositivo),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = stringResource(R.string.desc_salva_dispositivo),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-
-                    // OPZIONE 2: Condividi file via Intent Nativo
-                    Surface(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            showExportChoiceDialog = false
-                            val jsonString = viewModel.generateBackupJsonString()
-                            shareBackupJsonFile(context, jsonString, backupFileName)
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Share,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.opt_condividi_backup),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = stringResource(R.string.desc_condividi_backup),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
+                )
             },
-            confirmButton = {},
-            dismissButton = {
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                        showExportChoiceDialog = false
-                    },
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(stringResource(R.string.btn_annulla))
-                }
-            },
-            shape = RoundedCornerShape(24.dp)
-        )
-    }
-
-    // ====================================================================
-    // SOTTO-DIALOGO 1: SCELTA MODALITÀ DI RIPRISTINO (Unisci vs Sostituisci vs Annulla)
-    // ====================================================================
-    pendingImportUri?.let { uri ->
-        if (isSmallScreenLandscape) {
-            // --- VARIANTE PER SMARTPHONE IN ORIZZONTALE (A 2 Colonne Affiancate) ---
-            Dialog(
-                onDismissRequest = { pendingImportUri = null },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth(0.88f)
-                        .heightIn(max = 280.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.background,
-                    shadowElevation = 12.dp,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(14.dp),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // COLONNA SINISTRA: Icona, Titolo "Modalità di ripristino" e Descrizione Dettagliata
-                        Column(
-                            modifier = Modifier
-                                .weight(1.1f)
-                                .fillMaxHeight()
-                                .verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.FolderZip,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.titolo_conferma_import),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = stringResource(R.string.desc_dettagliata_import),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+            confirmButton = {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = {
+                            val importUri = uri
+                            pendingImportUri = null
+                            viewModel.importBackupFromUri(
+                                context = context,
+                                uri = importUri,
+                                isMerge = true,
+                                onSuccess = { count ->
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    onImportSuccess(String.format(msgImportOkTemplate, count))
+                                },
+                                onError = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showIncompatibleFileError = true
+                                }
                             )
-                        }
-
-                        // COLONNA DESTRA: I 3 Pulsanti di Azione
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // Tasto 1 (Primario Solido): Unisci ai dati attuali
-                            Button(
-                                onClick = {
-                                    val importUri = uri
-                                    pendingImportUri = null
-                                    viewModel.importBackupFromUri(
-                                        context = context,
-                                        uri = importUri,
-                                        isMerge = true,
-                                        onSuccess = { count ->
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            onImportSuccess(String.format(msgImportOkTemplate, count))
-                                        },
-                                        onError = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            showIncompatibleFileError = true
-                                        }
-                                    )
-                                },
-                                modifier = Modifier.fillMaxWidth().height(42.dp),
-                                shape = RoundedCornerShape(14.dp)
-                            ) {
-                                AutoResizedText(
-                                    text = stringResource(R.string.btn_unisci_dati),
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-
-                            // Tasto 2 (Bordo Rosso Error): Sostituisci tutti i dati
-                            OutlinedButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    if (viewModel.hasSavedData) {
-                                        showReplaceWarningUri = uri
-                                        pendingImportUri = null
-                                    } else {
-                                        val importUri = uri
-                                        pendingImportUri = null
-                                        viewModel.importBackupFromUri(
-                                            context = context,
-                                            uri = importUri,
-                                            isMerge = false,
-                                            onSuccess = { count ->
-                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                                onImportSuccess(String.format(msgImportOkTemplate, count))
-                                            },
-                                            onError = {
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                showIncompatibleFileError = true
-                                            }
-                                        )
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth().height(42.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
-                            ) {
-                                AutoResizedText(
-                                    text = stringResource(R.string.btn_sostituisci_dati),
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-
-                            // Tasto 3 (Neutro Contornato): Annulla
-                            OutlinedButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    pendingImportUri = null
-                                },
-                                modifier = Modifier.fillMaxWidth().height(42.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                            ) {
-                                AutoResizedText(
-                                    text = stringResource(R.string.btn_annulla),
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            // --- VARIANTE STANDARD PER PORTRAIT E TABLET (AlertDialog Centrato) ---
-            AlertDialog(
-                onDismissRequest = { pendingImportUri = null },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.FolderZip,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(36.dp)
-                    )
-                },
-                title = {
-                    Text(
-                        text = stringResource(R.string.titolo_conferma_import),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                text = {
-                    Text(
-                        text = stringResource(R.string.desc_dettagliata_import),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                confirmButton = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        },
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Button(
-                            onClick = {
+                        AutoResizedText(text = stringResource(R.string.btn_unisci_dati), fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            if (viewModel.hasSavedData) {
+                                showReplaceWarningUri = uri
+                                pendingImportUri = null
+                            } else {
                                 val importUri = uri
                                 pendingImportUri = null
-                                viewModel.importBackupFromUri(
-                                    context = context,
-                                    uri = importUri,
-                                    isMerge = true,
-                                    onSuccess = { count ->
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        onImportSuccess(String.format(msgImportOkTemplate, count))
-                                    },
-                                    onError = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        showIncompatibleFileError = true
-                                    }
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_unisci_dati),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                if (viewModel.hasSavedData) {
-                                    showReplaceWarningUri = uri
-                                    pendingImportUri = null
-                                } else {
-                                    val importUri = uri
-                                    pendingImportUri = null
-                                    viewModel.importBackupFromUri(
-                                        context = context,
-                                        uri = importUri,
-                                        isMerge = false,
-                                        onSuccess = { count ->
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            onImportSuccess(String.format(msgImportOkTemplate, count))
-                                        },
-                                        onError = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            showIncompatibleFileError = true
-                                        }
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
-                        ) {
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_sostituisci_dati),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-
-                        OutlinedButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                pendingImportUri = null
-                            },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                        ) {
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_annulla),
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-            )
-        }
-    }
-
-    // ====================================================================
-    // SOTTO-DIALOGO 2: ULTIMO AVVISO PRIMA DELLA SOVRASCRITTURA DATI
-    // ====================================================================
-    showReplaceWarningUri?.let { uri ->
-        if (isSmallScreenLandscape) {
-            Dialog(
-                onDismissRequest = {
-                    pendingImportUri = uri
-                    showReplaceWarningUri = null
-                },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(0.88f).heightIn(max = 260.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.background,
-                    shadowElevation = 12.dp,
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize().padding(14.dp),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1.1f).fillMaxHeight().verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(Icons.Filled.Warning, null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(28.dp))
-                                Text(stringResource(R.string.titolo_warning_sostituisci), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(stringResource(R.string.msg_warning_sostituisci), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                        }
-
-                        Column(
-                            modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Button(
-                                onClick = {
-                                    val importUri = uri
-                                    showReplaceWarningUri = null
-                                    viewModel.importBackupFromUri(
-                                        context = context,
-                                        uri = importUri,
-                                        isMerge = false,
-                                        onSuccess = { count ->
-                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            onImportSuccess(String.format(msgImportOkTemplate, count))
-                                        },
-                                        onError = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            showIncompatibleFileError = true
-                                        }
-                                    )
-                                },
-                                modifier = Modifier.fillMaxWidth().height(42.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                AutoResizedText(stringResource(R.string.btn_procedi_sostituisci), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onError, style = MaterialTheme.typography.labelMedium)
-                            }
-
-                            OutlinedButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    pendingImportUri = uri
-                                    showReplaceWarningUri = null
-                                },
-                                modifier = Modifier.fillMaxWidth().height(42.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                            ) {
-                                AutoResizedText(stringResource(R.string.btn_annulla), fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium)
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            AlertDialog(
-                onDismissRequest = {
-                    pendingImportUri = uri
-                    showReplaceWarningUri = null
-                },
-                icon = {
-                    Icon(imageVector = Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(38.dp))
-                },
-                title = {
-                    Text(text = stringResource(R.string.titolo_warning_sostituisci), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-                },
-                text = {
-                    Text(text = stringResource(R.string.msg_warning_sostituisci), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth())
-                },
-                confirmButton = {
-                    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(
-                            onClick = {
-                                val importUri = uri
-                                showReplaceWarningUri = null
                                 viewModel.importBackupFromUri(
                                     context = context,
                                     uri = importUri,
@@ -704,35 +260,94 @@ fun BackupRestoreDialog(
                                         showIncompatibleFileError = true
                                     }
                                 )
-                            },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            AutoResizedText(text = stringResource(R.string.btn_procedi_sostituisci), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onError)
-                        }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+                    ) {
+                        AutoResizedText(text = stringResource(R.string.btn_sostituisci_dati), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                    }
 
-                        OutlinedButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                pendingImportUri = uri
-                                showReplaceWarningUri = null
-                            },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                        ) {
-                            AutoResizedText(text = stringResource(R.string.btn_annulla), fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                        }
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            pendingImportUri = null
+                        },
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        AutoResizedText(text = stringResource(R.string.btn_annulla), fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
-            )
-        }
+            },
+            shape = RoundedCornerShape(24.dp)
+        )
     }
 
-    // ====================================================================
+    // SOTTO-DIALOGO 2: AVVISO SOSTITUZIONE DATI ESISTENTI
+    showReplaceWarningUri?.let { uri ->
+        AlertDialog(
+            onDismissRequest = {
+                pendingImportUri = uri
+                showReplaceWarningUri = null
+            },
+            icon = {
+                Icon(imageVector = Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(38.dp))
+            },
+            title = {
+                Text(text = stringResource(R.string.titolo_warning_sostituisci), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            },
+            text = {
+                Text(text = stringResource(R.string.msg_warning_sostituisci), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Start, modifier = Modifier.fillMaxWidth())
+            },
+            confirmButton = {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = {
+                            val importUri = uri
+                            showReplaceWarningUri = null
+                            viewModel.importBackupFromUri(
+                                context = context,
+                                uri = importUri,
+                                isMerge = false,
+                                onSuccess = { count ->
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    onImportSuccess(String.format(msgImportOkTemplate, count))
+                                },
+                                onError = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showIncompatibleFileError = true
+                                }
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        AutoResizedText(text = stringResource(R.string.btn_procedi_sostituisci), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onError)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            pendingImportUri = uri
+                            showReplaceWarningUri = null
+                        },
+                        modifier = Modifier.fillMaxWidth().height(44.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                    ) {
+                        AutoResizedText(text = stringResource(R.string.btn_annulla), fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+            },
+            shape = RoundedCornerShape(24.dp)
+        )
+    }
+
     // SOTTO-DIALOGO 3: AVVISO FILE CORROTTO / NON COMPATIBILE
-    // ====================================================================
     if (showIncompatibleFileError) {
         AlertDialog(
             onDismissRequest = { showIncompatibleFileError = false },
@@ -775,210 +390,392 @@ fun BackupRestoreDialog(
                         fontWeight = FontWeight.Bold
                     )
                 }
-            }
+            },
+            shape = RoundedCornerShape(24.dp)
         )
     }
 }
 
 /**
  * LAYOUT VERTICALE (Portrait) PER IL DIALOGO PRINCIPALE
+ * Con navigazione interna animata (AnimatedContent) tra vista principale e sotto-menu di esportazione.
  */
 @Composable
 private fun BackupRestoreDialogPortrait(
-    onExportClick: () -> Unit,
+    onExportSaveClick: () -> Unit,
+    onExportShareClick: () -> Unit,
     onImportClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    // 🧠 RILEVAZIONE ALTEZZA SCHERMO:
-    // Leggiamo l'altezza totale disponibile sul dispositivo per calcolare il tetto massimo (heightIn) del dialogo.
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val haptic = LocalHapticFeedback.current
+
+    var currentScreen by remember { mutableStateOf(ExportScreen.MAIN) }
+
+    // Intercettazione del tasto Back di sistema per tornare alla vista principale invece di chiudere il dialogo
+    BackHandler(enabled = currentScreen == ExportScreen.EXPORT_CHOICE) {
+        currentScreen = ExportScreen.MAIN
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        // 🧠 PROTEZIONE TOCCO INVOLONTARIO:
+        // `dismissOnClickOutside = false` impedisce la chiusura accidentale del dialogo se l'utente tocca lo sfondo scuro esterno.
+        // L'unico modo per uscire è premere il tasto Chiudi/Indietro o il comando Indietro di Android.
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.92f)                  // Occupa il 92% della larghezza dello schermo per una disposizione confortevole
-                .wrapContentHeight()                    // ADATTAMENTO DINAMICO: L'altezza si restringe automaticamente in base al contenuto effettivo (elimina lo spazio vuoto in basso)
-                .heightIn(max = screenHeight * 0.88f),  // TETTO MASSIMO: Impedisce al dialogo di superare l'88% dell'altezza dello schermo (fondamentale per accessibilità e font grandi)
-            shape = RoundedCornerShape(24.dp),          // Angoli arrotondati a 24dp in stile Material You
-            color = MaterialTheme.colorScheme.background, // Sfondo del dialogo coerente con il tema corrente
-            shadowElevation = 12.dp,                    // Ombra profonda per separare visivamente il modale dallo sfondo
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)) // Bordo perimetrale sottile
+                .fillMaxWidth(0.92f)
+                .wrapContentHeight()
+                .heightIn(max = screenHeight * 0.88f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
         ) {
-            // Colonna principale con disposizione verticale basata su spaziatura fissa (spacedBy) per evitare riempimenti forzati
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()                // Adatta l'altezza della colonna al contenuto senza forzare spazi verticali extra
-                    .padding(18.dp),                    // Margine interno uniforme di 18dp su tutti i lati
-                verticalArrangement = Arrangement.spacedBy(14.dp) // Spaziatura costante tra intestazione, schede e tasto chiusura
-            ) {
-                // 1. INTESTAZIONE (Header con icona e titoli)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Storage,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(36.dp)
-                            .padding(end = 10.dp)
-                    )
-                    Column {
-                        Text(
-                            text = stringResource(R.string.titolo_backup_dialog),
-                            fontWeight = FontWeight.Black,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = stringResource(R.string.desc_backup_dialog),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+            AnimatedContent(
+                targetState = currentScreen,
+                // 🧠 OTTIMIZZAZIONE PRESTAZIONI (Accelerazione Hardware GPU):
+                // `Modifier.graphicsLayer()` forza il rendering off-screen su GPU durante lo slide,
+                // evitando ricalcoli di layout (measure/layout pass) superflui e garantendo 60/120 FPS stabili.
+                modifier = Modifier.graphicsLayer(),
+                transitionSpec = {
+                    // 🧠 TRANSIZIONE FLUIDA OTTIMIZZATA:
+                    // Usiamo una durata ridotta a 220ms con curva di accelerazione 'FastOutSlowInEasing'
+                    // e uno spostamento parziale (width / 3) anziché a schermo intero (width),
+                    // eliminando qualsiasi effetto di scatto (jank) al ritorno alla vista principale.
+                    if (targetState == ExportScreen.EXPORT_CHOICE) {
+                        (slideInHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeIn(animationSpec = tween(220))) togetherWith
+                        (slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeOut(animationSpec = tween(220)))
+                    } else {
+                        (slideInHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeIn(animationSpec = tween(220))) togetherWith
+                        (slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeOut(animationSpec = tween(220)))
                     }
-                }
-
-                // 2. CORPO SCORREVOLE IN SCHEDE (Si adatta in altezza ed attiva lo scrolling solo se necessario)
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(12.dp)
-                            .verticalScroll(rememberScrollState()), // Abilita lo scrolling verticale solo se il contenuto supera il tetto massimo (es. font grandi)
-                        verticalArrangement = Arrangement.spacedBy(10.dp) // Spaziatura di 10dp tra le schede interne
-                    ) {
-                        // Scheda 1: ESPORTAZIONE
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                },
+                label = "BackupPortraitAnimation"
+            ) { screen ->
+                when (screen) {
+                    ExportScreen.MAIN -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(18.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.titolo_esporta_backup),
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    modifier = Modifier.padding(bottom = 4.dp)
+                            // Intestazione
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Storage,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(36.dp).padding(end = 10.dp)
                                 )
-                                Text(
-                                    text = stringResource(R.string.msg_esporta_backup),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                                Button(
-                                    onClick = onExportClick,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(42.dp),
-                                    shape = RoundedCornerShape(16.dp)
-                                ) {
-                                    Icon(Icons.Filled.Upload, null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    AutoResizedText(
-                                        text = stringResource(R.string.btn_esporta_backup),
-                                        fontWeight = FontWeight.Bold
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.titolo_backup_dialog),
+                                        fontWeight = FontWeight.Black,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.desc_backup_dialog),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
-                        }
 
-                        // Scheda 2: IMPORTAZIONE
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.titolo_importa_backup),
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.msg_importa_backup),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                                OutlinedButton(
-                                    onClick = onImportClick,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(42.dp),
-                                    shape = RoundedCornerShape(16.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f, fill = false)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                // Scheda 1: Esporta salvataggi
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                                 ) {
-                                    Icon(Icons.Filled.Download, null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(6.dp))
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.titolo_esporta_backup),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.msg_esporta_backup),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                        Button(
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                currentScreen = ExportScreen.EXPORT_CHOICE
+                                            },
+                                            modifier = Modifier.fillMaxWidth().height(42.dp),
+                                            shape = RoundedCornerShape(16.dp)
+                                        ) {
+                                            Icon(Icons.Filled.Upload, null, modifier = Modifier.size(18.dp))
+                                            Spacer(Modifier.width(6.dp))
+                                            AutoResizedText(
+                                                text = stringResource(R.string.btn_esporta_backup),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Scheda 2: Importa salvataggi
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.titolo_importa_backup),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.msg_importa_backup),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(bottom = 8.dp)
+                                        )
+                                        OutlinedButton(
+                                            onClick = onImportClick,
+                                            modifier = Modifier.fillMaxWidth().height(42.dp),
+                                            shape = RoundedCornerShape(16.dp),
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                                        ) {
+                                            Icon(Icons.Filled.Download, null, modifier = Modifier.size(18.dp))
+                                            Spacer(Modifier.width(6.dp))
+                                            AutoResizedText(
+                                                text = stringResource(R.string.btn_importa_file),
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Scheda 3: Privacy
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.titolo_privacy_backup),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.msg_privacy_backup),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Tasto Chiudi
+                            OutlinedButton(
+                                onClick = onDismiss,
+                                modifier = Modifier.fillMaxWidth().height(48.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            ) {
+                                Icon(Icons.Filled.Close, null, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(8.dp))
+                                AutoResizedText(
+                                    text = stringResource(R.string.btn_chiudi_backup),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                    ExportScreen.EXPORT_CHOICE -> {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(18.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Intestazione centrata
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Upload,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(36.dp).padding(bottom = 4.dp)
+                                )
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     AutoResizedText(
-                                        text = stringResource(R.string.btn_importa_file),
+                                        text = stringResource(R.string.titolo_dialog_esporta_scelta),
                                         fontWeight = FontWeight.Bold,
+                                        style = MaterialTheme.typography.titleLarge,
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
-                        }
 
-                        // Scheda 3: PRIVACY & FORMATO APERTO
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Text(
-                                    text = stringResource(R.string.titolo_privacy_backup),
+                            // Corpo opzioni
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f, fill = false)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                // Opzione 1: Salva sul dispositivo
+                                Surface(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        currentScreen = ExportScreen.MAIN
+                                        onExportSaveClick()
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            modifier = Modifier.size(40.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Download,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = stringResource(R.string.opt_salva_dispositivo),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.desc_salva_dispositivo),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+
+                                // Opzione 2: Condividi file
+                                Surface(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        currentScreen = ExportScreen.MAIN
+                                        onExportShareClick()
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            modifier = Modifier.size(40.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Share,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = stringResource(R.string.opt_condividi_backup),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.desc_condividi_backup),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Tasto Indietro
+                            OutlinedButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    currentScreen = ExportScreen.MAIN
+                                },
+                                modifier = Modifier.fillMaxWidth().height(48.dp),
+                                shape = RoundedCornerShape(20.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, null, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(8.dp))
+                                AutoResizedText(
+                                    text = stringResource(R.string.btn_indietro),
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.msg_privacy_backup),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
                     }
-                }
-
-                // 3. TASTO DI CHIUSURA ANCORATO IN FONDO (Senza spazi vuoti intermedi)
-                OutlinedButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                ) {
-                    Icon(Icons.Filled.Close, null, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(6.dp))
-                    AutoResizedText(
-                        text = stringResource(R.string.btn_chiudi_backup),
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
                 }
             }
         }
@@ -987,29 +784,38 @@ private fun BackupRestoreDialogPortrait(
 
 /**
  * LAYOUT ORIZZONTALE (Landscape Split-Screen) PER IL DIALOGO PRINCIPALE
+ * Con navigazione interna animata (AnimatedContent) tra vista principale e sotto-menu di esportazione.
  */
 @Composable
 private fun BackupRestoreDialogLandscape(
-    onExportClick: () -> Unit,
+    onExportSaveClick: () -> Unit,
+    onExportShareClick: () -> Unit,
     onImportClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    // 🧠 RILEVAZIONE ALTEZZA SCHERMO IN LANDSCAPE:
-    // Leggiamo l'altezza disponibile dello schermo in orizzontale per calcolare il limite massimo del dialogo.
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val haptic = LocalHapticFeedback.current
+
+    var currentScreen by remember { mutableStateOf(ExportScreen.MAIN) }
+
+    BackHandler(enabled = currentScreen == ExportScreen.EXPORT_CHOICE) {
+        currentScreen = ExportScreen.MAIN
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        // 🧠 PROTEZIONE TOCCO INVOLONTARIO:
+        // `dismissOnClickOutside = false` impedisce la chiusura accidentale del dialogo se l'utente tocca lo sfondo scuro esterno in Landscape.
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.92f)                  // 92% della larghezza in orizzontale
-                .wrapContentHeight()                    // ADATTAMENTO DINAMICO: Altezza basata sul contenuto effettivo
-                .heightIn(max = screenHeight * 0.90f),  // TETTO MASSIMO: Limite al 90% dell'altezza dello schermo in landscape
-            shape = RoundedCornerShape(24.dp),          // Angoli arrotondati a 24dp
-            color = MaterialTheme.colorScheme.background, // Sfondo coerente col tema
-            shadowElevation = 12.dp,                    // Ombra di elevazione
+                .fillMaxWidth(0.92f)
+                .wrapContentHeight()
+                .heightIn(max = screenHeight * 0.90f),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 12.dp,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
         ) {
             Row(
@@ -1020,7 +826,7 @@ private fun BackupRestoreDialogLandscape(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // PANNELLO SINISTRO (~28%): Intestazione + Tasto ancorato in basso
+                // PANNELLO SINISTRO (~28%): Intestazione + Tasto chiusura
                 Column(
                     modifier = Modifier
                         .weight(0.28f)
@@ -1063,21 +869,22 @@ private fun BackupRestoreDialogLandscape(
                         onClick = onDismiss,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(42.dp),
+                            .height(48.dp),
                         shape = RoundedCornerShape(16.dp),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        Icon(Icons.Filled.Close, null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(6.dp))
+                        Icon(Icons.Filled.Close, null, modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
                         AutoResizedText(
                             text = stringResource(R.string.btn_chiudi_backup),
-                            fontWeight = FontWeight.Medium,
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
 
-                // PANNELLO DESTRO (~72%): Schede Esportazione / Importazione
+                // PANNELLO DESTRO (~72%): AnimatedContent tra Vista Principale e Sottomenu Esportazione (Senza table wrapper superfluo)
                 Surface(
                     modifier = Modifier
                         .weight(0.72f)
@@ -1086,119 +893,289 @@ private fun BackupRestoreDialogLandscape(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(12.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        // Scheda 1: ESPORTAZIONE
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.titolo_esporta_backup),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.msg_esporta_backup),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                Button(
-                                    onClick = onExportClick,
-                                    shape = RoundedCornerShape(16.dp)
+                    AnimatedContent(
+                        targetState = currentScreen,
+                        // 🧠 OTTIMIZZAZIONE PRESTAZIONI (Accelerazione Hardware GPU) in Landscape:
+                        // Forza il rendering off-screen su GPU per azzerare qualsiasi scatto (jank) durante la transizione orizzontale.
+                        modifier = Modifier.graphicsLayer(),
+                        transitionSpec = {
+                            if (targetState == ExportScreen.EXPORT_CHOICE) {
+                                (slideInHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeIn(animationSpec = tween(220))) togetherWith
+                                (slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeOut(animationSpec = tween(220)))
+                            } else {
+                                (slideInHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> -width / 3 } + fadeIn(animationSpec = tween(220))) togetherWith
+                                (slideOutHorizontally(animationSpec = tween(220, easing = FastOutSlowInEasing)) { width -> width / 3 } + fadeOut(animationSpec = tween(220)))
+                            }
+                        },
+                        label = "BackupLandscapeAnimation"
+                    ) { screen ->
+                        when (screen) {
+                            ExportScreen.MAIN -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight()
+                                        .padding(12.dp)
+                                        .verticalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    Icon(Icons.Filled.Upload, null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(
-                                        text = stringResource(R.string.btn_esporta_backup),
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
+                                    // Scheda Esportazione
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_esporta_backup),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.msg_esporta_backup),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            Button(
+                                                onClick = {
+                                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                                    currentScreen = ExportScreen.EXPORT_CHOICE
+                                                },
+                                                shape = RoundedCornerShape(16.dp)
+                                            ) {
+                                                Icon(Icons.Filled.Upload, null, modifier = Modifier.size(18.dp))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = stringResource(R.string.btn_esporta_backup),
+                                                    fontWeight = FontWeight.Bold,
+                                                    style = MaterialTheme.typography.labelLarge
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Scheda Importazione
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                                                Text(
+                                                    text = stringResource(R.string.titolo_importa_backup),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.msg_importa_backup),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            OutlinedButton(
+                                                onClick = onImportClick,
+                                                shape = RoundedCornerShape(16.dp),
+                                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                                            ) {
+                                                Icon(Icons.Filled.Download, null, modifier = Modifier.size(18.dp))
+                                                Spacer(Modifier.width(6.dp))
+                                                Text(
+                                                    text = stringResource(R.string.btn_importa_file),
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    style = MaterialTheme.typography.labelLarge
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Scheda Privacy
+                                    Surface(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                                    ) {
+                                        Column(modifier = Modifier.padding(10.dp)) {
+                                            Text(
+                                                text = stringResource(R.string.titolo_privacy_backup),
+                                                style = MaterialTheme.typography.labelLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.msg_privacy_backup),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
                                 }
                             }
-                        }
-
-                        // Scheda 2: IMPORTAZIONE
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                                    Text(
-                                        text = stringResource(R.string.titolo_importa_backup),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.msg_importa_backup),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                OutlinedButton(
-                                    onClick = onImportClick,
-                                    shape = RoundedCornerShape(16.dp),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                            ExportScreen.EXPORT_CHOICE -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight()
+                                        .padding(12.dp)
+                                        .verticalScroll(rememberScrollState()),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Icon(Icons.Filled.Download, null, modifier = Modifier.size(18.dp))
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(
-                                        text = stringResource(R.string.btn_importa_file),
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
-                                }
-                            }
-                        }
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Upload,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(32.dp).padding(bottom = 2.dp)
+                                        )
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AutoResizedText(
+                                                text = stringResource(R.string.titolo_dialog_esporta_scelta),
+                                                fontWeight = FontWeight.Bold,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
 
-                        // Scheda 3: PRIVACY
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
-                        ) {
-                            Column(modifier = Modifier.padding(10.dp)) {
-                                Text(
-                                    text = stringResource(R.string.titolo_privacy_backup),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = stringResource(R.string.msg_privacy_backup),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                    // Opzione 1: Salva sul dispositivo
+                                    Surface(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            currentScreen = ExportScreen.MAIN
+                                            onExportSaveClick()
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            Surface(
+                                                shape = RoundedCornerShape(10.dp),
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                modifier = Modifier.size(36.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Download,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = stringResource(R.string.opt_salva_dispositivo),
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.desc_salva_dispositivo),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Opzione 2: Condividi file
+                                    Surface(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            currentScreen = ExportScreen.MAIN
+                                            onExportShareClick()
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        ) {
+                                            Surface(
+                                                shape = RoundedCornerShape(10.dp),
+                                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                                modifier = Modifier.size(36.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Share,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = stringResource(R.string.opt_condividi_backup),
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.desc_condividi_backup),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // Tasto Indietro
+                                    OutlinedButton(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            currentScreen = ExportScreen.MAIN
+                                        },
+                                        modifier = Modifier.fillMaxWidth().height(40.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                                    ) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(6.dp))
+                                        AutoResizedText(
+                                            text = stringResource(R.string.btn_indietro),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

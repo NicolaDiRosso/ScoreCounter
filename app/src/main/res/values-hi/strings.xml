@@ -350,7 +350,7 @@
     <string name="msg_conferma_import">आप बैकअप डेटा कैसे लागू करना चाहते हैं?</string>
     <string name="btn_unisci_dati">वर्तमान डेटा के साथ जोड़ें</string>
     <string name="btn_sostituisci_dati">सभी वर्तमान डेटा को बदलें</string>
-    <string name="titolo_dialog_esporta_scelta">निर्यात विधि चुनें</string>
+    <string name="titolo_dialog_esporta_scelta">निर्यात मोड</string>
     <string name="opt_salva_dispositivo">डिवाइस पर सहेजें</string>
     <string name="desc_salva_dispositivo">अपने फोन के फोल्डर में .json फाइल सहेजें</string>
     <string name="opt_condividi_backup">फ़ाइल साझा करें</string>
@@ -428,4 +428,5 @@
     <string name="badge_storico_basso">न्यूनतम स्कोर</string>
     <string name="badge_punteggio_minimo">न्यूनतम स्कोर</string>
     <string name="badge_punteggio_massimo">उच्चतम स्कोर</string>
+    <string name="btn_indietro">पीछे</string>
 </resources>
