@@ -1434,6 +1434,25 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * GENERAZIONE STRINGA JSON DI BACKUP
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Genera la stringa JSON formattata (Pretty-Printing) contenente la fotografia
+     * istantanea di tutte le partite, preferiti, titoli e preset del timer dell'app.
+     */
+    fun generateBackupJsonString(): String {
+        val backupData = ScoreCounterBackup(
+            version = 1,
+            timestamp = System.currentTimeMillis(),
+            history = history.toList(),
+            favoriteNames = favoriteNames.toList(),
+            matchTitleHistory = matchTitleHistory.toList(),
+            timerPresets = timerPresets.toList()
+        )
+        val prettyGson = GsonBuilder().setPrettyPrinting().create()
+        return prettyGson.toJson(backupData)
+    }
+
+    /**
      * ====================================================================
      * ESPORTAZIONE SALVATAGGI IN FILE JSON ESTERNO
      * ====================================================================

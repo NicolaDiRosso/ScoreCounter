@@ -2,6 +2,7 @@
 
     import android.content.Context
     import android.content.Intent
+    import android.widget.Toast
     import androidx.compose.animation.animateColorAsState
     import androidx.compose.animation.core.*
     import androidx.compose.foundation.BorderStroke
@@ -1028,6 +1029,44 @@
             e.printStackTrace()
             // Fallback: se il salvataggio immagine fallisce, invia almeno il testo
             launchShareIntent(context, shareText)
+        }
+    }
+
+    /**
+     * Condivide il file di backup JSON tramite Intent nativo di Android (FileProvider).
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Salva la stringa JSON formattata in un file temporaneo `.json` nella cache dell'app.
+     * 2. Genera un Content URI sicuro tramite FileProvider.
+     * 3. Lancia l'Intent ACTION_SEND concedendo i permessi di lettura temporanei all'app ricevente (es. WhatsApp, Email, Drive).
+     */
+    fun shareBackupJsonFile(context: Context, jsonString: String, fileName: String) {
+        try {
+            val cachePath = File(context.cacheDir, "backups")
+            cachePath.mkdirs()
+            val file = File(cachePath, fileName)
+            FileOutputStream(file).use { out ->
+                out.write(jsonString.toByteArray(Charsets.UTF_8))
+            }
+
+            val contentUri: Uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/json"
+                putExtra(Intent.EXTRA_STREAM, contentUri)
+                putExtra(Intent.EXTRA_SUBJECT, fileName)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = Intent.createChooser(shareIntent, context.getString(R.string.share_intent_chooser))
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(chooser)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, context.getString(R.string.msg_backup_errore), Toast.LENGTH_SHORT).show()
         }
     }
 

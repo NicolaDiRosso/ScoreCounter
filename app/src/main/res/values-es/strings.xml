@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">Copia de seguridad y restauración</string>
     <string name="desc_backup_dialog">Guarda o restaura tus partidas</string>
     <string name="titolo_esporta_backup">📤 Exportar copias</string>
-    <string name="msg_esporta_backup">Guarda todas las partidas completadas, jugadores favoritos, títulos personalizados y ajustes del temporizador en un archivo JSON en claro. Puedes guardarlo en Drive, Descargas o enviarlo por WhatsApp/Correo antes de desinstalar la app.</string>
+    <string name="msg_esporta_backup">Crea una copia de seguridad de partidas, jugadores y ajustes.</string>
     <string name="btn_esporta_file">Exportar a archivo JSON</string>
+    <string name="btn_esporta_backup">Exportar copia de seguridad</string>
+    <string name="btn_chiudi_backup">Cerrar</string>
     <string name="titolo_importa_backup">📥 Importar copias</string>
-    <string name="msg_importa_backup">Selecciona un archivo de copia de seguridad .json previamente exportado desde ScoreCounter para restaurar el historial de tus partidas, jugadores favoritos y ajustes del temporizador.</string>
+    <string name="msg_importa_backup">Restaura tus datos seleccionando un archivo de copia de seguridad .json guardado previamente.</string>
     <string name="btn_importa_file">Importar desde archivo</string>
     <string name="titolo_privacy_backup">🔒 Formato libre y transparente</string>
     <string name="msg_privacy_backup">Los archivos de copia se guardan en formato JSON en claro sin cifrar, otorgándote control total sobre tus datos sin restricciones.</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">¿Cómo deseas aplicar los datos de la copia de seguridad?</string>
     <string name="btn_unisci_dati">Combinar con datos actuales</string>
     <string name="btn_sostituisci_dati">Reemplazar todos los datos</string>
+    <string name="titolo_dialog_esporta_scelta">Elegir método de exportación</string>
+    <string name="opt_salva_dispositivo">Guardar en el dispositivo</string>
+    <string name="desc_salva_dispositivo">Guarda el archivo .json en una carpeta del teléfono</string>
+    <string name="opt_condividi_backup">Compartir archivo</string>
+    <string name="desc_condividi_backup">Envía la copia de seguridad por WhatsApp, correo electrónico o nube</string>
     <string name="msg_backup_esportato_ok">¡Copia de seguridad exportada con éxito!</string>
     <string name="msg_backup_importato_ok">¡%d nuevas partidas importadas con éxito!</string>
     <string name="msg_backup_errore">Fallo en la copia de seguridad: %s</string>

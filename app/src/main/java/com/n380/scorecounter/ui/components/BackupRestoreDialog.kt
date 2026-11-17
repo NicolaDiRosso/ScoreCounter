@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FolderZip
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Warning
@@ -94,6 +96,9 @@ fun BackupRestoreDialog(
     // `showIncompatibleFileError`: Flag booleano attivato se il file selezionato dall'utente non è un JSON valido di ScoreCounter
     var showIncompatibleFileError by remember { mutableStateOf(false) }
 
+    // `showExportChoiceDialog`: Flag booleano per aprire il sotto-dialogo di scelta tra "Salva sul dispositivo" e "Condividi file"
+    var showExportChoiceDialog by remember { mutableStateOf(false) }
+
     // Stringhe di notifica pre-calcolate nel contesto Composable per la formattazione dei messaggi
     val msgExportOk = stringResource(R.string.msg_backup_esportato_ok)
     val msgImportOkTemplate = stringResource(R.string.msg_backup_importato_ok)
@@ -144,8 +149,7 @@ fun BackupRestoreDialog(
         BackupRestoreDialogLandscape(
             onExportClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                exportLauncher.launch("ScoreCounter_Backup_$timeStamp.json")
+                showExportChoiceDialog = true
             },
             onImportClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -157,14 +161,158 @@ fun BackupRestoreDialog(
         BackupRestoreDialogPortrait(
             onExportClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                exportLauncher.launch("ScoreCounter_Backup_$timeStamp.json")
+                showExportChoiceDialog = true
             },
             onImportClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
             },
             onDismiss = onDismiss
+        )
+    }
+
+    // ====================================================================
+    // SOTTO-DIALOGO ESPORTAZIONE: SCEGLI TRA "SALVA SUL DISPOSITIVO" E "CONDIVIDI"
+    // ====================================================================
+    if (showExportChoiceDialog) {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val backupFileName = "ScoreCounter_Backup_$timeStamp.json"
+
+        AlertDialog(
+            onDismissRequest = { showExportChoiceDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Upload,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = stringResource(R.string.titolo_dialog_esporta_scelta),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // OPZIONE 1: Salva sul dispositivo (SAF File Saver)
+                    Surface(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            showExportChoiceDialog = false
+                            exportLauncher.launch(backupFileName)
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Download,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.opt_salva_dispositivo),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.desc_salva_dispositivo),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    // OPZIONE 2: Condividi file via Intent Nativo
+                    Surface(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            showExportChoiceDialog = false
+                            val jsonString = viewModel.generateBackupJsonString()
+                            shareBackupJsonFile(context, jsonString, backupFileName)
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Share,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.opt_condividi_backup),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = stringResource(R.string.desc_condividi_backup),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        showExportChoiceDialog = false
+                    },
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text(stringResource(R.string.btn_annulla))
+                }
+            },
+            shape = RoundedCornerShape(24.dp)
         )
     }
 
@@ -641,29 +789,36 @@ private fun BackupRestoreDialogPortrait(
     onImportClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    // 🧠 RILEVAZIONE ALTEZZA SCHERMO:
+    // Leggiamo l'altezza totale disponibile sul dispositivo per calcolare il tetto massimo (heightIn) del dialogo.
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .fillMaxHeight(0.85f),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.background,
-            shadowElevation = 12.dp,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                .fillMaxWidth(0.92f)                  // Occupa il 92% della larghezza dello schermo per una disposizione confortevole
+                .wrapContentHeight()                    // ADATTAMENTO DINAMICO: L'altezza si restringe automaticamente in base al contenuto effettivo (elimina lo spazio vuoto in basso)
+                .heightIn(max = screenHeight * 0.88f),  // TETTO MASSIMO: Impedisce al dialogo di superare l'88% dell'altezza dello schermo (fondamentale per accessibilità e font grandi)
+            shape = RoundedCornerShape(24.dp),          // Angoli arrotondati a 24dp in stile Material You
+            color = MaterialTheme.colorScheme.background, // Sfondo del dialogo coerente con il tema corrente
+            shadowElevation = 12.dp,                    // Ombra profonda per separare visivamente il modale dallo sfondo
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)) // Bordo perimetrale sottile
         ) {
+            // Colonna principale con disposizione verticale basata su spaziatura fissa (spacedBy) per evitare riempimenti forzati
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(18.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                    .fillMaxWidth()
+                    .wrapContentHeight()                // Adatta l'altezza della colonna al contenuto senza forzare spazi verticali extra
+                    .padding(18.dp),                    // Margine interno uniforme di 18dp su tutti i lati
+                verticalArrangement = Arrangement.spacedBy(14.dp) // Spaziatura costante tra intestazione, schede e tasto chiusura
             ) {
-                // INTESTAZIONE (Header)
+                // 1. INTESTAZIONE (Header con icona e titoli)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Storage,
@@ -688,21 +843,22 @@ private fun BackupRestoreDialogPortrait(
                     }
                 }
 
-                // CORPO SCORREVOLE IN SCHEDE
+                // 2. CORPO SCORREVOLE IN SCHEDE (Si adatta in altezza ed attiva lo scrolling solo se necessario)
                 Surface(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxWidth()
+                            .wrapContentHeight()
                             .padding(12.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                            .verticalScroll(rememberScrollState()), // Abilita lo scrolling verticale solo se il contenuto supera il tetto massimo (es. font grandi)
+                        verticalArrangement = Arrangement.spacedBy(10.dp) // Spaziatura di 10dp tra le schede interne
                     ) {
                         // Scheda 1: ESPORTAZIONE
                         Surface(
@@ -735,7 +891,7 @@ private fun BackupRestoreDialogPortrait(
                                     Icon(Icons.Filled.Upload, null, modifier = Modifier.size(18.dp))
                                     Spacer(Modifier.width(6.dp))
                                     AutoResizedText(
-                                        text = stringResource(R.string.btn_esporta_file),
+                                        text = stringResource(R.string.btn_esporta_backup),
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -807,9 +963,7 @@ private fun BackupRestoreDialogPortrait(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // TASTO DI CHIUSURA ANCORATO
+                // 3. TASTO DI CHIUSURA ANCORATO IN FONDO (Senza spazi vuoti intermedi)
                 OutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier
@@ -821,7 +975,7 @@ private fun BackupRestoreDialogPortrait(
                     Icon(Icons.Filled.Close, null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(6.dp))
                     AutoResizedText(
-                        text = stringResource(R.string.btn_chiudi_statistiche),
+                        text = stringResource(R.string.btn_chiudi_backup),
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -840,37 +994,44 @@ private fun BackupRestoreDialogLandscape(
     onImportClick: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    // 🧠 RILEVAZIONE ALTEZZA SCHERMO IN LANDSCAPE:
+    // Leggiamo l'altezza disponibile dello schermo in orizzontale per calcolare il limite massimo del dialogo.
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .fillMaxHeight(0.92f),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.background,
-            shadowElevation = 12.dp,
+                .fillMaxWidth(0.92f)                  // 92% della larghezza in orizzontale
+                .wrapContentHeight()                    // ADATTAMENTO DINAMICO: Altezza basata sul contenuto effettivo
+                .heightIn(max = screenHeight * 0.90f),  // TETTO MASSIMO: Limite al 90% dell'altezza dello schermo in landscape
+            shape = RoundedCornerShape(24.dp),          // Angoli arrotondati a 24dp
+            color = MaterialTheme.colorScheme.background, // Sfondo coerente col tema
+            shadowElevation = 12.dp,                    // Ombra di elevazione
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .wrapContentHeight()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 // PANNELLO SINISTRO (~28%): Intestazione + Tasto ancorato in basso
                 Column(
                     modifier = Modifier
                         .weight(0.28f)
-                        .fillMaxHeight(),
+                        .wrapContentHeight(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .verticalScroll(rememberScrollState()),
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -898,8 +1059,6 @@ private fun BackupRestoreDialogLandscape(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     OutlinedButton(
                         onClick = onDismiss,
                         modifier = Modifier
@@ -911,7 +1070,7 @@ private fun BackupRestoreDialogLandscape(
                         Icon(Icons.Filled.Close, null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
                         AutoResizedText(
-                            text = stringResource(R.string.btn_chiudi_statistiche),
+                            text = stringResource(R.string.btn_chiudi_backup),
                             fontWeight = FontWeight.Medium,
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -922,14 +1081,15 @@ private fun BackupRestoreDialogLandscape(
                 Surface(
                     modifier = Modifier
                         .weight(0.72f)
-                        .fillMaxHeight(),
+                        .wrapContentHeight(),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxWidth()
+                            .wrapContentHeight()
                             .padding(12.dp)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -968,7 +1128,7 @@ private fun BackupRestoreDialogLandscape(
                                     Icon(Icons.Filled.Upload, null, modifier = Modifier.size(18.dp))
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(R.string.btn_esporta_file),
+                                        text = stringResource(R.string.btn_esporta_backup),
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.labelLarge
                                     )

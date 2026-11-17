@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">データバックアップと復元</string>
     <string name="desc_backup_dialog">試合データを保存・復元</string>
     <string name="titolo_esporta_backup">📤 バックアップのエクスポート</string>
-    <string name="msg_esporta_backup">完了したすべての試合、お気に入りプレイヤー、カスタムタイトル、タイマープリセットをJSONファイルに保存します。Drive、ダウンロード、WhatsApp/メールで送信可能です。</string>
+    <string name="msg_esporta_backup">対戦、プレイヤー、設定のバックアップコピーを作成します。</string>
     <string name="btn_esporta_file">JSONファイルへ出力</string>
+    <string name="btn_esporta_backup">バックアップをエクスポート</string>
+    <string name="btn_chiudi_backup">閉じる</string>
     <string name="titolo_importa_backup">📥 バックアップのインポート</string>
-    <string name="msg_importa_backup">以前エクスポートした.jsonバックアップファイルを選択して、試合履歴、お気に入りプレイヤー、タイマープリセットを復元します。</string>
+    <string name="msg_importa_backup">以前に保存した.jsonバックアップファイルを選択してデータを復元します。</string>
     <string name="btn_importa_file">ファイルから取り込み</string>
     <string name="titolo_privacy_backup">🔒 透明性の高い非暗号化フォーマット</string>
     <string name="msg_privacy_backup">バックアップファイルはテキスト形式のJSONで保存され、データに対する完全な所有権を維持できます。</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">バックアップデータをどのように適用しますか？</string>
     <string name="btn_unisci_dati">現在のデータと統合する</string>
     <string name="btn_sostituisci_dati">すべてのデータを置き換える</string>
+    <string name="titolo_dialog_esporta_scelta">エクスポート方法を選択</string>
+    <string name="opt_salva_dispositivo">デバイスに保存</string>
+    <string name="desc_salva_dispositivo">スマートフォンのフォルダに.jsonファイルを保存します</string>
+    <string name="opt_condividi_backup">ファイルを共有</string>
+    <string name="desc_condividi_backup">WhatsApp、メール、またはクラウドでバックアップを送信</string>
     <string name="msg_backup_esportato_ok">バックアップのエクスポートに成功しました！</string>
     <string name="msg_backup_importato_ok">%d 件の新しい試合を正常に取り込みました！</string>
     <string name="msg_backup_errore">バックアップ処理に失敗しました: %s</string>

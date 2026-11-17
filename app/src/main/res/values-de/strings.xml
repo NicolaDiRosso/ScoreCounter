@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">Datensicherung &amp; Wiederherstellung</string>
     <string name="desc_backup_dialog">Spiele sichern oder wiederherstellen</string>
     <string name="titolo_esporta_backup">📤 Sicherung exportieren</string>
-    <string name="msg_esporta_backup">Speichere alle abgeschlossenen Spiele, Lieblingsspieler, benutzerdefinierte Titel und Timer-Voreinstellungen in einer Klartext-JSON-Datei. Du kannst sie auf Drive, Downloads oder per WhatsApp/E-Mail speichern, bevor du die App deinstallierst.</string>
+    <string name="msg_esporta_backup">Erstelle eine Sicherungskopie von Spielen, Spielern und Einstellungen.</string>
     <string name="btn_esporta_file">In JSON-Datei exportieren</string>
+    <string name="btn_esporta_backup">Backup exportieren</string>
+    <string name="btn_chiudi_backup">Schließen</string>
     <string name="titolo_importa_backup">📥 Sicherung importieren</string>
-    <string name="msg_importa_backup">Wähle eine zuvor exportierte .json-Sicherungsdatei aus ScoreCounter aus, um deine Spielhistorie, Lieblingsspieler und Timer-Voreinstellungen wiederherzustellen.</string>
+    <string name="msg_importa_backup">Stelle deine Daten wieder her, indem du eine zuvor gespeicherte .json-Backup-Datei auswählst.</string>
     <string name="btn_importa_file">Aus Datei importieren</string>
     <string name="titolo_privacy_backup">🔒 Offenes &amp; unverschlüsseltes Format</string>
     <string name="msg_privacy_backup">Sicherungsdateien werden im Klartext-JSON-Format gespeichert, damit du die volle Kontrolle über deine Daten hast.</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">Wie möchtest du die Sicherungsdaten anwenden?</string>
     <string name="btn_unisci_dati">Mit aktuellen Daten zusammenführen</string>
     <string name="btn_sostituisci_dati">Alle aktuellen Daten ersetzen</string>
+    <string name="titolo_dialog_esporta_scelta">Exportmethode wählen</string>
+    <string name="opt_salva_dispositivo">Auf Gerät speichern</string>
+    <string name="desc_salva_dispositivo">Speichere die .json-Datei in einem Ordner auf deinem Telefon</string>
+    <string name="opt_condividi_backup">Datei teilen</string>
+    <string name="desc_condividi_backup">Sende das Backup per WhatsApp, E-Mail oder Cloud</string>
     <string name="msg_backup_esportato_ok">Sicherung erfolgreich exportiert!</string>
     <string name="msg_backup_importato_ok">%d neue Spiele erfolgreich importiert!</string>
     <string name="msg_backup_errore">Sicherung fehlgeschlagen: %s</string>

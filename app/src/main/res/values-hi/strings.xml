@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">डेटा बैकअप और पुनर्प्राप्ति</string>
     <string name="desc_backup_dialog">अपने मैच सहेजें या पुनर्प्राप्त करें</string>
     <string name="titolo_esporta_backup">📤 बैकअप निर्यात करें</string>
-    <string name="msg_esporta_backup">सभी पूर्ण मैचों, पसंदीदा खिलाड़ियों, कस्टम शीर्षकों और टाइमर प्रीसेट को एक आसान JSON फ़ाइल में सहेजें। आप इसे ड्राइव, डाउनलोड या व्हाट्सएप/ईमेल से भेज सकते हैं।</string>
+    <string name="msg_esporta_backup">अपने मैचों, खिलाड़ियों और सेटिंग्स की एक बैकअप प्रति बनाएं।</string>
     <string name="btn_esporta_file">JSON फ़ाइल में निर्यात करें</string>
+    <string name="btn_esporta_backup">बैकअप निर्यात करें</string>
+    <string name="btn_chiudi_backup">बंद करें</string>
     <string name="titolo_importa_backup">📥 बैकअप आयात करें</string>
-    <string name="msg_importa_backup">अपने मैच इतिहास, पसंदीदा खिलाड़ियों और टाइमर प्रीसेट को पुनर्प्राप्त करने के लिए पहले से निर्यात की गई .json बैकअप फ़ाइल चुनें।</string>
+    <string name="msg_importa_backup">पहले से सहेजी गई .json बैकअप फ़ाइल चुनकर अपना डेटा पुनर्स्थापित करें।</string>
     <string name="btn_importa_file">फ़ाइल से आयात करें</string>
     <string name="titolo_privacy_backup">🔒 खुला और पारदर्शी प्रारूप</string>
     <string name="msg_privacy_backup">बैकअप फ़ाइलें स्पष्ट JSON प्रारूप में सहेजी जाती हैं, जिससे आपको अपने डेटा पर पूरा नियंत्रण मिलता है।</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">आप बैकअप डेटा कैसे लागू करना चाहते हैं?</string>
     <string name="btn_unisci_dati">वर्तमान डेटा के साथ जोड़ें</string>
     <string name="btn_sostituisci_dati">सभी वर्तमान डेटा को बदलें</string>
+    <string name="titolo_dialog_esporta_scelta">निर्यात विधि चुनें</string>
+    <string name="opt_salva_dispositivo">डिवाइस पर सहेजें</string>
+    <string name="desc_salva_dispositivo">अपने फोन के फोल्डर में .json फाइल सहेजें</string>
+    <string name="opt_condividi_backup">फ़ाइल साझा करें</string>
+    <string name="desc_condividi_backup">व्हाट्सएप, ईमेल या क्लाउड के माध्यम से बैकअप भेजें</string>
     <string name="msg_backup_esportato_ok">बैकअप सफलतापूर्वक निर्यात किया गया!</string>
     <string name="msg_backup_importato_ok">%d नए मैच सफलतापूर्वक आयात किए गए!</string>
     <string name="msg_backup_errore">बैकअप विफल रहा: %s</string>

@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">Data backup &amp; restore</string>
     <string name="desc_backup_dialog">Save or restore your matches</string>
     <string name="titolo_esporta_backup">📤 Export backups</string>
-    <string name="msg_esporta_backup">Save all completed matches, favorite player names, custom titles, and timer presets into a human-readable JSON file. You can save it to Drive, Downloads, or send it via WhatsApp/Email before uninstalling.</string>
+    <string name="msg_esporta_backup">Create a backup copy of matches, players, and settings to transfer or keep them safe.</string>
     <string name="btn_esporta_file">Export to JSON file</string>
+    <string name="btn_esporta_backup">Export backup</string>
+    <string name="btn_chiudi_backup">Close</string>
     <string name="titolo_importa_backup">📥 Import backups</string>
-    <string name="msg_importa_backup">Select a previously exported .json backup file from ScoreCounter to restore your match history, favorite players, and timer presets onto your device.</string>
+    <string name="msg_importa_backup">Restore your data by selecting a previously saved .json backup file.</string>
     <string name="btn_importa_file">Import from file</string>
     <string name="titolo_privacy_backup">🔒 Open &amp; unencrypted format</string>
     <string name="msg_privacy_backup">Backup files are saved in clear, unencrypted JSON format, giving you full control and ownership over your data without proprietary lock-in.</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">How would you like to apply the backup data to your device?</string>
     <string name="btn_unisci_dati">Merge with current data</string>
     <string name="btn_sostituisci_dati">Replace all current data</string>
+    <string name="titolo_dialog_esporta_scelta">Choose export method</string>
+    <string name="opt_salva_dispositivo">Save to device</string>
+    <string name="desc_salva_dispositivo">Save the .json file to a folder on your phone</string>
+    <string name="opt_condividi_backup">Share file</string>
+    <string name="desc_condividi_backup">Send backup via WhatsApp, Email, or Cloud</string>
     <string name="msg_backup_esportato_ok">Backup exported successfully!</string>
     <string name="msg_backup_importato_ok">%d new matches imported successfully!</string>
     <string name="msg_backup_errore">Backup operation failed: %s</string>

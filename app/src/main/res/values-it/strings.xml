@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">Backup e ripristino dati</string>
     <string name="desc_backup_dialog">Salva o ripristina le tue partite</string>
     <string name="titolo_esporta_backup">📤 Esporta salvataggi</string>
-    <string name="msg_esporta_backup">Salva tutte le partite concluse, i giocatori preferiti, i titoli personalizzati e i preset del timer in un file JSON in chiaro. Puoi salvarlo su Drive, Downloads o inviarlo via WhatsApp/Email prima di disinstallare l\'app.</string>
+    <string name="msg_esporta_backup">Crea una copia di sicurezza di partite, giocatori e impostazioni per trasferirli o metterli al sicuro.</string>
     <string name="btn_esporta_file">Esporta su file JSON</string>
+    <string name="btn_esporta_backup">Esporta backup</string>
+    <string name="btn_chiudi_backup">Chiudi</string>
     <string name="titolo_importa_backup">📥 Importa salvataggi</string>
-    <string name="msg_importa_backup">Seleziona un file di backup .json precedentemente esportato da ScoreCounter per ripristinare la cronologia delle tue partite, i giocatori preferiti e i preset del timer.</string>
+    <string name="msg_importa_backup">Ripristina i tuoi dati selezionando un file di backup .json salvato in precedenza.</string>
     <string name="btn_importa_file">Importa da file</string>
     <string name="titolo_privacy_backup">🔒 Formato libero e trasparente</string>
     <string name="msg_privacy_backup">I file di backup sono salvati in formato JSON chiaro e non cifrato, lasciandoti il pieno controllo e la proprietà dei tuoi dati senza vincoli.</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">Come desideri applicare i dati del backup sul dispositivo?</string>
     <string name="btn_unisci_dati">Unisci ai dati attuali</string>
     <string name="btn_sostituisci_dati">Sostituisci tutti i dati</string>
+    <string name="titolo_dialog_esporta_scelta">Scegli modalità di esportazione</string>
+    <string name="opt_salva_dispositivo">Salva sul dispositivo</string>
+    <string name="desc_salva_dispositivo">Salva il file .json in una cartella del telefono</string>
+    <string name="opt_condividi_backup">Condividi file</string>
+    <string name="desc_condividi_backup">Invia il backup tramite WhatsApp, Email o Cloud</string>
     <string name="msg_backup_esportato_ok">Backup esportato con successo!</string>
     <string name="msg_backup_importato_ok">%d nuove partite importate con successo!</string>
     <string name="msg_backup_errore">Operazione di backup fallita: %s</string>

@@ -336,10 +336,12 @@
     <string name="titolo_backup_dialog">Sauvegarde et restauration</string>
     <string name="desc_backup_dialog">Sauvegardez ou restaurez vos parties</string>
     <string name="titolo_esporta_backup">📤 Exporter les sauvegardes</string>
-    <string name="msg_esporta_backup">Enregistrez toutes les parties terminées, joueurs favoris, titres personnalisés et préréglages du minuteur dans un fichier JSON clair. Enregistrez-le sur Drive, Téléchargements ou envoyez-le par WhatsApp/E-mail avant de désinstaller l\'application.</string>
+    <string name="msg_esporta_backup">Créez une copie de sauvegarde des parties, joueurs et paramètres.</string>
     <string name="btn_esporta_file">Exporter vers fichier JSON</string>
+    <string name="btn_esporta_backup">Exporter la sauvegarde</string>
+    <string name="btn_chiudi_backup">Fermer</string>
     <string name="titolo_importa_backup">📥 Importer des sauvegardes</string>
-    <string name="msg_importa_backup">Sélectionnez un fichier de sauvegarde .json précédemment exporté depuis ScoreCounter pour restaurer l\'historique de vos parties, joueurs favoris et préréglages du minuteur.</string>
+    <string name="msg_importa_backup">Restaurez vos données en sélectionnant un fichier de sauvegarde .json précédemment enregistré.</string>
     <string name="btn_importa_file">Importer depuis fichier</string>
     <string name="titolo_privacy_backup">🔒 Format ouvert et non chiffré</string>
     <string name="msg_privacy_backup">Les fichiers de sauvegarde sont enregistrés au format JSON en clair, vous laissant le contrôle total sur vos données sans restrictions.</string>
@@ -348,6 +350,11 @@
     <string name="msg_conferma_import">Comment souhaitez-vous appliquer les données de la sauvegarde ?</string>
     <string name="btn_unisci_dati">Fusionner avec données actuelles</string>
     <string name="btn_sostituisci_dati">Remplacer toutes les données</string>
+    <string name="titolo_dialog_esporta_scelta">Choisir le mode d\'exportation</string>
+    <string name="opt_salva_dispositivo">Enregistrer sur l\'appareil</string>
+    <string name="desc_salva_dispositivo">Enregistrez le fichier .json dans un dossier de votre téléphone</string>
+    <string name="opt_condividi_backup">Partager le fichier</string>
+    <string name="desc_condividi_backup">Envoyez la sauvegarde via WhatsApp, e-mail ou cloud</string>
     <string name="msg_backup_esportato_ok">Sauvegarde exportée avec succès !</string>
     <string name="msg_backup_importato_ok">%d nouvelles parties importées avec succès !</string>
     <string name="msg_backup_errore">Échec de la sauvegarde : %s</string>
