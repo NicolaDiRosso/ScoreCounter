@@ -57,6 +57,8 @@ fun CounterScreenLandscape(
     onShowEndMatchDialogChange: (Boolean) -> Unit,
     showInfoDialog: Boolean,
     onShowInfoDialogChange: (Boolean) -> Unit,
+    showScoreHistoryDialog: Boolean,
+    onShowScoreHistoryDialogChange: (Boolean) -> Unit,
     showTimerDialog: Boolean,
     onShowTimerDialogChange: (Boolean) -> Unit,
     showDiceDialog: Boolean,
@@ -167,6 +169,26 @@ fun CounterScreenLandscape(
                                     text = stringResource(R.string.desc_info_icon),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            // Pulsante compatto gemello circolare per l'apertura della cronologia punteggi e annulla mossa
+                            FilledIconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onShowScoreHistoryDialogChange(true)
+                                },
+                                modifier = Modifier.size(44.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.History,
+                                    contentDescription = stringResource(R.string.desc_cronologia_icon),
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
 

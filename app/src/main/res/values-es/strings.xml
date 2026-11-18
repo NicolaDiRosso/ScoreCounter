@@ -429,4 +429,10 @@
     <string name="btn_indietro">Atrás</string>
     <string name="btn_github">GitHub</string>
     <string name="btn_privacy_policy">Privacidad</string>
+    <string name="titolo_cronologia_punteggi">Historial</string>
+    <string name="desc_cronologia_icon">Historial de puntuaciones</string>
+    <string name="btn_annulla_mossa">Deshacer</string>
+    <string name="btn_chiudi_cronologia">Cerrar</string>
+    <string name="msg_nessuna_mossa_cronologia">Ningún movimiento registrado todavía</string>
+    <string name="lbl_punteggio_totale">Total: %1$d</string>
 </resources>

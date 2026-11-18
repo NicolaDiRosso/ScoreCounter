@@ -429,4 +429,10 @@
     <string name="btn_indietro">पीछे</string>
     <string name="btn_github">GitHub</string>
     <string name="btn_privacy_policy">गोपनीयता</string>
+    <string name="titolo_cronologia_punteggi">इतिहास</string>
+    <string name="desc_cronologia_icon">स्कोर इतिहास</string>
+    <string name="btn_annulla_mossa">पूर्ववत करें</string>
+    <string name="btn_chiudi_cronologia">बंद करें</string>
+    <string name="msg_nessuna_mossa_cronologia">अभी तक कोई चाल दर्ज नहीं की गई</string>
+    <string name="lbl_punteggio_totale">कुल: %1$d</string>
 </resources>

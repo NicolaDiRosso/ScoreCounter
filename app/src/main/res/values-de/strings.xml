@@ -429,4 +429,10 @@
     <string name="btn_indietro">Zurück</string>
     <string name="btn_github">GitHub</string>
     <string name="btn_privacy_policy">Datenschutz</string>
+    <string name="titolo_cronologia_punteggi">Verlauf</string>
+    <string name="desc_cronologia_icon">Punkteverlauf</string>
+    <string name="btn_annulla_mossa">Rückgängig</string>
+    <string name="btn_chiudi_cronologia">Schließen</string>
+    <string name="msg_nessuna_mossa_cronologia">Bisher keine Spielzüge erfasst</string>
+    <string name="lbl_punteggio_totale">Gesamt: %1$d</string>
 </resources>

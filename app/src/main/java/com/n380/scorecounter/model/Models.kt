@@ -406,3 +406,24 @@ package com.n380.scorecounter.model
         
         return if (bestDiesel != null) Pair(bestDiesel, (maxSecondHalfPercentage * 100).toInt()) else null
     }
+
+    // ====================================================================
+    // MODELLO DATI PER L'AZIONE DI PUNTEGGIO E LA CRONOLOGIA MOSSE
+    // ====================================================================
+    // Rappresentazione di una singola variazione di punteggio effettuata durante la partita.
+    // Include il riferimento al giocatore, i valori numerici prima e dopo l'operazione,
+    // il momento temporale in cui e avvenuta e lo stato delle serie per consentire l'annullamento.
+    data class ScoreAction(
+        val player: Player,
+        val playerName: String,
+        val playerColor: Int,
+        val delta: Int,
+        val scoreAfter: Int,
+        val matchDurationSeconds: Long,
+        val previousScore: Int,
+        val prevLastScoreUpdateTime: Long = 0L,
+        val prevComboCount: Int = 0,
+        val prevLastScorer: Player? = null,
+        val prevLastScorerWasOnFire: Boolean = false,
+        val prevPlayerFireComboCount: Int = 0
+    )

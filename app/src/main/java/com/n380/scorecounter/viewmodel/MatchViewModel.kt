@@ -23,6 +23,7 @@ import com.n380.scorecounter.model.MatchBackup
 import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.model.PlayerRecord
+import com.n380.scorecounter.model.ScoreAction
 import com.n380.scorecounter.model.ScoreCounterBackup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -195,6 +196,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     //variabile per tenere il conto dei punti per la combo della tripletta di punti consecutivi
     private var lastScorer: Player? = null
     private var comboCount = 0
+
+    // Cronologia delle variazioni di punteggio della partita attiva per consultazione e annullamento mosse.
+    val scoreActions = mutableStateListOf<ScoreAction>()
+
+    // Copia di riserva della cronologia mosse per consentire il ripristino in caso di annullamento dell'azzeramento punteggi.
+    private val undoScoreActionsBackup = mutableListOf<ScoreAction>()
 
     // L'init viene eseguito UNA sola volta, appena il cervello si "accende" aprendo l'app
     init {
@@ -524,6 +531,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             targetScore = backup.target
             matchDurationSeconds = backup.seconds
             players.clear() // Puliamo il tavolo
+            scoreActions.clear()
+            undoScoreActionsBackup.clear()
             // Rimettiamo i giocatori al loro posto con tutta la loro storia intatta per i grafici
             backup.players.forEach { record ->
                 val p = Player(record.name)
@@ -819,6 +828,14 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         // e per non attivare il pulsante "Fine Partita" se non c'è stato spostamento reale.
         if (amount == 0) return
 
+        // Memorizzazione dello stato precedente per consentire l'annullamento della mossa
+        val prevScore = player.score
+        val prevLastScoreUpdateTime = player.lastScoreUpdateTime
+        val prevComboCount = comboCount
+        val prevLastScorer = lastScorer
+        val prevLastScorerWasOnFire = lastScorer?.isOnFire ?: false
+        val prevFireComboCount = player.fireComboCount
+
         // ============================================================================
         // MACCHINA A STATI: SISTEMA COMBO E STATUS "ON FIRE"
         // ============================================================================
@@ -895,9 +912,63 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         players.forEach { p ->
             p.scoreHistory.add(p.score)
         }
+
+        // Registrazione dell'azione nella cronologia attiva della partita
+        scoreActions.add(
+            ScoreAction(
+                player = player,
+                playerName = player.name,
+                playerColor = player.color,
+                delta = amount,
+                scoreAfter = player.score,
+                matchDurationSeconds = matchDurationSeconds,
+                previousScore = prevScore,
+                prevLastScoreUpdateTime = prevLastScoreUpdateTime,
+                prevComboCount = prevComboCount,
+                prevLastScorer = prevLastScorer,
+                prevLastScorerWasOnFire = prevLastScorerWasOnFire,
+                prevPlayerFireComboCount = prevFireComboCount
+            )
+        )
+
         // Applichiamo la modifica al punteggio e salviamo il backup salva-vita
      //   player.changeScore(amount)
         saveBackup()
+    }
+
+    /**
+     * Annulla l'ultima variazione di punteggio registrata nella partita in corso.
+     * Ripristina il punteggio precedente del giocatore, lo stato delle serie combo e
+     * rimuove l'ultimo tick temporale sincronizzato dalle cronologie di tutti i giocatori.
+     * Restituisce true se l'operazione di annullamento e andata a buon fine, false se non vi erano mosse da annullare.
+     */
+    fun undoLastScoreAction(): Boolean {
+        if (scoreActions.isEmpty()) return false
+        val lastAction = scoreActions.removeAt(scoreActions.lastIndex)
+
+        // Ripristino del punteggio precedente e dei metadati del giocatore
+        lastAction.player.score = lastAction.previousScore
+        lastAction.player.lastScoreUpdateTime = lastAction.prevLastScoreUpdateTime
+        lastAction.player.fireComboCount = lastAction.prevPlayerFireComboCount
+
+        // Ripristino della macchina a stati per le combo e lo status rovente
+        players.forEach { it.isOnFire = false }
+        comboCount = lastAction.prevComboCount
+        lastScorer = lastAction.prevLastScorer
+        if (lastAction.prevLastScorer != null && lastAction.prevLastScorerWasOnFire) {
+            lastAction.prevLastScorer.isOnFire = true
+        }
+
+        // Rimozione sincronizzata dell'ultimo punto registrato nel grafico per ciascun partecipante
+        players.forEach { p ->
+            if (p.scoreHistory.size > 1) {
+                p.scoreHistory.removeAt(p.scoreHistory.lastIndex)
+            }
+        }
+
+        // Aggiornamento del salvataggio locale della partita
+        saveBackup()
+        return true
     }
 
     /**
@@ -913,6 +984,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     fun resetScoresWithUndo(): List<Pair<Int, List<Int>>> {
         // Mappa e salva una lista di "Coppie" (Pair): Il punteggio finale del giocatore e TUTTA la sua lunga lista di mosse passate
         val oldData = players.map { Pair(it.score, it.scoreHistory.toList()) }
+
+        // Salvataggio temporaneo delle mosse registrate per consentire l'eventuale ripristino
+        undoScoreActionsBackup.clear()
+        undoScoreActionsBackup.addAll(scoreActions)
+        scoreActions.clear()
 
         // Fatta la copia, azzera brutalmente i punti
         players.forEach {
@@ -940,6 +1016,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 player.scoreHistory.addAll(oldData[index].second) // Ripristina tutta la storia originale del grafico!
             }
         }
+        // Ripristino della cronologia delle mosse registrate prima dell'azzeramento
+        scoreActions.clear()
+        scoreActions.addAll(undoScoreActionsBackup)
+        undoScoreActionsBackup.clear()
         saveBackup() // Ri-aggiorna il salva-vita
     }
 
@@ -966,6 +1046,9 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         players.clear()
         resetTimer() // Assicuriamoci che il timer parta da 0 nella prossima partita
         clearBackup() // Fondamentale: se iniziamo da zero, il vecchio backup fantasma deve sparire
+        // Pulizia della cronologia delle mosse della partita precedente
+        scoreActions.clear()
+        undoScoreActionsBackup.clear()
     }
 
     // ---> LA FUNZIONE DI SALVATAGGIO DEFINITIVA <---

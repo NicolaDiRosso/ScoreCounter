@@ -42,6 +42,7 @@
     import com.n380.scorecounter.model.Player
     import com.n380.scorecounter.ui.components.PlayerScoreCard
     import com.n380.scorecounter.ui.components.FeatureInfoDialog
+    import com.n380.scorecounter.ui.components.ScoreHistoryDialog
     import com.n380.scorecounter.ui.components.formatTime
     import com.n380.scorecounter.ui.screens.landscape.CounterScreenLandscape
     import com.n380.scorecounter.viewmodel.MatchViewModel
@@ -93,6 +94,9 @@
 
         // STATO TUTORIAL: Controlla l'apertura del popup centrale con le regole nascoste (Manuale)
         var showInfoDialog by remember { mutableStateOf(false) }
+
+        // Stato per la gestione della visibilità del dialogo della cronologia punteggi
+        var showScoreHistoryDialog by rememberSaveable { mutableStateOf(false) }
 
         // SISTEMA SNACKBAR (Tasto Annulla Azzeramento)
         val snackbarHostState = remember { SnackbarHostState() }
@@ -213,6 +217,8 @@
                 onShowEndMatchDialogChange = { showEndMatchDialog = it },
                 showInfoDialog = showInfoDialog,
                 onShowInfoDialogChange = { showInfoDialog = it },
+                showScoreHistoryDialog = showScoreHistoryDialog,
+                onShowScoreHistoryDialogChange = { showScoreHistoryDialog = it },
                 showTimerDialog = showTimerDialog,
                 onShowTimerDialogChange = { showTimerDialog = it },
                 showDiceDialog = showDiceDialog,
@@ -480,6 +486,26 @@
                                 Icon(
                                     Icons.Filled.Info,
                                     contentDescription = stringResource(R.string.desc_info_icon), // 🌍 I18N: Traduzione descrizione lettore vocale
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            // Pulsante compatto gemello circolare per l'apertura della cronologia punteggi e annulla mossa
+                            FilledIconButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showScoreHistoryDialog = true
+                                },
+                                modifier = Modifier.size(38.dp),
+                                colors = IconButtonDefaults.filledIconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.History,
+                                    contentDescription = stringResource(R.string.desc_cronologia_icon),
                                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -1366,6 +1392,16 @@
                 // i preset del timer modificati nel dialogo aggiornano la memoria dell'app
                 // e vengono inclusi immediatamente nell'esportazione del file di backup JSON.
                 viewModel = viewModel
+            )
+        }
+
+        // Dialogo modale per la visualizzazione della cronologia punteggi e annulla ultima mossa
+        if (showScoreHistoryDialog) {
+            ScoreHistoryDialog(
+                viewModel = viewModel,
+                onDismissRequest = {
+                    showScoreHistoryDialog = false
+                }
             )
         }
     }

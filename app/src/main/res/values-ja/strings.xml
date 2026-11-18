@@ -429,4 +429,10 @@
     <string name="btn_indietro">戻る</string>
     <string name="btn_github">GitHub</string>
     <string name="btn_privacy_policy">プライバシー</string>
+    <string name="titolo_cronologia_punteggi">履歴</string>
+    <string name="desc_cronologia_icon">スコア履歴</string>
+    <string name="btn_annulla_mossa">元に戻す</string>
+    <string name="btn_chiudi_cronologia">閉じる</string>
+    <string name="msg_nessuna_mossa_cronologia">まだ動きは記録されていません</string>
+    <string name="lbl_punteggio_totale">合計: %1$d</string>
 </resources>
