@@ -68,6 +68,25 @@ package com.n380.scorecounter.model
         val isLowestScoreWins: Boolean = false
     )
 
+    // 🧠 MODELLO DATI SERIALIZZABILE PER IL RIPRISTINO DELLA CRONOLOGIA AZIONI:
+    // Questa data class converte l'oggetto runtime `ScoreAction` in un record idoneo alla serializzazione JSON su disco.
+    // Memorizza indici, nomi, variazioni di punteggio (delta) e gli stati delle serie consecutive (combo) per l'Undo.
+    data class ScoreActionRecord(
+        val playerIndex: Int = -1,
+        val playerName: String,
+        val playerColor: Int,
+        val delta: Int,
+        val scoreAfter: Int,
+        val matchDurationSeconds: Long,
+        val previousScore: Int,
+        val prevLastScoreUpdateTime: Long = 0L,
+        val prevComboCount: Int = 0,
+        val prevLastScorerIndex: Int = -1,
+        val prevLastScorerName: String? = null,
+        val prevLastScorerWasOnFire: Boolean = false,
+        val prevPlayerFireComboCount: Int = 0
+    )
+
     // ---> NUOVO: Modello per il backup salva-vita della partita in corso <---
     data class MatchBackup(
         val title: String,
@@ -75,7 +94,12 @@ package com.n380.scorecounter.model
         val players: List<PlayerRecord>,
         val seconds: Long,
         // Criterio di vittoria per la partita in sospeso salvata nel backup
-        val isLowestScoreWins: Boolean = false
+        val isLowestScoreWins: Boolean = false,
+        // Cronologia serializzata delle variazioni di punteggio per preservare le mosse al ripristino del backup
+        val scoreActions: List<ScoreActionRecord>? = emptyList(),
+        // Stato delle serie consecutive e dell'ultimo marcatore attivo al momento del salva-vita
+        val comboCount: Int = 0,
+        val lastScorerIndex: Int = -1
     )
 
     // ====================================================================

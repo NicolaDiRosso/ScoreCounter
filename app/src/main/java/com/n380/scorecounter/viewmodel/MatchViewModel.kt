@@ -24,6 +24,7 @@ import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.model.PlayerRecord
 import com.n380.scorecounter.model.ScoreAction
+import com.n380.scorecounter.model.ScoreActionRecord
 import com.n380.scorecounter.model.ScoreCounterBackup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -530,6 +531,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             matchTitle = backup.title
             targetScore = backup.target
             matchDurationSeconds = backup.seconds
+            isLowestScoreWins = backup.isLowestScoreWins
+            comboCount = backup.comboCount
             players.clear() // Puliamo il tavolo
             scoreActions.clear()
             undoScoreActionsBackup.clear()
@@ -543,6 +546,47 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 p.scoreHistory.addAll(record.scoreHistory ?: listOf(0))
                 players.add(p)
             }
+
+            // Ripristiniamo l'ultimo marcatore attivo se l'indice è valido
+            if (backup.lastScorerIndex in 0 until players.size) {
+                lastScorer = players[backup.lastScorerIndex]
+            } else {
+                lastScorer = null
+            }
+
+            // 🧠 RIPRISTINO CRONOLOGIA AZIONI (ScoreHistory):
+            // Mappiamo ciascun ScoreActionRecord salvato su disco ricreando l'oggetto runtime `ScoreAction`.
+            // Colleghiamo i riferimenti dei giocatori ripristinati per abilitare lo storico completo e la funzione Undo.
+            backup.scoreActions?.forEach { record ->
+                val targetPlayer = if (record.playerIndex in 0 until players.size) {
+                    players[record.playerIndex]
+                } else {
+                    players.firstOrNull { it.name == record.playerName } ?: Player(record.playerName).apply { color = record.playerColor }
+                }
+
+                val prevScorer = if (record.prevLastScorerIndex in 0 until players.size) {
+                    players[record.prevLastScorerIndex]
+                } else if (record.prevLastScorerName != null) {
+                    players.firstOrNull { it.name == record.prevLastScorerName }
+                } else null
+
+                scoreActions.add(
+                    ScoreAction(
+                        player = targetPlayer,
+                        playerName = record.playerName,
+                        playerColor = record.playerColor,
+                        delta = record.delta,
+                        scoreAfter = record.scoreAfter,
+                        matchDurationSeconds = record.matchDurationSeconds,
+                        previousScore = record.previousScore,
+                        prevLastScoreUpdateTime = record.prevLastScoreUpdateTime,
+                        prevComboCount = record.prevComboCount,
+                        prevLastScorer = prevScorer,
+                        prevLastScorerWasOnFire = record.prevLastScorerWasOnFire,
+                        prevPlayerFireComboCount = record.prevPlayerFireComboCount
+                    )
+                )
+            }
         }
         showResumeMatchDialog = false // Chiude il popup
     }
@@ -550,6 +594,31 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     // ---> FUNZIONE PER SALVARE IL BACKUP <---
     fun saveBackup() {
         if (players.isEmpty()) return
+
+        // 🧠 SERIALIZZAZIONE CRONOLOGIA MOSSE:
+        // Convertiamo la lista di `ScoreAction` in oggetti `ScoreActionRecord` serializzabili su JSON.
+        val actionRecords = scoreActions.map { action ->
+            val playerIdx = players.indexOf(action.player)
+            val prevLastScorerIdx = action.prevLastScorer?.let { players.indexOf(it) } ?: -1
+            ScoreActionRecord(
+                playerIndex = playerIdx,
+                playerName = action.playerName,
+                playerColor = action.playerColor,
+                delta = action.delta,
+                scoreAfter = action.scoreAfter,
+                matchDurationSeconds = action.matchDurationSeconds,
+                previousScore = action.previousScore,
+                prevLastScoreUpdateTime = action.prevLastScoreUpdateTime,
+                prevComboCount = action.prevComboCount,
+                prevLastScorerIndex = prevLastScorerIdx,
+                prevLastScorerName = action.prevLastScorer?.name,
+                prevLastScorerWasOnFire = action.prevLastScorerWasOnFire,
+                prevPlayerFireComboCount = action.prevPlayerFireComboCount
+            )
+        }
+
+        val lastScorerIdx = lastScorer?.let { players.indexOf(it) } ?: -1
+
         val backup = MatchBackup(
             title = matchTitle,
             target = targetScore,
@@ -562,7 +631,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     color = it.color,
                 )
             },
-            seconds = matchDurationSeconds
+            seconds = matchDurationSeconds,
+            isLowestScoreWins = isLowestScoreWins,
+            scoreActions = actionRecords,
+            comboCount = comboCount,
+            lastScorerIndex = lastScorerIdx
         )
         viewModelScope.launch {
             getApplication<Application>().dataStore.edit {
