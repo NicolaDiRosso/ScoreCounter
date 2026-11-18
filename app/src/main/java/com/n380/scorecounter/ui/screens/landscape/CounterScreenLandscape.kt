@@ -97,78 +97,23 @@ fun CounterScreenLandscape(
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // BLOCCO SUPERIORE SCORREVOLE (Titolo, Riquadro Timer/Info e Tools)
+            // BLOCCO SUPERIORE SCORREVOLE (Titolo, Badge del tempo e Tools)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // TITOLO DELLA SFIDA
+                // TITOLO DELLA SFIDA A LARGHEZZA PIENA PER MASSIMO RESPIRO
                 AutoResizedText(
                     text = if (viewModel.matchTitle.isEmpty()) stringResource(R.string.titolo_sfida_default) else viewModel.matchTitle,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 2.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 2.dp)
                 )
-
-                // ------------------------------------------------------------
-                // 🎨 RIQUADRO UNIFICATO: CRONOMETRO + TASTO INFO INTEGRATI
-                // ------------------------------------------------------------
-                // Usiamo secondaryContainer / onSecondaryContainer per garantire
-                // contrasto perfetto sia in Tema Chiaro che in Tema Scuro!
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // CRONOMETRO DURATA
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Schedule,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = formatTime(viewModel.matchDurationSeconds),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-
-                        // TASTO INFO INTEGRATO
-                        IconButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onShowInfoDialogChange(true)
-                            },
-                            modifier = Modifier.size(28.dp)
-                        ) {
-                            Icon(
-                                Icons.Filled.Info,
-                                contentDescription = stringResource(R.string.desc_info_icon),
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
 
                 if (viewModel.targetScore.isNotBlank()) {
                     Text(
@@ -194,6 +139,69 @@ fun CounterScreenLandscape(
                         modifier = Modifier.padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // RIGA SUPERIORE DEGLI STRUMENTI: Tasto Info (metà larghezza) + Badge del tempo di gioco (metà larghezza)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // TASTO INFO (Larghezza dimezzata con weight(1f))
+                            FilledTonalButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onShowInfoDialogChange(true)
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                contentPadding = PaddingValues(horizontal = 4.dp)
+                            ) {
+                                Icon(Icons.Filled.Info, null, modifier = Modifier.size(16.dp).padding(end = 4.dp))
+                                AutoResizedText(
+                                    text = stringResource(R.string.desc_info_icon),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            // BADGE TEMPO DI GIOCO (Larghezza dimezzata con weight(1f))
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Schedule,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(14.dp).padding(end = 4.dp)
+                                    )
+                                    AutoResizedText(
+                                        text = formatTime(viewModel.matchDurationSeconds),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
                         // TASTO TIMER
                         FilledTonalButton(
                             onClick = {

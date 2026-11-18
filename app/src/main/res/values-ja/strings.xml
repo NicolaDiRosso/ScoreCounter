@@ -358,7 +358,7 @@
     <string name="msg_backup_errore">バックアップ処理に失敗しました: %s</string>
     <string name="desc_backup_icon">データバックアップと復元</string>
     <string name="desc_menu_opzioni">その他のオプション</string>
-    <string name="titolo_warning_sostituisci">⚠️ 警告: データの上書き</string>
+    <string name="titolo_warning_sostituisci">警告: データの上書き</string>
     <string name="msg_warning_sostituisci">すべてのデータを置き換えると、アプリに現在保存されているすべての試合とお気に入りプレイヤーが永久に削除され、上書きされます。本当に続行しますか？</string>
     <string name="btn_procedi_sostituisci">続行して上書き</string>
     <string name="titolo_errore_import">互換性のないファイル</string>

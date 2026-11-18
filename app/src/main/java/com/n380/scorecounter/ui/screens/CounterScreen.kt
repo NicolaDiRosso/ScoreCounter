@@ -382,22 +382,56 @@
                 // Sostituito "Text" normale con il nostro nuovo "AutoResizedText".
                 // Ora, se inserisci un titolo chilometrico, si restringerà automaticamente
                 // pur di rimanere su una singola riga pulita!
-                AutoResizedText(
-                    // ====================================================================
-                    // 🧠 LEZIONE TEORICA I18N: Condizioni Logiche e Traduzioni
-                    // ====================================================================
-                    // Il Kotlin valuta le espressioni condizionali in linea (Inline If).
-                    // Se il ViewModel non ha un titolo (l'utente ha skippato la compilazione),
-                    // passiamo la traduzione ufficiale (es. "Sfida" in IT, "Challenge" in EN).
-                    // Altrimenti, stampiamo esattamente ciò che l'utente ha digitato in CreateMatchScreen!
-                    text = if (viewModel.matchTitle.isEmpty()) stringResource(R.string.titolo_sfida_default) else viewModel.matchTitle,
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                // 1. RIGA IN ALTO: TITOLO A SINISTRA E CRONOMETRO DELLA DURATA A DESTRA
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
-                )
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AutoResizedText(
+                        // ====================================================================
+                        // 🧠 LEZIONE TEORICA I18N: Condizioni Logiche e Traduzioni
+                        // ====================================================================
+                        // Il Kotlin valuta le espressioni condizionali in linea (Inline If).
+                        // Se il ViewModel non ha un titolo (l'utente ha skippato la compilazione),
+                        // passiamo la traduzione ufficiale (es. "Sfida" in IT, "Challenge" in EN).
+                        // Altrimenti, stampiamo esattamente ciò che l'utente ha digitato in CreateMatchScreen!
+                        text = if (viewModel.matchTitle.isEmpty()) stringResource(R.string.titolo_sfida_default) else viewModel.matchTitle,
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp)
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Schedule,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = formatTime(viewModel.matchDurationSeconds),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
                 // ====================================================================
                 // 2. BARRA DEGLI STRUMENTI (Toolbar Card)
                 // ====================================================================
@@ -423,11 +457,11 @@
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        // --- BLOCCO SINISTRO: Informazioni e Tempo di Gioco ---
+                        // --- BLOCCO SINISTRO: Informazioni ---
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            // 🧠 UX FIX: Usiamo weight(1.1f) per dare priorità a quest'area (Info + Tempo)
+                            // 🧠 UX FIX: Usiamo weight(1.1f) per dare priorità a quest'area
                             // ma permettendo al blocco dei bottoni a destra di non venire schiacciato.
                             modifier = Modifier.weight(1.1f)
                         ) {
@@ -450,35 +484,15 @@
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
-
-                            // DISPLAY CRONOMETRO: Tempo trascorso dall'inizio (Durata Match)
-                            Column(verticalArrangement = Arrangement.Center) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        // Abbiamo sostituito Icons.Filled.Timer con Icons.Filled.Schedule (un orologio classico)
-                                        // per distinguere visivamente il tempo trascorso dal pulsante "Timer" (conto alla rovescia).
-                                        imageVector = Icons.Filled.Schedule,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp).padding(end = 4.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = formatTime(viewModel.matchDurationSeconds),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
                                 
-                                // RIGA OBIETTIVO: Traguardo (se impostato)
-                                if (viewModel.targetScore.isNotBlank()) {
-                                    AutoResizedText(
-                                        text = stringResource(R.string.desc_obbiettivo, viewModel.targetScore),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
-                                    )
-                                }
+                            // RIGA OBIETTIVO: Traguardo (se impostato)
+                            if (viewModel.targetScore.isNotBlank()) {
+                                AutoResizedText(
+                                    text = stringResource(R.string.desc_obbiettivo, viewModel.targetScore),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
                             }
                         }
 

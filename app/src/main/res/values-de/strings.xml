@@ -358,7 +358,7 @@
     <string name="msg_backup_errore">Sicherung fehlgeschlagen: %s</string>
     <string name="desc_backup_icon">Datensicherung &amp; Wiederherstellung</string>
     <string name="desc_menu_opzioni">Weitere Optionen</string>
-    <string name="titolo_warning_sostituisci">⚠️ Warnung: Daten überschreiben</string>
+    <string name="titolo_warning_sostituisci">Warnung: Daten überschreiben</string>
     <string name="msg_warning_sostituisci">Das Ersetzen aller Daten löscht und überschreibt alle aktuell in der App gespeicherten Spiele und Lieblingsspieler dauerhaft. Möchtest du wirklich fortfahren?</string>
     <string name="btn_procedi_sostituisci">Fortfahren &amp; überschreiben</string>
     <string name="titolo_errore_import">Inkompatible Datei</string>

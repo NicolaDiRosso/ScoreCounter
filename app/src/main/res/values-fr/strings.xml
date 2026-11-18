@@ -358,7 +358,7 @@
     <string name="msg_backup_errore">Échec de la sauvegarde : %s</string>
     <string name="desc_backup_icon">Sauvegarde et restauration</string>
     <string name="desc_menu_opzioni">Plus d\'options</string>
-    <string name="titolo_warning_sostituisci">⚠️ Attention : écrasement des données</string>
+    <string name="titolo_warning_sostituisci">Attention : écrasement des données</string>
     <string name="msg_warning_sostituisci">Remplacer toutes les données supprimera et écrasera définitivement toutes les parties et joueurs favoris actuellement enregistrés dans l\'application. Voulez-vous vraiment continuer ?</string>
     <string name="btn_procedi_sostituisci">Poursuivre et écraser</string>
     <string name="titolo_errore_import">Fichier non compatible</string>
