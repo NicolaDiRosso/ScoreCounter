@@ -1086,7 +1086,11 @@
         // prima di eseguire operazioni matematiche di riduzione percentuale (fontSize * 0.92f).
         val initialFontSize = if (style.fontSize.isSpecified) style.fontSize else 16.sp
 
-        var resizedStyle by remember(text, style) {
+        // 🧠 PREVENZIONE FLICKERING SU TESTO IN CONTINUO AGGIORNAMENTO (Es. Cronometri):
+        // Manteniamo la memoria di `resizedStyle` agganciata allo `style` base anziché al valore del `text`.
+        // In questo modo, quando il testo varia ogni secondo (es. da "00:01" a "00:02"), il componente
+        // non azzera la variabile `readyToDraw` mantenendo attivo il disegno continuo senza alcun fotogramma bianco (flickering).
+        var resizedStyle by remember(style) {
             mutableStateOf(
                 style.copy(
                     fontSize = initialFontSize,
@@ -1095,8 +1099,8 @@
             )
         }
 
-        var readyToDraw by remember(text, style) {
-            mutableStateOf(false)
+        var readyToDraw by remember(style) {
+            mutableStateOf(true)
         }
 
         Text(

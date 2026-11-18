@@ -429,9 +429,13 @@
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
+                            // Configurazione delle cifre tabulari (fontFeatureSettings = "tnum")
+                            // Garantisce larghezza fissa uniforme per tutte le cifre (0-9), mantenendo perfetto l'allineamento.
                             Text(
                                 text = formatTime(viewModel.matchDurationSeconds),
-                                style = MaterialTheme.typography.labelLarge,
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontFeatureSettings = "tnum"
+                                ),
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

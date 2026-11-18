@@ -214,9 +214,14 @@ fun CounterScreenLandscape(
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(14.dp).padding(end = 4.dp)
                                     )
+                                    // Configurazione delle cifre tabulari (fontFeatureSettings = "tnum")
+                                    // Questa proprieta OpenType garantisce che tutte le cifre (0-9) abbiano la stessa identica larghezza fissa.
+                                    // In questo modo si evita lo scostamento orizzontale dei numeri e si azzera lo sfarfallio di AutoResizedText.
                                     AutoResizedText(
                                         text = formatTime(viewModel.matchDurationSeconds),
-                                        style = MaterialTheme.typography.labelMedium,
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontFeatureSettings = "tnum"
+                                        ),
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
