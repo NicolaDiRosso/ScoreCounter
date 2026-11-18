@@ -163,6 +163,8 @@
     <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes.\nTo change the number of dice faces, tap the button in the top right of the roll dialog (e.g. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Custom timer</string>
     <string name="msg_info_timer">Use the \'Timer\' button to set a countdown. The app will notify you with a vibration and sound when time is up.</string>
+    <string name="titolo_info_cronologia">📜 History &amp; Undo Move</string>
+    <string name="msg_info_cronologia">By tapping the history icon, you can view the complete log of all moves in the current match, including timestamp, points changed, and player name. You can also undo the last score change to restore the previous score.</string>
     <string name="btn_ho_capito">Got it</string>
     <string name="titolo_conferma_fine">End game?</string>
     <string name="msg_conferma_fine">The match will be ended.\nThis action is irreversible and the results will be automatically saved to history.</string>

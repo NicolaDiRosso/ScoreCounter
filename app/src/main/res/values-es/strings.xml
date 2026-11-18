@@ -163,6 +163,8 @@
     <string name="msg_info_dado">Usa el botón \'Dado\' para generar un número aleatorio y decidir quién empieza o resolver disputas entre amigos.\nPara cambiar las caras del dado, toca el botón arriba a la derecha en il diálogo de tirada (ej. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Temporizador personalizado</string>
     <string name="msg_info_timer">Usa el botón \'Temporizador\' para configurar una cuenta atrás. La aplicación te avisará con una vibración y un sonido cuando termine el tiempo.</string>
+    <string name="titolo_info_cronologia">📜 Historial y Deshacer jugada</string>
+    <string name="msg_info_cronologia">Al tocar el icono de historial, puedes consultar el registro completo de todas las jugadas de la partida actual, con hora, puntos modificados y jugador. También puedes deshacer el último cambio de puntos.</string>
     <string name="btn_ho_capito">Entendido</string>
     <string name="titolo_conferma_fine">¿Concluir partida?</string>
     <string name="msg_conferma_fine">La partida finalizará.\nEsta acción es irreversible y los resultados se guardarán automáticamente en el historial.</string>

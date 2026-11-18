@@ -163,6 +163,8 @@
     <string name="msg_info_dado">Utilisez le bouton \'Dé\' pour générer un nombre aléatoire et décider qui commence ou régler des différends.\nPour modifier les faces du dé, touchez le bouton en haut à droite dans la boîte de dialogue (ex. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Minuteur personnalisé</string>
     <string name="msg_info_timer">Utilisez le bouton \'Minuteur\' pour configurer un compte à rebours. L\'application vous avertira par une vibration et un son à la fin du temps.</string>
+    <string name="titolo_info_cronologia">📜 Historique et Annuler le coup</string>
+    <string name="msg_info_cronologia">En appuyant sur l\'icône d\'historique, vous pouvez consulter la liste de tous les coups de la partie en cours, avec l\'heure, les points modifiés et le joueur. Vous pouvez également annuler le dernier changement de score.</string>
     <string name="btn_ho_capito">J\'ai compris</string>
     <string name="titolo_conferma_fine">Terminer la partie ?</string>
     <string name="msg_conferma_fine">La partie va se terminer.\nCette action est irréversible et les résultats seront automatiquement sauvegardés dans l\'historique.</string>

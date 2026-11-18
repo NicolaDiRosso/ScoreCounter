@@ -163,6 +163,8 @@
     <string name="msg_info_dado">Nutze die \'Würfel\'-Taste, um eine Zufallszahl zu generieren und zu entscheiden, wer beginnt oder Streitigkeiten zu schlichten.\nUm die Anzahl der Würfelseiten zu ändern, tippe auf den Button oben rechts im Wurfdialog (z.B. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Benutzerdefinierter Timer</string>
     <string name="msg_info_timer">Nutze die \'Timer\'-Taste, um einen Countdown einzustellen. Die App benachrichtigt dich mit einer Vibration und einem Ton, wenn die Zeit abgelaufen ist.</string>
+    <string name="titolo_info_cronologia">📜 Chronik &amp; Zug rückgängig</string>
+    <string name="msg_info_cronologia">Tippe auf das Chronik-Symbol, um den gesamten Verlauf aller Züge des aktuellen Spiels mit Uhrzeit, Punkteänderung und Spieler einzusehen. Du kannst auch den letzten Zug rückgängig machen.</string>
     <string name="btn_ho_capito">Verstanden</string>
     <string name="titolo_conferma_fine">Spiel abschließen?</string>
     <string name="msg_conferma_fine">Das Spiel wird beendet.\nDiese Aktion ist unumkehrbar und die Ergebnisse werden automatisch im Verlauf gespeichert.</string>

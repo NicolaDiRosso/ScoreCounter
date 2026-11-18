@@ -163,6 +163,8 @@
     <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici.\nPer modificare le facce del dado, premi il pulsante in alto a destra nel dialogo di lancio (es. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Timer personalizzato</string>
     <string name="msg_info_timer">Usa il tasto \'Timer\' per impostare un conto alla rovescia. L\'app ti avviserà con una vibrazione e un suono al termine del tempo.</string>
+    <string name="titolo_info_cronologia">📜 Cronologia e Annulla Mossa</string>
+    <string name="msg_info_cronologia">Toccando l\'icona della cronologia puoi consultare lo storico di tutte le mosse della partita corrente, con orario, punti variati e marcatore. Puoi anche annullare l\'ultima modifica effettuata per ripristinare il punteggio precedente.</string>
     <string name="btn_ho_capito">Ho capito</string>
     <string name="titolo_conferma_fine">Concludere partita?</string>
     <string name="msg_conferma_fine">La partita verrà conclusa.\nL\'azione è irreversibile e i risultati verranno salvati automaticamente nello storico.</string>

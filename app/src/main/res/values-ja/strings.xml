@@ -163,6 +163,8 @@
     <string name="msg_info_dado">「サイコロ」ボタンを使ってランダムな数字を生成し、順番を決めたり友達との判定に使ったりできます。\nサイコロの面数を変更するには、ロールダイアログの右上にあるボタン（例: \"D6\"）をタップしてください。</string>
     <string name="titolo_info_timer">⏱️ カスタムタイマー</string>
     <string name="msg_info_timer">「タイマー」ボタンでカウントダウンを設定できます。時間が来ると、アプリが振動と音でお知らせします。</string>
+    <string name="titolo_info_cronologia">📜 履歴と操作のやり直し</string>
+    <string name="msg_info_cronologia">履歴アイコンをタップすると、時刻、変動ポイント、プレイヤー名を含む現在の試合の全操作履歴を確認できます。また、最後のスコア変更を取り消して前の状態に戻すこともできます。</string>
     <string name="btn_ho_capito">了解</string>
     <string name="titolo_conferma_fine">試合を終了しますか？</string>
     <string name="msg_conferma_fine">試合が終了します。\nこの操作はやり直すことができず、結果は自動的に履歴に保存されます。</string>
