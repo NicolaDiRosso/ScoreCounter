@@ -1013,10 +1013,10 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * Annulla l'ultima variazione di punteggio registrata nella partita in corso.
      * Ripristina il punteggio precedente del giocatore, lo stato delle serie combo e
      * rimuove l'ultimo tick temporale sincronizzato dalle cronologie di tutti i giocatori.
-     * Restituisce true se l'operazione di annullamento e andata a buon fine, false se non vi erano mosse da annullare.
+     * Restituisce l'azione annullata se l'operazione è andata a buon fine, null se non vi erano mosse.
      */
-    fun undoLastScoreAction(): Boolean {
-        if (scoreActions.isEmpty()) return false
+    fun undoLastScoreAction(): ScoreAction? {
+        if (scoreActions.isEmpty()) return null
         val lastAction = scoreActions.removeAt(scoreActions.lastIndex)
 
         // Ripristino del punteggio precedente e dei metadati del giocatore
@@ -1041,7 +1041,21 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
         // Aggiornamento del salvataggio locale della partita
         saveBackup()
-        return true
+        return lastAction
+    }
+
+    /**
+     * Ripristina un'azione di punteggio precedentemente annullata (Undo dell'annullamento mossa).
+     */
+    fun restoreScoreAction(action: ScoreAction) {
+        action.player.score = action.scoreAfter
+        action.player.lastScoreUpdateTime = System.currentTimeMillis()
+        // Ripristino sincronizzato del punto nel grafico per ciascun partecipante
+        players.forEach { p ->
+            p.scoreHistory.add(p.score)
+        }
+        scoreActions.add(action)
+        saveBackup()
     }
 
     /**

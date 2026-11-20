@@ -436,5 +436,6 @@
     <string name="btn_annulla_mossa">Annulla</string>
     <string name="btn_chiudi_cronologia">Chiudi</string>
     <string name="msg_nessuna_mossa_cronologia">Nessuna mossa registrata finora</string>
+    <string name="msg_mossa_annullata">Mossa annullata</string>
     <string name="lbl_punteggio_totale">Totale: %1$d</string>
 </resources>

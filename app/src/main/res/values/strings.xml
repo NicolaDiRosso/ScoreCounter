@@ -436,5 +436,6 @@
     <string name="btn_annulla_mossa">Undo</string>
     <string name="btn_chiudi_cronologia">Close</string>
     <string name="msg_nessuna_mossa_cronologia">No moves recorded yet</string>
+    <string name="msg_mossa_annullata">Move undone</string>
     <string name="lbl_punteggio_totale">Total: %1$d</string>
 </resources>

@@ -105,210 +105,223 @@ fun HomeScreenLandscape(
     showNewMatchButton: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // 🧠 TEORIA: La Row dispone gli elementi da sinistra a destra (Asse X).
-    Row(
-        modifier = modifier
-            .fillMaxSize() // Occupa l'intero display del dispositivo
-            // 🧠 TEORIA STATUS BARS PADDING:
-            // .statusBarsPadding() garantisce che la UI non finisca sotto l'orologio e la batteria in alto.
-            .statusBarsPadding()
-            // 🧠 TEORIA NAVIGATION BARS PADDING:
-            // .navigationBarsPadding() garantisce che la UI non finisca sotto la barra bianca dei gesti Android in basso.
-            .navigationBarsPadding()
-            // 📸 TEORIA PROTEZIONE FOTOCAMERA / PUNCH-HOLE:
-            // .displayCutoutPadding() interroga il WindowManager di Android per ottenere il rettangolo esatto del foro
-            // o tacca della fotocamera (a sinistra, a destra o al centro). Aggiunge il margine necessario solo sul lato
-            // dove si trova la lente, spostando i pulsanti al sicuro ed evitando qualsiasi sovrapposizione!
-            .displayCutoutPadding()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp) // Distanza tra pannello sinistro e destro
-    ) {
-        // ====================================================================
-        // 🏛️ PANNELLO DI SINISTRA: TITOLO, TAVOLA CONTENITIVA E NUOVA SFIDA
-        // ====================================================================
-        Column(
+    // 🧠 BOX IN OVERLAY: Permette di posizionare la SnackbarHost in basso al centro in modalità landscape
+    Box(modifier = modifier.fillMaxSize()) {
+        // 🧠 TEORIA: La Row dispone gli elementi da sinistra a destra (Asse X).
+        Row(
             modifier = Modifier
-                .weight(0.38f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize() // Occupa l'intero display del dispositivo
+                // 🧠 TEORIA STATUS BARS PADDING:
+                // .statusBarsPadding() garantisce che la UI non finisca sotto l'orologio e la batteria in alto.
+                .statusBarsPadding()
+                // 🧠 TEORIA NAVIGATION BARS PADDING:
+                // .navigationBarsPadding() garantisce che la UI non finisca sotto la barra bianca dei gesti Android in basso.
+                .navigationBarsPadding()
+                // 📸 TEORIA PROTEZIONE FOTOCAMERA / PUNCH-HOLE:
+                // .displayCutoutPadding() interroga il WindowManager di Android per ottenere il rettangolo esatto del foro
+                // o tacca della fotocamera (a sinistra, a destra o al centro). Aggiunge il margine necessario solo sul lato
+                // dove si trova la lente, spostando i pulsanti al sicuro ed evitando qualsiasi sovrapposizione!
+                .displayCutoutPadding()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp) // Distanza tra pannello sinistro e destro
         ) {
-            // TITOLO DELLA PAGINA "Storico Sfide"
-            // 🧠 DESIGN ORIZZONTALE LANDSCAPE:
-            // Nel pannello di sinistra della vista landscape, tutte le schede azione
-            // (Statistiche Globali, Sostieni ScoreCounter, Info e Backup & Ripristino)
-            // sono già chiaramente visibili ed estese all'interno della tavola contenitiva qui sotto.
-            // Di conseguenza, l'intestazione rimane pulita con il solo titolo principale.
-            AutoResizedText(
-                text = stringResource(R.string.titolo_storico_sfide),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+            // ====================================================================
+            // 🏛️ PANNELLO DI SINISTRA: TITOLO, TAVOLA CONTENITIVA E NUOVA SFIDA
+            // ====================================================================
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 6.dp, start = 2.dp)
-            )
-
-            // ------------------------------------------------------------
-            // TAVOLA CONTENITIVA (SURFACE VARIANT 24dp): RAGGRUPPA LE 3 SCHEDE AZIONE
-            // ------------------------------------------------------------
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(bottom = 10.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(24.dp)
+                    .weight(0.38f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
+                // TITOLO DELLA PAGINA "Storico Sfide"
+                // 🧠 DESIGN ORIZZONTALE LANDSCAPE:
+                // Nel pannello di sinistra della vista landscape, tutte le schede azione
+                // (Statistiche Globali, Sostieni ScoreCounter, Info e Backup & Ripristino)
+                // sono già chiaramente visibili ed estese all'interno della tavola contenitiva qui sotto.
+                // Di conseguenza, l'intestazione rimane pulita con il solo titolo principale.
+                AutoResizedText(
+                    text = stringResource(R.string.titolo_storico_sfide),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .fillMaxWidth()
+                        .padding(bottom = 6.dp, start = 2.dp)
+                )
+
+                // ------------------------------------------------------------
+                // TAVOLA CONTENITIVA (SURFACE VARIANT 24dp): RAGGRUPPA LE 3 SCHEDE AZIONE
+                // ------------------------------------------------------------
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(bottom = 10.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 1: STATISTICHE GLOBALI
-                    // ------------------------------------------------------------
-                    if (viewModel.history.isNotEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // ------------------------------------------------------------
+                        // CARD AZIONE 1: STATISTICHE GLOBALI
+                        // ------------------------------------------------------------
+                        if (viewModel.history.isNotEmpty()) {
+                            HomeLandscapeActionCard(
+                                icon = Icons.Filled.BarChart,
+                                title = stringResource(R.string.title_statistiche_landscape),
+                                subtitle = stringResource(R.string.subtitle_statistiche_landscape),
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                iconBackgroundColor = MaterialTheme.colorScheme.primary,
+                                iconTintColor = MaterialTheme.colorScheme.onPrimary,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onNavigateToStats()
+                                }
+                            )
+                        }
+
+                        // ------------------------------------------------------------
+                        // CARD AZIONE 2: IMPOSTAZIONI E PREFERENZE
+                        // ------------------------------------------------------------
                         HomeLandscapeActionCard(
-                            icon = Icons.Filled.BarChart,
-                            title = stringResource(R.string.title_statistiche_landscape),
-                            subtitle = stringResource(R.string.subtitle_statistiche_landscape),
+                            icon = Icons.Filled.Settings,
+                            title = stringResource(R.string.titolo_impostazioni),
+                            subtitle = stringResource(R.string.titolo_impostazioni_esteso),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            iconBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                            iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                onNavigateToSettings()
+                            }
+                        )
+
+                        // ------------------------------------------------------------
+                        // CARD AZIONE 3: BACKUP E RIPRISTINO DATI
+                        // ------------------------------------------------------------
+                        HomeLandscapeActionCard(
+                            icon = Icons.Filled.Storage,
+                            title = stringResource(R.string.titolo_backup_dialog),
+                            subtitle = stringResource(R.string.desc_backup_dialog),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            iconBackgroundColor = MaterialTheme.colorScheme.secondary,
+                            iconTintColor = MaterialTheme.colorScheme.onSecondary,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                onShowBackupDialog()
+                            }
+                        )
+
+                        // ------------------------------------------------------------
+                        // CARD AZIONE 4: SOSTIENI SCORECOUNTER (DONAZIONE)
+                        // ------------------------------------------------------------
+                        HomeLandscapeActionCard(
+                            icon = Icons.Filled.Favorite,
+                            title = stringResource(R.string.title_sostieni_landscape),
+                            subtitle = stringResource(R.string.subtitle_sostieni_landscape),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
+                            iconTintColor = MaterialTheme.colorScheme.onTertiary,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                onShowDonationDialog()
+                            }
+                        )
+
+                        // ------------------------------------------------------------
+                        // CARD AZIONE 5: INFO APP & FEEDBACK
+                        // ------------------------------------------------------------
+                        HomeLandscapeActionCard(
+                            icon = Icons.AutoMirrored.Filled.Help,
+                            title = stringResource(R.string.title_info_landscape),
+                            subtitle = stringResource(R.string.subtitle_info_landscape),
                             containerColor = MaterialTheme.colorScheme.surface,
                             iconBackgroundColor = MaterialTheme.colorScheme.primary,
                             iconTintColor = MaterialTheme.colorScheme.onPrimary,
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onNavigateToStats()
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                onShowAboutDialog()
                             }
                         )
                     }
-
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 2: IMPOSTAZIONI E PREFERENZE
-                    // ------------------------------------------------------------
-                    HomeLandscapeActionCard(
-                        icon = Icons.Filled.Settings,
-                        title = stringResource(R.string.titolo_impostazioni),
-                        subtitle = stringResource(R.string.titolo_impostazioni_esteso),
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        iconBackgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                        iconTintColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onNavigateToSettings()
-                        }
-                    )
-
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 3: BACKUP E RIPRISTINO DATI
-                    // ------------------------------------------------------------
-                    HomeLandscapeActionCard(
-                        icon = Icons.Filled.Storage,
-                        title = stringResource(R.string.titolo_backup_dialog),
-                        subtitle = stringResource(R.string.desc_backup_dialog),
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        iconBackgroundColor = MaterialTheme.colorScheme.secondary,
-                        iconTintColor = MaterialTheme.colorScheme.onSecondary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onShowBackupDialog()
-                        }
-                    )
-
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 4: SOSTIENI SCORECOUNTER (DONAZIONE)
-                    // ------------------------------------------------------------
-                    HomeLandscapeActionCard(
-                        icon = Icons.Filled.Favorite,
-                        title = stringResource(R.string.title_sostieni_landscape),
-                        subtitle = stringResource(R.string.subtitle_sostieni_landscape),
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        iconBackgroundColor = MaterialTheme.colorScheme.tertiary,
-                        iconTintColor = MaterialTheme.colorScheme.onTertiary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onShowDonationDialog()
-                        }
-                    )
-
-                    // ------------------------------------------------------------
-                    // CARD AZIONE 5: INFO APP & FEEDBACK
-                    // ------------------------------------------------------------
-                    HomeLandscapeActionCard(
-                        icon = Icons.AutoMirrored.Filled.Help,
-                        title = stringResource(R.string.title_info_landscape),
-                        subtitle = stringResource(R.string.subtitle_info_landscape),
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        iconBackgroundColor = MaterialTheme.colorScheme.primary,
-                        iconTintColor = MaterialTheme.colorScheme.onPrimary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                            onShowAboutDialog()
-                        }
-                    )
                 }
-            }
 
-            // ------------------------------------------------------------
-            // PULSANTE + NUOVA SFIDA (Ancorato in Basso nel Pannello Sinistro)
-            // ------------------------------------------------------------
-            SlideUpAnimatedVisibility(
-                visible = showNewMatchButton
-            ) {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.clearMatch()
-                        onNavigateToCreate()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                // ------------------------------------------------------------
+                // PULSANTE + NUOVA SFIDA (Ancorato in Basso nel Pannello Sinistro)
+                // ------------------------------------------------------------
+                SlideUpAnimatedVisibility(
+                    visible = showNewMatchButton
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null,
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.clearMatch()
+                            onNavigateToCreate()
+                        },
                         modifier = Modifier
-                            .padding(end = 6.dp)
-                            .size(22.dp)
-                    )
-                    AutoResizedText(
-                        text = stringResource(R.string.btn_nuova_sfida),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(end = 6.dp)
+                                .size(22.dp)
+                        )
+                        AutoResizedText(
+                            text = stringResource(R.string.btn_nuova_sfida),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
+            }
+
+            // ====================================================================
+            // 📋 PANNELLO DI DESTRA: TAVOLO STORICO CON GRIGLIA MATCH A 2 COLONNE
+            // ====================================================================
+            // 🧠 TEORIA WEIGHT: Modifier.weight(0.62f) assegna il rimanente 62% di larghezza a questo contenitore.
+            Card(
+                modifier = Modifier
+                    .weight(0.62f)
+                    .fillMaxHeight(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                HomeHistoryGridTableContent(
+                    viewModel = viewModel,
+                    timeFormatter = timeFormatter,
+                    haptic = haptic,
+                    context = context,
+                    coroutineScope = coroutineScope,
+                    snackbarHostState = snackbarHostState,
+                    onExpandMatch = onExpandedMatchIndexChange
+                )
             }
         }
 
-        // ====================================================================
-        // 📋 PANNELLO DI DESTRA: TAVOLO STORICO CON GRIGLIA MATCH A 2 COLONNE
-        // ====================================================================
-        // 🧠 TEORIA WEIGHT: Modifier.weight(0.62f) assegna il rimanente 62% di larghezza a questo contenitore.
-        Card(
+        // ==========================================================
+        // HOST DELLE NOTIFICHE (SnackbarHost per la modalità Landscape)
+        // ==========================================================
+        SnackbarHost(
+            hostState = snackbarHostState,
             modifier = Modifier
-                .weight(0.62f)
-                .fillMaxHeight(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            HomeHistoryGridTableContent(
-                viewModel = viewModel,
-                timeFormatter = timeFormatter,
-                haptic = haptic,
-                context = context,
-                coroutineScope = coroutineScope,
-                snackbarHostState = snackbarHostState,
-                onExpandMatch = onExpandedMatchIndexChange
-            )
-        }
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
+        )
     }
 }
 

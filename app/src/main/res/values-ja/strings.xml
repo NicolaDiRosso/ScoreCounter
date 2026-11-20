@@ -436,5 +436,6 @@
     <string name="btn_annulla_mossa">元に戻す</string>
     <string name="btn_chiudi_cronologia">閉じる</string>
     <string name="msg_nessuna_mossa_cronologia">まだ動きは記録されていません</string>
+    <string name="msg_mossa_annullata">操作が元に戻されました</string>
     <string name="lbl_punteggio_totale">合計: %1$d</string>
 </resources>
