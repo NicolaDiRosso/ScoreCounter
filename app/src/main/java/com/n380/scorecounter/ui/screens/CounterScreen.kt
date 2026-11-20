@@ -388,7 +388,9 @@
                 // Sostituito "Text" normale con il nostro nuovo "AutoResizedText".
                 // Ora, se inserisci un titolo chilometrico, si restringerà automaticamente
                 // pur di rimanere su una singola riga pulita!
-                // 1. RIGA IN ALTO: TITOLO A SINISTRA E CRONOMETRO DELLA DURATA A DESTRA
+                // ====================================================================
+                // 1. RIGA IN ALTO: TITOLO A SINISTRA E AZIONI SECONDARIE A DESTRA
+                // ====================================================================
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -400,7 +402,7 @@
                         // ====================================================================
                         // 🧠 LEZIONE TEORICA I18N: Condizioni Logiche e Traduzioni
                         // ====================================================================
-                        // Il Kotlin valuta le espressioni condizionali in linea (Inline If).
+                        // Il Kotlin valuta lespressioni condizionali in linea (Inline If).
                         // Se il ViewModel non ha un titolo (l'utente ha skippato la compilazione),
                         // passiamo la traduzione ufficiale (es. "Sfida" in IT, "Challenge" in EN).
                         // Altrimenti, stampiamo esattamente ciò che l'utente ha digitato in CreateMatchScreen!
@@ -413,31 +415,46 @@
                             .padding(end = 12.dp)
                     )
 
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    // Pulsanti d'azione secondari circolari ad ampiezza discreta: Cronologia e Info
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        // Pulsante circolare Cronologia
+                        FilledIconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showScoreHistoryDialog = true
+                            },
+                            modifier = Modifier.size(36.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Schedule,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
+                                imageVector = Icons.Filled.History,
+                                contentDescription = stringResource(R.string.desc_cronologia_icon),
+                                modifier = Modifier.size(18.dp)
                             )
-                            // Configurazione delle cifre tabulari (fontFeatureSettings = "tnum")
-                            // Garantisce larghezza fissa uniforme per tutte le cifre (0-9), mantenendo perfetto l'allineamento.
-                            Text(
-                                text = formatTime(viewModel.matchDurationSeconds),
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontFeatureSettings = "tnum"
-                                ),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+
+                        // Pulsante circolare Info
+                        FilledIconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showInfoDialog = true
+                            },
+                            modifier = Modifier.size(36.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                Icons.Filled.Info,
+                                contentDescription = stringResource(R.string.desc_info_icon),
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -467,61 +484,37 @@
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        // --- BLOCCO SINISTRO: Informazioni ---
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            // 🧠 UX FIX: Usiamo weight(1.1f) per dare priorità a quest'area
-                            // ma permettendo al blocco dei bottoni a destra di non venire schiacciato.
+                        // --- BLOCCO SINISTRO: Indicatore Passivo del Tempo trascorso e Obiettivo ---
+                        Column(
+                            verticalArrangement = Arrangement.Center,
                             modifier = Modifier.weight(1.1f)
                         ) {
-                            // ICONA INFO: Pulsante compatto per le regole
-                            FilledIconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showInfoDialog = true
-                                },
-                                modifier = Modifier.size(38.dp), // Ingrandito per facilità di tocco (Standard Accessibilità)
-                                colors = IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    Icons.Filled.Info,
-                                    contentDescription = stringResource(R.string.desc_info_icon), // 🌍 I18N: Traduzione descrizione lettore vocale
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(20.dp)
+                                    imageVector = Icons.Filled.Schedule,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp).padding(end = 4.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                // Configurazione delle cifre tabulari (fontFeatureSettings = "tnum")
+                                // Garantisce larghezza fissa uniforme per tutte le cifre (0-9), mantenendo perfetto l'allineamento.
+                                Text(
+                                    text = formatTime(viewModel.matchDurationSeconds),
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontFeatureSettings = "tnum"
+                                    ),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
-
-                            // Pulsante compatto gemello circolare per l'apertura della cronologia punteggi e annulla mossa
-                            FilledIconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showScoreHistoryDialog = true
-                                },
-                                modifier = Modifier.size(38.dp),
-                                colors = IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
-                                    contentDescription = stringResource(R.string.desc_cronologia_icon),
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                                
+                            
                             // RIGA OBIETTIVO: Traguardo (se impostato)
                             if (viewModel.targetScore.isNotBlank()) {
                                 AutoResizedText(
                                     text = stringResource(R.string.desc_obbiettivo, viewModel.targetScore),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                    modifier = Modifier.padding(start = 4.dp)
+                                    modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                                 )
                             }
                         }
