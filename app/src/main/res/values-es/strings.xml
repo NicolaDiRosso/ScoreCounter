@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">Ningún movimiento registrado todavía</string>
     <string name="msg_mossa_annullata">Movimiento deshecho</string>
     <string name="lbl_punteggio_totale">Total: %1$d</string>
+    <string name="btn_sorteggio">Sorteo</string>
+    <string name="badge_inizia">¡Empieza!</string>
+    <string name="titolo_info_sorteggio">🔀 Sorteo primer jugador</string>
+    <string name="msg_info_sorteggio">Al pulsar el botón de sorteo puedes elegir al azar quién empieza la partida. Una animación de ruleta se desplaza por las tarjetas de los jugadores y se detiene en el ganador mostrando la etiqueta \"¡Empieza!\".</string>
 </resources>

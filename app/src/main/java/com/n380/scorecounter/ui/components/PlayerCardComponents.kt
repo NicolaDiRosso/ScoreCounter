@@ -40,7 +40,9 @@
     import androidx.compose.ui.geometry.Offset
     import androidx.compose.ui.graphics.Brush
     import androidx.compose.ui.graphics.graphicsLayer
+    import androidx.compose.ui.res.stringResource
     import androidx.compose.ui.zIndex
+    import com.n380.scorecounter.R
     import com.n380.scorecounter.model.Player
 
     /**
@@ -302,17 +304,30 @@
     fun PlayerScoreCard(
         player: Player,
         isLeader: Boolean = false,
+        isRaffleHighlighted: Boolean = false,
+        showStartBadge: Boolean = false,
+        isScoreButtonsEnabled: Boolean = true,
         positiveStep: Int = 10,
         negativeStep: Int = 5,
         totalPlayers: Int = 0,
         isExpandedMode: Boolean = totalPlayers in 1..4,
         modifier: Modifier = Modifier,
         onScoreChange: (Int) -> Unit,
-        onScoreClick: () -> Unit
+        onScoreClick: () -> Unit,
+        onCardClick: (() -> Unit)? = null
     ) {
         // Estraiamo i motori di vibrazione e il colore originale del giocatore
         val haptic = LocalHapticFeedback.current
         val playerColor = Color(player.color)
+
+        // 🧠 ANIMAZIONE SCALA SORTEGGIO ("ROULETTE"):
+        // Quando la card viene illuminata durante la roulette del sorteggio casuale,
+        // pulsa visivamente aumentando la propria scala al 103% (1.03f) tramite animateFloatAsState.
+        val raffleScale by animateFloatAsState(
+            targetValue = if (isRaffleHighlighted) 1.03f else 1.0f,
+            animationSpec = tween(durationMillis = 120),
+            label = "raffleScaleAnimation"
+        )
 
         // 🧠 MISURAZIONE DINAMICA E RESPONSIVE DEI DPI DEL DISPOSITIVO
         // Utilizziamo `BoxWithConstraints` per misurare la larghezza e l'altezza assegnate alla card
@@ -428,34 +443,35 @@
             val actualAccentWidth = if (isExpandedMode) expandedMetrics.accentWidth else accentWidth
 
             Card(
-                // 🧠 GESTIONE DIMENSIONE FISICA:
-                // Se la card riceve un vincolo di altezza (es. weight(1f)), occupa tutto lo spazio (fillMaxSize)
-                // garantendo che tutte le card abbiano esattamente la stessa altezza senza vuoti asimmetrici,
-                // sia in modalità espansa che in modalità compatta!
-                // In una lista a scorrimento (unbounded height), usa invece le dimensioni intrinseche.
-                modifier = if (hasBoundedHeight) {
+                // 🧠 GESTIONE DIMENSIONE FISICA & APPLICAZIONE SCALA SORTEGGIO:
+                // Appliciamo graphicsLayer { scaleX = raffleScale; scaleY = raffleScale } per la pulsazione della card estratta.
+                // Integriamo inoltre .clickable per consentire al tocco dell'utente di disattivare l'evidenziazione.
+                modifier = (if (hasBoundedHeight) {
                     Modifier.fillMaxSize()
                 } else {
                     Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                },
+                })
+                    .graphicsLayer {
+                        scaleX = raffleScale
+                        scaleY = raffleScale
+                    }
+                    .clickable(enabled = onCardClick != null) { onCardClick?.invoke() },
 
                 // Lo sfondo della card prende il colore del giocatore sbiadito al 30% (Effetto Vetro/Pastello)
                 colors = CardDefaults.cardColors(containerColor = playerColor.copy(alpha = 0.30f)),
 
                 // ----------------------------------------
-                // Assegnazione Dinamica con "Inline If"
+                // Assegnazione Dinamica Bordo con "when"
                 // ----------------------------------------
-                // Diciamo al parametro 'border' di prendere il risultato di questa scelta logica:
-                border = if (isLeader) {
-                    // CASO VERO: Se il giocatore è in testa, crea un bordo spesso (4.dp)
-                    // e usa 'playerColor' puro al 100% di saturazione. Contrasto perfetto!
-                    BorderStroke(4.dp, playerColor)
-                } else {
-                    // CASO FALSO: Se non è in testa, mantieni il design originale dell'app:
-                    // un bordo sottile (1.dp) e semi-trasparente (50%) per dare sobrietà.
-                    BorderStroke(1.dp, playerColor.copy(alpha = 0.5f))
+                // 1. Se la card è illuminata dal sorteggio, evidenzia con un bordo spesso (4.dp) del colore primario del tema.
+                // 2. Se è in testa (isLeader), evidenzia col bordo spesso (4.dp) del colore puro del giocatore (regole classifica intatte!).
+                // 3. Altrimenti mantiene il bordo sottile predefinito (1.dp) semi-trasparente.
+                border = when {
+                    isRaffleHighlighted -> BorderStroke(4.dp, MaterialTheme.colorScheme.primary)
+                    isLeader -> BorderStroke(4.dp, playerColor)
+                    else -> BorderStroke(1.dp, playerColor.copy(alpha = 0.5f))
                 },
 
                 // Arrotondiamo gli angoli della card a 20 pixel di densità
@@ -487,6 +503,8 @@
                         ExpandedScoreCardContent(
                             player = player,
                             isCompact = isCompact,
+                            showStartBadge = showStartBadge,
+                            isScoreButtonsEnabled = isScoreButtonsEnabled,
                             horizontalPadding = horizontalPadding,
                             buttonWidth = expandedMetrics.buttonWidth,
                             buttonHeight = expandedMetrics.buttonHeight,
@@ -504,6 +522,8 @@
                         CompactScoreCardContent(
                             player = player,
                             isCompact = isCompact,
+                            showStartBadge = showStartBadge,
+                            isScoreButtonsEnabled = isScoreButtonsEnabled,
                             hasBoundedHeight = hasBoundedHeight,
                             availableHeight = availableHeight,
                             fontScale = fontScale,
@@ -542,6 +562,8 @@
     private fun ExpandedScoreCardContent(
         player: Player,
         isCompact: Boolean,
+        showStartBadge: Boolean = false,
+        isScoreButtonsEnabled: Boolean = true,
         horizontalPadding: Dp,
         buttonWidth: Dp,
         buttonHeight: Dp,
@@ -579,8 +601,14 @@
                     style = nameStyle,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.weight(1f, fill = false)
                 )
+
+                // 🧠 BADGE "INIZIA!": Visualizzato affiancato al nome del primo giocatore estratto dal sorteggio
+                if (showStartBadge) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    StartPlayerBadge()
+                }
             }
 
             // ---> 2. FASCIA PRINCIPALE: CONTROLLI GAMEPAD E PUNTEGGIO ADATTIVI <---
@@ -603,18 +631,20 @@
                     // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
                     // Usiamo 'MaterialTheme.colorScheme.error' e 'onError' (colore solido e saturo) al posto di 'errorContainer'
                     // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
+                    // 🧠 BLOCCO DURANTE SORTEGGIO: enabled = isScoreButtonsEnabled disabilita la pressione (singola e prolungata) durante l'estrazione!
                     Box(
                         modifier = Modifier
                             .width(buttonWidth)
                             .height(buttonHeight)
                             .clip(buttonShape)
-                            .background(MaterialTheme.colorScheme.error)
+                            .background(if (isScoreButtonsEnabled) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
                             .border(
                                 width = 1.dp,
                                 color = MaterialTheme.colorScheme.onError.copy(alpha = 0.3f),
                                 shape = buttonShape
                             )
                             .combinedClickable(
+                                enabled = isScoreButtonsEnabled,
                                 onClick = {
                                     onScoreChange(-1)
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -695,18 +725,20 @@
                     // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
                     // Usiamo 'MaterialTheme.colorScheme.primary' e 'onPrimary' (colore solido e saturo) al posto di 'primaryContainer'
                     // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
+                    // 🧠 BLOCCO DURANTE SORTEGGIO: enabled = isScoreButtonsEnabled disabilita la pressione (singola e prolungata) durante l'estrazione!
                     Box(
                         modifier = Modifier
                             .width(buttonWidth)
                             .height(buttonHeight)
                             .clip(buttonShape)
-                            .background(MaterialTheme.colorScheme.primary)
+                            .background(if (isScoreButtonsEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                             .border(
                                 width = 1.dp,
                                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f),
                                 shape = buttonShape
                             )
                             .combinedClickable(
+                                enabled = isScoreButtonsEnabled,
                                 onClick = {
                                     onScoreChange(1)
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -744,6 +776,8 @@
     private fun CompactScoreCardContent(
         player: Player,
         isCompact: Boolean,
+        showStartBadge: Boolean = false,
+        isScoreButtonsEnabled: Boolean = true,
         hasBoundedHeight: Boolean = false,
         availableHeight: Dp = Dp.Infinity,
         fontScale: Float,
@@ -771,7 +805,7 @@
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. BLOCCO NOME E CORONA
+            // 1. BLOCCO NOME E BADGE INIZIA
             // padding 8.dp per garantire un distanziamento minimo prima dei controlli del punteggio
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -790,6 +824,12 @@
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f, fill = false)
                 )
+
+                // 🧠 BADGE "INIZIA!": Visualizzato affiancato al nome del primo giocatore estratto dal sorteggio
+                if (showStartBadge) {
+                    Spacer(modifier = Modifier.width(6.dp))
+                    StartPlayerBadge()
+                }
             }
 
             // 2. BLOCCO CONTROLLI ANCORATO E OMOGENEO (Limite Fisso Insuperabile)
@@ -799,17 +839,19 @@
                 // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
                 // Usiamo 'MaterialTheme.colorScheme.error' e 'onError' (colore solido e saturo) al posto di 'errorContainer'
                 // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
+                // 🧠 BLOCCO DURANTE SORTEGGIO: enabled = isScoreButtonsEnabled impedisce qualsiasi modifica ai punteggi durante la roulette!
                 Box(
                     modifier = Modifier
                         .size(buttonSize)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.error)
+                        .background(if (isScoreButtonsEnabled) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error.copy(alpha = 0.4f))
                         .border(
                             1.dp,
                             MaterialTheme.colorScheme.onError.copy(alpha = 0.3f),
                             RoundedCornerShape(12.dp)
                         )
                         .combinedClickable(
+                            enabled = isScoreButtonsEnabled,
                             onClick = {
                                 onScoreChange(-1)
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -825,7 +867,6 @@
                         imageVector = Icons.Filled.Remove,
                         contentDescription = "Diminuisci",
                         tint = MaterialTheme.colorScheme.onError,
-                        // size 20.dp per impostare la dimensione fissa dell'icona
                         modifier = Modifier.size(iconSize)
                     )
                 }
@@ -834,9 +875,7 @@
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        // width bloccata con scoreBoxWidth calibrata dinamicamente in base all'altezza della card
                         .width(scoreBoxWidth)
-                        // padding 2.dp per aggiungere un margine minimo di sicurezza tra punteggio e pulsanti
                         .padding(horizontal = 2.dp)
                         .clickable { onScoreClick() }
                 ) {
@@ -895,17 +934,19 @@
                 // 🧠 CORREZIONE VIVIDIZZA COLORE (TABLET & SMARTPHONE):
                 // Usiamo 'MaterialTheme.colorScheme.primary' e 'onPrimary' (colore solido e saturo) al posto di 'primaryContainer'
                 // per evitare che il pulsante appaia sbiadito/grigio quando sovrapposto allo sfondo della card.
+                // 🧠 BLOCCO DURANTE SORTEGGIO: enabled = isScoreButtonsEnabled impedisce qualsiasi modifica ai punteggi durante la roulette!
                 Box(
                     modifier = Modifier
                         .size(buttonSize)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(if (isScoreButtonsEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
                         .border(
                             1.dp,
                             MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f),
                             RoundedCornerShape(12.dp)
                         )
                         .combinedClickable(
+                            enabled = isScoreButtonsEnabled,
                             onClick = {
                                 onScoreChange(1)
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -921,7 +962,6 @@
                         imageVector = Icons.Filled.Add,
                         contentDescription = "Aumenta",
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        // size 20.dp per impostare la dimensione fissa dell'icona
                         modifier = Modifier.size(iconSize)
                     )
                 }
@@ -1201,4 +1241,40 @@
             }
         }
     }
+
+/**
+ * ====================================================================
+ * SUB-COMPONENTE DIDATTICO: StartPlayerBadge
+ * ====================================================================
+ * Piccolo badge Material 3 / Material You ad alto contrasto visivo che reca
+ * l'icona Play e la scritta "Inizia!" per indicare il primo giocatore estratto dal sorteggio casuale.
+ * ====================================================================
+ */
+@Composable
+private fun StartPlayerBadge() {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.35f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.PlayArrow,
+                contentDescription = null,
+                modifier = Modifier.size(12.dp)
+            )
+            Text(
+                text = stringResource(R.string.badge_inizia),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1
+            )
+        }
+    }
+}
 

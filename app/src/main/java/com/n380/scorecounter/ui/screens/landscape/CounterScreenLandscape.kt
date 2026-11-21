@@ -71,6 +71,11 @@ fun CounterScreenLandscape(
     onPlayerForManualEditChange: (Player?) -> Unit,
     haptic: HapticFeedback,
     snackbarHostState: SnackbarHostState,
+    highlightedPlayerIndex: Int? = null,
+    selectedFirstPlayerIndex: Int? = null,
+    isRaffleAnimating: Boolean = false,
+    onStartRaffle: () -> Unit = {},
+    onClearRaffle: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // Calcolo del punteggio rilevante per il leader in base al criterio di vittoria attivo
@@ -238,6 +243,7 @@ fun CounterScreenLandscape(
                             modifier = Modifier.fillMaxWidth().height(44.dp),
                             shape = RoundedCornerShape(12.dp),
                             border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                            contentPadding = PaddingValues(horizontal = 4.dp), // 🧠 Padding interno ridotto per prevenire tagli di testo in tutte le lingue
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -251,28 +257,65 @@ fun CounterScreenLandscape(
                             )
                         }
 
-                        // TASTO DADO
-                        FilledTonalButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onDiceResultChange((1..viewModel.diceSides).random())
-                                onDiceRollCountChange(diceRollCount + 1)
-                                onShowDiceDialogChange(true)
-                            },
-                            modifier = Modifier.fillMaxWidth().height(44.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
+                        // 🧠 STRUMENTI AFFIANCATI (DADO & SORTEGGIO SU UN'UNICA RIGA)
+                        // Disponiamo Dado e Sorteggio affiancati su un'unica riga subito sotto il Timer
+                        // per mantenere intatta la struttura e non comprimere i pulsanti Azzera e Concludi in basso.
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(Icons.Filled.Casino, null, modifier = Modifier.size(16.dp).padding(end = 4.dp))
-                            AutoResizedText(
-                                text = stringResource(R.string.btn_dado),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold
-                            )
+                            // TASTO DADO
+                            FilledTonalButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onDiceResultChange((1..viewModel.diceSides).random())
+                                    onDiceRollCountChange(diceRollCount + 1)
+                                    onShowDiceDialogChange(true)
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                                contentPadding = PaddingValues(horizontal = 4.dp), // 🧠 Padding interno ridotto per adattare AutoResizedText
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(Icons.Filled.Casino, null, modifier = Modifier.size(16.dp).padding(end = 4.dp))
+                                AutoResizedText(
+                                    text = stringResource(R.string.btn_dado),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            // TASTO SORTEGGIO: Per la scelta casuale del primo giocatore che inizia la partita
+                            FilledTonalButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onStartRaffle()
+                                },
+                                enabled = viewModel.players.size >= 2 && !isRaffleAnimating,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                                contentPadding = PaddingValues(horizontal = 4.dp), // 🧠 Padding interno ridotto per adattare AutoResizedText
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(Icons.Filled.Shuffle, null, modifier = Modifier.size(16.dp).padding(end = 4.dp))
+                                AutoResizedText(
+                                    text = stringResource(R.string.btn_sorteggio),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -452,9 +495,16 @@ fun CounterScreenLandscape(
                                 rowPlayers.forEach { player ->
                                     key(player.name) {
                                         val isLeader = if (viewModel.isLowestScoreWins) player.score == winningScore else (winningScore > 0 && player.score == winningScore)
+                                        val playerIndex = viewModel.players.indexOf(player)
+                                        val isRaffleHighlighted = (highlightedPlayerIndex != null && highlightedPlayerIndex == playerIndex)
+                                        val showStartBadge = (!isRaffleAnimating && selectedFirstPlayerIndex != null && selectedFirstPlayerIndex == playerIndex)
+
                                         PlayerScoreCard(
                                             player = player,
                                             isLeader = isLeader,
+                                            isRaffleHighlighted = isRaffleHighlighted,
+                                            showStartBadge = showStartBadge,
+                                            isScoreButtonsEnabled = !isRaffleAnimating,
                                             positiveStep = viewModel.longPressPositiveStep,
                                             negativeStep = viewModel.longPressNegativeStep,
                                             totalPlayers = playerCount,
@@ -463,11 +513,13 @@ fun CounterScreenLandscape(
                                                 .weight(1f)
                                                 .fillMaxHeight(),
                                             onScoreChange = { amount ->
+                                                onClearRaffle()
                                                 viewModel.updatePlayerScore(player, amount)
                                             },
                                             onScoreClick = {
                                                 onPlayerForManualEditChange(player)
-                                            }
+                                            },
+                                            onCardClick = { onClearRaffle() }
                                         )
                                     }
                                 }
@@ -495,20 +547,29 @@ fun CounterScreenLandscape(
                             key = { player -> player.name }
                         ) { player ->
                             val isLeader = if (viewModel.isLowestScoreWins) player.score == winningScore else (winningScore > 0 && player.score == winningScore)
+                            val playerIndex = viewModel.players.indexOf(player)
+                            val isRaffleHighlighted = (highlightedPlayerIndex != null && highlightedPlayerIndex == playerIndex)
+                            val showStartBadge = (!isRaffleAnimating && selectedFirstPlayerIndex != null && selectedFirstPlayerIndex == playerIndex)
+
                             PlayerScoreCard(
                                 player = player,
                                 isLeader = isLeader,
+                                isRaffleHighlighted = isRaffleHighlighted,
+                                showStartBadge = showStartBadge,
+                                isScoreButtonsEnabled = !isRaffleAnimating,
                                 positiveStep = viewModel.longPressPositiveStep,
                                 negativeStep = viewModel.longPressNegativeStep,
                                 totalPlayers = displayedPlayers.size,
                                 isExpandedMode = false,
                                 modifier = Modifier.fillMaxWidth(),
                                 onScoreChange = { amount ->
+                                    onClearRaffle()
                                     viewModel.updatePlayerScore(player, amount)
                                 },
                                 onScoreClick = {
                                     onPlayerForManualEditChange(player)
-                                }
+                                },
+                                onCardClick = { onClearRaffle() }
                             )
                         }
                     }

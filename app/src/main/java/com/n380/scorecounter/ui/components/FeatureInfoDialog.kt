@@ -43,7 +43,7 @@ private data class FeatureInfoItem(
 )
 
 /**
- * Lista completa delle 6 funzionalità guidate
+ * Lista completa delle 7 funzionalità guidate (incluso il sorteggio casuale del primo giocatore)
  */
 private val allFeatureItems = listOf(
     FeatureInfoItem(R.string.titolo_info_punteggio, R.string.msg_info_punteggio),
@@ -51,7 +51,8 @@ private val allFeatureItems = listOf(
     FeatureInfoItem(R.string.titolo_info_manuale, R.string.msg_info_manuale),
     FeatureInfoItem(R.string.titolo_info_cronologia, R.string.msg_info_cronologia),
     FeatureInfoItem(R.string.titolo_info_dado, R.string.msg_info_dado),
-    FeatureInfoItem(R.string.titolo_info_timer, R.string.msg_info_timer)
+    FeatureInfoItem(R.string.titolo_info_timer, R.string.msg_info_timer),
+    FeatureInfoItem(R.string.titolo_info_sorteggio, R.string.msg_info_sorteggio)
 )
 
 /**

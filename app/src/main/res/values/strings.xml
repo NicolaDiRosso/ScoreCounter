@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">No moves recorded yet</string>
     <string name="msg_mossa_annullata">Move undone</string>
     <string name="lbl_punteggio_totale">Total: %1$d</string>
+    <string name="btn_sorteggio">Draw</string>
+    <string name="badge_inizia">Start!</string>
+    <string name="titolo_info_sorteggio">🔀 Draw First Player</string>
+    <string name="msg_info_sorteggio">Tapping the draw button randomly picks the first player to start the match. A roulette animation scrolls across player cards, slowing down to land on the winner and showing the \"Start!\" badge.</string>
 </resources>

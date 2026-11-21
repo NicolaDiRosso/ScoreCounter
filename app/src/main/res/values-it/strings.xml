@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">Nessuna mossa registrata finora</string>
     <string name="msg_mossa_annullata">Mossa annullata</string>
     <string name="lbl_punteggio_totale">Totale: %1$d</string>
+    <string name="btn_sorteggio">Sorteggio</string>
+    <string name="badge_inizia">Inizia!</string>
+    <string name="titolo_info_sorteggio">🔀 Sorteggio Primo Giocatore</string>
+    <string name="msg_info_sorteggio">Toccando il pulsante del sorteggio puoi estrarre in modo del tutto casuale chi deve iniziare la partita. Un\'animazione a roulette scorrerà velocemente tra le card dei giocatori rallentando fino a fermarsi sul vincitore, mostrando il badge \"Inizia!\".</string>
 </resources>

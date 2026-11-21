@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">अभी तक कोई चाल दर्ज नहीं की गई</string>
     <string name="msg_mossa_annullata">चाल पूर्ववत की गई</string>
     <string name="lbl_punteggio_totale">कुल: %1$d</string>
+    <string name="btn_sorteggio">चयन</string>
+    <string name="badge_inizia">शुरू करें!</string>
+    <string name="titolo_info_sorteggio">🔀 पहला खिलाड़ी चयन</string>
+    <string name="msg_info_sorteggio">ड्रॉ बटन दबाकर आप बेतरतीब ढंग से चुन सकते हैं कि मैच कौन शुरू करेगा। कार्ड पर एक रूले एनीमेशन चलती है और \"शुरू करें!\" बैज के साथ विजेता पर रुकती है।</string>
 </resources>

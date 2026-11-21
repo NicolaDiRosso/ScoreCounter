@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">まだ動きは記録されていません</string>
     <string name="msg_mossa_annullata">操作が元に戻されました</string>
     <string name="lbl_punteggio_totale">合計: %1$d</string>
+    <string name="btn_sorteggio">抽選</string>
+    <string name="badge_inizia">スタート！</string>
+    <string name="titolo_info_sorteggio">🔀 最初のプレイヤー抽選</string>
+    <string name="msg_info_sorteggio">抽選ボタンをタップすると、最初にプレイする人をランダムに選出します。ルーレットアニメーションがプレイヤーカード上を移動し、勝者の位置で停止して「スタート！」バッジを表示します。</string>
 </resources>

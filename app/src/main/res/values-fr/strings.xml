@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">Aucun coup enregistré pour l\'instant</string>
     <string name="msg_mossa_annullata">Coup annulé</string>
     <string name="lbl_punteggio_totale">Total : %1$d</string>
+    <string name="btn_sorteggio">Tirage</string>
+    <string name="badge_inizia">Commence !</string>
+    <string name="titolo_info_sorteggio">🔀 Tirage premier joueur</string>
+    <string name="msg_info_sorteggio">En appuyant sur le bouton de tirage, vous choisissez au hasard le premier joueur à commencer. Une animation de roulette défile sur les cartes des joueurs et s\'arrête sur le gagnant avec le badge \"Commence !\".</string>
 </resources>

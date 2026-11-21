@@ -47,6 +47,7 @@
     import com.n380.scorecounter.ui.screens.landscape.CounterScreenLandscape
     import com.n380.scorecounter.viewmodel.MatchViewModel
     import kotlinx.coroutines.delay
+    import kotlinx.coroutines.launch
 
     // ====================================================================
     // ====================================================================
@@ -103,6 +104,58 @@
 
         val haptic = LocalHapticFeedback.current
         val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
+
+        // 🎲 STATO E LOGICA SORTEGGIO PRIMO GIOCATORE ("Roulette" casuale)
+        // Memorizza l'indice del giocatore attualmente illuminato durante i salti della roulette
+        var highlightedPlayerIndex by remember { mutableStateOf<Int?>(null) }
+        // Memorizza l'indice del giocatore estratto vincitore per mostrare il badge "Inizia!"
+        var selectedFirstPlayerIndex by remember { mutableStateOf<Int?>(null) }
+        // Flag booleano di protezione che disabilita il pulsante "Sorteggio" durante l'animazione per evitare click sovrapposti
+        var isRaffleAnimating by remember { mutableStateOf(false) }
+
+        // 🧠 FUNZIONE AZIONE SORTEGGIO (Estrazione casuale con animazione a rallentamento progressivo):
+        val startRaffle: () -> Unit = {
+            val playerCount = viewModel.players.size
+            if (playerCount >= 2 && !isRaffleAnimating) {
+                isRaffleAnimating = true
+                selectedFirstPlayerIndex = null
+                highlightedPlayerIndex = null
+
+                coroutineScope.launch {
+                    // 1. Estrazione del vincitore in modo puramente casuale tramite Random.nextInt
+                    val winnerIndex = kotlin.random.Random.nextInt(playerCount)
+
+                    // 2. Calcolo dei passi della roulette per durare circa 1,8 secondi (14 passi da 50ms a 220ms)
+                    val minSteps = 14
+                    val extraSteps = (winnerIndex - (minSteps % playerCount) + playerCount) % playerCount
+                    val totalSteps = minSteps + extraSteps
+
+                    var currentDelay = 50L
+                    val delayIncrement = (220L - 50L) / totalSteps
+
+                    for (step in 0..totalSteps) {
+                        val currentIndex = step % playerCount
+                        highlightedPlayerIndex = currentIndex
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        delay(currentDelay)
+                        currentDelay += delayIncrement
+                    }
+
+                    // 3. Arresto sul vincitore estratto con vibrazione tattile di conferma
+                    highlightedPlayerIndex = winnerIndex
+                    selectedFirstPlayerIndex = winnerIndex
+                    isRaffleAnimating = false
+                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                }
+            }
+        }
+
+        // Funzione di utilità per azzerare l'evidenziazione del sorteggio al tocco o alla modifica del punteggio
+        val clearRaffle: () -> Unit = {
+            highlightedPlayerIndex = null
+            selectedFirstPlayerIndex = null
+        }
 
 
         // ---> AVVIO CRONOMETRO AUTOMATICO <---
@@ -230,7 +283,12 @@
                 playerForManualEdit = playerForManualEdit,
                 onPlayerForManualEditChange = { playerForManualEdit = it },
                 haptic = haptic,
-                snackbarHostState = snackbarHostState
+                snackbarHostState = snackbarHostState,
+                highlightedPlayerIndex = highlightedPlayerIndex,
+                selectedFirstPlayerIndex = selectedFirstPlayerIndex,
+                isRaffleAnimating = isRaffleAnimating,
+                onStartRaffle = startRaffle,
+                onClearRaffle = clearRaffle
             )
         } else {
             // ====================================================================
@@ -484,10 +542,13 @@
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        // --- BLOCCO SINISTRO: Indicatore Passivo del Tempo trascorso e Obiettivo ---
+                        // --- BLOCCO SINISTRO: Indicatore del Tempo trascorso e Obiettivo ---
+                        // 🧠 RESPIRO PER IL TEMPO DI GIOCO (ARMONIA GRAFICA):
+                        // Aumentiamo il padding a destra (padding end = 12.dp) per la Column del cronometro (🕒 32:10).
+                        // In questo modo le cifre del tempo che scorre hanno un generoso respiro visivo e non risultano mai schiacciate contro il pulsante Timer!
                         Column(
                             verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.weight(1.1f)
+                            modifier = Modifier.padding(end = 12.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
@@ -507,7 +568,7 @@
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            
+
                             // RIGA OBIETTIVO: Traguardo (se impostato)
                             if (viewModel.targetScore.isNotBlank()) {
                                 AutoResizedText(
@@ -519,44 +580,36 @@
                             }
                         }
 
-                        // --- BLOCCO DESTRO: Azioni Rapide (Timer e Dado) ---
+                        // --- BLOCCO DESTRO: I TRE STRUMENTI (Timer, Dado, Sorteggio) A TUTTA LARGHEZZA ---
+                        // 🧠 ESPANSIONE DINAMICA A TUTTA LARGHEZZA:
+                        // Assegnando Modifier.weight(1f) alla Row genitore dei 3 pulsanti, questa si espande fino a toccare il bordo destro della Card.
+                        // Ciascuno dei 3 pulsanti riceve Modifier.weight(1f), distribuendo il 100% dello spazio orizzontale rimanente in modo uniforme!
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            // 🧠 UX FIX: Diamo weight(1f) così il blocco bottoni occupa una porzione 
-                            // garantita e non sparisce se i testi a sinistra diventano enormi.
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier.weight(1f)
                         ) {
                             // PULSANTE TIMER: Per impostare conti alla rovescia
-                            // 🧠 TEORIA BORDURA MATERIAL YOU (CONTRASTO TEMA CHIARO):
-                            // border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)):
-                            // Aggiunge un bordo esatto di 2dp in colore 'outline' Material 3, garantendo che in Tema Chiaro
-                            // (Light Theme) il pulsante si stacchi nettamente dallo sfondo senza confondersi con esso.
                             FilledTonalButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     showTimerDialog = true
                                 },
                                 modifier = Modifier
-                                    .height(48.dp) // Altezza portata a 48dp per standard touch target
-                                    // 🧠 UX FIX: Entrambi i bottoni avranno weight(1f).
-                                    // Risultato: avranno SEMPRE la stessa larghezza dividendo lo spazio del blocco!
+                                    .height(48.dp)
                                     .weight(1f),
                                 shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)), // 🎨 Bordo 2dp per stacco in Tema Chiaro
-                                contentPadding = PaddingValues(horizontal = 8.dp), // Ridotto per font grandi
-                                // Coloriamo il pulsante con il PrimaryContainer pastello!
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                                contentPadding = PaddingValues(horizontal = 2.dp),
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 ),
                             ) {
                                 Icon(Icons.Filled.Timer, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
-                                // 🧠 UX FIX: Usiamo AutoResizedText così anche la parola "Timer" 
-                                // rimpicciolisce se il font di sistema è gigante, evitando di schiacciare il vicino.
                                 AutoResizedText(
-                                    text = stringResource(R.string.btn_timer), 
-                                    style = MaterialTheme.typography.labelLarge, 
+                                    text = stringResource(R.string.btn_timer),
+                                    style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -570,12 +623,10 @@
                                 },
                                 modifier = Modifier
                                     .height(48.dp)
-                                    // 🧠 UX FIX: Stesso peso del compagno Timer per garantire simmetria
                                     .weight(1f),
                                 shape = RoundedCornerShape(16.dp),
-                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)), // 🎨 Bordo 2dp per stacco in Tema Chiaro
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                                // Coloriamo il pulsante con il PrimaryContainer pastello!
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                                contentPadding = PaddingValues(horizontal = 2.dp),
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -583,7 +634,33 @@
 
                             ) {
                                 Icon(Icons.Filled.Casino, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
-                                AutoResizedText(stringResource(R.string.btn_dado), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold) // 🌍 I18N
+                                AutoResizedText(stringResource(R.string.btn_dado), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                            }
+
+                            // PULSANTE SORTEGGIO: Per la scelta casuale del primo giocatore che inizia la partita
+                            FilledTonalButton(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    startRaffle()
+                                },
+                                enabled = viewModel.players.size >= 2 && !isRaffleAnimating,
+                                modifier = Modifier
+                                    .height(48.dp)
+                                    .weight(1f),
+                                shape = RoundedCornerShape(16.dp),
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
+                                contentPadding = PaddingValues(horizontal = 2.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(Icons.Filled.Shuffle, null, modifier = Modifier.size(18.dp).padding(end = 4.dp))
+                                AutoResizedText(
+                                    text = stringResource(R.string.btn_sorteggio),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
@@ -716,9 +793,16 @@
                                         leftPlayers.forEach { p ->
                                             key(p.name) {
                                                 val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
+                                                val playerIndex = viewModel.players.indexOf(p)
+                                                val isRaffleHighlighted = (highlightedPlayerIndex != null && highlightedPlayerIndex == playerIndex)
+                                                val showStartBadge = (!isRaffleAnimating && selectedFirstPlayerIndex != null && selectedFirstPlayerIndex == playerIndex)
+
                                                 PlayerScoreCard(
                                                     player = p,
                                                     isLeader = isLeader,
+                                                    isRaffleHighlighted = isRaffleHighlighted,
+                                                    showStartBadge = showStartBadge,
+                                                    isScoreButtonsEnabled = !isRaffleAnimating,
                                                     positiveStep = viewModel.longPressPositiveStep,
                                                     negativeStep = viewModel.longPressNegativeStep,
                                                     totalPlayers = playerCount,
@@ -726,8 +810,12 @@
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .fillMaxWidth(),
-                                                    onScoreChange = { amount -> viewModel.updatePlayerScore(p, amount) },
-                                                    onScoreClick = { playerForManualEdit = p }
+                                                    onScoreChange = { amount ->
+                                                        clearRaffle()
+                                                        viewModel.updatePlayerScore(p, amount)
+                                                    },
+                                                    onScoreClick = { playerForManualEdit = p },
+                                                    onCardClick = { clearRaffle() }
                                                 )
                                             }
                                         }
@@ -742,9 +830,16 @@
                                         rightPlayers.forEach { p ->
                                             key(p.name) {
                                                 val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
+                                                val playerIndex = viewModel.players.indexOf(p)
+                                                val isRaffleHighlighted = (highlightedPlayerIndex != null && highlightedPlayerIndex == playerIndex)
+                                                val showStartBadge = (!isRaffleAnimating && selectedFirstPlayerIndex != null && selectedFirstPlayerIndex == playerIndex)
+
                                                 PlayerScoreCard(
                                                     player = p,
                                                     isLeader = isLeader,
+                                                    isRaffleHighlighted = isRaffleHighlighted,
+                                                    showStartBadge = showStartBadge,
+                                                    isScoreButtonsEnabled = !isRaffleAnimating,
                                                     positiveStep = viewModel.longPressPositiveStep,
                                                     negativeStep = viewModel.longPressNegativeStep,
                                                     totalPlayers = playerCount,
@@ -752,8 +847,12 @@
                                                     modifier = Modifier
                                                         .weight(1f)
                                                         .fillMaxWidth(),
-                                                    onScoreChange = { amount -> viewModel.updatePlayerScore(p, amount) },
-                                                    onScoreClick = { playerForManualEdit = p }
+                                                    onScoreChange = { amount ->
+                                                        clearRaffle()
+                                                        viewModel.updatePlayerScore(p, amount)
+                                                    },
+                                                    onScoreClick = { playerForManualEdit = p },
+                                                    onCardClick = { clearRaffle() }
                                                 )
                                             }
                                         }
@@ -775,6 +874,10 @@
                                     displayedPlayers.forEach { p ->
                                         key(p.name) {
                                             val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
+                                            val playerIndex = viewModel.players.indexOf(p)
+                                            val isRaffleHighlighted = (highlightedPlayerIndex != null && highlightedPlayerIndex == playerIndex)
+                                            val showStartBadge = (!isRaffleAnimating && selectedFirstPlayerIndex != null && selectedFirstPlayerIndex == playerIndex)
+
                                             val cardModifier = if (playerCount == 1) {
                                                 Modifier
                                                     .fillMaxWidth()
@@ -788,13 +891,20 @@
                                             PlayerScoreCard(
                                                 player = p,
                                                 isLeader = isLeader,
+                                                isRaffleHighlighted = isRaffleHighlighted,
+                                                showStartBadge = showStartBadge,
+                                                isScoreButtonsEnabled = !isRaffleAnimating,
                                                 positiveStep = viewModel.longPressPositiveStep,
                                                 negativeStep = viewModel.longPressNegativeStep,
                                                 totalPlayers = playerCount,
                                                 isExpandedMode = true,
                                                 modifier = cardModifier,
-                                                onScoreChange = { amount -> viewModel.updatePlayerScore(p, amount) },
-                                                onScoreClick = { playerForManualEdit = p }
+                                                onScoreChange = { amount ->
+                                                    clearRaffle()
+                                                    viewModel.updatePlayerScore(p, amount)
+                                                },
+                                                onScoreClick = { playerForManualEdit = p },
+                                                onCardClick = { clearRaffle() }
                                             )
                                         }
                                     }
@@ -812,18 +922,26 @@
                                     key = { player -> player.name } // Chiave stabile per animazioni fluide
                                 ) { p ->
                                     val isLeader = if (viewModel.isLowestScoreWins) p.score == winningScore else (p.score == winningScore && winningScore > 0)
+                                    val playerIndex = viewModel.players.indexOf(p)
+                                    val isRaffleHighlighted = (highlightedPlayerIndex != null && highlightedPlayerIndex == playerIndex)
+                                    val showStartBadge = (!isRaffleAnimating && selectedFirstPlayerIndex != null && selectedFirstPlayerIndex == playerIndex)
 
                                     PlayerScoreCard(
                                         player = p,
                                         isLeader = isLeader,
+                                        isRaffleHighlighted = isRaffleHighlighted,
+                                        showStartBadge = showStartBadge,
+                                        isScoreButtonsEnabled = !isRaffleAnimating,
                                         positiveStep = viewModel.longPressPositiveStep,
                                         negativeStep = viewModel.longPressNegativeStep,
                                         totalPlayers = playerCount,
                                         isExpandedMode = false,
                                         onScoreChange = { amount ->
+                                            clearRaffle()
                                             viewModel.updatePlayerScore(p, amount)
                                         },
-                                        onScoreClick = { playerForManualEdit = p }
+                                        onScoreClick = { playerForManualEdit = p },
+                                        onCardClick = { clearRaffle() }
                                     )
                                 }
                             }

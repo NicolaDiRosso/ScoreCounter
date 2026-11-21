@@ -438,4 +438,8 @@
     <string name="msg_nessuna_mossa_cronologia">Bisher keine Spielzüge erfasst</string>
     <string name="msg_mossa_annullata">Zug rückgängig gemacht</string>
     <string name="lbl_punteggio_totale">Gesamt: %1$d</string>
+    <string name="btn_sorteggio">Auslosung</string>
+    <string name="badge_inizia">Start!</string>
+    <string name="titolo_info_sorteggio">🔀 Auslosung erster Spieler</string>
+    <string name="msg_info_sorteggio">Durch Tippen auf die Auslosung wählst du zufällig den ersten Spieler aus, der das Spiel beginnt. Eine Roulette-Animation läuft über die Spielerkarten und stoppt beim Gewinner mit dem Badge \"Start!\".</string>
 </resources>
