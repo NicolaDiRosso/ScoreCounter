@@ -23,8 +23,10 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
@@ -54,6 +56,7 @@ import androidx.compose.ui.graphics.Brush
 import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.CreateMatchInfoDialog
 import com.n380.scorecounter.ui.components.AnimatedSelectableChip
 import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
@@ -85,6 +88,9 @@ fun CreateMatchScreen(
     // STATI PER LA GESTIONE DEI GIOCATORI RAPIDI (PREFERITI)
     var showFavoritesDialog by remember { mutableStateOf(false) } // Controllo visibilità del pannello inferiore
     var favToEdit by remember { mutableStateOf<String?>(null) }   // Riferimento per la rinomina di un preferito
+
+    // Stato per la visualizzazione del dialogo informativo della nuova sfida
+    var showInfoDialog by rememberSaveable { mutableStateOf(false) }
 
     // LOGICA DI VALIDAZIONE PER L'AVVIO DELLA SFIDA
     // canStart è vero solo se il titolo non è vuoto e sono presenti giocatori.
@@ -161,6 +167,7 @@ fun CreateMatchScreen(
             onIsNavigatingChange = { isNavigating = it },
             onShowFavoritesDialog = { showFavoritesDialog = true },
             onNavigateToCounter = onNavigateToCounter,
+            onShowInfoDialogChange = { showInfoDialog = it },
             haptic = haptic,
             focusManager = focusManager,
             keyboardController = keyboardController,
@@ -285,15 +292,40 @@ fun CreateMatchScreen(
                 .padding(horizontal = 16.dp),
         ) {
 
-            // 1. IL TITOLO (Ora è fisso e fuori dal tavolo scorrevole)
+            // 1. IL TITOLO E IL PULSANTE INFO NELLA STESSA RIGA
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.titolo_nuova_sfida),
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 16.dp) // Ridotto un po' il margine
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.titolo_nuova_sfida),
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                // Pulsante circolare Info coeso con il resto dell'app
+                FilledIconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showInfoDialog = true
+                    },
+                    modifier = Modifier.size(40.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = stringResource(R.string.desc_info_icon),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
             // ====================================================================
             // 2. IL GRANDE TAVOLO CONTENITIVO (La Card Unica)
@@ -2078,5 +2110,10 @@ fun CreateMatchScreen(
             },
             dismissButton = null
         )
+    }
+
+    // 🧠 POPUP GUIDA NUOVA SFIDA: Dialogo informativo in portrait
+    if (showInfoDialog) {
+        CreateMatchInfoDialog(onDismissRequest = { showInfoDialog = false })
     }
 }

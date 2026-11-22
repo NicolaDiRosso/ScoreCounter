@@ -443,4 +443,19 @@
     <string name="titolo_info_sorteggio">🔀 पहला खिलाड़ी चयन</string>
     <string name="msg_info_sorteggio">ड्रॉ बटन दबाकर आप बेतरतीब ढंग से चुन सकते हैं कि मैच कौन शुरू करेगा। कार्ड पर एक रूले एनीमेशन चलती है और \"शुरू करें!\" बैज के साथ विजेता पर रुकती है।</string>
     <string name="label_seleziona_sfumatura">कस्टम रंग शेड:</string>
+    <string name="titolo_info_nuova_sfida">नई चुनौती मार्गदर्शिका</string>
+    <string name="label_regola_nome">मैच का नाम:</string>
+    <string name="desc_regola_nome">मैच को शीर्षक देता है और शुरू करने के लिए आवश्यक है।</string>
+    <string name="label_regola_recenti">हाल के शीर्षक:</string>
+    <string name="desc_regola_recenti">टैप करके चुनने के लिए अंतिम 5 उपयोग किए गए नाम।</string>
+    <string name="label_regola_punteggio">विजेता स्कोर:</string>
+    <string name="desc_regola_punteggio">तय करता है कि उच्चतम या न्यूनतम स्कोर जीतता है।</string>
+    <string name="label_regola_traguardo">लक्ष्य स्कोर (वैकल्पिक):</string>
+    <string name="desc_regola_traguardo">सीमा स्कोर निर्धारित करता है।</string>
+    <string name="label_partecipanti_rapidi">त्वरित खिलाड़ी:</string>
+    <string name="desc_partecipanti_rapidi">प्र प्रबंधित करें बटन से प्रोफ़ाइल सहेजें या संपादित करें।</string>
+    <string name="label_partecipanti_manuale">मैन्युअल रूप से जोड़ें:</string>
+    <string name="desc_partecipanti_manuale">नाम टाइप करके खिलाड़ी जोड़ें।</string>
+    <string name="label_tavolo_partecipanti">टेबल प्रतिभागी:</string>
+    <string name="desc_tavolo_partecipanti">खिलाड़ी दिखाएं: पुनorder करें या संपादित करें।</string>
 </resources>

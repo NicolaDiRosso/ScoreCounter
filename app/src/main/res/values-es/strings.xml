@@ -443,4 +443,19 @@
     <string name="titolo_info_sorteggio">🔀 Sorteo primer jugador</string>
     <string name="msg_info_sorteggio">Al pulsar el botón de sorteo puedes elegir al azar quién empieza la partida. Una animación de ruleta se desplaza por las tarjetas de los jugadores y se detiene en el ganador mostrando la etiqueta \"¡Empieza!\".</string>
     <string name="label_seleziona_sfumatura">Tono personalizado:</string>
+    <string name="titolo_info_nuova_sfida">Guía del nuevo desafío</string>
+    <string name="label_regola_nome">Nombre del desafío:</string>
+    <string name="desc_regola_nome">da título a la partida y es obligatorio para empezar.</string>
+    <string name="label_regola_recenti">Títulos recientes:</string>
+    <string name="desc_regola_recenti">muestra los últimos 5 nombres usados para seleccionarlos con un toque.</string>
+    <string name="label_regola_punteggio">Puntuación ganadora:</string>
+    <string name="desc_regola_punteggio">define si gana la puntuación más alta o más baja.</string>
+    <string name="label_regola_traguardo">Objetivo (opcional):</string>
+    <string name="desc_regola_traguardo">establece un límite de puntos al alcanzarlo termina la partida.</string>
+    <string name="label_partecipanti_rapidi">Jugadores rápidos:</string>
+    <string name="desc_partecipanti_rapidi">con el botón Gestionar puedes guardar, editar o eliminar perfiles habituales.</string>
+    <string name="label_partecipanti_manuale">Añadir manualmente:</string>
+    <string name="desc_partecipanti_manuale">permite añadir un jugador escribiendo su nombre directamente.</string>
+    <string name="label_tavolo_partecipanti">Mesa de participantes:</string>
+    <string name="desc_tavolo_partecipanti">muestra los jugadores: puedes reordenarlos o editar el nombre y color de cada tarjeta.</string>
 </resources>

@@ -443,4 +443,19 @@
     <string name="titolo_info_sorteggio">🔀 Tirage premier joueur</string>
     <string name="msg_info_sorteggio">En appuyant sur le bouton de tirage, vous choisissez au hasard le premier joueur à commencer. Une animation de roulette défile sur les cartes des joueurs et s\'arrête sur le gagnant avec le badge \"Commence !\".</string>
     <string name="label_seleziona_sfumatura">Teinte personnalisée :</string>
+    <string name="titolo_info_nuova_sfida">Guide du nouveau défi</string>
+    <string name="label_regola_nome">Nom du défi :</string>
+    <string name="desc_regola_nome">donne le titre de la partie et est obligatoire.</string>
+    <string name="label_regola_recenti">Titres récents :</string>
+    <string name="desc_regola_recenti">affiche les 5 derniers noms utilisés pour les sélectionner.</string>
+    <string name="label_regola_punteggio">Score gagnant :</string>
+    <string name="desc_regola_punteggio">détermine si le plus haut ou le plus bas score l\'emporte.</string>
+    <string name="label_regola_traguardo">Objectif (optionnel) :</string>
+    <string name="desc_regola_traguardo">définit une limite de score de fin de partie.</string>
+    <string name="label_partecipanti_rapidi">Joueurs rapides :</string>
+    <string name="desc_partecipanti_rapidi">via Gérer, vous pouvez enregistrer, modifier ou supprimer des profils.</string>
+    <string name="label_partecipanti_manuale">Ajouter manuellement :</string>
+    <string name="desc_partecipanti_manuale">permet d\'ajouter un joueur en tapant directement son nom.</string>
+    <string name="label_tavolo_partecipanti">Participants à la table :</string>
+    <string name="desc_tavolo_partecipanti">affiche les joueurs : réordonnez-les ou modifiez nom et couleur.</string>
 </resources>

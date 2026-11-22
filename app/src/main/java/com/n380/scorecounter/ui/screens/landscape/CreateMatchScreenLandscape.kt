@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.CreateMatchInfoDialog
 import com.n380.scorecounter.ui.components.AnimatedSelectableChip
 import com.n380.scorecounter.ui.components.FadedRightEdgeWrapper
 import com.n380.scorecounter.ui.components.PlayerAtTableCard
@@ -80,6 +82,7 @@ fun CreateMatchScreenLandscape(
     onIsNavigatingChange: (Boolean) -> Unit,
     onShowFavoritesDialog: () -> Unit,
     onNavigateToCounter: () -> Unit,
+    onShowInfoDialogChange: (Boolean) -> Unit,
     haptic: HapticFeedback,
     focusManager: FocusManager,
     keyboardController: SoftwareKeyboardController?,
@@ -101,23 +104,48 @@ fun CreateMatchScreenLandscape(
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ====================================================================
-        // 🏛️ PANNELLO MASTER (Sinistra - weight = 0.44f): CONFIGURAZIONE & AVVIO
-        // ====================================================================
-        Column(
-            modifier = Modifier
-                .weight(0.44f)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // INTESTAZIONE TITOLO SCHERMATA
-            AutoResizedText(
-                text = stringResource(R.string.titolo_nuova_sfida),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-            )
+            // ====================================================================
+            // 🏛️ PANNELLO MASTER (Sinistra - weight = 0.44f): CONFIGURAZIONE & AVVIO
+            // ====================================================================
+            Column(
+                modifier = Modifier
+                    .weight(0.44f)
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // INTESTAZIONE TITOLO SCHERMATA E PULSANTE INFO AFFIANCATI
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 4.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AutoResizedText(
+                        text = stringResource(R.string.titolo_nuova_sfida),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    FilledIconButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onShowInfoDialogChange(true)
+                        },
+                        modifier = Modifier.size(36.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.desc_info_icon),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
 
             // CARD UNIFICATA DI CONFIGURAZIONE (Regole + Gestione Partecipanti)
             Card(

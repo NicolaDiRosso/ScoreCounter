@@ -443,4 +443,19 @@
     <string name="titolo_info_sorteggio">🔀 Auslosung erster Spieler</string>
     <string name="msg_info_sorteggio">Durch Tippen auf die Auslosung wählst du zufällig den ersten Spieler aus, der das Spiel beginnt. Eine Roulette-Animation läuft über die Spielerkarten und stoppt beim Gewinner mit dem Badge \"Start!\".</string>
     <string name="label_seleziona_sfumatura">Benutzerdefinierter Farpton:</string>
+    <string name="titolo_info_nuova_sfida">Leitfaden Neue Herausforderung</string>
+    <string name="label_regola_nome">Matchname:</string>
+    <string name="desc_regola_nome">gibt dem Spiel den Titel und ist zum Start erforderlich.</string>
+    <string name="label_regola_recenti">Letzte Titel:</string>
+    <string name="desc_regola_recenti">zeigt die letzten 5 verwendeten Namen zur Auswahl.</string>
+    <string name="label_regola_punteggio">Gewinner-Punktzahl:</string>
+    <string name="desc_regola_punteggio">bestimmt, ob die höchste oder niedrigste Punktzahl gewinnt.</string>
+    <string name="label_regola_traguardo">Zielpunktzahl (optional):</string>
+    <string name="desc_regola_traguardo">legt ein Punktelimit fest, bei dessen Erreichen das Spiel endet.</string>
+    <string name="label_partecipanti_rapidi">Schnelle Spieler:</string>
+    <string name="desc_partecipanti_rapidi">über Verwalten können Sie Profile speichern, bearbeiten oder löschen.</string>
+    <string name="label_partecipanti_manuale">Manuell hinzufügen:</string>
+    <string name="desc_partecipanti_manuale">ermöglicht das Hinzufügen eines Spielers durch direkte Namenseingabe.</string>
+    <string name="label_tavolo_partecipanti">Tischteilnehmer:</string>
+    <string name="desc_tavolo_partecipanti">zeigt teilnehmende Spieler: sortieren oder Name und Farbe bearbeiten.</string>
 </resources>

@@ -443,4 +443,19 @@
     <string name="titolo_info_sorteggio">🔀 Draw First Player</string>
     <string name="msg_info_sorteggio">Tapping the draw button randomly picks the first player to start the match. A roulette animation scrolls across player cards, slowing down to land on the winner and showing the \"Start!\" badge.</string>
     <string name="label_seleziona_sfumatura">Custom hue:</string>
+    <string name="titolo_info_nuova_sfida">New challenge guide</string>
+    <string name="label_regola_nome">Match name:</string>
+    <string name="desc_regola_nome">gives the title to the match and is required to start.</string>
+    <string name="label_regola_recenti">Recent titles:</string>
+    <string name="desc_regola_recenti">shows the last 5 used names to select them with a tap.</string>
+    <string name="label_regola_punteggio">Winning score:</string>
+    <string name="desc_regola_punteggio">determines whether the highest or lowest score wins.</string>
+    <string name="label_regola_traguardo">Target score (optional):</string>
+    <string name="desc_regola_traguardo">sets a limit score upon which the match ends automatically.</string>
+    <string name="label_partecipanti_rapidi">Quick players:</string>
+    <string name="desc_partecipanti_rapidi">via the Manage button you can save, edit, or delete habitual profiles to add them instantly.</string>
+    <string name="label_partecipanti_manuale">Add manually:</string>
+    <string name="desc_partecipanti_manuale">allows you to add an ad-hoc player by typing their name directly.</string>
+    <string name="label_tavolo_partecipanti">Table participants:</string>
+    <string name="desc_tavolo_partecipanti">shows participating players: you can reorder them as seated at the table or edit each card\'s name and color.</string>
 </resources>

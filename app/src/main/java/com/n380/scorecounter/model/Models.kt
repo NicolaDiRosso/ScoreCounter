@@ -227,9 +227,15 @@ package com.n380.scorecounter.model
         allPlayers.forEach { turnsInFirst[it] = 0 }
 
         for (t in 0 until numTurns) {
-            val maxScore = allPlayers.maxOfOrNull { it.scoreHistory?.getOrNull(t) ?: 0 } ?: 0
+            // 🧠 ADATTAMENTO PUNTEGGIO MINIMO: Se vince chi fa meno punti, la 1ª posizione al turno t è chi ha il punteggio MINIMO.
+            val bestScoreAtT = if (isLowestScoreWins) {
+                allPlayers.minOfOrNull { it.scoreHistory?.getOrNull(t) ?: 0 } ?: 0
+            } else {
+                allPlayers.maxOfOrNull { it.scoreHistory?.getOrNull(t) ?: 0 } ?: 0
+            }
+
             allPlayers.forEach { player ->
-                if ((player.scoreHistory?.getOrNull(t) ?: 0) == maxScore) {
+                if ((player.scoreHistory?.getOrNull(t) ?: 0) == bestScoreAtT) {
                     turnsInFirst[player] = turnsInFirst[player]!! + 1
                 }
             }
@@ -239,7 +245,11 @@ package com.n380.scorecounter.model
         if (maxTurns == 0) return null
 
         val candidates = turnsInFirst.filterValues { it == maxTurns }.keys
-        val dictator = candidates.maxByOrNull { it.score }
+        val dictator = if (isLowestScoreWins) {
+            candidates.minByOrNull { it.score }
+        } else {
+            candidates.maxByOrNull { it.score }
+        }
 
         return if (dictator != null) Pair(dictator, maxTurns) else null
     }
@@ -253,15 +263,9 @@ package com.n380.scorecounter.model
      * compiuto il maggior numero di "sorpassi" diretti in classifica durante la partita.
      *
      * Definizione matematica di Sorpasso al turno `t`:
-     * Un giocatore A effettua un sorpasso sul giocatore B al turno `t` se e solo se:
-     * - Al turno precedente `t - 1`, il punteggio di A era STRETTAMENTE MINORE del punteggio di B (`A < B`).
-     * - Al turno attuale `t`, il punteggio di A è diventato STRETTAMENTE MAGGIORE del punteggio di B (`A > B`).
-     *
-     * Passo-passo:
-     * 1. Iteriamo su tutti i turni dal secondo in poi (`t` da 1 a `numTurns - 1`).
-     * 2. Confrontiamo ogni coppia ordinata di giocatori `(A, B)`.
-     * 3. Se la condizione di sorpasso si verifica, incrementiamo il contatore dei sorpassi per il giocatore A.
-     * 4. Troviamo il numero massimo di sorpassi totalizzati. In caso di parità, vince chi ha il punteggio finale più alto.
+     * Un giocatore A effettua un sorpasso sul giocatore B al turno `t` se e solo se passa da una posizione peggiore ad una migliore.
+     * - Se vince chi fa più punti: al turno `t - 1` A < B e al turno `t` A > B.
+     * - Se vince chi fa meno punti: al turno `t - 1` A > B (peggiore) e al turno `t` A < B (migliore).
      *
      * @return Una coppia `Pair(PlayerRecord, Int)` col giocatore e il numero di sorpassi effettuati, oppure `null`.
      */
@@ -281,7 +285,14 @@ package com.n380.scorecounter.model
                     val scoreAtTMinus1 = playerA.scoreHistory?.getOrNull(t-1) ?: 0
                     val scoreBAtT = playerB.scoreHistory?.getOrNull(t) ?: 0
                     val scoreBAtTMinus1 = playerB.scoreHistory?.getOrNull(t-1) ?: 0
-                    if (scoreAtT > scoreBAtT && scoreAtTMinus1 < scoreBAtTMinus1) {
+
+                    val isOvertake = if (isLowestScoreWins) {
+                        scoreAtT < scoreBAtT && scoreAtTMinus1 > scoreBAtTMinus1
+                    } else {
+                        scoreAtT > scoreBAtT && scoreAtTMinus1 < scoreBAtTMinus1
+                    }
+
+                    if (isOvertake) {
                         overtakes[playerA] = overtakes[playerA]!! + 1
                     }
                 }
@@ -291,7 +302,11 @@ package com.n380.scorecounter.model
         val maxOvertakes = overtakes.values.maxOrNull() ?: 0
         if (maxOvertakes == 0) return null
 
-        val predator = overtakes.filterValues { it == maxOvertakes }.keys.maxByOrNull { it.score }
+        val predator = if (isLowestScoreWins) {
+            overtakes.filterValues { it == maxOvertakes }.keys.minByOrNull { it.score }
+        } else {
+            overtakes.filterValues { it == maxOvertakes }.keys.maxByOrNull { it.score }
+        }
         
         return if (predator != null) Pair(predator, maxOvertakes) else null
     }
@@ -305,18 +320,23 @@ package com.n380.scorecounter.model
      * al 1° e al 2° classificato se e solo se la partita è stata tiratissima fino all'ultimo punto!
      *
      * Requisito Matematico:
-     * Distacco finale tra il primo classificato (`p1`) e il secondo classificato (`p2`) <= 1 punto
-     * (incluso il caso di pareggio perfetto dove il distacco è 0).
+     * Distacco finale tra il primo classificato (`p1`) e il secondo classificato (`p2`) <= 1 punto.
      *
      * @return Una coppia `Pair(PlayerRecord, PlayerRecord)` con i due giocatori del duello, oppure `null`.
      */
     fun MatchRecord.getHistoricalTestaATesta(): Pair<PlayerRecord, PlayerRecord>? {
         if (allPlayers.size < 2) return null
-        val sortedPlayers = allPlayers.sortedByDescending { it.score }
+        val sortedPlayers = if (isLowestScoreWins) {
+            allPlayers.sortedBy { it.score }
+        } else {
+            allPlayers.sortedByDescending { it.score }
+        }
         val p1 = sortedPlayers[0]
         val p2 = sortedPlayers[1]
+
+        val diff = if (isLowestScoreWins) p2.score - p1.score else p1.score - p2.score
         
-        if (p1.score - p2.score <= 1) {
+        if (diff in 0..1) {
             return Pair(p1, p2)
         }
         return null

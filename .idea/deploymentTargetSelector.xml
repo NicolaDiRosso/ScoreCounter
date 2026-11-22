@@ -92,7 +92,7 @@
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\diros\.android\avd\Pixel_Tablet.avd" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\diros\.android\avd\Pixel_10_Pro_XL.avd" />
               </handle>
             </Target>
           </targets>

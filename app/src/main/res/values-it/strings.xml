@@ -443,4 +443,19 @@
     <string name="titolo_info_sorteggio">🔀 Sorteggio Primo Giocatore</string>
     <string name="msg_info_sorteggio">Toccando il pulsante del sorteggio puoi estrarre in modo del tutto casuale chi deve iniziare la partita. Un\'animazione a roulette scorrerà velocemente tra le card dei giocatori rallentando fino a fermarsi sul vincitore, mostrando il badge \"Inizia!\".</string>
     <string name="label_seleziona_sfumatura">Sfumatura personalizzata:</string>
+    <string name="titolo_info_nuova_sfida">Guida alla nuova sfida</string>
+    <string name="label_regola_nome">Nome della sfida:</string>
+    <string name="desc_regola_nome">dà il titolo alla partita ed è obbligatorio per poter iniziare.</string>
+    <string name="label_regola_recenti">Titoli recenti:</string>
+    <string name="desc_regola_recenti">mostra gli ultimi 5 nomi usati per selezionarli con un tocco.</string>
+    <string name="label_regola_punteggio">Punteggio vincente:</string>
+    <string name="desc_regola_punteggio">stabilisce se vince chi totalizza il punteggio più alto o quello più basso.</string>
+    <string name="label_regola_traguardo">Traguardo (opzionale):</string>
+    <string name="desc_regola_traguardo">imposta un punteggio limite al cui raggiungimento la partita termina automaticamente.</string>
+    <string name="label_partecipanti_rapidi">Giocatori rapidi:</string>
+    <string name="desc_partecipanti_rapidi">tramite il tasto Gestisci puoi salvare, modificare o eliminare i profili abituali per inserirli al volo.</string>
+    <string name="label_partecipanti_manuale">Aggiungi manualmente:</string>
+    <string name="desc_partecipanti_manuale">ti permette di inserire un giocatore estemporaneo scrivendo direttamente il suo nome.</string>
+    <string name="label_tavolo_partecipanti">Tavolo partecipanti:</string>
+    <string name="desc_tavolo_partecipanti">mostra i giocatori in gara: puoi riordinarli come sono seduti al tavolo oppure modificare nome e colore della card.</string>
 </resources>

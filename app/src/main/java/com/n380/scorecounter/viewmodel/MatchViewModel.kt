@@ -1448,9 +1448,15 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         players.forEach { turnsInFirst[it] = 0 }
 
         for (t in 0 until numTurns) {
-            val maxScore = players.maxOfOrNull { it.scoreHistory[t] } ?: 0
+            // 🧠 ADATTAMENTO PUNTEGGIO MINIMO: Se vince chi fa meno punti, la 1ª posizione al turno t è chi possiede il punteggio MINIMO.
+            val bestScoreAtT = if (isLowestScoreWins) {
+                players.minOfOrNull { it.scoreHistory[t] } ?: 0
+            } else {
+                players.maxOfOrNull { it.scoreHistory[t] } ?: 0
+            }
+
             players.forEach { player ->
-                if (player.scoreHistory[t] == maxScore) {
+                if (player.scoreHistory[t] == bestScoreAtT) {
                     turnsInFirst[player] = turnsInFirst[player]!! + 1
                 }
             }
@@ -1460,7 +1466,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         if (maxTurns == 0) return null
 
         val candidates = turnsInFirst.filterValues { it == maxTurns }.keys
-        val dictator = candidates.maxByOrNull { it.score }
+        val dictator = if (isLowestScoreWins) {
+            candidates.minByOrNull { it.score }
+        } else {
+            candidates.maxByOrNull { it.score }
+        }
 
         return if (dictator != null) Pair(dictator, maxTurns) else null
     }
@@ -1473,8 +1483,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      * Trova il giocatore che ha compiuto il maggior numero di sorpassi in classifica.
      *
      * Definizione di Sorpasso:
-     * Un sorpasso avviene al turno `t` quando un giocatore A passa da avere un punteggio
-     * inferiore ad un avversario B al turno `t - 1`, ad un punteggio superiore al turno `t`.
+     * Un sorpasso avviene al turno `t` quando un giocatore A passa da avere una posizione
+     * peggiore rispetto ad un avversario B al turno `t - 1`, ad una posizione migliore al turno `t`.
      */
     fun getPredatore(): Pair<Player, Int>? {
         if (players.size < 2) return null
@@ -1488,8 +1498,18 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             for (playerA in players) {
                 for (playerB in players) {
                     if (playerA == playerB) continue
-                    if (playerA.scoreHistory[t] > playerB.scoreHistory[t] && 
-                        playerA.scoreHistory[t-1] < playerB.scoreHistory[t-1]) {
+                    val scoreAAtT = playerA.scoreHistory[t]
+                    val scoreAAtTMinus1 = playerA.scoreHistory[t-1]
+                    val scoreBAtT = playerB.scoreHistory[t]
+                    val scoreBAtTMinus1 = playerB.scoreHistory[t-1]
+
+                    val isOvertake = if (isLowestScoreWins) {
+                        scoreAAtT < scoreBAtT && scoreAAtTMinus1 > scoreBAtTMinus1
+                    } else {
+                        scoreAAtT > scoreBAtT && scoreAAtTMinus1 < scoreBAtTMinus1
+                    }
+
+                    if (isOvertake) {
                         overtakes[playerA] = overtakes[playerA]!! + 1
                     }
                 }
@@ -1499,8 +1519,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         val maxOvertakes = overtakes.values.maxOrNull() ?: 0
         if (maxOvertakes == 0) return null
 
-        val predator = overtakes.filterValues { it == maxOvertakes }.keys.maxByOrNull { it.score }
-        
+        val predator = if (isLowestScoreWins) {
+            overtakes.filterValues { it == maxOvertakes }.keys.minByOrNull { it.score }
+        } else {
+            overtakes.filterValues { it == maxOvertakes }.keys.maxByOrNull { it.score }
+        }
+
         return if (predator != null) Pair(predator, maxOvertakes) else null
     }
 
@@ -1514,11 +1538,17 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun getTestaATesta(): Pair<Player, Player>? {
         if (players.size < 2) return null
-        val sortedPlayers = players.sortedByDescending { it.score }
+        val sortedPlayers = if (isLowestScoreWins) {
+            players.sortedBy { it.score }
+        } else {
+            players.sortedByDescending { it.score }
+        }
         val p1 = sortedPlayers[0]
         val p2 = sortedPlayers[1]
-        
-        if (p1.score - p2.score <= 1) {
+
+        val diff = if (isLowestScoreWins) p2.score - p1.score else p1.score - p2.score
+
+        if (diff in 0..1) {
             return Pair(p1, p2)
         }
         return null
