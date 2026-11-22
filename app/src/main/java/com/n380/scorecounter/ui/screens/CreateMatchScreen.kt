@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,7 +49,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-//-------------------------------------------------
+import androidx.compose.animation.*
+import androidx.compose.ui.graphics.Brush
 import com.n380.scorecounter.R // Import del file R (Resources) per accedere all'ID delle traduzioni
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -988,19 +990,28 @@ fun CreateMatchScreen(
     }
     }
 
-    // MODALE UNIFICATO: MODIFICA GIOCATORE (Nome e Colore)
-    // mettiamo il '.let'. In questo modo la variabile 'player'
-    // nasce già sicura e non-nullabile per tutto l'ambito interno al Dialog.
+    // MODALE UNIFICATO: MODIFICA GIOCATORE (Nome, Griglia Colori 2x7 e Selettore HSL Personalizzato)
+    // Usiamo il '.let' per garantire che 'player' nasca già sicuro e non-nullabile per tutto l'ambito interno al Dialog.
     playerToEdit?.let { player ->
-        // 🧠 RIPRISTINO: Torniamo alla semplicità di una Stringa base.
         var editedName by remember { mutableStateOf(player.name) }
         var editedColor by remember { mutableIntStateOf(player.color) }
+
+        // 🧠 STATO SLIDER HSL PERSONALIZZATO:
+        // Gestisce la visibilità della barra HSL e la tonalità selezionata dall'utente (Hue 0°..360°)
+        var showCustomHueSlider by remember { mutableStateOf(false) }
+        var customHue by remember { mutableFloatStateOf(180f) }
+
+        // 🧠 TRACCIAMENTO ORIGINE COLORE PERSONALIZZATO:
+        // Diventa TRUE solo se l'utente seleziona una sfumatura tramite la barra HSL (14ª casella).
+        // Garantisce che la 13ª casella memorizzi e salvi su DataStore SOLTANTO i colori generati dallo slider,
+        // senza venire sovrascritta quando l'utente seleziona uno dei 12 colori predefiniti.
+        var isCustomColorFromSliderPicked by remember { mutableStateOf(false) }
 
         AlertDialog(
             onDismissRequest = { playerToEdit = null },
             title = {
                 AutoResizedText(
-                    text = stringResource(R.string.titolo_modifica_giocatore), // Traduzione intestazione dialogo
+                    text = stringResource(R.string.titolo_modifica_giocatore),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -1008,34 +1019,263 @@ fun CreateMatchScreen(
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     AutoResizedText(
-                        text = stringResource(R.string.label_nuovo_colore), // Traduzione label colore
+                        text = stringResource(R.string.label_nuovo_colore),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 35.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    // ====================================================================
+                    // 🧠 GRIGLIA SIMMETRICA A 14 CASELLE (2 RIGHE X 7 COLONNE)
+                    // ====================================================================
+                    // Garantisce una distribuzione perfettamente simmetrica sia su smartphone che su tablet
+                    // eliminando qualsiasi elemento isolato a capo.
+                    Column(
                         modifier = Modifier
-                            .padding(top = 8.dp, bottom = 20.dp)
-                            .heightIn(max = 140.dp)
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        items(playerPalette) { color ->
-                            val isSelected = color.toArgb() == editedColor
+                        // ------------------------------------------------------------
+                        // RIGA 1 (7 CASELLE): I primi 7 colori predefiniti della palette
+                        // ------------------------------------------------------------
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            playerPalette.take(7).forEach { color ->
+                                val colorInt = color.toArgb()
+                                val isSelected = (colorInt == editedColor)
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(color)
+                                        .border(
+                                            width = if (isSelected) 3.dp else 0.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable {
+                                            editedColor = colorInt
+                                            isCustomColorFromSliderPicked = false
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // ------------------------------------------------------------
+                        // RIGA 2 (7 CASELLE): 5 colori predefiniti + 13ª casella salvata + 14ª casella selettore
+                        // ------------------------------------------------------------
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // 1. I 5 colori predefiniti rimanenti (dall'8° al 12° colore)
+                            playerPalette.drop(7).forEach { color ->
+                                val colorInt = color.toArgb()
+                                val isSelected = (colorInt == editedColor)
+
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(color)
+                                        .border(
+                                            width = if (isSelected) 3.dp else 0.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                        .clickable {
+                                            editedColor = colorInt
+                                            isCustomColorFromSliderPicked = false
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            // 2. LA 13ª CASELLA: Colore personalizzato salvato in DataStore
+                            val savedCustomColorObj = Color(viewModel.savedCustomColor)
+                            val isCustomSelected = (viewModel.savedCustomColor == editedColor)
 
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(color)
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(savedCustomColorObj)
                                     .border(
-                                        width = if (isSelected) 3.dp else 0.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
-                                        shape = RoundedCornerShape(12.dp)
+                                        width = if (isCustomSelected) 3.dp else 1.dp,
+                                        color = if (isCustomSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(10.dp)
                                     )
-                                    .clickable { editedColor = color.toArgb() }
+                                    .clickable {
+                                        editedColor = viewModel.savedCustomColor
+                                        isCustomColorFromSliderPicked = false
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isCustomSelected) Icons.Filled.Check else Icons.Filled.Tune,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+
+                            // 3. LA 14ª CASELLA: Selettore sfumatura arcobaleno circolare (Attiva lo slider HSL)
+                            // 🧠 ESTETICA A RUOTA CROMATICA CIRCOLARE (SWEEP GRADIENT):
+                            // Utilizziamo Brush.sweepGradient per sfumare in modo circolare a 360° tutti i colori dello spettro visibile,
+                            // creando un effetto "ruota dei colori" professionale, elegante e visivamente d'impatto.
+                            val sweepRainbowGradient = remember {
+                                Brush.sweepGradient(
+                                    colors = listOf(
+                                        Color(0xFFE53935), // Rosso
+                                        Color(0xFFFB8C00), // Arancione
+                                        Color(0xFFFFEB3B), // Giallo
+                                        Color(0xFF43A047), // Verde
+                                        Color(0xFF00ACC1), // Ciano
+                                        Color(0xFF1E88E5), // Blu
+                                        Color(0xFF8349EF), // Indaco
+                                        Color(0xFFD81B60), // Magenta
+                                        Color(0xFFE53935)  // Ritorno al Rosso per continuità circolare
+                                    )
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(sweepRainbowGradient)
+                                    .border(
+                                        width = if (showCustomHueSlider) 3.dp else 1.dp,
+                                        color = if (showCustomHueSlider) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                        shape = RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable {
+                                        showCustomHueSlider = !showCustomHueSlider
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                // 🧠 BADGE CENTRALE GLASSMORFICO PER L'ICONA TAVOLOZZA:
+                                // Un cerchio nero semitrasparente con bordino bianco evidenzia con classe l'icona della tavolozza.
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                                        .border(1.dp, Color.White.copy(alpha = 0.5f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Palette,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // ====================================================================
+                    // 🧠 BARRA COLORE PERSONALIZZATO INLINE (CON CONTRASTO PROTETTO HSL)
+                    // ====================================================================
+                    AnimatedVisibility(
+                        visible = showCustomHueSlider,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp)
+                        ) {
+                            AutoResizedText(
+                                text = stringResource(R.string.label_seleziona_sfumatura),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 4.dp)
                             )
+
+                            // 🧠 FASCIA SFUMATURA HSL A CONTRASTO PROTETTO:
+                            // Calcola la scala dei colori bloccando la Saturazione a 0.82f e la Luminosità a 0.55f.
+                            // Questo vincolo impedisce matematicamente di selezionare bianco, nero o grigi spenti,
+                            // garantendo un contrasto sempre nitido e brillante sulle card dei giocatori!
+                            val rainbowSpectrum = remember {
+                                (0..360 step 30).map { hue ->
+                                    Color.hsl(hue.toFloat(), 0.82f, 0.55f)
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                // Sfondo visivo con il gradiente cromatico dell'arcobaleno
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(14.dp)
+                                        .padding(horizontal = 10.dp)
+                                        .clip(RoundedCornerShape(7.dp))
+                                        .background(Brush.horizontalGradient(rainbowSpectrum))
+                                        .border(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                            RoundedCornerShape(7.dp)
+                                        )
+                                )
+
+                                Slider(
+                                    value = customHue,
+                                    onValueChange = { newHue ->
+                                        customHue = newHue
+                                        // Aggiornamento in tempo reale del colore con valori HSL protetti
+                                        val newHslColor = Color.hsl(newHue, 0.82f, 0.55f)
+                                        editedColor = newHslColor.toArgb()
+                                        // 🧠 Impostiamo la flag a TRUE perché il colore proviene direttamente dallo slider HSL
+                                        isCustomColorFromSliderPicked = true
+                                    },
+                                    valueRange = 0f..360f,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = Color.hsl(customHue, 0.82f, 0.55f),
+                                        activeTrackColor = Color.Transparent,
+                                        inactiveTrackColor = Color.Transparent
+                                    )
+                                )
+                            }
                         }
                     }
 
@@ -1043,8 +1283,7 @@ fun CreateMatchScreen(
                         value = editedName,
                         onValueChange = { editedName = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.hint_nuovo_nome)) }, // Traduzione input field
-                        // DESIGN CHANGE: Stondatura ridotta a 12dp per coerenza
+                        label = { Text(stringResource(R.string.hint_nuovo_nome)) },
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -1069,25 +1308,23 @@ fun CreateMatchScreen(
                         Text(
                             stringResource(R.string.btn_annulla),
                             color = MaterialTheme.colorScheme.onSurface
-                        ) // Traduzione bottone annulla
+                        )
                     }
 
                     Button(
                         onClick = {
-                            // Aggiunto .text per estrarre la stringa pura dal TextFieldValue
                             if (editedName.isNotBlank()) {
-                                // ------------------------------
-                                // Regola 2: Safe Call con .let
-                                // ------------------------------
-                                // Se l'utente ha premuto contemporaneamente "Annulla", playerToEdit sarà 'null'.
-                                // Di conseguenza, questo intero blocco '{...}' verrà elegantemente ignorato.
                                 playerToEdit?.let { playerSicuro ->
                                     playerSicuro.name = editedName.trim()
                                     viewModel.updatePlayerColor(playerSicuro, editedColor)
+                                    // 🧠 PERSISTENZA COLORE PERSONALIZZATO IN DATASTORE (ESCLUSIVO DA SLIDER HSL):
+                                    // Aggiorna e salva la 13ª casella in DataStore SOLTANTO se il colore proviene dallo slider HSL.
+                                    // Se l'utente seleziona un colore predefinito, la 13ª casella NON viene sovrascritta!
+                                    if (isCustomColorFromSliderPicked) {
+                                        viewModel.saveCustomColor(editedColor)
+                                    }
                                     haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 }
-
-                                // Finito tutto, chiudiamo il dialog svuotando la variabile
                                 playerToEdit = null
                             }
                         },
@@ -1101,7 +1338,7 @@ fun CreateMatchScreen(
                         Text(
                             stringResource(R.string.btn_salva),
                             fontWeight = FontWeight.Bold
-                        ) // Traduzione bottone salvataggio
+                        )
                     }
                 }
             },

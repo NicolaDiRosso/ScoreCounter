@@ -442,4 +442,5 @@
     <string name="badge_inizia">Inizia!</string>
     <string name="titolo_info_sorteggio">🔀 Sorteggio Primo Giocatore</string>
     <string name="msg_info_sorteggio">Toccando il pulsante del sorteggio puoi estrarre in modo del tutto casuale chi deve iniziare la partita. Un\'animazione a roulette scorrerà velocemente tra le card dei giocatori rallentando fino a fermarsi sul vincitore, mostrando il badge \"Inizia!\".</string>
+    <string name="label_seleziona_sfumatura">Sfumatura personalizzata:</string>
 </resources>

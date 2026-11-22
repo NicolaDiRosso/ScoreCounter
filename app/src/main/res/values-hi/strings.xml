@@ -442,4 +442,5 @@
     <string name="badge_inizia">शुरू करें!</string>
     <string name="titolo_info_sorteggio">🔀 पहला खिलाड़ी चयन</string>
     <string name="msg_info_sorteggio">ड्रॉ बटन दबाकर आप बेतरतीब ढंग से चुन सकते हैं कि मैच कौन शुरू करेगा। कार्ड पर एक रूले एनीमेशन चलती है और \"शुरू करें!\" बैज के साथ विजेता पर रुकती है।</string>
+    <string name="label_seleziona_sfumatura">कस्टम रंग शेड:</string>
 </resources>

@@ -442,4 +442,5 @@
     <string name="badge_inizia">Start!</string>
     <string name="titolo_info_sorteggio">🔀 Auslosung erster Spieler</string>
     <string name="msg_info_sorteggio">Durch Tippen auf die Auslosung wählst du zufällig den ersten Spieler aus, der das Spiel beginnt. Eine Roulette-Animation läuft über die Spielerkarten und stoppt beim Gewinner mit dem Badge \"Start!\".</string>
+    <string name="label_seleziona_sfumatura">Benutzerdefinierter Farpton:</string>
 </resources>

@@ -442,4 +442,5 @@
     <string name="badge_inizia">Commence !</string>
     <string name="titolo_info_sorteggio">🔀 Tirage premier joueur</string>
     <string name="msg_info_sorteggio">En appuyant sur le bouton de tirage, vous choisissez au hasard le premier joueur à commencer. Une animation de roulette défile sur les cartes des joueurs et s\'arrête sur le gagnant avec le badge \"Commence !\".</string>
+    <string name="label_seleziona_sfumatura">Teinte personnalisée :</string>
 </resources>

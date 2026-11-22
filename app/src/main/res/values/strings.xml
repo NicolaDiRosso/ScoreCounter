@@ -442,4 +442,5 @@
     <string name="badge_inizia">Start!</string>
     <string name="titolo_info_sorteggio">🔀 Draw First Player</string>
     <string name="msg_info_sorteggio">Tapping the draw button randomly picks the first player to start the match. A roulette animation scrolls across player cards, slowing down to land on the winner and showing the \"Start!\" badge.</string>
+    <string name="label_seleziona_sfumatura">Custom hue:</string>
 </resources>

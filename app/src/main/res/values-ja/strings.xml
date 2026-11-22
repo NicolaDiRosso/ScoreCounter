@@ -442,4 +442,5 @@
     <string name="badge_inizia">スタート！</string>
     <string name="titolo_info_sorteggio">🔀 最初のプレイヤー抽選</string>
     <string name="msg_info_sorteggio">抽選ボタンをタップすると、最初にプレイする人をランダムに選出します。ルーレットアニメーションがプレイヤーカード上を移動し、勝者の位置で停止して「スタート！」バッジを表示します。</string>
+    <string name="label_seleziona_sfumatura">カスタム色合い:</string>
 </resources>

@@ -442,4 +442,5 @@
     <string name="badge_inizia">¡Empieza!</string>
     <string name="titolo_info_sorteggio">🔀 Sorteo primer jugador</string>
     <string name="msg_info_sorteggio">Al pulsar el botón de sorteo puedes elegir al azar quién empieza la partida. Una animación de ruleta se desplaza por las tarjetas de los jugadores y se detiene en el ganador mostrando la etiqueta \"¡Empieza!\".</string>
+    <string name="label_seleziona_sfumatura">Tono personalizado:</string>
 </resources>

@@ -185,6 +185,17 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var hideMatchAwards by mutableStateOf(false)
         private set
 
+    // 9. COLORE PERSONALIZZATO SALVATO (DataStore HSL):
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Memorizza il valore int ARGB dell'ultimo colore personalizzato scelto dall'utente
+     * nella tavolozza HSL con selettore del dialogo "Modifica Giocatore".
+     * Di default è impostato su un colore viola/vibrante (0xFF9C27B0).
+     */
+    private val savedCustomColorKey = intPreferencesKey("saved_custom_color_preference")
+    var savedCustomColor by mutableIntStateOf(0xFF9C27B0.toInt())
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -345,6 +356,31 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 hideMatchAwards = false
+            }
+
+            // CARICAMENTO PREFERENZA COLORE PERSONALIZZATO SALVATO
+            try {
+                val savedCustom = preferences[savedCustomColorKey]
+                if (savedCustom != null) {
+                    savedCustomColor = savedCustom
+                }
+            } catch (_: Exception) {
+                savedCustomColor = 0xFF9C27B0.toInt()
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA COLORE PERSONALIZZATO
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato `savedCustomColor` in memoria.
+     * 2. Scrive il nuovo valore int ARGB asincronamente nel DataStore su disco.
+     */
+    fun saveCustomColor(colorInt: Int) {
+        savedCustomColor = colorInt
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[savedCustomColorKey] = colorInt
             }
         }
     }
