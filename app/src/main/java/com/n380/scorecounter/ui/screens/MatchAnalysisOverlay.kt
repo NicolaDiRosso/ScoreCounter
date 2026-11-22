@@ -105,48 +105,98 @@
                     ) {
                         // ====================================================================
                         // --- INTESTAZIONE OVERLAY ---
-                        // 🧠 UX & MATERIAL 3 (Gerarchia Visiva e Colori):
-                        // 1. "Analisi Partita" torna a essere il titolo principale (displaySmall, primary).
-                        // 2. Il nome della sfida diventa un sottotitolo ordinato (titleLarge, onSurface).
-                        // 3. Rimuoviamo l'effetto grigio (alpha) dal vincitore, dandogli un colore
-                        //    'secondary' per farlo risaltare in modo vibrante ed elegante.
+                        // 🧠 UX & MATERIAL 3 (GERARCHIA VISIVA E ALLINEAMENTO BILANCIATO):
+                        // 1. "Analisi Partita": Titolo principale ancorato e allineato a sinistra (displaySmall, primary).
+                        // 2. Blocco riepilogativo della sfida (Titolo partita, Vincitore, Durata e Modalità) completamente centrato.
                         // ====================================================================
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(bottom = 20.dp), // Diamo più respiro prima del Tavolo
-                            horizontalAlignment = Alignment.Start // Allineato a sinistra sul bordo sinistro come tutte le altre finestre dell'app
+                                .padding(bottom = 16.dp),
+                            horizontalAlignment = Alignment.Start // 1. Titolo della schermata ancorato a sinistra
                         ) {
+                            // TITOLO SCHERMATA (Ancorato a sinistra)
                             Text(
                                 text = stringResource(R.string.titolo_analisi_partita),
-                                style = MaterialTheme.typography.displaySmall, // Dimensione originale in stile Material
+                                style = MaterialTheme.typography.displaySmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary // Colore primario Material
-                            )
-                            AutoResizedText(
-                                text = match.title,
-                                style = MaterialTheme.typography.headlineSmall, // Nome della partita ingrandito
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 10.dp)
                             )
 
-                            // 🧠 PILLOLE INFORMATIVE ADATTIVE (Tempo di gioco e Criterio Punteggio Minimo/Massimo)
-                            // Allineate a sinistra sotto al vincitore in modalità Portrait
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
-                                verticalAlignment = Alignment.CenterVertically
+                            // BLOCCO RIEPILOGATIVO CENTRATO (Titolo partita, Vincitore, Durata e Modalità di vittoria)
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally, // Centratura orizzontale di tutti gli elementi riepilogativi
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                if (match.durationSeconds > 0) {
+                                // 1. Titolo della partita (Centrato orizzontalmente)
+                                AutoResizedText(
+                                    text = match.title,
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center // Testo del titolo centrato
+                                )
+
+                                // 2. Riga del vincitore (Centrata con icona del trofeo e testo)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center, // Centratura icona + testo vincitore
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 2.dp, bottom = 2.dp)
+                                ) {
+
+                                    Text(
+                                        text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                }
+
+                                // 3 & 4. Riquadri affiancati (Durata + Modalità di Vittoria) Centrati orizzontalmente
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally), // Centratura orizzontale dei 2 riquadri
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (match.durationSeconds > 0) {
+                                        Surface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = MaterialTheme.colorScheme.surfaceVariant,
+                                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Schedule,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Text(
+                                                    text = formatTime(match.durationSeconds),
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    val isLowest = match.isLowestScoreWins
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        color = if (isLowest) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                                     ) {
                                         Row(
@@ -155,44 +205,18 @@
                                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
                                             Icon(
-                                                imageVector = Icons.Filled.Schedule,
+                                                imageVector = if (isLowest) Icons.AutoMirrored.Filled.TrendingDown else Icons.AutoMirrored.Filled.TrendingUp,
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
+                                                tint = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Text(
-                                                text = formatTime(match.durationSeconds),
+                                                text = stringResource(if (isLowest) R.string.badge_punteggio_minimo else R.string.badge_punteggio_massimo),
                                                 style = MaterialTheme.typography.labelLarge,
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                color = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
-                                    }
-                                }
-
-                                val isLowest = match.isLowestScoreWins
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = if (isLowest) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (isLowest) Icons.AutoMirrored.Filled.TrendingDown else Icons.AutoMirrored.Filled.TrendingUp,
-                                            contentDescription = null,
-                                            tint = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text(
-                                            text = stringResource(if (isLowest) R.string.badge_punteggio_minimo else R.string.badge_punteggio_massimo),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (isLowest) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
                                     }
                                 }
                             }

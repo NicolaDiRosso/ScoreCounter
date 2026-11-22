@@ -23,6 +23,7 @@
     import androidx.compose.material3.Icon
     import androidx.compose.material3.MaterialTheme
     import androidx.compose.material3.Surface
+    import androidx.compose.ui.text.style.TextAlign
     import androidx.compose.material3.Text
     import androidx.compose.runtime.*
     import androidx.compose.ui.Alignment
@@ -1079,7 +1080,8 @@
         modifier: Modifier = Modifier,
         style: TextStyle = MaterialTheme.typography.titleMedium,
         color: Color = style.color,
-        fontWeight: FontWeight? = style.fontWeight
+        fontWeight: FontWeight? = style.fontWeight,
+        textAlign: TextAlign? = style.textAlign
     ) {
         // 🧠 SICUREZZA DIMENSIONE FONT (PROTEZIONE ANTI-CRASH):
         // Se `style.fontSize` non è specificato (Unspecified), impostiamo una dimensione base di 16.sp
@@ -1090,11 +1092,12 @@
         // Manteniamo la memoria di `resizedStyle` agganciata allo `style` base anziché al valore del `text`.
         // In questo modo, quando il testo varia ogni secondo (es. da "00:01" a "00:02"), il componente
         // non azzera la variabile `readyToDraw` mantenendo attivo il disegno continuo senza alcun fotogramma bianco (flickering).
-        var resizedStyle by remember(style) {
+        var resizedStyle by remember(style, textAlign) {
             mutableStateOf(
                 style.copy(
                     fontSize = initialFontSize,
-                    lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified
+                    lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified,
+                    textAlign = textAlign ?: style.textAlign
                 )
             )
         }
