@@ -458,4 +458,8 @@
     <string name="desc_partecipanti_manuale">ti permette di inserire un giocatore estemporaneo scrivendo direttamente il suo nome.</string>
     <string name="label_tavolo_partecipanti">Tavolo partecipanti:</string>
     <string name="desc_tavolo_partecipanti">mostra i giocatori in gara: puoi riordinarli come sono seduti al tavolo oppure modificare nome e colore della card.</string>
+    <string name="label_sfondo_app">Sfondo app</string>
+    <string name="desc_sfondo_app">Stile decorativo di sfondo</string>
+    <string name="sfondo_icone">Icone tematiche</string>
+    <string name="sfondo_tinta_unita">Tinta unita</string>
 </resources>

@@ -120,6 +120,7 @@ fun SettingsScreen(
     // ====================================================================
     // Gestiscono la visibilità dei menu a tendina e dei dialoghi modali.
     var showThemeDropdown by remember { mutableStateOf(false) }
+    var showBackgroundDropdown by remember { mutableStateOf(false) }
     var showLanguageDropdown by remember { mutableStateOf(false) }
     var showOrientationDropdown by remember { mutableStateOf(false) }
     var showScreenKeepOnDropdown by remember { mutableStateOf(false) }
@@ -309,6 +310,66 @@ fun SettingsScreen(
                                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                         showThemeDropdown = false
                                         viewModel.setAppThemePreference(index)
+                                    }
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // ------------------------------------------------------------
+                        // A.3: SFONDO APP (Gestisce lo stile decorativo di sfondo)
+                        // ------------------------------------------------------------
+                        val backgroundLabels = listOf<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>>(
+                            stringResource(R.string.sfondo_icone) to Icons.Filled.Palette,
+                            stringResource(R.string.sfondo_tinta_unita) to Icons.Filled.Visibility
+                        )
+                        val safeBackgroundIndex = viewModel.backgroundStyle.ordinal.coerceIn(0, backgroundLabels.size - 1)
+
+                        SettingsDropdownItem(
+                            title = stringResource(R.string.label_sfondo_app),
+                            subtitle = stringResource(R.string.desc_sfondo_app),
+                            currentSelectionText = backgroundLabels[safeBackgroundIndex].first,
+                            currentSelectionIcon = backgroundLabels[safeBackgroundIndex].second,
+                            showTextInCollapsed = false,
+                            isExpanded = showBackgroundDropdown,
+                            onExpandRequest = { showBackgroundDropdown = true },
+                            onDismissRequest = { showBackgroundDropdown = false }
+                        ) {
+                            backgroundLabels.forEachIndexed { index, (label, icon) ->
+                                val isSelected = safeBackgroundIndex == index
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    text = {
+                                        Text(
+                                            text = label,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    trailingIcon = {
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        showBackgroundDropdown = false
+                                        viewModel.setBackgroundStylePreference(index)
                                     }
                                 )
                             }

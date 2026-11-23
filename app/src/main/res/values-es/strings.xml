@@ -458,4 +458,8 @@
     <string name="desc_partecipanti_manuale">permite añadir un jugador escribiendo su nombre directamente.</string>
     <string name="label_tavolo_partecipanti">Mesa de participantes:</string>
     <string name="desc_tavolo_partecipanti">muestra los jugadores: puedes reordenarlos o editar el nombre y color de cada tarjeta.</string>
+    <string name="label_sfondo_app">Fondo de la app</string>
+    <string name="desc_sfondo_app">Estilo decorativo de fondo</string>
+    <string name="sfondo_icone">Iconos temáticos</string>
+    <string name="sfondo_tinta_unita">Color sólido</string>
 </resources>

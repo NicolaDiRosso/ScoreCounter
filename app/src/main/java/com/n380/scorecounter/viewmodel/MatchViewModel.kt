@@ -26,6 +26,7 @@ import com.n380.scorecounter.model.PlayerRecord
 import com.n380.scorecounter.model.ScoreAction
 import com.n380.scorecounter.model.ScoreActionRecord
 import com.n380.scorecounter.model.ScoreCounterBackup
+import com.n380.scorecounter.ui.components.BackgroundStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -194,6 +195,16 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
      */
     private val savedCustomColorKey = intPreferencesKey("saved_custom_color_preference")
     var savedCustomColor by mutableIntStateOf(0xFF9C27B0.toInt())
+        private set
+
+    // 10. STILE SFONDO APP:
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Memorizza lo stile decorativo dello sfondo dell'applicazione.
+     * Di default è impostato su BackgroundStyle.ICONS (Icone tematiche in filigrana).
+     */
+    private val appBackgroundKey = intPreferencesKey("app_background_preference")
+    var backgroundStyle by mutableStateOf(BackgroundStyle.ICONS)
         private set
 
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
@@ -366,6 +377,31 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 savedCustomColor = 0xFF9C27B0.toInt()
+            }
+
+            // CARICAMENTO PREFERENZA STILE SFONDO APP
+            try {
+                val savedBackgroundIndex = preferences[appBackgroundKey]
+                if (savedBackgroundIndex != null) {
+                    backgroundStyle = BackgroundStyle.fromInt(savedBackgroundIndex)
+                }
+            } catch (_: Exception) {
+                backgroundStyle = BackgroundStyle.ICONS
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA STILE SFONDO APP
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Aggiorna lo stato `backgroundStyle` in memoria.
+     * 2. Scrive asincronamente la preferenza numerica nel DataStore su disco.
+     */
+    fun setBackgroundStylePreference(styleIndex: Int) {
+        backgroundStyle = BackgroundStyle.fromInt(styleIndex)
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[appBackgroundKey] = styleIndex
             }
         }
     }

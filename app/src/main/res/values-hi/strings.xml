@@ -458,4 +458,8 @@
     <string name="desc_partecipanti_manuale">नाम टाइप करके खिलाड़ी जोड़ें।</string>
     <string name="label_tavolo_partecipanti">टेबल प्रतिभागी:</string>
     <string name="desc_tavolo_partecipanti">खिलाड़ी दिखाएं: पुनorder करें या संपादित करें।</string>
+    <string name="label_sfondo_app">ऐप पृष्ठभूमि</string>
+    <string name="desc_sfondo_app">सजावटी पृष्ठभूमि शैली</string>
+    <string name="sfondo_icone">थीमैटिक आइकन</string>
+    <string name="sfondo_tinta_unita">सादा रंग</string>
 </resources>

@@ -28,7 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.n380.scorecounter.ui.components.PatternedBackground
+import com.n380.scorecounter.ui.components.AppBackground
 import com.n380.scorecounter.ui.screens.CounterScreen
 import com.n380.scorecounter.ui.screens.CreateMatchScreen
 import com.n380.scorecounter.ui.screens.GlobalStatsScreen
@@ -102,8 +102,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
                 ) {
 
-                    // LIVELLO 1 (Lo Sfondo): Dipingiamo il muro con la nostra griglia di icone giganti e trasparenti.
-                    PatternedBackground()
+                    // LIVELLO 1 (Lo Sfondo): Dipingiamo il muro con lo stile di sfondo attivo (es. ICONS).
+                    AppBackground(style = matchViewModel.backgroundStyle)
 
                     // INIZIALIZZAZIONE STRUMENTI:
                     // Creiamo il "Vigile Urbano" che sposta l'utente da una stanza all'altra

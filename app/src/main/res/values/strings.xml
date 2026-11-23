@@ -458,4 +458,8 @@
     <string name="desc_partecipanti_manuale">allows you to add an ad-hoc player by typing their name directly.</string>
     <string name="label_tavolo_partecipanti">Table participants:</string>
     <string name="desc_tavolo_partecipanti">shows participating players: you can reorder them as seated at the table or edit each card\'s name and color.</string>
+    <string name="label_sfondo_app">App background</string>
+    <string name="desc_sfondo_app">Decorative background style</string>
+    <string name="sfondo_icone">Thematic icons</string>
+    <string name="sfondo_tinta_unita">Solid color</string>
 </resources>

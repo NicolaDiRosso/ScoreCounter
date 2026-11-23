@@ -458,4 +458,8 @@
     <string name="desc_partecipanti_manuale">permet d\'ajouter un joueur en tapant directement son nom.</string>
     <string name="label_tavolo_partecipanti">Participants à la table :</string>
     <string name="desc_tavolo_partecipanti">affiche les joueurs : réordonnez-les ou modifiez nom et couleur.</string>
+    <string name="label_sfondo_app">Arrière-plan</string>
+    <string name="desc_sfondo_app">Style d\'arrière-plan décoratif</string>
+    <string name="sfondo_icone">Icônes thématiques</string>
+    <string name="sfondo_tinta_unita">Couleur unie</string>
 </resources>

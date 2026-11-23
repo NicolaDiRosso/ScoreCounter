@@ -458,4 +458,8 @@
     <string name="desc_partecipanti_manuale">名前を直接入力してプレイヤーを追加できます。</string>
     <string name="label_tavolo_partecipanti">テーブルの参加者:</string>
     <string name="desc_tavolo_partecipanti">参加プレイヤーを表示: 並び替えや名前・カラーの変更が可能。</string>
+    <string name="label_sfondo_app">アプリの背景</string>
+    <string name="desc_sfondo_app">装飾的な背景スタイル</string>
+    <string name="sfondo_icone">テーマアイコン</string>
+    <string name="sfondo_tinta_unita">単色</string>
 </resources>

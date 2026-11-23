@@ -77,67 +77,6 @@
     }
 
     // ====================================================================
-    // COMPONENTE: SFONDO DECORATIVO GLOBALE
-    // ====================================================================
-    @Composable
-    fun PatternedBackground() {
-        // La lista delle nostre icone a tema (Giochi, Anime, Carte, Coppe, Timer, Medaglie)
-        val icons = listOf(
-            // Le tue originali
-            Icons.Filled.VideogameAsset,   // Controller Classico
-            Icons.Filled.Style,            // Carte
-            Icons.Filled.Tv,               // Anime/Schermo
-            Icons.Filled.EmojiEvents,      // Coppa del vincitore
-            Icons.Filled.Timer,            // Cronometro
-            Icons.Filled.WorkspacePremium, // Medaglia/Corona
-
-            // ICONE TEMATICHE ESCLUSIVE PER LO SFONDO
-            Icons.Filled.Casino,           // Dadi (Perfetto per i giochi da tavolo!)
-            Icons.Filled.SportsEsports,    // Controller Moderno (Per tornei e console)
-            Icons.Filled.Extension,        // Pezzo di Puzzle (Per giochi di strategia e logica)
-            Icons.Filled.Star,             // Stella (Il classico simbolo dei punti)
-            Icons.Filled.FlashOn,          // Fulmine (Richiama la combo "On Fire" e la velocità)
-        )
-
-        // ---> IL MOTORE CASUALE BLOCCATO <---
-        // Creiamo una "mappa" bidimensionale fissa. Viene calcolata a caso la prima volta,
-        // ma grazie a 'remember' lo schermo non sfarfallerà mai durante la partita!
-        val randomGrid = remember {
-            List(34) { // 34 righe
-                List(11) { // 11 colonne
-                    icons.random() // Sceglie un'icona totalmente a caso per ogni singola cella
-                }
-            }
-        }
-        // Un contenitore grande quanto tutto lo schermo
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {//mette 15 pixel di vuoto tra un'icona e l'altra in verticale.
-                // Disegniamo 33 righe per coprire anche gli schermi più lunghi
-                for (row in 0..33) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(43.dp),//mette 43 pixel di vuoto tra un'icona e l'altra in orizzontale.
-                        // IL TRUCCO: Sfalsiamo leggermente le righe dispari per fare l'effetto "muro di mattoni" sfalsato
-                        modifier = if (row % 2 == 0) Modifier else Modifier.padding(start = 36.dp)
-                    ) {
-                        for (col in 0..10) {val icon = randomGrid[row][col] // Andiamo a leggere l'icona salvata nella nostra mappa casuale
-
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                //Usiamo il colore del testo, ma con opacità al 5% (0.05f). Sarà un'ombra elegantissima!
-                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // ====================================================================
 // 🧠 COMPONENTE WRAPPER: SFUMATURA LATERALE (Faded Right Edge)
 // ====================================================================
