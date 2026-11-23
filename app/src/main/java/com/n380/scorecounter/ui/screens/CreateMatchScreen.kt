@@ -17,6 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
@@ -230,6 +232,21 @@ fun CreateMatchScreen(
                                     !isTitleValid && !arePlayersPresent -> errTitoloGiocatori // Sostituzione con la variabile tradotta
                                     !isTitleValid -> errSoloTitolo // Sostituzione con la variabile tradotta
                                     else -> errSoloGiocatori // Sostituzione con la variabile tradotta
+                                }
+
+                                // 🧠 ANIMAZIONE DI SCORRIMENTO FLUIDO CON RALLENTAMENTO FINALE (Easing):
+                                // Se il nome della sfida manca, facciamo scorrere la pagina in cima verso la sezione "Regole del gioco"
+                                // utilizzando animateScrollTo con tween e FastOutSlowInEasing (accelerazione iniziale e decelerazione dolce).
+                                if (!isTitleValid) {
+                                    coroutineScope.launch {
+                                        scrollState.animateScrollTo(
+                                            value = 0,
+                                            animationSpec = tween(
+                                                durationMillis = 600,
+                                                easing = FastOutSlowInEasing
+                                            )
+                                        )
+                                    }
                                 }
 
                                 // Esecuzione Asincrona: Mostra la notifica a comparsa (Snackbar)

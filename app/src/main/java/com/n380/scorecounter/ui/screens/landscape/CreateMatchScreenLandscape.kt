@@ -1,5 +1,7 @@
 package com.n380.scorecounter.ui.screens.landscape
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -95,6 +97,9 @@ fun CreateMatchScreenLandscape(
     val errSoloTitolo = stringResource(R.string.err_solo_titolo)
     val errSoloGiocatori = stringResource(R.string.err_solo_giocatori)
 
+    // 🧠 STATO SCORRIMENTO (Landscape): Consente di comandare lo scroll della card di configurazione
+    val scrollState = rememberScrollState()
+
     Row(
         modifier = modifier
             .fillMaxSize()
@@ -160,7 +165,7 @@ fun CreateMatchScreenLandscape(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .padding(12.dp)
                 ) {
                     // --------------------------------------------------------
@@ -517,6 +522,22 @@ fun CreateMatchScreenLandscape(
                             !isTitleValid -> errSoloTitolo
                             else -> errSoloGiocatori
                         }
+
+                        // 🧠 ANIMAZIONE DI SCORRIMENTO FLUIDO CON RALLENTAMENTO FINALE (Easing):
+                        // Se il nome della sfida manca, facciamo scorrere la card in cima verso "Regole del gioco"
+                        // con tween e FastOutSlowInEasing (accelerazione iniziale e decelerazione dolce).
+                        if (!isTitleValid) {
+                            coroutineScope.launch {
+                                scrollState.animateScrollTo(
+                                    value = 0,
+                                    animationSpec = tween(
+                                        durationMillis = 600,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                )
+                            }
+                        }
+
                         coroutineScope.launch {
                             snackbarHostState.currentSnackbarData?.dismiss()
                             snackbarHostState.showSnackbar(
