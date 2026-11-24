@@ -29,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.n380.scorecounter.ui.components.AppBackground
+import com.n380.scorecounter.ui.screens.BackgroundSettingsScreen
 import com.n380.scorecounter.ui.screens.CounterScreen
 import com.n380.scorecounter.ui.screens.CreateMatchScreen
 import com.n380.scorecounter.ui.screens.GlobalStatsScreen
@@ -303,6 +304,15 @@ class MainActivity : ComponentActivity() {
                         // ROTTA 6: Impostazioni e Preferenze
                         composable("settings") {
                             SettingsScreen(
+                                viewModel = matchViewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToBackgroundSettings = { navController.navigate("background_settings") }
+                            )
+                        }
+
+                        // ROTTA 7: Sfondo App (Selezione dello Stile di Sfondo)
+                        composable("background_settings") {
+                            BackgroundSettingsScreen(
                                 viewModel = matchViewModel,
                                 onNavigateBack = { navController.popBackStack() }
                             )

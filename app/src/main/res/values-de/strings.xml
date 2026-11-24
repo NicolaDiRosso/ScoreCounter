@@ -459,7 +459,9 @@
     <string name="label_tavolo_partecipanti">Tischteilnehmer:</string>
     <string name="desc_tavolo_partecipanti">zeigt teilnehmende Spieler: sortieren oder Name und Farbe bearbeiten.</string>
     <string name="label_sfondo_app">App-Hintergrund</string>
-    <string name="desc_sfondo_app">Dekorativer Hintergrundstil</string>
+    <string name="desc_sfondo_app">Wähle den visuellen Hintergrundstil</string>
     <string name="sfondo_icone">Thematische Symbole</string>
     <string name="sfondo_tinta_unita">Einfarbig</string>
+    <string name="titolo_anteprima_sfondo">Live-Vorschau</string>
+    <string name="desc_anteprima_sfondo">Prüfe den Kontrast der Spielkarten</string>
 </resources>

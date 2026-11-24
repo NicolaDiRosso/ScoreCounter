@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -64,6 +65,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -78,7 +80,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.n380.scorecounter.R
 import com.n380.scorecounter.ui.components.AnimatedSelectableChip
+import com.n380.scorecounter.ui.components.AppBackground
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.BackgroundStyle
 import com.n380.scorecounter.viewmodel.MatchViewModel
 
 /**
@@ -105,6 +109,7 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
 fun SettingsScreen(
     viewModel: MatchViewModel,
     onNavigateBack: () -> Unit,
+    onNavigateToBackgroundSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -120,15 +125,12 @@ fun SettingsScreen(
     // ====================================================================
     // Gestiscono la visibilità dei menu a tendina e dei dialoghi modali.
     var showThemeDropdown by remember { mutableStateOf(false) }
-    var showBackgroundDropdown by remember { mutableStateOf(false) }
     var showLanguageDropdown by remember { mutableStateOf(false) }
     var showOrientationDropdown by remember { mutableStateOf(false) }
     var showScreenKeepOnDropdown by remember { mutableStateOf(false) }
 
     var showPositiveStepDialog by remember { mutableStateOf(false) }
     var showNegativeStepDialog by remember { mutableStateOf(false) }
-
-
 
     // ====================================================================
     // 🧠 RENDER DIALOGHI MODALI (Incremento / Decremento Prolungato)
@@ -321,57 +323,106 @@ fun SettingsScreen(
                         )
 
                         // ------------------------------------------------------------
-                        // A.3: SFONDO APP (Gestisce lo stile decorativo di sfondo)
+                        // A.2: SFONDO APP (Navigazione verso la schermata dedicata Sfondo App)
                         // ------------------------------------------------------------
-                        val backgroundLabels = listOf<Pair<String, androidx.compose.ui.graphics.vector.ImageVector>>(
-                            stringResource(R.string.sfondo_icone) to Icons.Filled.Palette,
-                            stringResource(R.string.sfondo_tinta_unita) to Icons.Filled.Visibility
-                        )
-                        val safeBackgroundIndex = viewModel.backgroundStyle.ordinal.coerceIn(0, backgroundLabels.size - 1)
-
-                        SettingsDropdownItem(
-                            title = stringResource(R.string.label_sfondo_app),
-                            subtitle = stringResource(R.string.desc_sfondo_app),
-                            currentSelectionText = backgroundLabels[safeBackgroundIndex].first,
-                            currentSelectionIcon = backgroundLabels[safeBackgroundIndex].second,
-                            showTextInCollapsed = false,
-                            isExpanded = showBackgroundDropdown,
-                            onExpandRequest = { showBackgroundDropdown = true },
-                            onDismissRequest = { showBackgroundDropdown = false }
+                        // 🧠 SPIEGAZIONE DIDATTICA:
+                        // Usiamo la stessa identica pillola standard da 72.dp x 40.dp delle altre
+                        // opzioni per garantire un allineamento verticale perfetto.
+                        // Al suo interno mostriamo un mini-riquadro che riflette lo stile attivo:
+                        // - ICONS: mostra al centro una piccola icona tematica in filigrana
+                        // - SOLID: mostra il solo colore pulito del tema (chiaro/scuro/Material You)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    onNavigateToBackgroundSettings()
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            backgroundLabels.forEachIndexed { index, (label, icon) ->
-                                val isSelected = safeBackgroundIndex == index
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = null,
-                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    },
-                                    text = {
-                                        Text(
-                                            text = label,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                        )
-                                    },
-                                    trailingIcon = {
-                                        if (isSelected) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        showBackgroundDropdown = false
-                                        viewModel.setBackgroundStylePreference(index)
-                                    }
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = 4.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                AutoResizedText(
+                                    text = stringResource(R.string.label_sfondo_app),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
+                                Text(
+                                    text = stringResource(R.string.desc_sfondo_app),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                                    softWrap = true,
+                                    maxLines = 3,
+                                    lineHeight = 16.sp
+                                )
+                            }
+
+                            // Pillola standardizzata (width = 72.dp, height = 40.dp) allineata alle altre voci
+                            Surface(
+                                shape = RoundedCornerShape(14.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                border = BorderStroke(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)
+                                ),
+                                modifier = Modifier
+                                    .size(width = 72.dp, height = 40.dp)
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        onNavigateToBackgroundSettings()
+                                    }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    // Mini-riquadro con lo sfondo del tema e il simbolo rappresentativo centrato
+                                    Box(
+                                        modifier = Modifier
+                                            .size(width = 36.dp, height = 26.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(MaterialTheme.colorScheme.background)
+                                            .border(
+                                                width = 1.dp,
+                                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                                shape = RoundedCornerShape(8.dp)
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        when (viewModel.backgroundStyle) {
+                                            BackgroundStyle.ICONS -> {
+                                                // Piccola icona tematica centrata che richiama la trama di sfondo
+                                                Icon(
+                                                    imageVector = Icons.Filled.SportsEsports,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                            BackgroundStyle.SOLID -> {
+                                                // Nessun elemento: mostra il riquadro pulito a tinta unita
+                                            }
+                                        }
+                                    }
+
+                                    // Freccia standard verso destra che indica l'apertura di una nuova pagina
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -381,7 +432,7 @@ fun SettingsScreen(
                         )
 
                         // ------------------------------------------------------------
-                        // A.2: LINGUA APP (Gestisce le 7 lingue supportate + bandiere)
+                        // A.3: LINGUA APP (Gestisce le 7 lingue supportate + bandiere)
                         // ------------------------------------------------------------
                         val supportedLanguages = listOf(
                             Triple("it", "Italiano", "🇮🇹"),
@@ -451,7 +502,7 @@ fun SettingsScreen(
                         )
 
                         // ------------------------------------------------------------
-                        // A.3: BLOCCO ORIENTAMENTO (Auto, Orizzontale, Verticale)
+                        // A.4: BLOCCO ORIENTAMENTO (Auto, Orizzontale, Verticale)
                         // ------------------------------------------------------------
                         val orientationOptions = listOf(
                             stringResource(R.string.opt_orientamento_auto) to Icons.Filled.ScreenRotation,

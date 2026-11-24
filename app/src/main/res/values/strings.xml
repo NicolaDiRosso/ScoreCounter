@@ -459,7 +459,9 @@
     <string name="label_tavolo_partecipanti">Table participants:</string>
     <string name="desc_tavolo_partecipanti">shows participating players: you can reorder them as seated at the table or edit each card\'s name and color.</string>
     <string name="label_sfondo_app">App background</string>
-    <string name="desc_sfondo_app">Decorative background style</string>
+    <string name="desc_sfondo_app">Choose the background visual style</string>
     <string name="sfondo_icone">Thematic icons</string>
     <string name="sfondo_tinta_unita">Solid color</string>
+    <string name="titolo_anteprima_sfondo">Live preview</string>
+    <string name="desc_anteprima_sfondo">Check in-game card contrast</string>
 </resources>

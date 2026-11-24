@@ -459,7 +459,9 @@
     <string name="label_tavolo_partecipanti">Mesa de participantes:</string>
     <string name="desc_tavolo_partecipanti">muestra los jugadores: puedes reordenarlos o editar el nombre y color de cada tarjeta.</string>
     <string name="label_sfondo_app">Fondo de la app</string>
-    <string name="desc_sfondo_app">Estilo decorativo de fondo</string>
+    <string name="desc_sfondo_app">Elige el estilo visual del fondo</string>
     <string name="sfondo_icone">Iconos temáticos</string>
     <string name="sfondo_tinta_unita">Color sólido</string>
+    <string name="titolo_anteprima_sfondo">Vista previa en vivo</string>
+    <string name="desc_anteprima_sfondo">Evalúa el contraste de las tarjetas</string>
 </resources>
