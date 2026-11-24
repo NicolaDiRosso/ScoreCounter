@@ -466,6 +466,8 @@
     <string name="sfondo_puntini">Points</string>
     <string name="sfondo_geometrico">Plateau</string>
     <string name="sfondo_onde">Vagues</string>
+    <string name="sfondo_icone_animate">Icônes animées</string>
+    <string name="sfondo_numeri_animati">Chiffres flottants</string>
     <string name="titolo_anteprima_sfondo">Aperçu en direct</string>
     <string name="desc_anteprima_sfondo">Évaluez le contraste des cartes</string>
 </resources>

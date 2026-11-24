@@ -1,5 +1,13 @@
 package com.n380.scorecounter.ui.components
 
+import android.graphics.Paint
+import android.graphics.Typeface
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,6 +16,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,9 +26,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.PI
 import kotlin.math.ceil
+import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
 
@@ -31,6 +45,8 @@ import kotlin.math.sin
  * - DOTS: Trama regolare a puntini stile taccuino segnapunti.
  * - GEOMETRIC: Reticolato diagonale a rombi stile plancia da gioco.
  * - WAVES: Onde sinusoidali morbide e rilassanti sul fondo dello schermo.
+ * - ANIMATED_ICONS: Griglia di icone tematiche in lento scorrimento diagonale continuo.
+ * - ANIMATED_NUMBERS: Numeri e punteggi in filigrana che fluttuano lentamente verso l'alto.
  */
 enum class BackgroundStyle {
     ICONS,
@@ -38,7 +54,9 @@ enum class BackgroundStyle {
     GRADIENT,
     DOTS,
     GEOMETRIC,
-    WAVES;
+    WAVES,
+    ANIMATED_ICONS,
+    ANIMATED_NUMBERS;
 
     companion object {
         /**
@@ -81,6 +99,8 @@ fun AppBackground(
             BackgroundStyle.DOTS -> DotGridBackground()
             BackgroundStyle.GEOMETRIC -> GeometricBoardBackground()
             BackgroundStyle.WAVES -> WavesBackground()
+            BackgroundStyle.ANIMATED_ICONS -> AnimatedIconsBackground()
+            BackgroundStyle.ANIMATED_NUMBERS -> AnimatedNumbersBackground()
         }
     }
 }
@@ -341,3 +361,215 @@ fun WavesBackground() {
         drawWave(baseHeightRatio = 0.82f, amplitudeRatio = 0.05f, phaseShift = 4.2f, color = waveColorPrimary)
     }
 }
+
+/**
+ * ====================================================================
+ * COMPONENTE: SFONDO ICONE ANIMATE (AnimatedIconsBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Versione animata di [PatternedBackground]: fa scorrere lentamente l'intera
+ * griglia di icone in diagonale usando `rememberInfiniteTransition`.
+ * IL TRUCCO DEL LOOP INFINITO SENZA SCATTI (SEAMLESS LOOP):
+ * Trasliamo la griglia esattamente di un periodo multiplo di 2 righe e 2 colonne
+ * (`2 * rowStep` e `2 * colStep`), scegliendo le icone in modo periodico:
+ * al 100% dell'animazione ogni icona si trova esattamente al posto della gemella
+ * successiva, rendendo il riavvio del ciclo completamente invisibile all'occhio!
+ */
+@Composable
+fun AnimatedIconsBackground() {
+    val icons = listOf(
+        Icons.Filled.VideogameAsset,
+        Icons.Filled.Style,
+        Icons.Filled.Tv,
+        Icons.Filled.EmojiEvents,
+        Icons.Filled.Timer,
+        Icons.Filled.WorkspacePremium,
+        Icons.Filled.Casino,
+        Icons.Filled.SportsEsports,
+        Icons.Filled.Extension,
+        Icons.Filled.Star,
+        Icons.Filled.FlashOn,
+    )
+
+    val iconSize = 36.dp
+    val horizontalSpacing = 43.dp
+    val verticalSpacing = 15.dp
+    val diagonalAngle = -40f
+
+    val rowStepDp = iconSize + verticalSpacing
+    val colStepDp = iconSize + horizontalSpacing
+
+    val density = LocalDensity.current
+    val loopXSpanPx = with(density) { (colStepDp * 2).toPx() }
+    val loopYSpanPx = with(density) { (rowStepDp * 2).toPx() }
+
+    // Animazione lineare lenta (18 secondi per attraversare 2 celle)
+    val infiniteTransition = rememberInfiniteTransition(label = "AnimatedIconsTransition")
+    val progress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 18000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "IconsDriftProgress"
+    )
+
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        // Aggiungiamo un margine generoso (+ 280.dp) per coprire sia la diagonale sia lo scorrimento
+        val diagonalDp = (hypot(maxWidth.value, maxHeight.value) + 280f).dp
+
+        val rows = (ceil(diagonalDp.value / rowStepDp.value).toInt() + 2).coerceAtLeast(2)
+        val cols = (ceil(diagonalDp.value / colStepDp.value).toInt() + 2).coerceAtLeast(2)
+
+        // Griglia periodica (modulo 2 su righe e colonne) per garantire un loop senza salti
+        val periodicGrid = remember(rows, cols) {
+            List(rows) { r ->
+                List(cols) { c ->
+                    val index = ((r % 2) * 5 + (c % 2) * 3 + (r / 2) * 2 + (c / 2)) % icons.size
+                    icons[index]
+                }
+            }
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing),
+            modifier = Modifier
+                .requiredSize(diagonalDp)
+                .graphicsLayer {
+                    rotationZ = diagonalAngle
+                    translationX = -progress * loopXSpanPx
+                    translationY = -progress * loopYSpanPx
+                }
+        ) {
+            for (row in 0 until rows) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
+                    modifier = if (row % 2 == 0) Modifier else Modifier.padding(start = 36.dp)
+                ) {
+                    for (col in 0 until cols) {
+                        val icon = periodicGrid[row][col]
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
+                            modifier = Modifier
+                                .size(iconSize)
+                                .graphicsLayer {
+                                    rotationZ = -diagonalAngle
+                                }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE: SFONDO NUMERI FLUTTUANTI (AnimatedNumbersBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Disegna su Canvas nativo (tramite `nativeCanvas.drawText`) una costellazione
+ * di numeri e punteggi (+1, 10, 100, +5, 7, 42, ecc.) che salgono lentamente
+ * dal basso verso l'alto con un leggero ondeggiamento orizzontale e rotazione
+ * armoniosa. Essendo disegnato interamente in un unico passaggio GPU,
+ * non crea oggetti Composable figli e garantisce fluidità totale a 60/120 fps.
+ */
+@Composable
+fun AnimatedNumbersBackground() {
+    val textColorArgb = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f).toArgb()
+
+    // Animazione continua da 0 a 1 in 24 secondi per un movimento lento e rilassante
+    val infiniteTransition = rememberInfiniteTransition(label = "AnimatedNumbersTransition")
+    val progress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 24000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "NumbersFloatProgress"
+    )
+
+    // Elenco pre-calcolato di 18 particelle numeriche con posizioni, dimensioni e velocità sfalsate
+    val particles = remember {
+        listOf(
+            NumberParticle("+1", 0.08f, 0.12f, 22f, 1, 0.02f, 0f, -12f),
+            NumberParticle("10", 0.24f, 0.35f, 28f, 2, 0.025f, 1.1f, 10f),
+            NumberParticle("+5", 0.42f, 0.18f, 20f, 1, 0.018f, 2.3f, -8f),
+            NumberParticle("100", 0.62f, 0.45f, 30f, 1, 0.022f, 0.7f, 14f),
+            NumberParticle("7", 0.80f, 0.22f, 26f, 2, 0.02f, 3.4f, -15f),
+            NumberParticle("42", 0.92f, 0.60f, 24f, 1, 0.015f, 1.9f, 9f),
+            NumberParticle("+10", 0.14f, 0.68f, 25f, 2, 0.022f, 4.1f, 12f),
+            NumberParticle("21", 0.33f, 0.82f, 27f, 1, 0.02f, 2.8f, -10f),
+            NumberParticle("1°", 0.52f, 0.74f, 29f, 2, 0.018f, 0.4f, 8f),
+            NumberParticle("+2", 0.71f, 0.88f, 21f, 1, 0.025f, 3.7f, -14f),
+            NumberParticle("99", 0.86f, 0.92f, 26f, 2, 0.02f, 1.5f, 11f),
+            NumberParticle("0", 0.05f, 0.44f, 24f, 1, 0.016f, 5.0f, -6f),
+            NumberParticle("+3", 0.28f, 0.56f, 22f, 1, 0.024f, 2.1f, 15f),
+            NumberParticle("50", 0.48f, 0.40f, 26f, 2, 0.02f, 4.6f, -11f),
+            NumberParticle("8", 0.66f, 0.10f, 23f, 1, 0.021f, 1.3f, 7f),
+            NumberParticle("12", 0.77f, 0.54f, 25f, 1, 0.019f, 3.0f, -9f),
+            NumberParticle("+1", 0.90f, 0.30f, 20f, 2, 0.023f, 0.9f, 13f),
+            NumberParticle("25", 0.18f, 0.94f, 24f, 1, 0.017f, 4.4f, -13f)
+        )
+    }
+
+    val paint = remember {
+        Paint().apply {
+            isAntiAlias = true
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+    }
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+        val scaleFactor = (w.coerceAtLeast(180f) / 360f).coerceIn(0.55f, 1.35f)
+        paint.color = textColorArgb
+
+        particles.forEach { p ->
+            // Posizione verticale ciclica (sale dal basso verso l'alto e rientra dal fondo)
+            val rawY = (p.startYRatio - progress * p.speedMultiplier) % 1f
+            val normalizedY = if (rawY < 0f) rawY + 1f else rawY
+            val y = normalizedY * (h + 60.dp.toPx()) - 30.dp.toPx()
+
+            // Leggero ondeggiamento orizzontale armonioso
+            val sway = sin(progress * 2.0 * PI * p.speedMultiplier + p.phase).toFloat() * (w * p.swayAmplitudeRatio)
+            val x = p.xRatio * w + sway
+
+            // Leggera oscillazione dell'angolo di inclinazione
+            val angle = p.baseRotation + cos(progress * 2.0 * PI + p.phase).toFloat() * 6f
+
+            paint.textSize = p.fontSizeSp.sp.toPx() * scaleFactor
+
+            drawContext.canvas.nativeCanvas.apply {
+                save()
+                translate(x, y)
+                rotate(angle)
+                drawText(p.label, 0f, 0f, paint)
+                restore()
+            }
+        }
+    }
+}
+
+/**
+ * Modello dati immutabile per ciascun numero fluttuante disegnato su Canvas.
+ */
+private data class NumberParticle(
+    val label: String,
+    val xRatio: Float,
+    val startYRatio: Float,
+    val fontSizeSp: Float,
+    val speedMultiplier: Int,
+    val swayAmplitudeRatio: Float,
+    val phase: Float,
+    val baseRotation: Float
+)

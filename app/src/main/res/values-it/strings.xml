@@ -466,6 +466,8 @@
     <string name="sfondo_puntini">Taccuino</string>
     <string name="sfondo_geometrico">Plancia</string>
     <string name="sfondo_onde">Onde</string>
+    <string name="sfondo_icone_animate">Icone animate</string>
+    <string name="sfondo_numeri_animati">Numeri fluttuanti</string>
     <string name="titolo_anteprima_sfondo">Anteprima dal vivo</string>
     <string name="desc_anteprima_sfondo">Valuta il contrasto delle card in gioco</string>
 </resources>

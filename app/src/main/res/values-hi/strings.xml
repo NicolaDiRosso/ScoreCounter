@@ -466,6 +466,8 @@
     <string name="sfondo_puntini">डॉट ग्रिड</string>
     <string name="sfondo_geometrico">बोर्ड</string>
     <string name="sfondo_onde">लहरें</string>
+    <string name="sfondo_icone_animate">एनिमेटेड आइकन</string>
+    <string name="sfondo_numeri_animati">तैरते नंबर</string>
     <string name="titolo_anteprima_sfondo">लाइव पूर्वावलोकन</string>
     <string name="desc_anteprima_sfondo">गेम कार्ड कंट्रास्ट जांचें</string>
 </resources>

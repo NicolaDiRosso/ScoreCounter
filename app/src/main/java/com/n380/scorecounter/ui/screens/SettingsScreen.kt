@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.StayCurrentLandscape
@@ -490,6 +492,24 @@ fun SettingsScreen(
                                                     }
                                                     drawPath(path2, waveColor2, style = Stroke(width = strokePx))
                                                 }
+                                            }
+                                            BackgroundStyle.ANIMATED_ICONS -> {
+                                                // 7. ANIMATED_ICONS: Mini icona animata
+                                                Icon(
+                                                    imageVector = Icons.Filled.Animation,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                            BackgroundStyle.ANIMATED_NUMBERS -> {
+                                                // 8. ANIMATED_NUMBERS: Mini icona pin
+                                                Icon(
+                                                    imageVector = Icons.Filled.Pin,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
                                             }
                                         }
                                     }

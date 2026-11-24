@@ -466,6 +466,8 @@
     <string name="sfondo_puntini">ドット</string>
     <string name="sfondo_geometrico">ボード</string>
     <string name="sfondo_onde">ウェーブ</string>
+    <string name="sfondo_icone_animate">動くアイコン</string>
+    <string name="sfondo_numeri_animati">浮かぶ数字</string>
     <string name="titolo_anteprima_sfondo">ライブプレビュー</string>
     <string name="desc_anteprima_sfondo">ゲームカードのコントラストを確認</string>
 </resources>

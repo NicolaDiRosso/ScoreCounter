@@ -10,11 +10,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Gradient
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material3.*
@@ -278,8 +280,9 @@ private fun LiveBackgroundPreviewCard(
  * COMPONENTE: GRIGLIA OPZIONI SFONDO (BackgroundOptionsGrid)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
- * Mappa dinamica di tutti i 6 stili dell'enum `BackgroundStyle`,
- * organizzata in 3 righe simmetriche da 2 colonne ciascuna.
+ * Mappa dinamica di tutti gli 8 stili dell'enum `BackgroundStyle` (6 statici + 2 animati),
+ * organizzata in 4 righe simmetriche da 2 colonne ciascuna.
+ * Le anteprime in miniatura dei due sfondi animati si muovono dal vivo anche qui!
  */
 @Composable
 private fun BackgroundOptionsGrid(
@@ -287,17 +290,19 @@ private fun BackgroundOptionsGrid(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    // Mappatura completa dei 6 stili di sfondo con titolo localizzato e icona rappresentativa
+    // Mappatura completa degli 8 stili di sfondo con titolo localizzato e icona rappresentativa
     val backgroundOptions = listOf(
         BackgroundStyle.ICONS to Pair(stringResource(R.string.sfondo_icone), Icons.Filled.Palette),
         BackgroundStyle.SOLID to Pair(stringResource(R.string.sfondo_tinta_unita), Icons.Filled.Visibility),
         BackgroundStyle.GRADIENT to Pair(stringResource(R.string.sfondo_sfumatura), Icons.Filled.Gradient),
         BackgroundStyle.DOTS to Pair(stringResource(R.string.sfondo_puntini), Icons.Filled.MoreHoriz),
         BackgroundStyle.GEOMETRIC to Pair(stringResource(R.string.sfondo_geometrico), Icons.Filled.GridOn),
-        BackgroundStyle.WAVES to Pair(stringResource(R.string.sfondo_onde), Icons.Filled.Waves)
+        BackgroundStyle.WAVES to Pair(stringResource(R.string.sfondo_onde), Icons.Filled.Waves),
+        BackgroundStyle.ANIMATED_ICONS to Pair(stringResource(R.string.sfondo_icone_animate), Icons.Filled.Animation),
+        BackgroundStyle.ANIMATED_NUMBERS to Pair(stringResource(R.string.sfondo_numeri_animati), Icons.Filled.Pin)
     )
 
-    // Suddividiamo i 6 sfondi in 3 righe perfettamente pari da 2 colonne ciascuna
+    // Suddividiamo gli 8 sfondi in 4 righe perfettamente pari da 2 colonne ciascuna
     val rows = backgroundOptions.chunked(2)
 
     Column(
@@ -341,7 +346,7 @@ private fun BackgroundOptionsGrid(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.SpaceBetween
                             ) {
-                                // Miniatura dello Sfondo
+                                // Miniatura dello Sfondo (si anima dal vivo anche per gli stili animati)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()

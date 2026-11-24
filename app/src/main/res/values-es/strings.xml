@@ -466,6 +466,8 @@
     <string name="sfondo_puntini">Puntos</string>
     <string name="sfondo_geometrico">Tablero</string>
     <string name="sfondo_onde">Ondas</string>
+    <string name="sfondo_icone_animate">Iconos animados</string>
+    <string name="sfondo_numeri_animati">Números flotantes</string>
     <string name="titolo_anteprima_sfondo">Vista previa en vivo</string>
     <string name="desc_anteprima_sfondo">Evalúa el contraste de las tarjetas</string>
 </resources>
