@@ -44,6 +44,7 @@ import com.n380.scorecounter.ui.components.AppBackground
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.BackgroundStyle
 import com.n380.scorecounter.ui.components.PlayerScoreCard
+import com.n380.scorecounter.ui.screens.landscape.BackgroundSettingsScreenLandscape
 import com.n380.scorecounter.viewmodel.MatchViewModel
 
 /**
@@ -66,8 +67,32 @@ fun BackgroundSettingsScreen(
     viewModel: MatchViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val haptic = LocalHapticFeedback.current
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    if (isLandscape) {
+        BackgroundSettingsScreenLandscape(
+            viewModel = viewModel,
+            onNavigateBack = onNavigateBack
+        )
+    } else {
+        BackgroundSettingsScreenPortrait(
+            viewModel = viewModel,
+            onNavigateBack = onNavigateBack
+        )
+    }
+}
+
+/**
+ * ====================================================================
+ * LAYOUT VERTICALE (Portrait)
+ * ====================================================================
+ */
+@Composable
+internal fun BackgroundSettingsScreenPortrait(
+    viewModel: MatchViewModel,
+    onNavigateBack: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
 
     // Prevenzione del doppio click accidentale sul pulsante Indietro
     var isClosing by remember { mutableStateOf(false) }
@@ -94,7 +119,7 @@ fun BackgroundSettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = if (isLandscape) 10.dp else 16.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Button(
@@ -108,7 +133,7 @@ fun BackgroundSettingsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .widthIn(max = 700.dp)
-                            .height(if (isLandscape) 52.dp else 64.dp),
+                            .height(64.dp),
                         shape = RoundedCornerShape(20.dp),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -157,51 +182,25 @@ fun BackgroundSettingsScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = if (isLandscape) 950.dp else 700.dp)
+                    .widthIn(max = 700.dp)
                     .weight(1f)
                     .padding(bottom = 16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                if (isLandscape) {
-                    // LAYOUT LANDSCAPE / TABLET: 2 colonne affiancate dentro il tavolo
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        // Colonna Sinistra (42% W): Anteprima Live con Mini-Card Segnapunti
-                        Box(modifier = Modifier.weight(0.42f).fillMaxHeight()) {
-                            LiveBackgroundPreviewCard(viewModel = viewModel)
-                        }
+                // LAYOUT PORTRAIT: Disposizione verticale scorrevole
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // 2a. Riquadro Anteprima Live
+                    LiveBackgroundPreviewCardPortrait(viewModel = viewModel)
 
-                        // Colonna Destra (58% W): Sezioni Sfondi Animati e Statici
-                        Column(
-                            modifier = Modifier
-                                .weight(0.58f)
-                                .fillMaxHeight()
-                                .verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            BackgroundSectionsContent(viewModel = viewModel)
-                        }
-                    }
-                } else {
-                    // LAYOUT PORTRAIT: Disposizione verticale scorrevole
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        // 2a. Riquadro Anteprima Live
-                        LiveBackgroundPreviewCard(viewModel = viewModel)
-
-                        // 2b. Sezioni Sfondi Animati e Statici
-                        BackgroundSectionsContent(viewModel = viewModel)
-                    }
+                    // 2b. Sezioni Sfondi Animati e Statici
+                    BackgroundSectionsContentPortrait(viewModel = viewModel)
                 }
             }
         }
@@ -210,14 +209,14 @@ fun BackgroundSettingsScreen(
 
 /**
  * ====================================================================
- * COMPONENTE: RIQUADRO ANTEPRIMA LIVE (LiveBackgroundPreviewCard)
+ * COMPONENTE: RIQUADRO ANTEPRIMA LIVE PORTRAIT
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
  * Mostra una card interna (`surface`) contenente lo sfondo reale attivo (`AppBackground`
  * con `animate = true`) e una mini-card segnapunti di esempio nello stile nativo di ScoreCounter.
  */
 @Composable
-private fun LiveBackgroundPreviewCard(
+private fun LiveBackgroundPreviewCardPortrait(
     viewModel: MatchViewModel
 ) {
     Card(
@@ -287,7 +286,7 @@ private fun LiveBackgroundPreviewCard(
 
 /**
  * ====================================================================
- * COMPONENTE: CONTENUTO SEZIONI SFONDI (BackgroundSectionsContent)
+ * COMPONENTE: CONTENUTO SEZIONI SFONDI PORTRAIT
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
  * Organizza i 12 stili di sfondo in due schede distinte (speculari alle tabelle
@@ -296,7 +295,7 @@ private fun LiveBackgroundPreviewCard(
  * 2. "Sfondi statici" (subito sotto, 6 opzioni su 2 righe da 3 card compatte).
  */
 @Composable
-private fun BackgroundSectionsContent(
+private fun BackgroundSectionsContentPortrait(
     viewModel: MatchViewModel
 ) {
     // 1. Gruppo Sfondi Animati (6 stili)
@@ -319,8 +318,7 @@ private fun BackgroundSectionsContent(
         BackgroundStyle.WAVES to Pair(stringResource(R.string.sfondo_onde), Icons.Filled.Waves)
     )
 
-    // Scheda Sezione 1: Sfondi Animati (in evidenza)
-    BackgroundCategoryCard(
+    BackgroundCategoryCardPortrait(
         title = stringResource(R.string.sez_sfondi_animati),
         icon = Icons.Filled.AutoAwesome,
         options = animatedOptions,
@@ -328,8 +326,7 @@ private fun BackgroundSectionsContent(
         onSelectStyle = { style -> viewModel.setBackgroundStylePreference(style.ordinal) }
     )
 
-    // Scheda Sezione 2: Sfondi Statici
-    BackgroundCategoryCard(
+    BackgroundCategoryCardPortrait(
         title = stringResource(R.string.sez_sfondi_statici),
         icon = Icons.Filled.Palette,
         options = staticOptions,
@@ -349,7 +346,7 @@ private fun BackgroundSectionsContent(
  * e mostrano un discreto badge scintilla (`✦`) per identificare gli stili animati.
  */
 @Composable
-private fun BackgroundCategoryCard(
+private fun BackgroundCategoryCardPortrait(
     title: String,
     icon: ImageVector,
     options: List<Pair<BackgroundStyle, Pair<String, ImageVector>>>,
