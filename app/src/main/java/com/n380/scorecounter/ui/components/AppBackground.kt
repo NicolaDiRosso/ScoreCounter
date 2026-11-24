@@ -1,5 +1,6 @@
 package com.n380.scorecounter.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -9,7 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import kotlin.math.ceil
+import kotlin.math.hypot
 
 /**
  * Enumerazione degli stili di sfondo disponibili nell'applicazione.
@@ -37,18 +41,26 @@ enum class BackgroundStyle {
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
  * Questo composable funge da selettore centrale per il rendering dello sfondo.
- * Legge lo stile attivo (es. ICONS o SOLID) e dipinge il livello decorativo corrispondente.
- * Se lo stile è SOLID, non disegna nulla, lasciando spazio esclusivamente al colore solido del tema.
+ * Applica sempre il colore solido di base del tema attivo (chiaro, scuro o Material You)
+ * e, se lo stile lo prevede, sovrappone il livello decorativo corrispondente.
  */
 @Composable
 fun AppBackground(
-    style: BackgroundStyle = BackgroundStyle.ICONS
+    style: BackgroundStyle = BackgroundStyle.ICONS,
+    modifier: Modifier = Modifier
 ) {
-    when (style) {
-        BackgroundStyle.ICONS -> PatternedBackground()
-        BackgroundStyle.SOLID -> {
-            // 🧠 TINTA UNITA: Nessun pattern decorativo viene sovrapposto.
-            // Rimane visibile unicamente il colore solido MaterialTheme.colorScheme.background del tema attivo.
+    // Contenitore radice che garantisce sempre il colore di sfondo del tema attivo (Chiaro o Scuro)
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        when (style) {
+            BackgroundStyle.ICONS -> PatternedBackground()
+            BackgroundStyle.SOLID -> {
+                // 🧠 TINTA UNITA: Nessun pattern decorativo viene sovrapposto.
+                // Rimane visibile unicamente il colore solido MaterialTheme.colorScheme.background del tema attivo.
+            }
         }
     }
 }
@@ -80,30 +92,56 @@ fun PatternedBackground() {
         Icons.Filled.FlashOn,          // Fulmine (Richiama la combo "On Fire" e la velocità)
     )
 
-    // ---> IL MOTORE CASUALE BLOCCATO <---
-    // Creiamo una "mappa" bidimensionale fissa. Viene calcolata a caso la prima volta,
-    // ma grazie a 'remember' lo schermo non sfarfallerà mai durante la navigazione o l'uso dell'app!
-    val randomGrid = remember {
-        List(34) { // 34 righe
-            List(11) { // 11 colonne
-                icons.random() // Sceglie un'icona totalmente a caso per ogni singola cella
-            }
-        }
-    }
+    // Parametri geometrici della griglia e dell'inclinazione diagonale
+    val iconSize = 36.dp           // Dimensione di ogni singola icona
+    val horizontalSpacing = 43.dp  // Spazio orizzontale tra due icone sulla stessa riga
+    val verticalSpacing = 15.dp    // Spazio verticale tra una riga e l'altra
+    val diagonalAngle = -40f       // Angolo di inclinazione dell'intera trama (in gradi)
 
-    // Un contenitore grande quanto tutto lo schermo
-    Box(
+    // Usiamo BoxWithConstraints per leggere le dimensioni reali dello schermo (smartphone o tablet)
+    // o del riquadro di anteprima, garantendo una copertura totale senza bordi vuoti.
+    BoxWithConstraints(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(15.dp)) { // Mette 15 pixel di vuoto tra un'icona e l'altra in verticale
-            for (row in 0..33) {
+        // Calcoliamo la diagonale del contenitore con un margine extra (+ 120.dp):
+        // ruotando un rettangolo di 40°, serve un quadrato grande almeno quanto la sua diagonale
+        // per coprire anche tutti e quattro gli angoli dello schermo.
+        val diagonalDp = (hypot(maxWidth.value, maxHeight.value) + 120f).dp
+
+        // Calcoliamo dinamicamente quante righe e colonne servono per riempire l'intera diagonale
+        val rowStep = iconSize.value + verticalSpacing.value
+        val colStep = iconSize.value + horizontalSpacing.value
+        val rows = ceil(diagonalDp.value / rowStep).toInt().coerceAtLeast(1)
+        val cols = ceil(diagonalDp.value / colStep).toInt().coerceAtLeast(1)
+
+        // ---> IL MOTORE CASUALE BLOCCATO <---
+        // Creiamo una "mappa" bidimensionale fissa dimensionata su righe e colonne calcolate.
+        // Grazie a 'remember(rows, cols)' la griglia non sfarfalla mai durante l'uso dell'app!
+        val randomGrid = remember(rows, cols) {
+            List(rows) { // Righe calcolate dinamicamente
+                List(cols) { // Colonne calcolate dinamicamente
+                    icons.random() // Sceglie un'icona totalmente a caso per ogni singola cella
+                }
+            }
+        }
+
+        // Contenitore quadrato grande quanto la diagonale, ruotato di -40 gradi
+        Column(
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing), // Mette 15 dp di vuoto tra un'icona e l'altra in verticale
+            modifier = Modifier
+                .requiredSize(diagonalDp) // Forza la dimensione piena senza farsi tagliare dai bordi dello schermo
+                .graphicsLayer {
+                    rotationZ = diagonalAngle // Ruota l'intera griglia per creare le linee diagonali
+                }
+        ) {
+            for (row in 0 until rows) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(43.dp), // Mette 43 pixel di vuoto in orizzontale
+                    horizontalArrangement = Arrangement.spacedBy(horizontalSpacing), // Mette 43 dp di vuoto in orizzontale
                     // IL TRUCCO: Sfalsiamo leggermente le righe dispari per fare l'effetto "muro di mattoni" sfalsato
                     modifier = if (row % 2 == 0) Modifier else Modifier.padding(start = 36.dp)
                 ) {
-                    for (col in 0..10) {
+                    for (col in 0 until cols) {
                         val icon = randomGrid[row][col] // Legge l'icona salvata nella mappa casuale
 
                         Icon(
@@ -111,7 +149,12 @@ fun PatternedBackground() {
                             contentDescription = null,
                             // Usiamo il colore del testo, ma con opacità al 5% (0.05f). Ombra elegantissima!
                             tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.05f),
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier
+                                .size(iconSize)
+                                .graphicsLayer {
+                                    // Controtiriamo ogni singola icona (+40 gradi) per mantenerla perfettamente dritta!
+                                    rotationZ = -diagonalAngle
+                                }
                         )
                     }
                 }
