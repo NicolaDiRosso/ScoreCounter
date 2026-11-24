@@ -30,10 +30,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Animation
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Gradient
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Palette
@@ -43,6 +46,7 @@ import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.StayCurrentLandscape
 import androidx.compose.material.icons.filled.StayCurrentPortrait
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -511,8 +515,41 @@ fun SettingsScreen(
                                                     modifier = Modifier.size(15.dp)
                                                 )
                                             }
-                                            else -> {
-                                                // 🧠 FALLBACK (Eventuali altri stili futuri): riquadro pulito
+                                            BackgroundStyle.ANIMATED_PARTICLES -> {
+                                                // 9. ANIMATED_PARTICLES (Lucciole): Mini icona particelle
+                                                Icon(
+                                                    imageVector = Icons.Filled.BlurOn,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                            BackgroundStyle.ANIMATED_WAVES -> {
+                                                // 10. ANIMATED_WAVES (Onde vive): Mini icona onde
+                                                Icon(
+                                                    imageVector = Icons.Filled.Waves,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                            BackgroundStyle.ANIMATED_AURORA -> {
+                                                // 11. ANIMATED_AURORA (Aurora viva): Mini icona gradiente
+                                                Icon(
+                                                    imageVector = Icons.Filled.Gradient,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
+                                            }
+                                            BackgroundStyle.ANIMATED_STARS -> {
+                                                // 12. ANIMATED_STARS (Stelle): Mini icona stelle
+                                                Icon(
+                                                    imageVector = Icons.Filled.AutoAwesome,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f),
+                                                    modifier = Modifier.size(15.dp)
+                                                )
                                             }
                                         }
                                     }
