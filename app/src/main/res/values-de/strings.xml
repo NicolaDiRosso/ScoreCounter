@@ -468,6 +468,12 @@
     <string name="sfondo_onde">Wellen</string>
     <string name="sfondo_icone_animate">Animierte Symbole</string>
     <string name="sfondo_numeri_animati">Schwebende Zahlen</string>
+    <string name="sez_sfondi_animati">Animierte Hintergründe</string>
+    <string name="sez_sfondi_statici">Statische Hintergründe</string>
+    <string name="sfondo_particelle_animate">Glühwürmchen</string>
+    <string name="sfondo_onde_animate">Lebendige Wellen</string>
+    <string name="sfondo_aurora_animata">Lebendige Aurora</string>
+    <string name="sfondo_stelle_animate">Sterne</string>
     <string name="titolo_anteprima_sfondo">Live-Vorschau</string>
     <string name="desc_anteprima_sfondo">Prüfe den Kontrast der Spielkarten</string>
 </resources>

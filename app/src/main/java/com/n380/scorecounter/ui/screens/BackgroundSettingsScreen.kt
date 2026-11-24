@@ -11,6 +11,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Animation
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Gradient
 import androidx.compose.material.icons.filled.GridOn
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -54,6 +57,9 @@ import com.n380.scorecounter.viewmodel.MatchViewModel
  *   cambi dal vivo direttamente dietro questa pagina man mano che l'utente seleziona le opzioni.
  * - Struttura speculare a SettingsScreen: Titolo ancorato in alto a sinistra, grande card
  *   contenitiva (`surfaceVariant`) al centro e dock inferiore con pulsante "Indietro".
+ * - Ottimizzazione energetica: Le 12 card sono divise in due schede ("Sfondi animati" in
+ *   evidenza in alto + "Sfondi statici" sotto) con miniature compatte a 3 colonne (`animate = false`),
+ *   mentre l'animazione reale gira unicamente nell'anteprima live grande e sullo sfondo dell'app!
  */
 @Composable
 fun BackgroundSettingsScreen(
@@ -165,19 +171,20 @@ fun BackgroundSettingsScreen(
                             .padding(12.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Colonna Sinistra (45% W): Anteprima Live con Mini-Card Segnapunti
-                        Box(modifier = Modifier.weight(0.45f).fillMaxHeight()) {
+                        // Colonna Sinistra (42% W): Anteprima Live con Mini-Card Segnapunti
+                        Box(modifier = Modifier.weight(0.42f).fillMaxHeight()) {
                             LiveBackgroundPreviewCard(viewModel = viewModel)
                         }
 
-                        // Colonna Destra (55% W): Griglia delle Opzioni Sfondo
-                        Box(
+                        // Colonna Destra (58% W): Sezioni Sfondi Animati e Statici
+                        Column(
                             modifier = Modifier
-                                .weight(0.55f)
+                                .weight(0.58f)
                                 .fillMaxHeight()
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            BackgroundOptionsGrid(viewModel = viewModel)
+                            BackgroundSectionsContent(viewModel = viewModel)
                         }
                     }
                 } else {
@@ -192,8 +199,8 @@ fun BackgroundSettingsScreen(
                         // 2a. Riquadro Anteprima Live
                         LiveBackgroundPreviewCard(viewModel = viewModel)
 
-                        // 2b. Griglia delle Opzioni Sfondo
-                        BackgroundOptionsGrid(viewModel = viewModel)
+                        // 2b. Sezioni Sfondi Animati e Statici
+                        BackgroundSectionsContent(viewModel = viewModel)
                     }
                 }
             }
@@ -206,8 +213,8 @@ fun BackgroundSettingsScreen(
  * COMPONENTE: RIQUADRO ANTEPRIMA LIVE (LiveBackgroundPreviewCard)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
- * Mostra una card interna (`surface`) contenente lo sfondo reale attivo (`AppBackground`)
- * e una mini-card segnapunti di esempio nello stile nativo di ScoreCounter.
+ * Mostra una card interna (`surface`) contenente lo sfondo reale attivo (`AppBackground`
+ * con `animate = true`) e una mini-card segnapunti di esempio nello stile nativo di ScoreCounter.
  */
 @Composable
 private fun LiveBackgroundPreviewCard(
@@ -240,16 +247,19 @@ private fun LiveBackgroundPreviewCard(
                 )
             }
 
-            // Box di Anteprima con Mini-Card Esempio
+            // Box di Anteprima con Mini-Card Esempio (qui l'animazione è sempre attiva!)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(116.dp)
+                    .height(112.dp)
                     .clip(RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 // Sfondo reale attivo
-                AppBackground(style = viewModel.backgroundStyle)
+                AppBackground(
+                    style = viewModel.backgroundStyle,
+                    animate = true
+                )
 
                 // Mini-Card Segnapunti di Esempio
                 val samplePlayer = remember {
@@ -266,7 +276,7 @@ private fun LiveBackgroundPreviewCard(
                     isExpandedMode = false,
                     modifier = Modifier
                         .fillMaxWidth(0.90f)
-                        .height(74.dp),
+                        .height(72.dp),
                     onScoreChange = { },
                     onScoreClick = { }
                 )
@@ -277,124 +287,228 @@ private fun LiveBackgroundPreviewCard(
 
 /**
  * ====================================================================
- * COMPONENTE: GRIGLIA OPZIONI SFONDO (BackgroundOptionsGrid)
+ * COMPONENTE: CONTENUTO SEZIONI SFONDI (BackgroundSectionsContent)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
- * Mappa dinamica di tutti gli 8 stili dell'enum `BackgroundStyle` (6 statici + 2 animati),
- * organizzata in 4 righe simmetriche da 2 colonne ciascuna.
- * Le anteprime in miniatura dei due sfondi animati si muovono dal vivo anche qui!
+ * Organizza i 12 stili di sfondo in due schede distinte (speculari alle tabelle
+ * di `SettingsScreen`):
+ * 1. "Sfondi animati" (in evidenza in cima, 6 opzioni su 2 righe da 3 card compatte).
+ * 2. "Sfondi statici" (subito sotto, 6 opzioni su 2 righe da 3 card compatte).
  */
 @Composable
-private fun BackgroundOptionsGrid(
+private fun BackgroundSectionsContent(
     viewModel: MatchViewModel
 ) {
-    val haptic = LocalHapticFeedback.current
+    // 1. Gruppo Sfondi Animati (6 stili)
+    val animatedOptions = listOf(
+        BackgroundStyle.ANIMATED_ICONS to Pair(stringResource(R.string.sfondo_icone_animate), Icons.Filled.Animation),
+        BackgroundStyle.ANIMATED_NUMBERS to Pair(stringResource(R.string.sfondo_numeri_animati), Icons.Filled.Pin),
+        BackgroundStyle.ANIMATED_PARTICLES to Pair(stringResource(R.string.sfondo_particelle_animate), Icons.Filled.BlurOn),
+        BackgroundStyle.ANIMATED_WAVES to Pair(stringResource(R.string.sfondo_onde_animate), Icons.Filled.Waves),
+        BackgroundStyle.ANIMATED_AURORA to Pair(stringResource(R.string.sfondo_aurora_animata), Icons.Filled.Gradient),
+        BackgroundStyle.ANIMATED_STARS to Pair(stringResource(R.string.sfondo_stelle_animate), Icons.Filled.AutoAwesome)
+    )
 
-    // Mappatura completa degli 8 stili di sfondo con titolo localizzato e icona rappresentativa
-    val backgroundOptions = listOf(
+    // 2. Gruppo Sfondi Statici (6 stili)
+    val staticOptions = listOf(
         BackgroundStyle.ICONS to Pair(stringResource(R.string.sfondo_icone), Icons.Filled.Palette),
         BackgroundStyle.SOLID to Pair(stringResource(R.string.sfondo_tinta_unita), Icons.Filled.Visibility),
         BackgroundStyle.GRADIENT to Pair(stringResource(R.string.sfondo_sfumatura), Icons.Filled.Gradient),
         BackgroundStyle.DOTS to Pair(stringResource(R.string.sfondo_puntini), Icons.Filled.MoreHoriz),
         BackgroundStyle.GEOMETRIC to Pair(stringResource(R.string.sfondo_geometrico), Icons.Filled.GridOn),
-        BackgroundStyle.WAVES to Pair(stringResource(R.string.sfondo_onde), Icons.Filled.Waves),
-        BackgroundStyle.ANIMATED_ICONS to Pair(stringResource(R.string.sfondo_icone_animate), Icons.Filled.Animation),
-        BackgroundStyle.ANIMATED_NUMBERS to Pair(stringResource(R.string.sfondo_numeri_animati), Icons.Filled.Pin)
+        BackgroundStyle.WAVES to Pair(stringResource(R.string.sfondo_onde), Icons.Filled.Waves)
     )
 
-    // Suddividiamo gli 8 sfondi in 4 righe perfettamente pari da 2 colonne ciascuna
-    val rows = backgroundOptions.chunked(2)
+    // Scheda Sezione 1: Sfondi Animati (in evidenza)
+    BackgroundCategoryCard(
+        title = stringResource(R.string.sez_sfondi_animati),
+        icon = Icons.Filled.AutoAwesome,
+        options = animatedOptions,
+        selectedStyle = viewModel.backgroundStyle,
+        onSelectStyle = { style -> viewModel.setBackgroundStylePreference(style.ordinal) }
+    )
 
-    Column(
+    // Scheda Sezione 2: Sfondi Statici
+    BackgroundCategoryCard(
+        title = stringResource(R.string.sez_sfondi_statici),
+        icon = Icons.Filled.Palette,
+        options = staticOptions,
+        selectedStyle = viewModel.backgroundStyle,
+        onSelectStyle = { style -> viewModel.setBackgroundStylePreference(style.ordinal) }
+    )
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE: SCHEDA CATEGORIA SFONDI (BackgroundCategoryCard)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Card contenitrice (`surface`) con intestazione e griglia compatta a 3 colonne
+ * (`height = 96.dp`). Per non sovraccaricare GPU e batteria su dispositivi
+ * medio/bassi, le miniature passano `animate = false` ad [AppBackground]
+ * e mostrano un discreto badge scintilla (`✦`) per identificare gli stili animati.
+ */
+@Composable
+private fun BackgroundCategoryCard(
+    title: String,
+    icon: ImageVector,
+    options: List<Pair<BackgroundStyle, Pair<String, ImageVector>>>,
+    selectedStyle: BackgroundStyle,
+    onSelectStyle: (BackgroundStyle) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    val rows = options.chunked(3)
+
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        rows.forEach { rowItems ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Intestazione della sezione (coerente con SettingsSectionCard)
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                rowItems.forEach { (style, labelAndIcon) ->
-                    val isSelected = (viewModel.backgroundStyle == style)
-                    val (label, _) = labelAndIcon
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
 
-                    Card(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(132.dp)
-                            .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                viewModel.setBackgroundStylePreference(style.ordinal)
-                            },
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected)
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                AutoResizedText(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Righe compatte a 3 colonne
+            rows.forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    rowItems.forEach { (style, labelAndIcon) ->
+                        val isSelected = (selectedStyle == style)
+                        val (label, _) = labelAndIcon
+
+                        Card(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(96.dp)
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    onSelectStyle(style)
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected)
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+                                else
+                                    MaterialTheme.colorScheme.surfaceContainerLow
+                            ),
+                            border = if (isSelected)
+                                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
                             else
-                                MaterialTheme.colorScheme.surface
-                        ),
-                        border = if (isSelected)
-                            BorderStroke(2.5.dp, MaterialTheme.colorScheme.primary)
-                        else
-                            BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    ) {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(10.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                // Miniatura dello Sfondo (si anima dal vivo anche per gli stili animati)
-                                Box(
+                                BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.Center
+                                        .fillMaxSize()
+                                        .padding(7.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    AppBackground(style = style)
+                                    // Miniatura compatta dello sfondo (animate = false per zero lag)
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(10.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AppBackground(
+                                            style = style,
+                                            animate = false
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    // Etichetta compatta del nome sfondo
+                                    AutoResizedText(
+                                        text = label,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
                                 }
 
-                                Spacer(modifier = Modifier.height(6.dp))
-
-                                // Etichetta del Nome Sfondo
-                                AutoResizedText(
-                                    text = label,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-
-                            // Badge Spunta Selezionato (✓) in alto a destra
-                            if (isSelected) {
-                                Surface(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(8.dp)
-                                        .size(24.dp),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primary
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimary,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                                // Badge spunta selezionato (✓) in alto a destra
+                                if (isSelected) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(5.dp)
+                                            .size(20.dp),
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.primary
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                        }
+                                    }
+                                } else if (style.isAnimated) {
+                                    // Discreto badge scintilla per riconoscere subito gli stili animati
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(5.dp)
+                                            .size(18.dp),
+                                        shape = CircleShape,
+                                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Filled.AutoAwesome,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                modifier = Modifier.size(11.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
 
-                // Se una riga avesse un solo elemento in futuro (numero dispari), bilanciamo lo spazio
-                if (rowItems.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
+                    // Bilanciamento automatico se una riga avesse meno di 3 elementi in futuro
+                    repeat(3 - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }

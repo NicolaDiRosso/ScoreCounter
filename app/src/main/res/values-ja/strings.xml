@@ -468,6 +468,12 @@
     <string name="sfondo_onde">ウェーブ</string>
     <string name="sfondo_icone_animate">動くアイコン</string>
     <string name="sfondo_numeri_animati">浮かぶ数字</string>
+    <string name="sez_sfondi_animati">アニメーション背景</string>
+    <string name="sez_sfondi_statici">静止画背景</string>
+    <string name="sfondo_particelle_animate">ホタル</string>
+    <string name="sfondo_onde_animate">ウェーブ・ライブ</string>
+    <string name="sfondo_aurora_animata">オーロラ・ライブ</string>
+    <string name="sfondo_stelle_animate">スター</string>
     <string name="titolo_anteprima_sfondo">ライブプレビュー</string>
     <string name="desc_anteprima_sfondo">ゲームカードのコントラストを確認</string>
 </resources>

@@ -511,6 +511,9 @@ fun SettingsScreen(
                                                     modifier = Modifier.size(15.dp)
                                                 )
                                             }
+                                            else -> {
+                                                // 🧠 FALLBACK (Eventuali altri stili futuri): riquadro pulito
+                                            }
                                         }
                                     }
 

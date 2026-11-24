@@ -47,16 +47,24 @@ import kotlin.math.sin
  * - WAVES: Onde sinusoidali morbide e rilassanti sul fondo dello schermo.
  * - ANIMATED_ICONS: Griglia di icone tematiche in lento scorrimento diagonale continuo.
  * - ANIMATED_NUMBERS: Numeri e punteggi in filigrana che fluttuano lentamente verso l'alto.
+ * - ANIMATED_PARTICLES: Particelle luminose (lucciole) con effetto parallasse morbido.
+ * - ANIMATED_WAVES: Onde sinusoidali viventi che oscillano armoniosamente.
+ * - ANIMATED_AURORA: Bagliori radiali Material You che respirano e si spostano lentamente.
+ * - ANIMATED_STARS: Scintille e stelle di vittoria a 4 punte che pulsano in filigrana.
  */
-enum class BackgroundStyle {
-    ICONS,
-    SOLID,
-    GRADIENT,
-    DOTS,
-    GEOMETRIC,
-    WAVES,
-    ANIMATED_ICONS,
-    ANIMATED_NUMBERS;
+enum class BackgroundStyle(val isAnimated: Boolean) {
+    ICONS(isAnimated = false),
+    SOLID(isAnimated = false),
+    GRADIENT(isAnimated = false),
+    DOTS(isAnimated = false),
+    GEOMETRIC(isAnimated = false),
+    WAVES(isAnimated = false),
+    ANIMATED_ICONS(isAnimated = true),
+    ANIMATED_NUMBERS(isAnimated = true),
+    ANIMATED_PARTICLES(isAnimated = true),
+    ANIMATED_WAVES(isAnimated = true),
+    ANIMATED_AURORA(isAnimated = true),
+    ANIMATED_STARS(isAnimated = true);
 
     companion object {
         /**
@@ -77,10 +85,15 @@ enum class BackgroundStyle {
  * Questo composable funge da selettore centrale per il rendering dello sfondo.
  * Applica sempre il colore solido di base del tema attivo (chiaro, scuro o Material You)
  * e, se lo stile lo prevede, sovrappone il livello decorativo corrispondente.
+ *
+ * @param animate Se `false` (usato nelle miniature della griglia di selezione), renderizza
+ * il fotogramma fisso senza allocare `rememberInfiniteTransition`, evitando di far girare
+ * 6 animazioni simultanee su dispositivi di fascia medio-bassa.
  */
 @Composable
 fun AppBackground(
     style: BackgroundStyle = BackgroundStyle.ICONS,
+    animate: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     // Contenitore radice che garantisce sempre il colore di sfondo del tema attivo (Chiaro o Scuro)
@@ -99,10 +112,43 @@ fun AppBackground(
             BackgroundStyle.DOTS -> DotGridBackground()
             BackgroundStyle.GEOMETRIC -> GeometricBoardBackground()
             BackgroundStyle.WAVES -> WavesBackground()
-            BackgroundStyle.ANIMATED_ICONS -> AnimatedIconsBackground()
-            BackgroundStyle.ANIMATED_NUMBERS -> AnimatedNumbersBackground()
+            BackgroundStyle.ANIMATED_ICONS -> AnimatedIconsBackground(animate = animate)
+            BackgroundStyle.ANIMATED_NUMBERS -> AnimatedNumbersBackground(animate = animate)
+            BackgroundStyle.ANIMATED_PARTICLES -> AnimatedParticlesBackground(animate = animate)
+            BackgroundStyle.ANIMATED_WAVES -> AnimatedWavesBackground(animate = animate)
+            BackgroundStyle.ANIMATED_AURORA -> AnimatedAuroraBackground(animate = animate)
+            BackgroundStyle.ANIMATED_STARS -> AnimatedStarsBackground(animate = animate)
         }
     }
+}
+
+/**
+ * ====================================================================
+ * HELPER INTERNO PER PROGRESSO INFINITO CONDIZIONALE
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Restituisce un valore animato continuo tra `0f` e `1f` solo quando `animate == true`.
+ * Quando `animate == false` (miniature statiche), restituisce immediatamente `0.25f`
+ * senza avviare alcun ciclo di animazione sul thread UI.
+ */
+@Composable
+private fun rememberOptionalInfiniteProgress(
+    animate: Boolean,
+    durationMillis: Int,
+    label: String
+): Float {
+    if (!animate) return 0.25f
+    val infiniteTransition = rememberInfiniteTransition(label = label)
+    val progress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = durationMillis, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "${label}_Progress"
+    )
+    return progress
 }
 
 /**
@@ -364,11 +410,11 @@ fun WavesBackground() {
 
 /**
  * ====================================================================
- * COMPONENTE: SFONDO ICONE ANIMATE (AnimatedIconsBackground)
+ * COMPONENTE 1 ANIMATO: ICONE ANIMATE (AnimatedIconsBackground)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
  * Versione animata di [PatternedBackground]: fa scorrere lentamente l'intera
- * griglia di icone in diagonale usando `rememberInfiniteTransition`.
+ * griglia di icone in diagonale usando `rememberOptionalInfiniteProgress`.
  * IL TRUCCO DEL LOOP INFINITO SENZA SCATTI (SEAMLESS LOOP):
  * Trasliamo la griglia esattamente di un periodo multiplo di 2 righe e 2 colonne
  * (`2 * rowStep` e `2 * colStep`), scegliendo le icone in modo periodico:
@@ -376,7 +422,7 @@ fun WavesBackground() {
  * successiva, rendendo il riavvio del ciclo completamente invisibile all'occhio!
  */
 @Composable
-fun AnimatedIconsBackground() {
+fun AnimatedIconsBackground(animate: Boolean = true) {
     val icons = listOf(
         Icons.Filled.VideogameAsset,
         Icons.Filled.Style,
@@ -404,15 +450,10 @@ fun AnimatedIconsBackground() {
     val loopYSpanPx = with(density) { (rowStepDp * 2).toPx() }
 
     // Animazione lineare lenta (18 secondi per attraversare 2 celle)
-    val infiniteTransition = rememberInfiniteTransition(label = "AnimatedIconsTransition")
-    val progress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 18000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "IconsDriftProgress"
+    val progress = rememberOptionalInfiniteProgress(
+        animate = animate,
+        durationMillis = 18000,
+        label = "AnimatedIconsTransition"
     )
 
     BoxWithConstraints(
@@ -471,29 +512,24 @@ fun AnimatedIconsBackground() {
 
 /**
  * ====================================================================
- * COMPONENTE: SFONDO NUMERI FLUTTUANTI (AnimatedNumbersBackground)
+ * COMPONENTE 2 ANIMATO: NUMERI FLUTTUANTI (AnimatedNumbersBackground)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
  * Disegna su Canvas nativo (tramite `nativeCanvas.drawText`) una costellazione
  * di numeri e punteggi (+1, 10, 100, +5, 7, 42, ecc.) che salgono lentamente
  * dal basso verso l'alto con un leggero ondeggiamento orizzontale e rotazione
  * armoniosa. Essendo disegnato interamente in un unico passaggio GPU,
- * non crea oggetti Composable figli e garantisce fluidità totale a 60/120 fps.
+ * garantisce fluidità totale a 60/120 fps anche su dispositivi medio-bassi.
  */
 @Composable
-fun AnimatedNumbersBackground() {
+fun AnimatedNumbersBackground(animate: Boolean = true) {
     val textColorArgb = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f).toArgb()
 
     // Animazione continua da 0 a 1 in 24 secondi per un movimento lento e rilassante
-    val infiniteTransition = rememberInfiniteTransition(label = "AnimatedNumbersTransition")
-    val progress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 24000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "NumbersFloatProgress"
+    val progress = rememberOptionalInfiniteProgress(
+        animate = animate,
+        durationMillis = 24000,
+        label = "AnimatedNumbersTransition"
     )
 
     // Elenco pre-calcolato di 18 particelle numeriche con posizioni, dimensioni e velocità sfalsate
@@ -531,7 +567,7 @@ fun AnimatedNumbersBackground() {
     Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
-        val scaleFactor = (w.coerceAtLeast(180f) / 360f).coerceIn(0.55f, 1.35f)
+        val scaleFactor = (w.coerceAtLeast(140f) / 360f).coerceIn(0.45f, 1.35f)
         paint.color = textColorArgb
 
         particles.forEach { p ->
@@ -561,6 +597,263 @@ fun AnimatedNumbersBackground() {
 }
 
 /**
+ * ====================================================================
+ * COMPONENTE 3 ANIMATO: LUCCIOLE / PARTICELLE (AnimatedParticlesBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Disegna su Canvas 22 sfere morbide con effetto parallasse (particelle grandi più
+ * luminose e veloci, particelle piccole più tenui e lente) basate sui colori
+ * `primary` e `tertiary` del tema Material You, salendo dolcemente verso l'alto.
+ */
+@Composable
+fun AnimatedParticlesBackground(animate: Boolean = true) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
+    val progress = rememberOptionalInfiniteProgress(
+        animate = animate,
+        durationMillis = 20000,
+        label = "AnimatedParticlesTransition"
+    )
+
+    val particles = remember {
+        listOf(
+            GlowParticle(0.10f, 0.15f, 4.5f, 1, 0.03f, 0.2f, 0.13f, true),
+            GlowParticle(0.22f, 0.62f, 2.8f, 1, 0.02f, 1.4f, 0.08f, false),
+            GlowParticle(0.35f, 0.30f, 5.2f, 2, 0.035f, 2.5f, 0.14f, false),
+            GlowParticle(0.48f, 0.80f, 3.2f, 1, 0.02f, 0.9f, 0.09f, true),
+            GlowParticle(0.60f, 0.22f, 4.8f, 2, 0.03f, 3.8f, 0.12f, true),
+            GlowParticle(0.75f, 0.50f, 2.6f, 1, 0.015f, 1.8f, 0.07f, false),
+            GlowParticle(0.88f, 0.18f, 5.0f, 1, 0.03f, 4.3f, 0.14f, false),
+            GlowParticle(0.16f, 0.88f, 3.6f, 2, 0.025f, 2.9f, 0.10f, false),
+            GlowParticle(0.30f, 0.45f, 2.5f, 1, 0.02f, 0.5f, 0.07f, true),
+            GlowParticle(0.44f, 0.10f, 4.2f, 2, 0.03f, 3.1f, 0.12f, false),
+            GlowParticle(0.56f, 0.68f, 5.4f, 1, 0.035f, 1.2f, 0.15f, true),
+            GlowParticle(0.68f, 0.90f, 3.0f, 2, 0.02f, 4.7f, 0.09f, false),
+            GlowParticle(0.82f, 0.72f, 4.4f, 1, 0.03f, 2.1f, 0.13f, true),
+            GlowParticle(0.93f, 0.40f, 2.8f, 2, 0.02f, 3.5f, 0.08f, false),
+            GlowParticle(0.07f, 0.52f, 3.8f, 1, 0.025f, 1.6f, 0.11f, true),
+            GlowParticle(0.26f, 0.95f, 4.6f, 2, 0.03f, 4.0f, 0.13f, false),
+            GlowParticle(0.52f, 0.36f, 2.7f, 1, 0.02f, 2.4f, 0.08f, false),
+            GlowParticle(0.72f, 0.12f, 4.0f, 1, 0.025f, 0.8f, 0.11f, true)
+        )
+    }
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+        val sizeScale = (w.coerceAtLeast(140f) / 360f).coerceIn(0.55f, 1.3f)
+
+        particles.forEach { p ->
+            val rawY = (p.startYRatio - progress * p.speedMultiplier) % 1f
+            val normalizedY = if (rawY < 0f) rawY + 1f else rawY
+            val y = normalizedY * (h + 40.dp.toPx()) - 20.dp.toPx()
+
+            val sway = sin(progress * 2.0 * PI * p.speedMultiplier + p.phase).toFloat() * (w * p.swayRatio)
+            val x = p.xRatio * w + sway
+
+            // Pulsazione morbida della luminosità durante il movimento
+            val pulse = 0.75f + 0.25f * sin(progress * 4.0 * PI + p.phase).toFloat()
+            val baseColor = if (p.usePrimary) primaryColor else tertiaryColor
+
+            drawCircle(
+                color = baseColor.copy(alpha = p.maxAlpha * pulse),
+                radius = p.radiusDp.dp.toPx() * sizeScale,
+                center = Offset(x, y)
+            )
+        }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE 4 ANIMATO: ONDE VIVE (AnimatedWavesBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Versione fluida e animata di [WavesBackground]: fa scorrere continuamente
+ * la fase delle tre onde sinusoidali sul fondo dello schermo in un loop
+ * perfetto (variazione di fase esatta di `2 * PI`), creando l'effetto di una
+ * marea calma e rilassante.
+ */
+@Composable
+fun AnimatedWavesBackground(animate: Boolean = true) {
+    val waveColorPrimary = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+    val waveColorSecondary = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+
+    val progress = rememberOptionalInfiniteProgress(
+        animate = animate,
+        durationMillis = 14000,
+        label = "AnimatedWavesTransition"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val width = size.width
+        val height = size.height
+        val animatedPhase = (progress * 2.0 * PI).toFloat()
+
+        fun drawAnimatedWave(
+            baseHeightRatio: Float,
+            amplitudeRatio: Float,
+            phaseOffset: Float,
+            direction: Float,
+            color: Color
+        ) {
+            val path = Path()
+            val baseY = height * baseHeightRatio
+            val amplitude = height * amplitudeRatio
+
+            path.moveTo(0f, height)
+            path.lineTo(0f, baseY)
+
+            val step = (width / 40f).coerceAtLeast(4f)
+            var x = 0f
+            while (x <= width + step) {
+                val angle = (x / width) * (2.0 * PI) + phaseOffset + (animatedPhase * direction)
+                val y = baseY + (sin(angle) * amplitude).toFloat()
+                path.lineTo(x, y)
+                x += step
+            }
+
+            path.lineTo(width, height)
+            path.close()
+            drawPath(path = path, color = color)
+        }
+
+        // Onde contrapposte per un movimento naturale e tridimensionale
+        drawAnimatedWave(0.45f, 0.05f, 0.0f, 1f, waveColorSecondary)
+        drawAnimatedWave(0.65f, 0.06f, 2.1f, -1f, waveColorSecondary)
+        drawAnimatedWave(0.82f, 0.05f, 4.2f, 1f, waveColorPrimary)
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE 5 ANIMATO: AURORA VIVA (AnimatedAuroraBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Versione viva di [AuroraGradientBackground]: i due bagliori radiali
+ * Material You (`primary` e `tertiary`) orbitano lentamente lungo traiettorie
+ * ellittiche morbide e modulano dolcemente il loro raggio (effetto "respiro").
+ */
+@Composable
+fun AnimatedAuroraBackground(animate: Boolean = true) {
+    val primaryGlow = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    val tertiaryGlow = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f)
+
+    val progress = rememberOptionalInfiniteProgress(
+        animate = animate,
+        durationMillis = 16000,
+        label = "AnimatedAuroraTransition"
+    )
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val angle = progress * 2.0 * PI
+
+        // Primo bagliore (primary) che orbita morbidamente nella parte superiore
+        val c1X = size.width * (0.25f + 0.18f * cos(angle).toFloat())
+        val c1Y = size.height * (0.20f + 0.12f * sin(angle).toFloat())
+        val r1 = size.maxDimension * (0.72f + 0.08f * sin(angle).toFloat())
+
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(primaryGlow, Color.Transparent),
+                center = Offset(c1X, c1Y),
+                radius = r1.coerceAtLeast(1f)
+            )
+        )
+
+        // Secondo bagliore (tertiary) che orbita in fase opposta nella parte inferiore
+        val c2X = size.width * (0.75f - 0.18f * cos(angle).toFloat())
+        val c2Y = size.height * (0.80f - 0.12f * sin(angle).toFloat())
+        val r2 = size.maxDimension * (0.72f + 0.08f * cos(angle).toFloat())
+
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(tertiaryGlow, Color.Transparent),
+                center = Offset(c2X, c2Y),
+                radius = r2.coerceAtLeast(1f)
+            )
+        )
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE 6 ANIMATO: STELLE E SCINTILLE (AnimatedStarsBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Disegna su Canvas una costellazione di stelle a 4 punte (scintille di vittoria)
+ * che pulsano lentamente di dimensione e luminosità in modo sfasato, creando
+ * un'atmosfera elegante e festosa ma sempre discreta (opacità max 11%).
+ */
+@Composable
+fun AnimatedStarsBackground(animate: Boolean = true) {
+    val starColor = MaterialTheme.colorScheme.primary
+
+    val progress = rememberOptionalInfiniteProgress(
+        animate = animate,
+        durationMillis = 12000,
+        label = "AnimatedStarsTransition"
+    )
+
+    val stars = remember {
+        listOf(
+            StarParticle(0.12f, 0.14f, 9f, 0.0f),
+            StarParticle(0.32f, 0.24f, 6f, 1.2f),
+            StarParticle(0.55f, 0.12f, 10f, 2.4f),
+            StarParticle(0.82f, 0.18f, 7f, 3.6f),
+            StarParticle(0.18f, 0.42f, 7f, 4.8f),
+            StarParticle(0.45f, 0.38f, 11f, 0.8f),
+            StarParticle(0.72f, 0.45f, 8f, 2.0f),
+            StarParticle(0.90f, 0.52f, 6f, 3.2f),
+            StarParticle(0.10f, 0.70f, 10f, 4.4f),
+            StarParticle(0.36f, 0.65f, 7f, 5.4f),
+            StarParticle(0.62f, 0.74f, 9f, 1.6f),
+            StarParticle(0.85f, 0.80f, 11f, 2.8f),
+            StarParticle(0.24f, 0.88f, 8f, 4.0f),
+            StarParticle(0.50f, 0.90f, 6f, 5.0f),
+            StarParticle(0.76f, 0.92f, 7f, 0.4f)
+        )
+    }
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+        val sizeScale = (w.coerceAtLeast(140f) / 360f).coerceIn(0.55f, 1.3f)
+
+        stars.forEach { s ->
+            // Pulsazione sinusoidale sfasata tra 0.35 e 1.0
+            val wave = 0.5f + 0.5f * sin(progress * 2.0 * PI + s.phase).toFloat()
+            val scale = 0.55f + 0.45f * wave
+            val alpha = 0.03f + 0.08f * wave
+
+            val cx = s.xRatio * w
+            val cy = s.yRatio * h
+            val outerR = s.radiusDp.dp.toPx() * sizeScale * scale
+            val innerR = outerR * 0.28f
+
+            // Disegno stella a 4 punte (scintilla)
+            val path = Path().apply {
+                moveTo(cx, cy - outerR)
+                lineTo(cx + innerR, cy - innerR)
+                lineTo(cx + outerR, cy)
+                lineTo(cx + innerR, cy + innerR)
+                lineTo(cx, cy + outerR)
+                lineTo(cx - innerR, cy + innerR)
+                lineTo(cx - outerR, cy)
+                lineTo(cx - innerR, cy - innerR)
+                close()
+            }
+
+            drawPath(
+                path = path,
+                color = starColor.copy(alpha = alpha)
+            )
+        }
+    }
+}
+
+/**
  * Modello dati immutabile per ciascun numero fluttuante disegnato su Canvas.
  */
 private data class NumberParticle(
@@ -572,4 +865,28 @@ private data class NumberParticle(
     val swayAmplitudeRatio: Float,
     val phase: Float,
     val baseRotation: Float
+)
+
+/**
+ * Modello dati immutabile per ciascuna particella luminosa (lucciola) su Canvas.
+ */
+private data class GlowParticle(
+    val xRatio: Float,
+    val startYRatio: Float,
+    val radiusDp: Float,
+    val speedMultiplier: Int,
+    val swayRatio: Float,
+    val phase: Float,
+    val maxAlpha: Float,
+    val usePrimary: Boolean
+)
+
+/**
+ * Modello dati immutabile per ciascuna stella a 4 punte su Canvas.
+ */
+private data class StarParticle(
+    val xRatio: Float,
+    val yRatio: Float,
+    val radiusDp: Float,
+    val phase: Float
 )

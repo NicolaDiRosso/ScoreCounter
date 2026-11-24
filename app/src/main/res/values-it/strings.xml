@@ -468,6 +468,12 @@
     <string name="sfondo_onde">Onde</string>
     <string name="sfondo_icone_animate">Icone animate</string>
     <string name="sfondo_numeri_animati">Numeri fluttuanti</string>
+    <string name="sez_sfondi_animati">Sfondi animati</string>
+    <string name="sez_sfondi_statici">Sfondi statici</string>
+    <string name="sfondo_particelle_animate">Lucciole</string>
+    <string name="sfondo_onde_animate">Onde vive</string>
+    <string name="sfondo_aurora_animata">Aurora viva</string>
+    <string name="sfondo_stelle_animate">Stelle</string>
     <string name="titolo_anteprima_sfondo">Anteprima dal vivo</string>
     <string name="desc_anteprima_sfondo">Valuta il contrasto delle card in gioco</string>
 </resources>

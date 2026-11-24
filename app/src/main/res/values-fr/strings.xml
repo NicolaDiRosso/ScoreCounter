@@ -468,6 +468,12 @@
     <string name="sfondo_onde">Vagues</string>
     <string name="sfondo_icone_animate">Icônes animées</string>
     <string name="sfondo_numeri_animati">Chiffres flottants</string>
+    <string name="sez_sfondi_animati">Arrière-plans animés</string>
+    <string name="sez_sfondi_statici">Arrière-plans statiques</string>
+    <string name="sfondo_particelle_animate">Lucioles</string>
+    <string name="sfondo_onde_animate">Vagues vives</string>
+    <string name="sfondo_aurora_animata">Aurore vive</string>
+    <string name="sfondo_stelle_animate">Étoiles</string>
     <string name="titolo_anteprima_sfondo">Aperçu en direct</string>
     <string name="desc_anteprima_sfondo">Évaluez le contraste des cartes</string>
 </resources>

@@ -468,6 +468,12 @@
     <string name="sfondo_onde">Waves</string>
     <string name="sfondo_icone_animate">Animated Icons</string>
     <string name="sfondo_numeri_animati">Floating Numbers</string>
+    <string name="sez_sfondi_animati">Animated backgrounds</string>
+    <string name="sez_sfondi_statici">Static backgrounds</string>
+    <string name="sfondo_particelle_animate">Fireflies</string>
+    <string name="sfondo_onde_animate">Live Waves</string>
+    <string name="sfondo_aurora_animata">Live Aurora</string>
+    <string name="sfondo_stelle_animate">Stars</string>
     <string name="titolo_anteprima_sfondo">Live preview</string>
     <string name="desc_anteprima_sfondo">Check in-game card contrast</string>
 </resources>

@@ -468,6 +468,12 @@
     <string name="sfondo_onde">Ondas</string>
     <string name="sfondo_icone_animate">Iconos animados</string>
     <string name="sfondo_numeri_animati">Números flotantes</string>
+    <string name="sez_sfondi_animati">Fondos animados</string>
+    <string name="sez_sfondi_statici">Fondos estáticos</string>
+    <string name="sfondo_particelle_animate">Luciérnagas</string>
+    <string name="sfondo_onde_animate">Olas vivas</string>
+    <string name="sfondo_aurora_animata">Aurora viva</string>
+    <string name="sfondo_stelle_animate">Estrellas</string>
     <string name="titolo_anteprima_sfondo">Vista previa en vivo</string>
     <string name="desc_anteprima_sfondo">Evalúa el contraste de las tarjetas</string>
 </resources>
