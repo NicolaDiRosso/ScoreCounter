@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">Elige el estilo visual del fondo</string>
     <string name="sfondo_icone">Iconos temáticos</string>
     <string name="sfondo_tinta_unita">Color sólido</string>
+    <string name="sfondo_sfumatura">Aurora</string>
+    <string name="sfondo_puntini">Puntos</string>
+    <string name="sfondo_geometrico">Tablero</string>
+    <string name="sfondo_onde">Ondas</string>
     <string name="titolo_anteprima_sfondo">Vista previa en vivo</string>
     <string name="desc_anteprima_sfondo">Evalúa el contraste de las tarjetas</string>
 </resources>

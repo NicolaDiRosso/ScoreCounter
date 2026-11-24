@@ -11,8 +11,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Gradient
+import androidx.compose.material.icons.filled.GridOn
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -274,8 +278,8 @@ private fun LiveBackgroundPreviewCard(
  * COMPONENTE: GRIGLIA OPZIONI SFONDO (BackgroundOptionsGrid)
  * ====================================================================
  * 🧠 SPIEGAZIONE DIDATTICA:
- * Mappa dinamica di tutte le opzioni dell'enum `BackgroundStyle` (ICONS, SOLID, ecc.),
- * organizzata a righe da 2 colonne così da accogliere automaticamente nuovi sfondi futuri.
+ * Mappa dinamica di tutti i 6 stili dell'enum `BackgroundStyle`,
+ * organizzata in 3 righe simmetriche da 2 colonne ciascuna.
  */
 @Composable
 private fun BackgroundOptionsGrid(
@@ -283,13 +287,17 @@ private fun BackgroundOptionsGrid(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    // Mappatura dinamica degli stili di sfondo con titolo e icona rappresentativa
+    // Mappatura completa dei 6 stili di sfondo con titolo localizzato e icona rappresentativa
     val backgroundOptions = listOf(
         BackgroundStyle.ICONS to Pair(stringResource(R.string.sfondo_icone), Icons.Filled.Palette),
-        BackgroundStyle.SOLID to Pair(stringResource(R.string.sfondo_tinta_unita), Icons.Filled.Visibility)
+        BackgroundStyle.SOLID to Pair(stringResource(R.string.sfondo_tinta_unita), Icons.Filled.Visibility),
+        BackgroundStyle.GRADIENT to Pair(stringResource(R.string.sfondo_sfumatura), Icons.Filled.Gradient),
+        BackgroundStyle.DOTS to Pair(stringResource(R.string.sfondo_puntini), Icons.Filled.MoreHoriz),
+        BackgroundStyle.GEOMETRIC to Pair(stringResource(R.string.sfondo_geometrico), Icons.Filled.GridOn),
+        BackgroundStyle.WAVES to Pair(stringResource(R.string.sfondo_onde), Icons.Filled.Waves)
     )
 
-    // Suddividiamo le opzioni in righe da 2 colonne (pronto anche per quando ci saranno 3, 4 o più sfondi)
+    // Suddividiamo i 6 sfondi in 3 righe perfettamente pari da 2 colonne ciascuna
     val rows = backgroundOptions.chunked(2)
 
     Column(
@@ -379,7 +387,7 @@ private fun BackgroundOptionsGrid(
                     }
                 }
 
-                // Se una riga avesse un solo elemento (es. 3 sfondi totali), bilanciamo lo spazio a destra
+                // Se una riga avesse un solo elemento in futuro (numero dispari), bilanciamo lo spazio
                 if (rowItems.size == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }

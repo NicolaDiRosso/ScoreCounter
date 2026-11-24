@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">背景のビジュアルスタイルを選択</string>
     <string name="sfondo_icone">テーマアイコン</string>
     <string name="sfondo_tinta_unita">単色</string>
+    <string name="sfondo_sfumatura">オーロラ</string>
+    <string name="sfondo_puntini">ドット</string>
+    <string name="sfondo_geometrico">ボード</string>
+    <string name="sfondo_onde">ウェーブ</string>
     <string name="titolo_anteprima_sfondo">ライブプレビュー</string>
     <string name="desc_anteprima_sfondo">ゲームカードのコントラストを確認</string>
 </resources>

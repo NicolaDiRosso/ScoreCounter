@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">Choose the background visual style</string>
     <string name="sfondo_icone">Thematic icons</string>
     <string name="sfondo_tinta_unita">Solid color</string>
+    <string name="sfondo_sfumatura">Aurora</string>
+    <string name="sfondo_puntini">Dot Grid</string>
+    <string name="sfondo_geometrico">Board</string>
+    <string name="sfondo_onde">Waves</string>
     <string name="titolo_anteprima_sfondo">Live preview</string>
     <string name="desc_anteprima_sfondo">Check in-game card contrast</string>
 </resources>

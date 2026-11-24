@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">पृष्ठभूमि की दृश्य शैली चुनें</string>
     <string name="sfondo_icone">थीमैटिक आइकन</string>
     <string name="sfondo_tinta_unita">सादा रंग</string>
+    <string name="sfondo_sfumatura">ऑरोरा</string>
+    <string name="sfondo_puntini">डॉट ग्रिड</string>
+    <string name="sfondo_geometrico">बोर्ड</string>
+    <string name="sfondo_onde">लहरें</string>
     <string name="titolo_anteprima_sfondo">लाइव पूर्वावलोकन</string>
     <string name="desc_anteprima_sfondo">गेम कार्ड कंट्रास्ट जांचें</string>
 </resources>

@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">Choisissez le style visuel de l\'arrière-plan</string>
     <string name="sfondo_icone">Icônes thématiques</string>
     <string name="sfondo_tinta_unita">Couleur unie</string>
+    <string name="sfondo_sfumatura">Aurore</string>
+    <string name="sfondo_puntini">Points</string>
+    <string name="sfondo_geometrico">Plateau</string>
+    <string name="sfondo_onde">Vagues</string>
     <string name="titolo_anteprima_sfondo">Aperçu en direct</string>
     <string name="desc_anteprima_sfondo">Évaluez le contraste des cartes</string>
 </resources>

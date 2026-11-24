@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">Wähle den visuellen Hintergrundstil</string>
     <string name="sfondo_icone">Thematische Symbole</string>
     <string name="sfondo_tinta_unita">Einfarbig</string>
+    <string name="sfondo_sfumatura">Aurora</string>
+    <string name="sfondo_puntini">Punktraster</string>
+    <string name="sfondo_geometrico">Spielbrett</string>
+    <string name="sfondo_onde">Wellen</string>
     <string name="titolo_anteprima_sfondo">Live-Vorschau</string>
     <string name="desc_anteprima_sfondo">Prüfe den Kontrast der Spielkarten</string>
 </resources>

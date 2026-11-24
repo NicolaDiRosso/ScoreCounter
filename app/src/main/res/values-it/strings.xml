@@ -462,6 +462,10 @@
     <string name="desc_sfondo_app">Scegli lo stile grafico dello sfondo</string>
     <string name="sfondo_icone">Icone tematiche</string>
     <string name="sfondo_tinta_unita">Tinta unita</string>
+    <string name="sfondo_sfumatura">Aurora</string>
+    <string name="sfondo_puntini">Taccuino</string>
+    <string name="sfondo_geometrico">Plancia</string>
+    <string name="sfondo_onde">Onde</string>
     <string name="titolo_anteprima_sfondo">Anteprima dal vivo</string>
     <string name="desc_anteprima_sfondo">Valuta il contrasto delle card in gioco</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.LocaleList
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -66,7 +67,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
@@ -401,7 +406,7 @@ fun SettingsScreen(
                                     ) {
                                         when (viewModel.backgroundStyle) {
                                             BackgroundStyle.ICONS -> {
-                                                // Piccola icona tematica centrata che richiama la trama di sfondo
+                                                // 1. ICONS: Piccola icona tematica centrata che richiama la trama di sfondo
                                                 Icon(
                                                     imageVector = Icons.Filled.SportsEsports,
                                                     contentDescription = null,
@@ -410,7 +415,81 @@ fun SettingsScreen(
                                                 )
                                             }
                                             BackgroundStyle.SOLID -> {
-                                                // Nessun elemento: mostra il riquadro pulito a tinta unita
+                                                // 2. SOLID: Riquadro pulito a tinta unita basato sul colore di sfondo del tema attivo
+                                            }
+                                            BackgroundStyle.GRADIENT -> {
+                                                // 3. GRADIENT (Aurora): Bagliore sfumato radiale che richiama le sfumature cromatiche dell'aurora
+                                                val primaryGlow = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .background(
+                                                            brush = Brush.radialGradient(
+                                                                colors = listOf(primaryGlow, Color.Transparent)
+                                                            )
+                                                        )
+                                                )
+                                            }
+                                            BackgroundStyle.DOTS -> {
+                                                // 4. DOTS (Taccuino): Griglia minimale 3x2 di puntini ben proporzionati
+                                                val dotColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35f)
+                                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                                    val radiusPx = 1.4.dp.toPx()
+                                                    val cols = 3
+                                                    val rows = 2
+                                                    val dx = size.width / (cols + 1)
+                                                    val dy = size.height / (rows + 1)
+                                                    for (r in 1..rows) {
+                                                        for (c in 1..cols) {
+                                                            drawCircle(
+                                                                color = dotColor,
+                                                                radius = radiusPx,
+                                                                center = Offset(c * dx, r * dy)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            BackgroundStyle.GEOMETRIC -> {
+                                                // 5. GEOMETRIC (Plancia): Reticolato minimale a rombi/diagonali incrociate
+                                                val gridColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.25f)
+                                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                                    val strokePx = 1.dp.toPx()
+                                                    val w = size.width
+                                                    val h = size.height
+
+                                                    // Linee diagonali discendenti
+                                                    drawLine(gridColor, Offset(0f, 0f), Offset(w, h), strokeWidth = strokePx)
+                                                    drawLine(gridColor, Offset(0f, h * 0.5f), Offset(w * 0.5f, h), strokeWidth = strokePx)
+                                                    drawLine(gridColor, Offset(w * 0.5f, 0f), Offset(w, h * 0.5f), strokeWidth = strokePx)
+
+                                                    // Linee diagonali ascendenti
+                                                    drawLine(gridColor, Offset(0f, h), Offset(w, 0f), strokeWidth = strokePx)
+                                                    drawLine(gridColor, Offset(0f, h * 0.5f), Offset(w * 0.5f, 0f), strokeWidth = strokePx)
+                                                    drawLine(gridColor, Offset(w * 0.5f, h), Offset(w, h * 0.5f), strokeWidth = strokePx)
+                                                }
+                                            }
+                                            BackgroundStyle.WAVES -> {
+                                                // 6. WAVES (Onde): Due piccole onde sinusoidali sovrapposte nella metà inferiore del riquadrino
+                                                val waveColor1 = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+                                                val waveColor2 = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                                    val w = size.width
+                                                    val h = size.height
+                                                    val strokePx = 1.2.dp.toPx()
+
+                                                    val path1 = Path().apply {
+                                                        moveTo(0f, h * 0.55f)
+                                                        cubicTo(w * 0.25f, h * 0.40f, w * 0.75f, h * 0.70f, w, h * 0.55f)
+                                                    }
+                                                    drawPath(path1, waveColor1, style = Stroke(width = strokePx))
+
+                                                    val path2 = Path().apply {
+                                                        moveTo(0f, h * 0.70f)
+                                                        cubicTo(w * 0.30f, h * 0.85f, w * 0.70f, h * 0.55f, w, h * 0.70f)
+                                                    }
+                                                    drawPath(path2, waveColor2, style = Stroke(width = strokePx))
+                                                }
                                             }
                                         }
                                     }

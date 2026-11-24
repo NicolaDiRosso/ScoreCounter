@@ -1,5 +1,6 @@
 package com.n380.scorecounter.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -10,19 +11,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.hypot
+import kotlin.math.sin
 
 /**
  * Enumerazione degli stili di sfondo disponibili nell'applicazione.
  * - ICONS: Sfondo con griglia decorativa di icone tematiche in filigrana.
  * - SOLID: Sfondo a tinta unita basato sul colore di background del tema attivo.
+ * - GRADIENT: Bagliore sfumato radiale basato sui colori dinamici Material You.
+ * - DOTS: Trama regolare a puntini stile taccuino segnapunti.
+ * - GEOMETRIC: Reticolato diagonale a rombi stile plancia da gioco.
+ * - WAVES: Onde sinusoidali morbide e rilassanti sul fondo dello schermo.
  */
 enum class BackgroundStyle {
     ICONS,
-    SOLID;
+    SOLID,
+    GRADIENT,
+    DOTS,
+    GEOMETRIC,
+    WAVES;
 
     companion object {
         /**
@@ -61,6 +77,10 @@ fun AppBackground(
                 // 🧠 TINTA UNITA: Nessun pattern decorativo viene sovrapposto.
                 // Rimane visibile unicamente il colore solido MaterialTheme.colorScheme.background del tema attivo.
             }
+            BackgroundStyle.GRADIENT -> AuroraGradientBackground()
+            BackgroundStyle.DOTS -> DotGridBackground()
+            BackgroundStyle.GEOMETRIC -> GeometricBoardBackground()
+            BackgroundStyle.WAVES -> WavesBackground()
         }
     }
 }
@@ -160,5 +180,164 @@ fun PatternedBackground() {
                 }
             }
         }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE: SFONDO SFUMATO DINAMICO "AURORA" (AuroraGradientBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Sovrappone due bagliori radiali morbidissimi (uno in alto a sinistra con il colore
+ * `primary` del tema e uno in basso a destra con il colore `tertiary`), mantenendo
+ * l'opacità bassa (10% - 14%) per preservare il contrasto assoluto delle card.
+ */
+@Composable
+fun AuroraGradientBackground() {
+    val primaryGlow = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+    val tertiaryGlow = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.11f)
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        // Bagliore superiore sinistro (colore primario del tema Material You)
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(primaryGlow, Color.Transparent),
+                center = Offset(x = size.width * 0.15f, y = size.height * 0.12f),
+                radius = size.maxDimension * 0.75f
+            )
+        )
+
+        // Bagliore inferiore destro (colore terziario del tema Material You)
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(tertiaryGlow, Color.Transparent),
+                center = Offset(x = size.width * 0.85f, y = size.height * 0.88f),
+                radius = size.maxDimension * 0.75f
+            )
+        )
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE: SFONDO TACCUINO A PUNTINI (DotGridBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Disegna direttamente su Canvas una griglia regolare di piccoli puntini
+ * (stile taccuino segnapunti / bullet journal) con opacità al 10%.
+ * È leggerissimo per la GPU e si adatta sia allo schermo intero che alle miniature.
+ */
+@Composable
+fun DotGridBackground() {
+    val dotColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f)
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        // Distanza tra un puntino e il successivo (in pixel convertiti da dp)
+        val spacingPx = 22.dp.toPx()
+        val radiusPx = 1.6.dp.toPx()
+
+        var y = spacingPx / 2f
+        while (y < size.height) {
+            var x = spacingPx / 2f
+            while (x < size.width) {
+                drawCircle(
+                    color = dotColor,
+                    radius = radiusPx,
+                    center = Offset(x, y)
+                )
+                x += spacingPx
+            }
+            y += spacingPx
+        }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE: SFONDO PLANCIA GEOMETRICA (GeometricBoardBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Crea un reticolato diagonale a rombi sottili ispirato alle plance dei giochi
+ * da tavolo strategici, disegnando linee incrociate a 45° con opacità al 6%.
+ */
+@Composable
+fun GeometricBoardBackground() {
+    val lineColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f)
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val stepPx = 34.dp.toPx()
+        val strokeWidthPx = 1.dp.toPx()
+        val maxSpan = size.width + size.height
+
+        // Linee diagonali discendenti (da in alto a sinistra verso in basso a destra)
+        var offset = -size.height
+        while (offset < maxSpan) {
+            drawLine(
+                color = lineColor,
+                start = Offset(offset, 0f),
+                end = Offset(offset + size.height, size.height),
+                strokeWidth = strokeWidthPx
+            )
+            offset += stepPx
+        }
+
+        // Linee diagonali ascendenti (da in basso a sinistra verso in alto a destra)
+        offset = 0f
+        while (offset < maxSpan) {
+            drawLine(
+                color = lineColor,
+                start = Offset(offset, 0f),
+                end = Offset(offset - size.height, size.height),
+                strokeWidth = strokeWidthPx
+            )
+            offset += stepPx
+        }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE: SFONDO ONDE ZEN (WavesBackground)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Disegna tre onde sinusoidali morbide e stratificate nella fascia inferiore
+ * e centrale dello schermo, usando il colore primario del tema a bassa opacità.
+ */
+@Composable
+fun WavesBackground() {
+    val waveColorPrimary = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+    val waveColorSecondary = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val width = size.width
+        val height = size.height
+
+        // Funzione interna di supporto per disegnare una singola onda sinusoidale piena
+        fun drawWave(baseHeightRatio: Float, amplitudeRatio: Float, phaseShift: Float, color: Color) {
+            val path = Path()
+            val baseY = height * baseHeightRatio
+            val amplitude = height * amplitudeRatio
+
+            path.moveTo(0f, height)
+            path.lineTo(0f, baseY)
+
+            val step = (width / 40f).coerceAtLeast(4f)
+            var x = 0f
+            while (x <= width + step) {
+                val angle = (x / width) * (2.0 * PI) + phaseShift
+                val y = baseY + (sin(angle) * amplitude).toFloat()
+                path.lineTo(x, y)
+                x += step
+            }
+
+            path.lineTo(width, height)
+            path.close()
+            drawPath(path = path, color = color)
+        }
+
+        // Tre strati sovrapposti con sfasamento per dare profondità fluida
+        drawWave(baseHeightRatio = 0.45f, amplitudeRatio = 0.05f, phaseShift = 0.0f, color = waveColorSecondary)
+        drawWave(baseHeightRatio = 0.65f, amplitudeRatio = 0.06f, phaseShift = 2.1f, color = waveColorSecondary)
+        drawWave(baseHeightRatio = 0.82f, amplitudeRatio = 0.05f, phaseShift = 4.2f, color = waveColorPrimary)
     }
 }
