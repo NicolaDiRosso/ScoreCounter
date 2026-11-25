@@ -16,7 +16,9 @@
     import androidx.compose.material3.Icon
     import androidx.compose.material3.MaterialTheme
     import androidx.compose.runtime.Composable
+    import androidx.compose.runtime.State
     import androidx.compose.runtime.getValue
+    import androidx.compose.runtime.mutableFloatStateOf
     import androidx.compose.runtime.remember
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.Modifier
@@ -136,10 +138,10 @@
         animate: Boolean,
         durationMillis: Int,
         label: String
-    ): Float {
-        if (!animate) return 0.25f
+    ): State<Float> {
+        if (!animate) return remember { mutableFloatStateOf(0.25f) }
         val infiniteTransition = rememberInfiniteTransition(label = label)
-        val progress by infiniteTransition.animateFloat(
+        return infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
@@ -148,7 +150,6 @@
             ),
             label = "${label}_Progress"
         )
-        return progress
     }
 
     /**
@@ -451,7 +452,7 @@
         val loopXSpanPx = with(density) { (colStepDp * 2).toPx() }
 
         // Animazione lineare lenta (16 secondi per attraversare 2 colonne)
-        val progress = rememberOptionalInfiniteProgress(
+        val progressState = rememberOptionalInfiniteProgress(
             animate = animate,
             durationMillis = 16000,
             label = "AnimatedIconsTransition"
@@ -483,8 +484,11 @@
                     .requiredSize(diagonalDp)
                     .graphicsLayer {
                         rotationZ = diagonalAngle
-                        // Traslazione pura sull'asse X ruotato: scorrimento diagonale fluido e loop perfetto
-                        translationX = -progress * loopXSpanPx
+                        // 🧠 FISICA GRAPHICSLAYER (SKIP RECOMPOSITION & LAYOUT PHASES):
+                        // Leggiamo `progressState.value` ESCLUSIVAMENTE all'interno del blocco lambda di `graphicsLayer`.
+                        // In questo modo, Compose salta le fasi di Recomposition e di Layout, applicando la traslazione
+                        // direttamente sull'hardware GPU a 60/120fps senza mai rieseguire i cicli Kotlin di righe e colonne.
+                        translationX = -progressState.value * loopXSpanPx
                     }
             ) {
                 for (row in 0 until rows) {
@@ -527,7 +531,7 @@
         val textColorArgb = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f).toArgb()
 
         // Animazione continua da 0 a 1 in 24 secondi per un movimento lento e rilassante
-        val progress = rememberOptionalInfiniteProgress(
+        val progressState = rememberOptionalInfiniteProgress(
             animate = animate,
             durationMillis = 24000,
             label = "AnimatedNumbersTransition"
@@ -566,6 +570,7 @@
         }
 
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val progress = progressState.value
             val w = size.width
             val h = size.height
             val scaleFactor = (w.coerceAtLeast(140f) / 360f).coerceIn(0.45f, 1.35f)
@@ -612,7 +617,7 @@
         val primaryColor = MaterialTheme.colorScheme.primary
         val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
-        val progress = rememberOptionalInfiniteProgress(
+        val progressState = rememberOptionalInfiniteProgress(
             animate = animate,
             durationMillis = 20000,
             label = "AnimatedParticlesTransition"
@@ -642,6 +647,7 @@
         }
 
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val progress = progressState.value
             val w = size.width
             val h = size.height
             val sizeScale = (w.coerceAtLeast(140f) / 360f).coerceIn(0.55f, 1.3f)
@@ -682,13 +688,14 @@
         val waveColorPrimary = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
         val waveColorSecondary = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
 
-        val progress = rememberOptionalInfiniteProgress(
+        val progressState = rememberOptionalInfiniteProgress(
             animate = animate,
             durationMillis = 14000,
             label = "AnimatedWavesTransition"
         )
 
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val progress = progressState.value
             val width = size.width
             val height = size.height
             val animatedPhase = (progress * 2.0 * PI).toFloat()
@@ -742,13 +749,14 @@
         val primaryGlow = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         val tertiaryGlow = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f)
 
-        val progress = rememberOptionalInfiniteProgress(
+        val progressState = rememberOptionalInfiniteProgress(
             animate = animate,
             durationMillis = 16000,
             label = "AnimatedAuroraTransition"
         )
 
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val progress = progressState.value
             val angle = progress * 2.0 * PI
 
             // Primo bagliore (primary) che orbita morbidamente nella parte superiore
@@ -792,7 +800,7 @@
     fun AnimatedStarsBackground(animate: Boolean = true) {
         val starColor = MaterialTheme.colorScheme.primary
 
-        val progress = rememberOptionalInfiniteProgress(
+        val progressState = rememberOptionalInfiniteProgress(
             animate = animate,
             durationMillis = 12000,
             label = "AnimatedStarsTransition"
@@ -819,6 +827,7 @@
         }
 
         Canvas(modifier = Modifier.fillMaxSize()) {
+            val progress = progressState.value
             val w = size.width
             val h = size.height
             val sizeScale = (w.coerceAtLeast(140f) / 360f).coerceIn(0.55f, 1.3f)
