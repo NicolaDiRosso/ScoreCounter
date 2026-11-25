@@ -478,4 +478,9 @@
     <string name="desc_anteprima_sfondo">Check in-game card contrast</string>
     <string name="opt_punteggio_iniziale">Starting score</string>
     <string name="desc_punteggio_iniziale">Score assigned to players at the start of each new match</string>
+    <string name="btn_ripristina_impostazioni">Reset settings</string>
+    <string name="desc_ripristina_impostazioni">Restore all preferences to their default values</string>
+    <string name="titolo_dialog_ripristino">Reset settings?</string>
+    <string name="desc_dialog_ripristino">All appearance and game preferences will return to their default values. Match history and saved players will not be deleted.</string>
+    <string name="btn_ripristina">Reset</string>
 </resources>

@@ -478,4 +478,9 @@
     <string name="desc_anteprima_sfondo">Valuta il contrasto delle card in gioco</string>
     <string name="opt_punteggio_iniziale">Punteggio iniziale</string>
     <string name="desc_punteggio_iniziale">Valore assegnato ai giocatori all\'inizio di ogni nuova partita</string>
+    <string name="btn_ripristina_impostazioni">Ripristina impostazioni</string>
+    <string name="desc_ripristina_impostazioni">Riporta tutte le preferenze ai valori predefiniti</string>
+    <string name="titolo_dialog_ripristino">Ripristinare le impostazioni?</string>
+    <string name="desc_dialog_ripristino">Tutte le preferenze di aspetto e di gioco torneranno ai valori predefiniti. Lo storico delle partite e i giocatori salvati non verranno eliminati.</string>
+    <string name="btn_ripristina">Ripristina</string>
 </resources>

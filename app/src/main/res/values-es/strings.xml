@@ -478,4 +478,9 @@
     <string name="desc_anteprima_sfondo">Evalúa el contraste de las tarjetas</string>
     <string name="opt_punteggio_iniziale">Puntuación inicial</string>
     <string name="desc_punteggio_iniziale">Valor asignado a los jugadores al inicio de cada nueva partida</string>
+    <string name="btn_ripristina_impostazioni">Restablecer ajustes</string>
+    <string name="desc_ripristina_impostazioni">Restaura todas las preferencias a sus valores predeterminados</string>
+    <string name="titolo_dialog_ripristino">¿Restablecer ajustes?</string>
+    <string name="desc_dialog_ripristino">Todas las preferencias de aspecto y juego volverán a sus valores predeterminados. El historial de partidas y los jugadores guardados no se eliminarán.</string>
+    <string name="btn_ripristina">Restablecer</string>
 </resources>

@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.displayCutoutPadding
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +43,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Pin
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.StayCurrentLandscape
@@ -91,7 +94,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.n380.scorecounter.R
 import com.n380.scorecounter.ui.components.AnimatedSelectableChip
-import com.n380.scorecounter.ui.components.AppBackground
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.BackgroundStyle
 import com.n380.scorecounter.viewmodel.MatchViewModel
@@ -143,9 +145,10 @@ fun SettingsScreen(
     var showPositiveStepDialog by remember { mutableStateOf(false) }
     var showNegativeStepDialog by remember { mutableStateOf(false) }
     var showInitialScoreDialog by remember { mutableStateOf(false) }
+    var showResetSettingsDialog by remember { mutableStateOf(false) }
 
     // ====================================================================
-    // 🧠 RENDER DIALOGHI MODALI (Incremento / Decremento Prolungato)
+    // 🧠 RENDER DIALOGHI MODALI (Incremento / Decremento Prolungato / Reset)
     // ====================================================================
     if (showPositiveStepDialog) {
         PositiveStepDialog(
@@ -168,6 +171,17 @@ fun SettingsScreen(
             initialValue = viewModel.initialScore,
             onDismiss = { showInitialScoreDialog = false },
             onConfirm = { score -> viewModel.updateInitialScore(score) }
+        )
+    }
+
+    if (showResetSettingsDialog) {
+        ResetSettingsDialog(
+            onDismiss = { showResetSettingsDialog = false },
+            onConfirm = {
+                viewModel.resetDefaultSettings()
+                val localeManager = context.getSystemService(Context.LOCALE_SERVICE) as? LocaleManager
+                localeManager?.applicationLocales = LocaleList.getEmptyLocaleList()
+            }
         )
     }
 
@@ -899,8 +913,22 @@ fun SettingsScreen(
                         )
                     }
 
+                    // ================================================================
+                    // 📁 SCHEDA RIPRISTINO IMPOSTAZIONI PREDEFINITE
+                    // ================================================================
+                    // 🧠 SPIEGAZIONE DIDATTICA:
+                    // Adotta la stessa struttura a card (`surface` + angoli da 20.dp +
+                    // badge icona arrotondato) delle tabelle superiori, così da integrarsi
+                    // armoniosamente nel layout senza apparire come un pulsante isolato.
+                    ResetSettingsCard(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            showResetSettingsDialog = true
+                        }
+                    )
+
                     // Testo di copyright posizionato in fondo alla schermata, fuori dalle card delle sezioni
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = stringResource(R.string.testo_copyright),
                         style = MaterialTheme.typography.labelSmall,
@@ -909,6 +937,96 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
                         textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * ====================================================================
+ * COMPONENTE SCHEDA RIPRISTINO IMPOSTAZIONI (ResetSettingsCard)
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Card dedicata che rispecchia lo stile delle schede di impostazione
+ * (sfondo `surface`, angoli da `20.dp`, icona badge a sinistra e pillola
+ * d'azione a destra) con titolo conciso e sottotitolo esplicativo.
+ */
+@Composable
+private fun ResetSettingsCard(
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.error.copy(alpha = 0.28f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            // Titolo breve (così mantiene la stessa dimensione delle altre voci) e sottotitolo esplicativo
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                AutoResizedText(
+                    text = stringResource(R.string.btn_ripristina_impostazioni),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = stringResource(R.string.desc_ripristina_impostazioni),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                    softWrap = true,
+                    maxLines = 3,
+                    lineHeight = 16.sp
+                )
+            }
+
+            // Pillola standardizzata (width = 72.dp, height = 40.dp) allineata alle altre voci
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.45f),
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.error.copy(alpha = 0.3f)
+                ),
+                modifier = Modifier.size(width = 72.dp, height = 40.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.RestartAlt,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
@@ -1235,6 +1353,118 @@ private fun InitialScoreDialog(
                     }
                 ) {
                     Text(stringResource(R.string.btn_applica))
+                }
+            }
+        },
+        dismissButton = null,
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+/**
+ * ====================================================================
+ * DIALOG DI CONFERMA RIPRISTINO IMPOSTAZIONI PREDEFINITE
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * AlertDialog Material 3 Expressive con badge icona circolare superiore,
+ * corpo del messaggio giustificato (`TextAlign.Justify`) e pulsanti dotati
+ * di [AutoResizedText] per impedire qualsiasi troncamento su schermi stretti.
+ */
+@Composable
+private fun ResetSettingsDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.errorContainer,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Filled.RestartAlt,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+        },
+        title = {
+            AutoResizedText(
+                text = stringResource(R.string.titolo_dialog_ripristino),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.desc_dialog_ripristino),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Justify,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismiss()
+                    }
+                ) {
+                    AutoResizedText(
+                        text = stringResource(R.string.btn_annulla),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    ),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onConfirm()
+                        onDismiss()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.RestartAlt,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 6.dp)
+                            .size(18.dp)
+                    )
+                    AutoResizedText(
+                        text = stringResource(R.string.btn_ripristina),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         },

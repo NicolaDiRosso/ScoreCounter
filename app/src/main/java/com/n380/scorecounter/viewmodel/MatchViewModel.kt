@@ -431,6 +431,53 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * RIPRISTINO DELLE IMPOSTAZIONI E PREFERENZE AI VALORI PREDEFINITI DI FABBRICA
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Reimposta tutti gli stati delle preferenze in memoria sui rispettivi valori di fabbrica.
+     * 2. Scrive asincronamente i valori predefiniti nel DataStore su disco.
+     * 3. Mantiene intatti e inalterati lo storico delle partite (`history`), i giocatori preferiti
+     *    (`favoriteNames`), la cronologia titoli (`matchTitleHistory`) e i preset del timer (`timerPresets`).
+     */
+    fun resetDefaultSettings() {
+        // 1. Ripristino in memoria delle preferenze dell'interfaccia e del gioco
+        appLanguage = "system"
+        appOrientation = 0
+        appTheme = 0
+        keepScreenOnMode = 0
+        isHapticFeedbackEnabled = true
+        longPressPositiveStep = 10
+        longPressNegativeStep = 5
+        initialScore = 0
+        confirmQuickActions = true
+        dynamicLeaderboardSorting = false
+        hideMatchAwards = false
+        backgroundStyle = BackgroundStyle.ICONS
+        savedCustomColor = 0xFF9C27B0.toInt()
+
+        // Applicazione immediata della lingua di sistema per sincronizzare l'interfaccia OS
+        setAppLanguagePreference("system")
+
+        // 2. Persistenza asincrona su DataStore
+        viewModelScope.launch {
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[appLanguageKey] = "system"
+                prefs[appOrientationKey] = 0
+                prefs[appThemeKey] = 0
+                prefs[keepScreenOnKey] = 0
+                prefs[hapticFeedbackKey] = true
+                prefs[longPressPositiveStepKey] = 10
+                prefs[longPressNegativeStepKey] = 5
+                prefs[initialScoreKey] = 0
+                prefs[confirmQuickActionsKey] = true
+                prefs[dynamicLeaderboardSortingKey] = false
+                prefs[hideMatchAwardsKey] = false
+                prefs[appBackgroundKey] = 0
+                prefs[savedCustomColorKey] = 0xFF9C27B0.toInt()
+            }
+        }
+    }
+
+    /**
      * IMPOSTAZIONE E PERSISTENZA STILE SFONDO APP
      * 🧠 SPIEGAZIONE DIDATTICA:
      * 1. Aggiorna lo stato `backgroundStyle` in memoria.

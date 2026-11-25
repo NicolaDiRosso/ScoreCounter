@@ -478,4 +478,9 @@
     <string name="desc_anteprima_sfondo">गेम कार्ड कंट्रास्ट जांचें</string>
     <string name="opt_punteggio_iniziale">प्रारंभिक स्कोर</string>
     <string name="desc_punteggio_iniziale">प्रत्येक नए मैच की शुरुआत में खिलाड़ियों को दिया जाने वाला स्कोर</string>
+    <string name="btn_ripristina_impostazioni">सेटिंग्स रीसेट करें</string>
+    <string name="desc_ripristina_impostazioni">सभी प्राथमिकताओं को डिफ़ॉल्ट मानों पर वापस लाएं</string>
+    <string name="titolo_dialog_ripristino">सेटिंग्स रीसेट करें?</string>
+    <string name="desc_dialog_ripristino">सभी दिखावट और गेम प्राथमिकताएं अपने डिफ़ॉल्ट मानों पर लौट आएंगी। मैच इतिहास और सहेजे गए खिलाड़ी हटाए नहीं जाएंगे।</string>
+    <string name="btn_ripristina">रीसेट करें</string>
 </resources>

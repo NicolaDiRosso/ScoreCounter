@@ -478,4 +478,9 @@
     <string name="desc_anteprima_sfondo">Prüfe den Kontrast der Spielkarten</string>
     <string name="opt_punteggio_iniziale">Startpunktzahl</string>
     <string name="desc_punteggio_iniziale">Wert, der den Spielern zu Beginn jedes neuen Spiels zugewiesen wird</string>
+    <string name="btn_ripristina_impostazioni">Einstellungen zurücksetzen</string>
+    <string name="desc_ripristina_impostazioni">Setzt alle Einstellungen auf die Standardwerte zurück</string>
+    <string name="titolo_dialog_ripristino">Einstellungen zurücksetzen?</string>
+    <string name="desc_dialog_ripristino">Alle Darstellungs- und Spieleinstellungen werden auf die Standardwerte zurückgesetzt. Spielverlauf und gespeicherte Spieler werden nicht gelöscht.</string>
+    <string name="btn_ripristina">Zurücksetzen</string>
 </resources>
