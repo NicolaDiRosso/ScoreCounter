@@ -476,4 +476,6 @@
     <string name="sfondo_stelle_animate">スター</string>
     <string name="titolo_anteprima_sfondo">ライブプレビュー</string>
     <string name="desc_anteprima_sfondo">ゲームカードのコントラストを確認</string>
+    <string name="opt_punteggio_iniziale">初期スコア</string>
+    <string name="desc_punteggio_iniziale">新しい試合の開始時に各プレイヤーへ設定されるスコア</string>
 </resources>

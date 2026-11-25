@@ -476,4 +476,6 @@
     <string name="sfondo_stelle_animate">Stars</string>
     <string name="titolo_anteprima_sfondo">Live preview</string>
     <string name="desc_anteprima_sfondo">Check in-game card contrast</string>
+    <string name="opt_punteggio_iniziale">Starting score</string>
+    <string name="desc_punteggio_iniziale">Score assigned to players at the start of each new match</string>
 </resources>

@@ -207,6 +207,17 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
     var backgroundStyle by mutableStateOf(BackgroundStyle.ICONS)
         private set
 
+    // 5.5 PUNTEGGIO INIZIALE GIOCO:
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * Memorizza il punteggio di partenza assegnato a ciascun giocatore quando
+     * viene aggiunto al tavolo di gioco o quando i punteggi vengono azzerati.
+     * Di default è 0.
+     */
+    private val initialScoreKey = intPreferencesKey("initial_score_preference")
+    var initialScore by mutableIntStateOf(0)
+        private set
+
     // Preset predefiniti di fabbrica per il timer (30 sec, 1 min, 5 min, 10 min)
     private val defaultTimerPresets = listOf("0030", "0100", "0500", "1000")
 
@@ -387,6 +398,34 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (_: Exception) {
                 backgroundStyle = BackgroundStyle.ICONS
+            }
+
+            // CARICAMENTO PREFERENZA PUNTEGGIO INIZIALE GIOCO CON PROTEZIONE ANTI-CRASH
+            try {
+                val savedInitScore = preferences[initialScoreKey]
+                if (savedInitScore != null && savedInitScore >= 0) {
+                    initialScore = savedInitScore
+                }
+            } catch (_: Exception) {
+                initialScore = 0
+            }
+        }
+    }
+
+    /**
+     * IMPOSTAZIONE E PERSISTENZA PUNTEGGIO INIZIALE GIOCO
+     * 🧠 SPIEGAZIONE DIDATTICA:
+     * 1. Valida che il valore sia >= 0.
+     * 2. Aggiorna lo stato `initialScore` in memoria.
+     * 3. Scrive asincronamente il valore int nel DataStore su disco.
+     */
+    fun updateInitialScore(score: Int) {
+        if (score >= 0) {
+            initialScore = score
+            viewModelScope.launch {
+                getApplication<Application>().dataStore.edit { prefs ->
+                    prefs[initialScoreKey] = score
+                }
             }
         }
     }
@@ -760,7 +799,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
         // 3. Esecuzione: Aggiungiamo il giocatore SOLO SE non è vuoto E non esiste già al tavolo.
         if (cleanName.isNotEmpty() && !alreadyExists) {
-            val newPlayer = Player(cleanName)
+            val newPlayer = Player(cleanName, initialScore)
             newPlayer.color = color // Assegniamo il colore scelto
             players.add(newPlayer)
             saveBackup() // Salviamo subito il nuovo giocatore nel salva-vita
@@ -1149,11 +1188,11 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         undoScoreActionsBackup.addAll(scoreActions)
         scoreActions.clear()
 
-        // Fatta la copia, azzera brutalmente i punti
+        // Fatta la copia, azzera o ripristina i punti al punteggio iniziale configurato (initialScore)
         players.forEach {
-            it.score = 0
+            it.score = initialScore
             it.scoreHistory.clear()
-            it.scoreHistory.add(0) // Registra l'azzeramento nel grafico come se fosse un tuffo verticale verso il basso!
+            it.scoreHistory.add(initialScore) // Registra il ripristino al punteggio iniziale nel grafico
             it.isOnFire = false // Spegne visivamente il cerchio infuocato
             it.fireComboCount = 0 // Cancella la memoria per il premio "Inarrestabile"
         }

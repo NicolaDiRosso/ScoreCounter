@@ -476,4 +476,6 @@
     <string name="sfondo_stelle_animate">सितारे</string>
     <string name="titolo_anteprima_sfondo">लाइव पूर्वावलोकन</string>
     <string name="desc_anteprima_sfondo">गेम कार्ड कंट्रास्ट जांचें</string>
+    <string name="opt_punteggio_iniziale">प्रारंभिक स्कोर</string>
+    <string name="desc_punteggio_iniziale">प्रत्येक नए मैच की शुरुआत में खिलाड़ियों को दिया जाने वाला स्कोर</string>
 </resources>

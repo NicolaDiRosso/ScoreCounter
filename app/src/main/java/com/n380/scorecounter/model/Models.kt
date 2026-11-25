@@ -13,10 +13,10 @@ package com.n380.scorecounter.model
     // Se fosse stato "val", Kotlin avrebbe vietato le modifiche testuali una volta creato l'oggetto.
     // "mutableStateOf" è lo Stato Magico di Compose: se tu cambi questo valore nel ViewModel,
     // Compose si accorge del cambiamento e ridisegna immediatamente l'interfaccia ovunque appaia questo nome.
-    class Player(initialName: String) {
+    class Player(initialName: String, initialScore: Int = 0) {
         var name by mutableStateOf(initialName)
         var color by mutableStateOf(0xFF757575.toInt()) // Grigio di default
-        var score by mutableStateOf(0)
+        var score by mutableIntStateOf(initialScore)
 
         // ---> STATO ON FIRE: Determina se il punteggio deve diventare arancione.
         // Viene gestito dal ViewModel in base alla sequenza di punti.
@@ -30,8 +30,8 @@ package com.n380.scorecounter.model
         // A parità di punteggio, il giocatore che ha ottenuto punti più recentemente viene posizionato in cima.
         var lastScoreUpdateTime by mutableLongStateOf(0L)
 
-        // LA MEMORIA STORICA PER IL GRAFICO
-        val scoreHistory = mutableStateListOf<Int>(0)
+        // LA MEMORIA STORICA PER IL GRAFICO (inizializzata col punteggio iniziale)
+        val scoreHistory = mutableStateListOf<Int>(initialScore)
 
         // Cambia il punteggio e aggiorna la cronologia per il grafico a linee.
         fun changeScore(amount: Int) {

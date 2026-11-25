@@ -142,6 +142,7 @@ fun SettingsScreen(
 
     var showPositiveStepDialog by remember { mutableStateOf(false) }
     var showNegativeStepDialog by remember { mutableStateOf(false) }
+    var showInitialScoreDialog by remember { mutableStateOf(false) }
 
     // ====================================================================
     // 🧠 RENDER DIALOGHI MODALI (Incremento / Decremento Prolungato)
@@ -159,6 +160,14 @@ fun SettingsScreen(
             initialValue = viewModel.longPressNegativeStep,
             onDismiss = { showNegativeStepDialog = false },
             onConfirm = { step -> viewModel.updateLongPressNegativeStep(step) }
+        )
+    }
+
+    if (showInitialScoreDialog) {
+        InitialScoreDialog(
+            initialValue = viewModel.initialScore,
+            onDismiss = { showInitialScoreDialog = false },
+            onConfirm = { score -> viewModel.updateInitialScore(score) }
         )
     }
 
@@ -841,6 +850,24 @@ fun SettingsScreen(
                         )
 
                         // ------------------------------------------------------------
+                        // C.2b: PUNTEGGIO INIZIALE (Apre InitialScoreDialog)
+                        // ------------------------------------------------------------
+                        SettingsClickableItem(
+                            title = stringResource(R.string.opt_punteggio_iniziale),
+                            subtitle = stringResource(R.string.desc_punteggio_iniziale),
+                            currentSelectionText = "${viewModel.initialScore}",
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                showInitialScoreDialog = true
+                            }
+                        )
+
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        // ------------------------------------------------------------
                         // C.3: ORDINAMENTO DINAMICO CLASSIFICA (Interruttore Switch On/Off)
                         // ------------------------------------------------------------
                         SettingsSwitchItem(
@@ -1089,6 +1116,119 @@ private fun NegativeStepDialog(
                         haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                         val value = textInput.toIntOrNull() ?: initialValue
                         if (value > 0) {
+                            onConfirm(value)
+                        }
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_applica))
+                }
+            }
+        },
+        dismissButton = null,
+        shape = RoundedCornerShape(24.dp)
+    )
+}
+
+/**
+ * ====================================================================
+ * DIALOG DI PERSONALIZZAZIONE PUNTEGGIO INIZIALE
+ * ====================================================================
+ * 🧠 SPIEGAZIONE DIDATTICA:
+ * Ricicla la stessa struttura Material 3 di PositiveStepDialog e NegativeStepDialog:
+ * - Titolo "Punteggio iniziale" e sottotitolo descrittivo.
+ * - Griglia 4×2 di AnimatedSelectableChip con i valori rapidi puliti (0, 10, 20, 25, 40, 50, 100, 300).
+ * - Campo di testo numerico OutlinedTextField per l'inserimento di un valore personalizzato.
+ * - Validazione: Accetta qualsiasi numero intero >= 0 (incluso lo 0).
+ */
+@Composable
+private fun InitialScoreDialog(
+    initialValue: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    var textInput by remember { mutableStateOf(initialValue.toString()) }
+    val quickPresets = listOf(0, 10, 20, 25, 40, 50, 100, 300)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            AutoResizedText(
+                text = stringResource(R.string.opt_punteggio_iniziale),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = stringResource(R.string.desc_dialog_passo),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                val rows = quickPresets.chunked(4)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    rows.forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            rowItems.forEach { preset ->
+                                val isSelected = textInput.toIntOrNull() == preset
+                                AnimatedSelectableChip(
+                                    text = "$preset",
+                                    isSelected = isSelected,
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        textInput = preset.toString()
+                                    },
+                                    height = 42.dp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+
+                OutlinedTextField(
+                    value = textInput,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) textInput = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.hint_valore_personalizzato)) },
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismiss()
+                    }
+                ) {
+                    Text(stringResource(R.string.btn_annulla))
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                        val value = textInput.toIntOrNull() ?: initialValue
+                        if (value >= 0) {
                             onConfirm(value)
                         }
                         onDismiss()

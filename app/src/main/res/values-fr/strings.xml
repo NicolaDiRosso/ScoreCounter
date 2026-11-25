@@ -476,4 +476,6 @@
     <string name="sfondo_stelle_animate">Étoiles</string>
     <string name="titolo_anteprima_sfondo">Aperçu en direct</string>
     <string name="desc_anteprima_sfondo">Évaluez le contraste des cartes</string>
+    <string name="opt_punteggio_iniziale">Score initial</string>
+    <string name="desc_punteggio_iniziale">Valeur attribuée aux joueurs au début de chaque nouvelle partie</string>
 </resources>
