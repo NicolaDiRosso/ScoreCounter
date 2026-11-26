@@ -45,6 +45,7 @@
     <string name="titolo_nessun_risultato">結果が見つかりませんでした。</string>
     <string name="desc_prova_altra_ricerca">別の名前またはプレイヤーで検索してください</string>
     <string name="label_vincitore">🏆 勝者: %s</string>
+    <string name="label_vincitori">🏆 勝者: %s</string>
     <string name="label_classifica_primo">1位 %s</string>
     <string name="label_classifica_generico">%d位 %s</string>
     <string name="label_punti">%d 点</string>

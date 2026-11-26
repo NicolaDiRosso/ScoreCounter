@@ -45,6 +45,7 @@
     <string name="titolo_nessun_risultato">Nessun risultato trovato.</string>
     <string name="desc_prova_altra_ricerca">Prova a cercare un altro nome o giocatore</string>
     <string name="label_vincitore">🏆 Vincitore: %s</string>
+    <string name="label_vincitori">🏆 Vincitori: %s</string>
     <string name="label_classifica_primo">1° %s</string>
     <string name="label_classifica_generico">%d° %s</string>
     <string name="label_punti">%d pt</string>

@@ -58,6 +58,9 @@ import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.model.getWinnerNames
+import com.n380.scorecounter.model.getWinnerFormattedNames
+import com.n380.scorecounter.model.getRankedPlayers
 import com.n380.scorecounter.ui.components.AboutAppDialog
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.DonationDialog
@@ -1033,14 +1036,24 @@ fun HomeScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
+                                                // 🧠 GESTIONE EX-AEQUO (PAREGGIO):
+                                                // Se ci sono 2 o più vincitori a pari merito, utilizziamo l'etichetta plurale "Vincitori: ..."
+                                                // altrimenti manteniamo la classica dicitura singolare "Vincitore: ...".
+                                                // Il modifier weight(1f) garantisce una gestione pulita dello spazio evitando troncamenti bruschi.
+                                                val winnerNames = record.getWinnerNames()
+                                                val isMultipleWinners = winnerNames.size > 1
+                                                val formattedWinners = record.getWinnerFormattedNames()
+                                                val labelRes = if (isMultipleWinners) R.string.label_vincitori else R.string.label_vincitore
+
                                                 Text(
                                                     text = stringResource(
-                                                        R.string.label_vincitore,
-                                                        record.winnerName
-                                                    ), // Testo che indica il vincitore della partita
+                                                        labelRes,
+                                                        formattedWinners
+                                                    ), // Testo che indica il vincitore/i vincitori della partita
                                                     style = MaterialTheme.typography.bodyLarge,
                                                     color = MaterialTheme.colorScheme.primary,
-                                                    fontWeight = FontWeight.Medium
+                                                    fontWeight = FontWeight.Medium,
+                                                    modifier = Modifier.weight(1f).padding(end = 8.dp)
                                                 )
                                                 Icon(
                                                     imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
@@ -1058,15 +1071,20 @@ fun HomeScreen(
                                                         )
                                                     )
 
+                                                    // 🧠 GESTIONE CLASSIFICA CON EX-AEQUO:
+                                                    // Calcola la posizione effettiva con standard ranking (es. due 1° posti seguiti da un 3°).
+                                                    val rankedPlayersWithPositions = record.getRankedPlayers()
+
                                                     // Ciclo che genera la classifica dei giocatori
-                                                    record.allPlayers.forEachIndexed { index, playerRecord ->
+                                                    rankedPlayersWithPositions.forEach { (playerRecord, position) ->
+                                                        val isFirst = position == 1
                                                         Row(
                                                             modifier = Modifier.fillMaxWidth()
                                                                 .padding(vertical = 4.dp),
                                                             horizontalArrangement = Arrangement.SpaceBetween,
                                                             verticalAlignment = Alignment.CenterVertically
                                                         ) {
-                                                            if (index == 0) {
+                                                            if (isFirst) {
                                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                                     Icon(
                                                                         Icons.Filled.EmojiEvents,
@@ -1090,9 +1108,9 @@ fun HomeScreen(
                                                                 Text(
                                                                     text = stringResource(
                                                                         R.string.label_classifica_generico,
-                                                                        index + 1,
+                                                                        position,
                                                                         playerRecord.name
-                                                                    ), // Etichetta per gli altri classificati (2°, 3°, ecc.)
+                                                                    ), // Etichetta per gli altri classificati (2°, 3°, ecc.) con posizione calcolata
                                                                     style = MaterialTheme.typography.bodyLarge
                                                                 )
                                                             }
@@ -1103,7 +1121,7 @@ fun HomeScreen(
                                                                     playerRecord.score
                                                                 ), // Testo che mostra i punti del giocatore
                                                                 style = MaterialTheme.typography.bodyLarge,
-                                                                fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
+                                                                fontWeight = if (isFirst) FontWeight.Bold else FontWeight.Normal
                                                             )
                                                         }
                                                     }

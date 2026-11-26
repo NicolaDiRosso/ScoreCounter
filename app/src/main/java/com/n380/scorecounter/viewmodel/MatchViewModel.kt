@@ -1298,55 +1298,60 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     // ---> LA FUNZIONE DI SALVATAGGIO DEFINITIVA <---
     fun saveCurrentMatch() {
-        // Selezione del vincitore in base al criterio di vittoria attivo (minimo o massimo)
-        val winner = if (isLowestScoreWins) {
-            players.minByOrNull { it.score }
+        if (players.isEmpty()) return
+
+        // 🧠 GESTIONE COMPLETA DEL PAREGGIO (EX-AEQUO):
+        // Non scegliamo arbitrariamente un solo giocatore in base all'ordine di lista.
+        // Identifichiamo il punteggio migliore in base al criterio di vittoria attivo:
+        val winningScore = if (isLowestScoreWins) {
+            players.minOfOrNull { it.score }
         } else {
-            players.maxByOrNull { it.score }
-        }
+            players.maxOfOrNull { it.score }
+        } ?: return
 
-        // Salviamo solo se c'è effettivamente un vincitore (non possiamo salvare partite vuote)
-        if (winner != null) {
-            val finalTitle = if (matchTitle.isEmpty()) "Sfida Senza Nome" else matchTitle
+        // Tutti i giocatori che hanno totalizzato il punteggio vincente sono riconosciuti a pari merito come vincitori!
+        val winners = players.filter { it.score == winningScore }
+        val winnersNames = winners.joinToString(", ") { it.name }
 
-            // Congelamento della classifica finale ordinata correttamente in base al criterio di vittoria
-            val snapshotOfPlayers = players.map { activePlayer ->
-                PlayerRecord(
-                    name = activePlayer.name,
-                    score = activePlayer.score,
-                    scoreHistory = activePlayer.scoreHistory.toList(),
-                    // ---> IMPORTANTE: Passiamo il conteggio delle combo al database permanente
-                    fireComboCount = activePlayer.fireComboCount,
-                    color = activePlayer.color// ---> FIX DATABASE: Salviamo il colore su disco per lo Storico
-                )
-            }.run {
-                if (isLowestScoreWins) sortedBy { it.score } else sortedByDescending { it.score }
-            }
+        val finalTitle = if (matchTitle.isEmpty()) "Sfida Senza Nome" else matchTitle
 
-            // Creazione del record della partita completo includendo lo stato isLowestScoreWins
-            val record = MatchRecord(
-                title = finalTitle,
-                winnerName = winner.name,
-                winningScore = winner.score,
-                allPlayers = snapshotOfPlayers, // Passiamo al database l'intera classifica congelata
-                durationSeconds = matchDurationSeconds, // Salviamo i secondi del cronometro!
-                timestamp = System.currentTimeMillis(), // Salviamo il millisecondo esatto della chiusura per la data
-                isLowestScoreWins = isLowestScoreWins // Salviamo il criterio di vittoria sul disco
+        // Congelamento della classifica finale ordinata correttamente in base al criterio di vittoria
+        val snapshotOfPlayers = players.map { activePlayer ->
+            PlayerRecord(
+                name = activePlayer.name,
+                score = activePlayer.score,
+                scoreHistory = activePlayer.scoreHistory.toList(),
+                // ---> IMPORTANTE: Passiamo il conteggio delle combo al database permanente
+                fireComboCount = activePlayer.fireComboCount,
+                color = activePlayer.color// ---> FIX DATABASE: Salviamo il colore su disco per lo Storico
             )
-
-            // history.add(0, ...) Inseriamo la nuova partita salvata IN CIMA alla lista grafica (Posizione 0), non in fondo!
-            history.add(0, record)
-
-            // Scrittura fisica finale su Android
-            viewModelScope.launch {
-                val jsonString = gson.toJson(history)
-                getApplication<Application>().dataStore.edit { prefs ->
-                    prefs[historyKey] = jsonString
-                }
-            }
-            // Partita finita e salvata correttamente: distruggiamo il file temporaneo salva-vita!
-            clearBackup()
+        }.run {
+            if (isLowestScoreWins) sortedBy { it.score } else sortedByDescending { it.score }
         }
+
+        // Creazione del record della partita completo includendo tutti i vincitori e lo stato isLowestScoreWins
+        val record = MatchRecord(
+            title = finalTitle,
+            winnerName = winnersNames, // Se c'è pareggio, conterrà i nomi separati da virgola (es. "Marco, Daniele")
+            winningScore = winningScore,
+            allPlayers = snapshotOfPlayers, // Passiamo al database l'intera classifica congelata
+            durationSeconds = matchDurationSeconds, // Salviamo i secondi del cronometro!
+            timestamp = System.currentTimeMillis(), // Salviamo il millisecondo esatto della chiusura per la data
+            isLowestScoreWins = isLowestScoreWins // Salviamo il criterio di vittoria sul disco
+        )
+
+        // history.add(0, ...) Inseriamo la nuova partita salvata IN CIMA alla lista grafica (Posizione 0), non in fondo!
+        history.add(0, record)
+
+        // Scrittura fisica finale su Android
+        viewModelScope.launch {
+            val jsonString = gson.toJson(history)
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[historyKey] = jsonString
+            }
+        }
+        // Partita finita e salvata correttamente: distruggiamo il file temporaneo salva-vita!
+        clearBackup()
     }
     /**
      * ====================================================================

@@ -45,6 +45,7 @@
     <string name="titolo_nessun_risultato">कोई परिणाम नहीं मिला।</string>
     <string name="desc_prova_altra_ricerca">कोई अन्य नाम या खिलाड़ी खोजने का प्रयास करें</string>
     <string name="label_vincitore">🏆 विजेता: %s</string>
+    <string name="label_vincitori">🏆 विजेता: %s</string>
     <string name="label_classifica_primo">पहला %s</string>
     <string name="label_classifica_generico">%dवां %s</string>
     <string name="label_punti">%d अंक</string>

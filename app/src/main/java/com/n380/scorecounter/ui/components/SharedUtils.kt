@@ -53,6 +53,7 @@
     import android.net.Uri
     import com.n380.scorecounter.R // 🌍 I18N: Import fondamentale per accedere agli ID del dizionario
     import com.n380.scorecounter.model.PlayerRecord
+    import com.n380.scorecounter.model.calculateRankings
     import java.text.SimpleDateFormat
     import java.util.*
     import kotlin.math.cos
@@ -865,13 +866,18 @@
 
             appendLine() // Separatore visivo dell'intestazione
 
-            // ITERAZIONE CLASSIFICA: Trasforma la lista di Coppie in testo formattato
-            rankedPlayersData.forEachIndexed { index, (name, score) ->
-                val medal = when (index) {
-                    0 -> "🥇 1°"
-                    1 -> "🥈 2°"
-                    2 -> "🥉 3°"
-                    else -> "- ${index + 1}°"
+            // 🧠 GESTIONE EX-AEQUO (PAREGGIO) NELLA CONDIVISIONE TESTUALE:
+            // Calcoliamo la posizione con la logica standard competition ranking (1, 1, 3...).
+            // Se due giocatori sono al 1° posto a pari merito, entrambi ricevono la medaglia d'oro 🥇 1°,
+            // e il giocatore successivo riceve la posizione 3° (🥉 3°), evitando assegnazioni arbitrarie.
+            val rankedWithPositions = calculateRankings(rankedPlayersData) { it.second }
+            rankedWithPositions.forEach { (playerPair, rank) ->
+                val (name, score) = playerPair
+                val medal = when (rank) {
+                    1 -> "🥇 1°"
+                    2 -> "🥈 2°"
+                    3 -> "🥉 3°"
+                    else -> "- $rank°"
                 }
                 appendLine("$medal $name - $score ${context.getString(R.string.share_points_suffix)}")
             }

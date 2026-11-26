@@ -34,6 +34,7 @@ import com.n380.scorecounter.model.getHistoricalPredatore
 import com.n380.scorecounter.model.getHistoricalTestaATesta
 import com.n380.scorecounter.model.getHistoricalLumaca
 import com.n380.scorecounter.model.getHistoricalDiesel
+import com.n380.scorecounter.model.getWinnerFormattedNames
 import com.n380.scorecounter.ui.components.ChartGuideDialog
 import com.n380.scorecounter.ui.components.*
 
@@ -147,7 +148,7 @@ fun MatchAnalysisOverlayLandscape(
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
-                                        text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
+                                        text = stringResource(R.string.label_vinta_da_con_punti, match.getWinnerFormattedNames(), match.winningScore),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.secondary,

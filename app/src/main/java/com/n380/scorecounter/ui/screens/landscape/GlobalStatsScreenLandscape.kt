@@ -35,6 +35,8 @@ import com.n380.scorecounter.model.getHistoricalPredatore
 import com.n380.scorecounter.model.getHistoricalTestaATesta
 import com.n380.scorecounter.model.getHistoricalLumaca
 import com.n380.scorecounter.model.getHistoricalDiesel
+import com.n380.scorecounter.model.getWinnerNames
+import com.n380.scorecounter.model.getWinnerFormattedNames
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.formatDate
 import com.n380.scorecounter.ui.components.formatTime
@@ -67,8 +69,14 @@ fun GlobalStatsScreenLandscape(
     // --------------------------------------------------------------------
     val totalMatches = viewModel.history.size
     val totalSeconds = viewModel.history.sumOf { it.durationSeconds }
-    val winsMap = viewModel.history.groupingBy { it.winnerName }.eachCount()
+    // 🧠 GESTIONE PAREGGIO: Con flatMap { it.getWinnerNames() }, in caso di pareggio a pari merito
+    // ogni vincitore riceve correttamente +1 vittoria nelle statistiche globali.
+    val winsMap = viewModel.history.flatMap { it.getWinnerNames() }.groupingBy { it }.eachCount()
+    val maxWins = winsMap.values.maxOrNull() ?: 0
     val bestPlayer = winsMap.maxByOrNull { it.value }
+    val bestPlayerNames = if (maxWins > 0) {
+        winsMap.filterValues { it == maxWins }.keys.joinToString(", ")
+    } else null
     val highestScoreRecord = viewModel.history.maxByOrNull { it.winningScore }
     val longestMatch = viewModel.history.filter { it.durationSeconds > 0 }.maxByOrNull { it.durationSeconds }
 
@@ -237,7 +245,7 @@ fun GlobalStatsScreenLandscape(
                                     fontWeight = FontWeight.ExtraBold
                                 )
                                 AutoResizedText(
-                                    text = bestPlayer?.key ?: stringResource(R.string.nessuno),
+                                    text = bestPlayerNames ?: stringResource(R.string.nessuno),
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Black,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -422,7 +430,7 @@ fun GlobalStatsScreenLandscape(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = highestScoreRecord.winnerName,
+                                        text = highestScoreRecord.getWinnerFormattedNames(),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Black
                                     )
@@ -484,7 +492,7 @@ fun GlobalStatsScreenLandscape(
                                 )
                             }
                             Text(
-                                text = stringResource(R.string.label_vinta_da, longestMatch.winnerName),
+                                text = stringResource(R.string.label_vinta_da, longestMatch.getWinnerFormattedNames()),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -517,7 +525,7 @@ fun GlobalStatsScreenLandscape(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = dictatorMatch.winnerName,
+                                        text = dictatorMatch.getWinnerFormattedNames(),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Black
                                     )

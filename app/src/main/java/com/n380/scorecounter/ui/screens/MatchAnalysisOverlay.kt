@@ -150,7 +150,7 @@
                                 ) {
 
                                     Text(
-                                        text = stringResource(R.string.label_vinta_da_con_punti, match.winnerName, match.winningScore),
+                                        text = stringResource(R.string.label_vinta_da_con_punti, match.getWinnerFormattedNames(), match.winningScore),
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.secondary,

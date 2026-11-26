@@ -44,6 +44,8 @@ import com.n380.scorecounter.model.getHistoricalPredatore
 import com.n380.scorecounter.model.getHistoricalTestaATesta
 import com.n380.scorecounter.model.getHistoricalLumaca
 import com.n380.scorecounter.model.getHistoricalDiesel
+import com.n380.scorecounter.model.getWinnerNames
+import com.n380.scorecounter.model.getWinnerFormattedNames
 import com.n380.scorecounter.ui.components.formatDate // Per mostrare la data nelle card espanse
 import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -144,15 +146,14 @@ fun GlobalStatsScreen(
     val totalSeconds = viewModel.history.sumOf { it.durationSeconds }
 
     // 3. CAMPIONE ASSOLUTO (Chi ha vinto più partite in assoluto?):
-    // Questo calcolo si fa in due passaggi.
-    // PASSAGGIO A: groupingBy { it.winnerName }.eachCount()
-    // Prende le partite, le raggruppa creando delle "scatole" col nome del vincitore e conta quante partite ci sono in ogni scatola.
-    // Il risultato è una Mappa (Dizionario) fatta così -> ["Nicola": 5, "Marco": 2, "Anna": 8]
-    val winsMap = viewModel.history.groupingBy { it.winnerName }.eachCount()
-    // PASSAGGIO B: maxByOrNull { it.value }
-    // Guarda dentro la Mappa appena creata, cerca il valore (.value) più alto (l'8 di Anna) e salva quell'elemento.
-    // Se la lista è vuota, 'OrNull' evita che l'app crashi e restituisce semplicemente "niente".
+    // 🧠 GESTIONE PAREGGIO: Con flatMap { it.getWinnerNames() }, in caso di pareggio a pari merito
+    // ogni vincitore riceve correttamente +1 vittoria nelle statistiche globali.
+    val winsMap = viewModel.history.flatMap { it.getWinnerNames() }.groupingBy { it }.eachCount()
+    val maxWins = winsMap.values.maxOrNull() ?: 0
     val bestPlayer = winsMap.maxByOrNull { it.value }
+    val bestPlayerNames = if (maxWins > 0) {
+        winsMap.filterValues { it == maxWins }.keys.joinToString(", ")
+    } else null
 
     // 4. RECORD DI PUNTI (Il punteggio più alto mai registrato da un vincitore):
     // maxByOrNull scansiona tutto lo storico e trova LA PARTITA in cui 'winningScore' era il più alto in assoluto.
@@ -477,8 +478,8 @@ fun GlobalStatsScreen(
                                         // è vuoto, bestPlayer sarà nullo. L'operatore '?:' dice: "Se la variabile di
                                         // sinistra è nulla, usa la stringa che ti passo a destra come paracadute".
                                         AutoResizedText(
-                                            // Utilizza la stringa "Nessuno" dal dizionario se il giocatore è nullo
-                                            text = bestPlayer?.key ?: stringResource(R.string.nessuno),
+                                            // Utilizza i nomi dei migliori giocatori o "Nessuno" dal dizionario se il database è vuoto
+                                            text = bestPlayerNames ?: stringResource(R.string.nessuno),
                                             style = MaterialTheme.typography.displayMedium,
                                             fontWeight = FontWeight.Black,
                                             color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -657,7 +658,7 @@ fun GlobalStatsScreen(
                                             // A sinistra: Chi ha fatto il record e in che partita lo ha fatto
                                             Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
                                                 Text(
-                                                    text = highestScoreRecord.winnerName,
+                                                    text = highestScoreRecord.getWinnerFormattedNames(),
                                                     style = MaterialTheme.typography.headlineSmall,
                                                     fontWeight = FontWeight.Bold
                                                 )
@@ -781,7 +782,7 @@ fun GlobalStatsScreen(
                                                 )
                                                 Text(
                                                     // Inserisce il nome del vincitore nella stringa formattata "Vinta da [Nome]"
-                                                    text = stringResource(R.string.label_vinta_da, longestMatch.winnerName),
+                                                    text = stringResource(R.string.label_vinta_da, longestMatch.getWinnerFormattedNames()),
                                                     style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -876,7 +877,7 @@ fun GlobalStatsScreen(
                                                 modifier = Modifier.weight(1f).padding(end = 12.dp)
                                             ) {
                                                 Text(
-                                                    text = dictatorMatch.winnerName,
+                                                    text = dictatorMatch.getWinnerFormattedNames(),
                                                     style = MaterialTheme.typography.headlineSmall,
                                                     fontWeight = FontWeight.Bold,
                                                     maxLines = 1,

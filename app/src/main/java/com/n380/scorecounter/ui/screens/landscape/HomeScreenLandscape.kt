@@ -42,6 +42,9 @@ import com.n380.scorecounter.model.getHistoricalCecchino
 import com.n380.scorecounter.model.getHistoricalFenice
 import com.n380.scorecounter.model.getHistoricalGambero
 import com.n380.scorecounter.model.getHistoricalInarrestabile
+import com.n380.scorecounter.model.getWinnerNames
+import com.n380.scorecounter.model.getWinnerFormattedNames
+import com.n380.scorecounter.model.getRankedPlayers
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.SlideUpAnimatedVisibility
@@ -622,12 +625,20 @@ private fun HomeHistoryGridTableContent(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // 🧠 GESTIONE EX-AEQUO (PAREGGIO):
+                                // Se ci sono 2 o più vincitori a pari merito, utilizziamo l'etichetta plurale "Vincitori: ..."
+                                // AutoResizedText garantisce un ridimensionamento fluido per evitare troncamenti bruschi dei nomi.
+                                val winnerNames = record.getWinnerNames()
+                                val isMultipleWinners = winnerNames.size > 1
+                                val formattedWinners = record.getWinnerFormattedNames()
+                                val labelRes = if (isMultipleWinners) R.string.label_vincitori else R.string.label_vincitore
+
                                 AutoResizedText(
-                                    text = stringResource(R.string.label_vincitore, record.winnerName),
+                                    text = stringResource(labelRes, formattedWinners),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Medium,
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f).padding(end = 4.dp)
                                 )
                                 Icon(
                                     imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
@@ -641,7 +652,12 @@ private fun HomeHistoryGridTableContent(
                                 Column(modifier = Modifier.padding(top = 10.dp)) {
                                     HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
 
-                                    record.allPlayers.forEachIndexed { index, playerRecord ->
+                                    // 🧠 GESTIONE CLASSIFICA CON EX-AEQUO:
+                                    // Calcola le posizioni tenendo conto del pareggio (1°, 1°, 3°...)
+                                    val rankedPlayersWithPositions = record.getRankedPlayers()
+
+                                    rankedPlayersWithPositions.forEach { (playerRecord, position) ->
+                                        val isFirst = position == 1
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -650,15 +666,15 @@ private fun HomeHistoryGridTableContent(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
-                                                text = if (index == 0) "🏆 ${playerRecord.name}" else "${index + 1}. ${playerRecord.name}",
+                                                text = if (isFirst) "🏆 ${playerRecord.name}" else "$position. ${playerRecord.name}",
                                                 style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal,
-                                                color = if (index == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                                fontWeight = if (isFirst) FontWeight.Bold else FontWeight.Normal,
+                                                color = if (isFirst) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
                                                 text = "${playerRecord.score} pt",
                                                 style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = if (index == 0) FontWeight.Bold else FontWeight.Normal
+                                                fontWeight = if (isFirst) FontWeight.Bold else FontWeight.Normal
                                             )
                                         }
                                     }

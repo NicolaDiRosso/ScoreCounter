@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.drawToBitmap
 import com.n380.scorecounter.R // 🌍 I18N: Import per l'accesso agli ID
 import com.n380.scorecounter.model.PlayerRecord
+import com.n380.scorecounter.model.calculateRankings
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.AwardCard
 import com.n380.scorecounter.ui.components.ConfettiExplosion
@@ -504,12 +505,21 @@ fun ResultsScreen(
                         // Controllo di sicurezza
                         if (rankedPlayers.isNotEmpty()) {
 
-                            // --- LA CLASSIFICA GIOCATORI ---
+                            // --- LA CLASSIFICA GIOCATORI (CON GESTIONE PAREGGIO EX-AEQUO) ---
+                            // 🧠 SPIEGAZIONE DIDATTICA:
+                            // Calcoliamo le posizioni reali secondo lo standard competition ranking (1, 1, 3...):
+                            // Se due o più giocatori finiscono a pari merito al primo posto,
+                            // tutti ricevono position = 1. Questo fa scattare su ciascuna card lo stile vincente pieno,
+                            // l'elevazione a 8.dp, lo shimmer animato e l'icona del trofeo dorato.
+                            val rankedWithPositions = remember(rankedPlayers) {
+                                calculateRankings(rankedPlayers) { it.score }
+                            }
+
                             // Utilizziamo forEachIndexed al posto di itemsIndexed (che è esclusivo delle LazyColumn)
-                            rankedPlayers.forEachIndexed { index, player ->
+                            rankedWithPositions.forEachIndexed { index, (player, position) ->
                                 PlayerResultCard(
                                     player = player,
-                                    position = index + 1, // L'indice parte da 0, la classifica da 1
+                                    position = position, // Posizione calcolata con ex-aequo (1 per tutti i primi posti)
                                     modifier = staggeredModifier(index + 1)
                                 )
                             }

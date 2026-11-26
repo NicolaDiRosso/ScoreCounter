@@ -119,6 +119,86 @@ package com.n380.scorecounter.model
     )
 
     // ====================================================================
+    // LOGICA CLASSIFICA E RICONOSCIMENTO DEL PAREGGIO (EX-AEQUO)
+    // ====================================================================
+    /**
+     * 🧠 SPIEGAZIONE DIDATTICA DELL'ALGORITMO (Standard Competition Ranking "1224"):
+     * Quando due o più giocatori ottengono lo stesso identico punteggio:
+     * - Ricevono la stessa identica posizione in classifica (es. due primi posti `1°`).
+     * - La posizione successiva "salta" in base al numero di concorrenti a pari merito
+     *   (es. due `1°` posti seguiti da un `3°` posto, oppure tre `1°` posti seguiti da un `4°` posto).
+     *
+     * @param items Lista ordinata per punteggio (in ordine decrescente o crescente a seconda del criterio)
+     * @param getScore Funzione lambda per estrarre il punteggio numerico di ciascun elemento
+     * @return Lista di coppie Pair(elemento, posizioneCalcolata)
+     */
+    fun <T> calculateRankings(items: List<T>, getScore: (T) -> Int): List<Pair<T, Int>> {
+        if (items.isEmpty()) return emptyList()
+        var currentRank = 1
+        return items.mapIndexed { index, item ->
+            if (index > 0 && getScore(item) != getScore(items[index - 1])) {
+                currentRank = index + 1
+            }
+            Pair(item, currentRank)
+        }
+    }
+
+    /**
+     * 🧠 RICONOSCIMENTO VINCITORI A PARI MERITO PER MatchRecord:
+     * Restituisce tutti i giocatori che hanno terminato la partita con il punteggio migliore
+     * in base al criterio della partita (minimo se isLowestScoreWins, massimo altrimenti).
+     * Se allPlayers è vuoto, restituisce una lista vuota.
+     */
+    fun MatchRecord.getWinners(): List<PlayerRecord> {
+        if (allPlayers.isEmpty()) return emptyList()
+        val bestScore = if (isLowestScoreWins) {
+            allPlayers.minOfOrNull { it.score }
+        } else {
+            allPlayers.maxOfOrNull { it.score }
+        } ?: return emptyList()
+        return allPlayers.filter { it.score == bestScore }
+    }
+
+    /**
+     * Restituisce i nomi di tutti i vincitori a pari merito.
+     * Gestisce sia i record completi con allPlayers, sia i vecchi record o backup
+     * effettuando il parsing della stringa `winnerName` (es. "Marco, Daniele").
+     */
+    fun MatchRecord.getWinnerNames(): List<String> {
+        val winners = getWinners()
+        return if (winners.isNotEmpty()) {
+            winners.map { it.name }
+        } else {
+            if (winnerName.isNotBlank()) {
+                winnerName.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            } else {
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * Restituisce i nomi dei vincitori separati da virgola per la visualizzazione nelle card dello storico.
+     */
+    fun MatchRecord.getWinnerFormattedNames(): String {
+        val names = getWinnerNames()
+        return if (names.isNotEmpty()) names.joinToString(", ") else winnerName
+    }
+
+    /**
+     * Restituisce la lista dei giocatori della partita ordinati con la posizione calcolata
+     * tenendo conto del pareggio ex-aequo (1°, 1°, 3°...).
+     */
+    fun MatchRecord.getRankedPlayers(): List<Pair<PlayerRecord, Int>> {
+        val sorted = if (isLowestScoreWins) {
+            allPlayers.sortedBy { it.score }
+        } else {
+            allPlayers.sortedByDescending { it.score }
+        }
+        return calculateRankings(sorted) { it.score }
+    }
+
+    // ====================================================================
     // LOGICA STORICA: CALCOLO PREMI SUI SALVATAGGI (EXTENSION FUNCTIONS)
     // ====================================================================
     // 🧠 TEORIA KOTLIN: Le Extension Functions

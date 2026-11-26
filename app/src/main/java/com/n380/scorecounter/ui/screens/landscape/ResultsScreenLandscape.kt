@@ -31,6 +31,7 @@ import androidx.core.view.drawToBitmap
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.model.PlayerRecord
+import com.n380.scorecounter.model.calculateRankings
 import com.n380.scorecounter.ui.components.*
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.launch
@@ -183,10 +184,17 @@ fun ResultsScreenLandscape(
                                 .verticalScroll(rememberScrollState()),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            rankedPlayers.forEachIndexed { index, player ->
+                            // 🧠 GESTIONE EX-AEQUO (PAREGGIO):
+                            // Calcoliamo le posizioni affinché tutti i giocatori a pari merito al 1° posto
+                            // ricevano position = 1 e la medesima evidenziazione grafica con trofeo e shimmer.
+                            val rankedWithPositions = remember(rankedPlayers) {
+                                calculateRankings(rankedPlayers) { it.score }
+                            }
+
+                            rankedWithPositions.forEach { (player, position) ->
                                 PlayerResultCard(
                                     player = player,
-                                    position = index + 1
+                                    position = position
                                 )
                             }
                         }
