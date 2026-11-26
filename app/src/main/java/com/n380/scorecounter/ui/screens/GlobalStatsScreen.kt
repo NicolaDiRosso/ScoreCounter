@@ -51,9 +51,12 @@ import com.n380.scorecounter.ui.components.formatTime
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.viewmodel.MatchViewModel
 //per misurare un solo tocco alla volta per il pulsante chiudi
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.n380.scorecounter.model.calculateHeadToHeadStats
+import com.n380.scorecounter.model.extractAvailableVsPlayers
 import com.n380.scorecounter.ui.screens.landscape.GlobalStatsScreenLandscape
 
 /**
@@ -240,6 +243,37 @@ fun GlobalStatsScreen(
         .mapNotNull { match -> match.getHistoricalDiesel()?.let { Triple(match, it.first, it.second) } }
         .maxByOrNull { it.third }
 
+    // ====================================================================
+    // STATO SCHEDA ATTIVA (0 = Generali, 1 = Confronto VS) E SFIDANTI
+    // ====================================================================
+    // 🧠 TEORIA COMPOSE (State Hoisting & Sopravvivenza alla Rotazione):
+    // Dichiarando questi stati in cima a GlobalStatsScreen (prima del bivio
+    // Portrait / Landscape), se ruoti il telefono mentre consulti un confronto VS
+    // Compose mantiene sia la scheda attiva sia i due giocatori selezionati!
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+
+    // 🧠 OTTIMIZZAZIONE CON `remember(key)`:
+    // Ricalcola la lista dei giocatori disponibili solo se cambia il numero di partite nello storico.
+    val availableVsPlayers = remember(viewModel.history.size) {
+        extractAvailableVsPlayers(viewModel.history)
+    }
+
+    var selectedPlayer1 by remember(availableVsPlayers) {
+        mutableStateOf(availableVsPlayers.getOrNull(0)?.name)
+    }
+    var selectedPlayer2 by remember(availableVsPlayers) {
+        mutableStateOf(availableVsPlayers.getOrNull(1)?.name)
+    }
+
+    // Ricalcola le statistiche incrociate solo quando cambia uno dei due sfidanti o lo storico
+    val vsStats = remember(selectedPlayer1, selectedPlayer2, viewModel.history.size) {
+        val p1 = selectedPlayer1
+        val p2 = selectedPlayer2
+        if (p1 != null && p2 != null) {
+            calculateHeadToHeadStats(p1, p2, viewModel.history)
+        } else null
+    }
+
     // --------------------------------------------------------------------
     // RILEVAMENTO ORIENTAMENTO SCHERMO (RESPONSIVE ROUTING)
     // --------------------------------------------------------------------
@@ -252,7 +286,15 @@ fun GlobalStatsScreen(
         // ====================================================================
         GlobalStatsScreenLandscape(
             viewModel = viewModel,
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            selectedTabIndex = selectedTabIndex,
+            onTabSelected = { selectedTabIndex = it },
+            availableVsPlayers = availableVsPlayers,
+            selectedPlayer1 = selectedPlayer1,
+            onPlayer1Selected = { selectedPlayer1 = it },
+            selectedPlayer2 = selectedPlayer2,
+            onPlayer2Selected = { selectedPlayer2 = it },
+            vsStats = vsStats
         )
     } else {
         // ====================================================================
@@ -360,9 +402,55 @@ fun GlobalStatsScreen(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
                 // 2. Rimosso 'start = 16.dp' per evitare il "doppio padding" e allinearlo perfettamente a sinistra.
-                // 3. Aggiunto 'bottom = 24.dp' per distaccarlo elegantemente dalla prima carta sottostante.
-                modifier = Modifier.padding(bottom = 24.dp)
+                // 3. Spaziatura ridotta a 12.dp per ospitare subito sotto il selettore a schede.
+                modifier = Modifier.padding(bottom = 12.dp)
             )
+
+            // ====================================================================
+            // ---> SELETTORE A SCHEDE CENTRATO SOTTO IL TITOLO (Generali vs VS) <---
+            // ====================================================================
+            // 🧠 COMPONENTE MATERIAL 3 (SingleChoiceSegmentedButtonRow):
+            // Permette di alternare tra le statistiche generali e il confronto testa a testa
+            // mantenendo lo stesso identico linguaggio visivo usato in CreateMatchScreen.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    SegmentedButton(
+                        selected = selectedTabIndex == 0,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            selectedTabIndex = 0
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                    ) {
+                        AutoResizedText(
+                            text = stringResource(R.string.tab_statistiche_generali),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                    SegmentedButton(
+                        selected = selectedTabIndex == 1,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            selectedTabIndex = 1
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                    ) {
+                        AutoResizedText(
+                            text = stringResource(R.string.tab_confronto_vs),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+            }
 
             // ====================================================================
             // ---> IL TAVOLO DELLE STATISTICHE (Ora include anche il Campione!) <---
@@ -377,6 +465,17 @@ fun GlobalStatsScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(24.dp)
             ) {
+                if (selectedTabIndex == 1) {
+                    // Vista dedicata al confronto diretto testa a testa tra due giocatori
+                    VsComparisonContent(
+                        availablePlayers = availableVsPlayers,
+                        selectedPlayer1 = selectedPlayer1,
+                        onPlayer1Selected = { selectedPlayer1 = it },
+                        selectedPlayer2 = selectedPlayer2,
+                        onPlayer2Selected = { selectedPlayer2 = it },
+                        stats = vsStats
+                    )
+                } else {
                 // ---> EFFETTO CARTA RARA (Shimmer Sweep) <---
                 // 1. IL MOTORE DELL'ANIMAZIONE INFINITA
                 val infiniteTransition = rememberInfiniteTransition(label = "shimmer_campione")
@@ -1614,8 +1713,9 @@ fun GlobalStatsScreen(
                     // permettendo uno scorrimento piacevole fino in fondo.
                     //item { Spacer(modifier = Modifier.height(1.dp)) }
                 }
+                }
             }
         }
+        }
     }
-}
 }

@@ -487,4 +487,33 @@
     <string name="titolo_modifica_giocatore_rapido">Modifica giocatore rapido</string>
     <string name="label_colore_preferito">Colore preferito (opzionale):</string>
     <string name="label_nessun_colore">Nessun colore</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">Generali</string>
+    <string name="tab_confronto_vs">Confronto VS</string>
+    <string name="label_giocatore_1">Giocatore 1</string>
+    <string name="label_giocatore_2">Giocatore 2</string>
+    <string name="desc_scambia_giocatori">Scambia giocatori</string>
+    <string name="titolo_scontri_diretti">Scontri diretti</string>
+    <string name="label_sfide_insieme">%d sfide insieme</string>
+    <string name="label_una_sfida_insieme">1 sfida insieme</string>
+    <string name="label_pareggi_vs">%d pareggi</string>
+    <string name="label_un_pareggio_vs">1 pareggio</string>
+    <string name="titolo_media_punti_vs">📊 Media punti</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 Vittorie al tavolo</string>
+    <string name="desc_vittorie_tavolo_vs">1° posto assoluto nelle sfide condivise</string>
+    <string name="titolo_scarto_massimo_vs">⚡ Scarto record</string>
+    <string name="label_ottenuto_da_in">Da %1$s in \'%2$s\'</string>
+    <string name="msg_nessuno_scarto_vs">Solo pareggi finora</string>
+    <string name="titolo_combo_fuoco_vs">🔥 Combo On Fire</string>
+    <string name="titolo_premi_condivisi_vs">🏅 Premi nelle sfide insieme</string>
+    <string name="msg_nessun_premio_vs">Nessun premio conquistato nelle sfide condivise.</string>
+    <string name="titolo_vs_pochi_giocatori">Servono almeno 2 giocatori</string>
+    <string name="desc_vs_pochi_giocatori">Completa qualche partita con almeno due partecipanti per sbloccare il confronto testa a testa.</string>
+    <string name="titolo_vs_nessuna_sfida">Nessuna sfida insieme</string>
+    <string name="desc_vs_nessuna_sfida">%1$s e %2$s non hanno ancora giocato nella stessa partita.</string>
+
 </resources>
+

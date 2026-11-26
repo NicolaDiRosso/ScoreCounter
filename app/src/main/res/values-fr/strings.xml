@@ -487,4 +487,31 @@
     <string name="titolo_modifica_giocatore_rapido">Modifier le joueur rapide</string>
     <string name="label_colore_preferito">Couleur préférée (facultatif) :</string>
     <string name="label_nessun_colore">Aucune couleur</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">Général</string>
+    <string name="tab_confronto_vs">Comparaison VS</string>
+    <string name="label_giocatore_1">Joueur 1</string>
+    <string name="label_giocatore_2">Joueur 2</string>
+    <string name="desc_scambia_giocatori">Échanger les joueurs</string>
+    <string name="titolo_scontri_diretti">Face-à-face</string>
+    <string name="label_sfide_insieme">%d parties ensemble</string>
+    <string name="label_una_sfida_insieme">1 partie ensemble</string>
+    <string name="label_pareggi_vs">%d matchs nuls</string>
+    <string name="label_un_pareggio_vs">1 match nul</string>
+    <string name="titolo_media_punti_vs">📊 Score moyen</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 Victoires</string>
+    <string name="desc_vittorie_tavolo_vs">1ère place globale dans les parties partagées</string>
+    <string name="titolo_scarto_massimo_vs">⚡ Plus grand écart</string>
+    <string name="label_ottenuto_da_in">Par %1$s dans \'%2$s\'</string>
+    <string name="msg_nessuno_scarto_vs">Seulement des nuls pour l\'instant</string>
+    <string name="titolo_combo_fuoco_vs">🔥 Combos On Fire</string>
+    <string name="titolo_premi_condivisi_vs">🏅 Récompenses partagées</string>
+    <string name="msg_nessun_premio_vs">Aucune récompense gagnée dans les parties partagées.</string>
+    <string name="titolo_vs_pochi_giocatori">Au moins 2 joueurs requis</string>
+    <string name="desc_vs_pochi_giocatori">Terminez une partie avec au moins deux participants pour débloquer le face-à-face.</string>
+    <string name="titolo_vs_nessuna_sfida">Aucune partie ensemble</string>
+    <string name="desc_vs_nessuna_sfida">%1$s et %2$s n\'ont pas encore joué dans la même partie.</string>
 </resources>

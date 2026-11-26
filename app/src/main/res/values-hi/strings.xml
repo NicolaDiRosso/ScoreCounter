@@ -487,4 +487,31 @@
     <string name="titolo_modifica_giocatore_rapido">त्वरित खिलाड़ी संपादित करें</string>
     <string name="label_colore_preferito">पसंदीदा रंग (वैकल्पिक):</string>
     <string name="label_nessun_colore">कोई रंग नहीं</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">सामान्य</string>
+    <string name="tab_confronto_vs">आमने-सामने (VS)</string>
+    <string name="label_giocatore_1">खिलाड़ी 1</string>
+    <string name="label_giocatore_2">खिलाड़ी 2</string>
+    <string name="desc_scambia_giocatori">खिलाड़ी बदलें</string>
+    <string name="titolo_scontri_diretti">सीधा मुकाबला</string>
+    <string name="label_sfide_insieme">%d साझा मैच</string>
+    <string name="label_una_sfida_insieme">1 साझा मैच</string>
+    <string name="label_pareggi_vs">%d ड्रा</string>
+    <string name="label_un_pareggio_vs">1 ड्रा</string>
+    <string name="titolo_media_punti_vs">📊 औसत स्कोर</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 मैच जीत</string>
+    <string name="desc_vittorie_tavolo_vs">साझा मैचों में कुल मिलाकर पहला स्थान</string>
+    <string name="titolo_scarto_massimo_vs">⚡ सबसे बड़ा अंतर</string>
+    <string name="label_ottenuto_da_in">%1$s द्वारा \'%2$s\' में</string>
+    <string name="msg_nessuno_scarto_vs">अब तक केवल ड्रा</string>
+    <string name="titolo_combo_fuoco_vs">🔥 ऑन फायर कॉम्बो</string>
+    <string name="titolo_premi_condivisi_vs">🏅 साझा मैचों में पुरस्कार</string>
+    <string name="msg_nessun_premio_vs">साझा मैचों में अभी तक कोई पुरस्कार नहीं जीता गया है।</string>
+    <string name="titolo_vs_pochi_giocatori">कम से कम 2 खिलाड़ियों की आवश्यकता है</string>
+    <string name="desc_vs_pochi_giocatori">आमने-सामने की तुलना अनलॉक करने के लिए कम से कम दो प्रतिभागियों के साथ एक मैच पूरा करें।</string>
+    <string name="titolo_vs_nessuna_sfida">कोई साझा मैच नहीं</string>
+    <string name="desc_vs_nessuna_sfida">%1$s और %2$s ने अभी तक एक ही मैच में नहीं खेला है।</string>
 </resources>

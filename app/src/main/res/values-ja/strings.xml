@@ -487,4 +487,31 @@
     <string name="titolo_modifica_giocatore_rapido">クイックプレイヤーを編集</string>
     <string name="label_colore_preferito">お気に入りの色（任意）:</string>
     <string name="label_nessun_colore">色なし</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">一般</string>
+    <string name="tab_confronto_vs">VS対戦</string>
+    <string name="label_giocatore_1">プレイヤー 1</string>
+    <string name="label_giocatore_2">プレイヤー 2</string>
+    <string name="desc_scambia_giocatori">プレイヤーを入れ替え</string>
+    <string name="titolo_scontri_diretti">直接対決</string>
+    <string name="label_sfide_insieme">%d 共通の試合</string>
+    <string name="label_una_sfida_insieme">1 共通の試合</string>
+    <string name="label_pareggi_vs">%d 引き分け</string>
+    <string name="label_un_pareggio_vs">1 引き分け</string>
+    <string name="titolo_media_punti_vs">📊 平均スコア</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 マッチ勝利数</string>
+    <string name="desc_vittorie_tavolo_vs">共通の試合での総合1位</string>
+    <string name="titolo_scarto_massimo_vs">⚡ 最大ポイント差</string>
+    <string name="label_ottenuto_da_in">%1$s が「%2$s」で獲得</string>
+    <string name="msg_nessuno_scarto_vs">現在すべて引き分け</string>
+    <string name="titolo_combo_fuoco_vs">🔥 オンファイア・コンボ</string>
+    <string name="titolo_premi_condivisi_vs">🏅 共通の試合でのアワード</string>
+    <string name="msg_nessun_premio_vs">共通の試合で獲得したアワードはまだありません。</string>
+    <string name="titolo_vs_pochi_giocatori">2人以上のプレイヤーが必要です</string>
+    <string name="desc_vs_pochi_giocatori">直接対決をロック解除するには、2人以上の参加者で試合を完了してください。</string>
+    <string name="titolo_vs_nessuna_sfida">共通の試合はありません</string>
+    <string name="desc_vs_nessuna_sfida">%1$s と %2$s はまだ同じ試合でプレイしていません。</string>
 </resources>

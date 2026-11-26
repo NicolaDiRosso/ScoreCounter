@@ -487,4 +487,32 @@
     <string name="titolo_modifica_giocatore_rapido">Edit quick player</string>
     <string name="label_colore_preferito">Preferred color (optional):</string>
     <string name="label_nessun_colore">No color</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">General</string>
+    <string name="tab_confronto_vs">VS Head-to-Head</string>
+    <string name="label_giocatore_1">Player 1</string>
+    <string name="label_giocatore_2">Player 2</string>
+    <string name="desc_scambia_giocatori">Swap players</string>
+    <string name="titolo_scontri_diretti">Head-to-head</string>
+    <string name="label_sfide_insieme">%d shared matches</string>
+    <string name="label_una_sfida_insieme">1 shared match</string>
+    <string name="label_pareggi_vs">%d draws</string>
+    <string name="label_un_pareggio_vs">1 draw</string>
+    <string name="titolo_media_punti_vs">📊 Average score</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 Match wins</string>
+    <string name="desc_vittorie_tavolo_vs">1st place overall in shared matches</string>
+    <string name="titolo_scarto_massimo_vs">⚡ Biggest margin</string>
+    <string name="label_ottenuto_da_in">By %1$s in \'%2$s\'</string>
+    <string name="msg_nessuno_scarto_vs">Only draws so far</string>
+    <string name="titolo_combo_fuoco_vs">🔥 On Fire combos</string>
+    <string name="titolo_premi_condivisi_vs">🏅 Awards in shared matches</string>
+    <string name="msg_nessun_premio_vs">No awards earned in shared matches yet.</string>
+    <string name="titolo_vs_pochi_giocatori">At least 2 players needed</string>
+    <string name="desc_vs_pochi_giocatori">Complete a match with at least two participants to unlock head-to-head comparisons.</string>
+    <string name="titolo_vs_nessuna_sfida">No shared matches</string>
+    <string name="desc_vs_nessuna_sfida">%1$s and %2$s haven\'t played in the same match yet.</string>
+
 </resources>

@@ -487,4 +487,31 @@
     <string name="titolo_modifica_giocatore_rapido">Editar jugador rápido</string>
     <string name="label_colore_preferito">Color preferido (opcional):</string>
     <string name="label_nessun_colore">Sin color</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">Generales</string>
+    <string name="tab_confronto_vs">Comparativa VS</string>
+    <string name="label_giocatore_1">Jugador 1</string>
+    <string name="label_giocatore_2">Jugador 2</string>
+    <string name="desc_scambia_giocatori">Intercambiar jugadores</string>
+    <string name="titolo_scontri_diretti">Cara a cara</string>
+    <string name="label_sfide_insieme">%d partidas juntos</string>
+    <string name="label_una_sfida_insieme">1 partida juntos</string>
+    <string name="label_pareggi_vs">%d empates</string>
+    <string name="label_un_pareggio_vs">1 empate</string>
+    <string name="titolo_media_punti_vs">📊 Puntuación media</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 Victorias en mesa</string>
+    <string name="desc_vittorie_tavolo_vs">1.er puesto general en partidas compartidas</string>
+    <string name="titolo_scarto_massimo_vs">⚡ Mayor margen</string>
+    <string name="label_ottenuto_da_in">Por %1$s en \'%2$s\'</string>
+    <string name="msg_nessuno_scarto_vs">Solo empates hasta ahora</string>
+    <string name="titolo_combo_fuoco_vs">🔥 Combos On Fire</string>
+    <string name="titolo_premi_condivisi_vs">🏅 Premios en partidas juntas</string>
+    <string name="msg_nessun_premio_vs">Aún no se han ganado premios en partidas compartidas.</string>
+    <string name="titolo_vs_pochi_giocatori">Se necesitan al menos 2 jugadores</string>
+    <string name="desc_vs_pochi_giocatori">Completa una partida con al menos dos participantes para desbloquear la comparativa cara a cara.</string>
+    <string name="titolo_vs_nessuna_sfida">Sin partidas juntos</string>
+    <string name="desc_vs_nessuna_sfida">%1$s y %2$s aún no han jugado en la misma partida.</string>
 </resources>

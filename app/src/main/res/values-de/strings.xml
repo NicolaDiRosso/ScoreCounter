@@ -487,4 +487,31 @@
     <string name="titolo_modifica_giocatore_rapido">Schnellspieler bearbeiten</string>
     <string name="label_colore_preferito">Bevorzugte Farbe (optional):</string>
     <string name="label_nessun_colore">Keine Farbe</string>
+
+    <!-- ==================================================================== -->
+    <!-- CONFRONTO VS: VsComparisonContent                                    -->
+    <!-- ==================================================================== -->
+    <string name="tab_statistiche_generali">Allgemein</string>
+    <string name="tab_confronto_vs">VS-Vergleich</string>
+    <string name="label_giocatore_1">Spieler 1</string>
+    <string name="label_giocatore_2">Spieler 2</string>
+    <string name="desc_scambia_giocatori">Spieler tauschen</string>
+    <string name="titolo_scontri_diretti">Direkter Vergleich</string>
+    <string name="label_sfide_insieme">%d gemeinsame Spiele</string>
+    <string name="label_una_sfida_insieme">1 gemeinsames Spiel</string>
+    <string name="label_pareggi_vs">%d Unentschieden</string>
+    <string name="label_un_pareggio_vs">1 Unentschieden</string>
+    <string name="titolo_media_punti_vs">📊 Durchschnittspunktzahl</string>
+    <string name="titolo_vittorie_tavolo_vs">🏆 Spielsiege</string>
+    <string name="desc_vittorie_tavolo_vs">1. Platz insgesamt in gemeinsamen Spielen</string>
+    <string name="titolo_scarto_massimo_vs">⚡ Größter Abstand</string>
+    <string name="label_ottenuto_da_in">Von %1$s in \'%2$s\'</string>
+    <string name="msg_nessuno_scarto_vs">Bisher nur Unentschieden</string>
+    <string name="titolo_combo_fuoco_vs">🔥 On-Fire-Combos</string>
+    <string name="titolo_premi_condivisi_vs">🏅 Auszeichnungen in gemeinsamen Spielen</string>
+    <string name="msg_nessun_premio_vs">Noch keine Auszeichnungen in gemeinsamen Spielen erhalten.</string>
+    <string name="titolo_vs_pochi_giocatori">Mindestens 2 Spieler erforderlich</string>
+    <string name="desc_vs_pochi_giocatori">Schließe ein Spiel mit mindestens zwei Teilnehmern ab, um den direkten Vergleich freizuschalten.</string>
+    <string name="titolo_vs_nessuna_sfida">Keine gemeinsamen Spiele</string>
+    <string name="desc_vs_nessuna_sfida">%1$s und %2$s haben noch nicht im selben Spiel gespielt.</string>
 </resources>
