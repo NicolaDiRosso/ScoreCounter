@@ -33,6 +33,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.Player
 import com.n380.scorecounter.ui.components.AutoResizedText
@@ -408,22 +410,41 @@ fun CreateMatchScreenLandscape(
                                 modifier = Modifier.fillMaxWidth(),
                                 contentPadding = PaddingValues(start = 6.dp, end = 16.dp)
                             ) {
-                                items(viewModel.favoriteNames) { fav ->
-                                    val isAlreadyAtTable = viewModel.players.any { it.name.equals(fav, ignoreCase = true) }
+                                // 🧠 ITERAZIONE SU OGGETTI COMPLETI (FavoritePlayer):
+                                // Invece di leggere solo i nomi (`favoriteNames`), leggiamo gli oggetti `FavoritePlayer`
+                                // che contengono sia il nome sia l'eventuale colore preferito salvato in DataStore.
+                                items(viewModel.favoritePlayers) { favPlayer ->
+                                    val isAlreadyAtTable = viewModel.players.any {
+                                        it.name.equals(favPlayer.name, ignoreCase = true)
+                                    }
+
+                                    // 🧠 EREDITARIETÀ COLORE PREFERITO:
+                                    // Convertiamo l'eventuale intero ARGB in un oggetto `Color` di Compose (o null se neutro)
+                                    // per colorare sia la chip in anteprima (28% opacità) sia quando è attiva al tavolo (85%).
+                                    val preferredColor = favPlayer.color?.let { Color(it) }
+
                                     AnimatedSelectableChip(
-                                        text = fav,
+                                        text = favPlayer.name,
                                         isSelected = isAlreadyAtTable,
+                                        customColor = preferredColor,
                                         onClick = {
                                             if (!isAlreadyAtTable) {
-                                                val usedColors = viewModel.players.map { it.color }
-                                                val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
-                                                val finalColor = if (availableColors.isNotEmpty()) availableColors.random() else playerPalette.random()
-                                                viewModel.addPlayer(fav, finalColor.toArgb())
+                                                // 🧠 ASSEGNAZIONE COLORE ALL'INGRESSO AL TAVOLO:
+                                                // Se il giocatore rapido ha un colore salvato nei preferiti, usa quello;
+                                                // altrimenti pesca automaticamente un colore libero dalla palette evitando duplicati.
+                                                val finalColor = favPlayer.color ?: run {
+                                                    val usedColors = viewModel.players.map { it.color }
+                                                    val availableColors = playerPalette.filter { it.toArgb() !in usedColors }
+                                                    if (availableColors.isNotEmpty()) availableColors.random().toArgb() else playerPalette.random().toArgb()
+                                                }
+                                                viewModel.addPlayer(favPlayer.name, finalColor)
                                             } else {
                                                 if (viewModel.players.size == 1) {
                                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 }
-                                                val playerToRemove = viewModel.players.find { it.name.equals(fav, ignoreCase = true) }
+                                                val playerToRemove = viewModel.players.find {
+                                                    it.name.equals(favPlayer.name, ignoreCase = true)
+                                                }
                                                 playerToRemove?.let { viewModel.removePlayer(it) }
                                             }
                                         }

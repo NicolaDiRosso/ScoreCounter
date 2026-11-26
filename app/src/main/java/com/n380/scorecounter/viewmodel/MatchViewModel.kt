@@ -1768,6 +1768,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
             timestamp = System.currentTimeMillis(),
             history = history.toList(),
             favoriteNames = favoriteNames.toList(),
+            favoritePlayers = favoritePlayers.toList(), // 🎨 SALVATAGGIO COLORI PREFERITI
             matchTitleHistory = matchTitleHistory.toList(),
             timerPresets = timerPresets.toList()
         )
@@ -1800,6 +1801,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         // siano lette in modo coerente e sicuro senza problemi di concorrenza tra thread.
         val currentHistory = history.toList()
         val currentFavorites = favoriteNames.toList()
+        val currentFavoritePlayers = favoritePlayers.toList()
         val currentTitles = matchTitleHistory.toList()
         val currentPresets = timerPresets.toList()
 
@@ -1812,6 +1814,7 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                     timestamp = System.currentTimeMillis(),
                     history = currentHistory,
                     favoriteNames = currentFavorites,
+                    favoritePlayers = currentFavoritePlayers, // 🎨 SALVATAGGIO COLORI PREFERITI
                     matchTitleHistory = currentTitles,
                     timerPresets = currentPresets
                 )
