@@ -241,23 +241,23 @@ fun GlobalStatsScreenLandscape(
                 // TAVOLA CONTENITIVA (SURFACE VARIANT 24dp): RAGGRUPPA CAMPIONE & RIEPILOGO
                 // ------------------------------------------------------------
                 Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(bottom = 10.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(24.dp)
-            ) {
-                Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(bottom = 10.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
-                    // ------------------------------------------------------------
-                    // CARD 1: CAMPIONE ASSOLUTO (Sfondo Primario + Animazione Shimmer)
-                    // ------------------------------------------------------------
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                            // ------------------------------------------------------------
+                            // CARD 1: CAMPIONE ASSOLUTO (Sfondo Primario + Animazione Shimmer)
+                            // ------------------------------------------------------------
                     val infiniteTransition = rememberInfiniteTransition(label = "shimmer_campione_land")
                     val translateAnim by infiniteTransition.animateFloat(
                         initialValue = -500f,

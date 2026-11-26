@@ -472,56 +472,83 @@ fun GlobalStatsScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                if (selectedTabIndex == 1) {
-                    // Vista dedicata al confronto diretto testa a testa tra due giocatori
-                    VsComparisonContent(
-                        availablePlayers = availableVsPlayers,
-                        selectedPlayer1 = selectedPlayer1,
-                        onPlayer1Selected = { selectedPlayer1 = it },
-                        selectedPlayer2 = selectedPlayer2,
-                        onPlayer2Selected = { selectedPlayer2 = it },
-                        stats = vsStats
-                    )
-                } else {
-                // ---> EFFETTO CARTA RARA (Shimmer Sweep) <---
-                // 1. IL MOTORE DELL'ANIMAZIONE INFINITA
-                val infiniteTransition = rememberInfiniteTransition(label = "shimmer_campione")
-                val translateAnim by infiniteTransition.animateFloat(
-                    initialValue = -500f,
-                    targetValue = 2000f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(durationMillis = 4500, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
-                    ),
-                    label = "shimmer_translation_campione"
-                )
+                // 🧠 TRANSIZIONE A SCORRIMENTO ORIZZONTALE (Slide In/Out da sinistra a destra e viceversa)
+                AnimatedContent(
+                    targetState = selectedTabIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(300)) togetherWith
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(300))
+                        } else {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> -fullWidth },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeIn(animationSpec = tween(300)) togetherWith
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> fullWidth },
+                                animationSpec = tween(300, easing = FastOutSlowInEasing)
+                            ) + fadeOut(animationSpec = tween(300))
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    label = "GlobalStatsTabTransition"
+                ) { tab ->
+                    if (tab == 1) {
+                        // Vista dedicata al confronto diretto testa a testa tra due giocatori
+                        VsComparisonContent(
+                            availablePlayers = availableVsPlayers,
+                            selectedPlayer1 = selectedPlayer1,
+                            onPlayer1Selected = { selectedPlayer1 = it },
+                            selectedPlayer2 = selectedPlayer2,
+                            onPlayer2Selected = { selectedPlayer2 = it },
+                            stats = vsStats
+                        )
+                    } else {
+                        // ---> EFFETTO CARTA RARA (Shimmer Sweep) <---
+                        // 1. IL MOTORE DELL'ANIMAZIONE INFINITA
+                        val infiniteTransition = rememberInfiniteTransition(label = "shimmer_campione")
+                        val translateAnim by infiniteTransition.animateFloat(
+                            initialValue = -500f,
+                            targetValue = 2000f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(durationMillis = 4500, easing = LinearEasing),
+                                repeatMode = RepeatMode.Restart
+                            ),
+                            label = "shimmer_translation_campione"
+                        )
 
-                // 2. IL FASCIO DI LUCE: Usiamo il colore primario del tema per farlo brillare
-                val shimmerColor = MaterialTheme.colorScheme.primary
-                val shimmerBrush = Brush.linearGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        shimmerColor.copy(alpha = 0.3f), // Raggio luminoso al 30%
-                        Color.Transparent
-                    ),
-                    start = Offset(translateAnim, translateAnim),
-                    end = Offset(translateAnim + 400f, translateAnim + 400f)
-                )
+                        // 2. IL FASCIO DI LUCE: Usiamo il colore primario del tema per farlo brillare
+                        val shimmerColor = MaterialTheme.colorScheme.primary
+                        val shimmerBrush = Brush.linearGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                shimmerColor.copy(alpha = 0.3f), // Raggio luminoso al 30%
+                                Color.Transparent
+                            ),
+                            start = Offset(translateAnim, translateAnim),
+                            end = Offset(translateAnim + 400f, translateAnim + 400f)
+                        )
 
-                // TEORIA COMPOSE: Il trucco del singolo 'item'!
-                // Trasformiamo il Tavolo in una scatola che scorre (LazyColumn).
-                // Invece di modificare ogni singola carta aggiungendo 'item { }', creiamo
-                // una LazyColumn che contiene un solo gigantesco elemento 'item'.
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp), // Padding interno del tavolo
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        // TEORIA COMPOSE: Il trucco del singolo 'item'!
+                        // Trasformiamo il Tavolo in una scatola che scorre (LazyColumn).
+                        // Invece di modificare ogni singola carta aggiungendo 'item { }', creiamo
+                        // una LazyColumn che contiene un solo gigantesco elemento 'item'.
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize()
                         ) {
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp), // Padding interno del tavolo
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
                             // ==============================================================
                             // --- PRIMA CARD: IL CAMPIONE ASSOLUTO (Ora "Inglobata"!) ---
                             // ==============================================================
@@ -1720,9 +1747,10 @@ fun GlobalStatsScreen(
                     // permettendo uno scorrimento piacevole fino in fondo.
                     //item { Spacer(modifier = Modifier.height(1.dp)) }
                 }
-                }
+              }
             }
         }
-        }
     }
+}
+}
 }
