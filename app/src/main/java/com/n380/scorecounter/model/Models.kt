@@ -103,19 +103,35 @@ package com.n380.scorecounter.model
     )
 
     // ====================================================================
+    // MODELLO DATI PER GIOCATORE RAPIDO (PREFERITO) CON COLORE OPZIONALE
+    // ====================================================================
+    // 🧠 SPIEGAZIONE DIDATTICA:
+    // Permette di associare opzionalmente un colore ARGB preferito a ciascun giocatore rapido.
+    // Se 'color' è null (default), il giocatore adotta l'estetica neutra predefinita
+    // e l'assegnazione automatica del colore al momento dell'ingresso al tavolo.
+    data class FavoritePlayer(
+        val name: String,
+        val color: Int? = null // Colore ARGB salvato o null se non impostato
+    )
+
+    // ====================================================================
     // MODELLO DATI PER IL BACKUP ED ESPORTAZIONE COMPLETA (JSON IN CHIARO)
     // ====================================================================
     // 🧠 SPIEGAZIONE DIDATTICA:
     // Questa data class racchiude l'intera memoria dell'applicazione in un unico contenitore.
     // Viene usata sia per generare il file di backup .json leggibile esternamente, sia per ripristinare
     // lo storico completo, i giocatori preferiti, i titoli personalizzati e i preset del timer quando si reinstalla l'app.
+    // Per garantire la massima retrocompatibilità con backup storici:
+    // - 'favoriteNames' mantiene la lista di stringhe dei nomi per le versioni legacy.
+    // - 'favoritePlayers' salva la struttura completa con l'eventuale colore preferito.
     data class ScoreCounterBackup(
         val version: Int = 1,                             // Versione del formato per controlli di compatibilità
         val timestamp: Long = System.currentTimeMillis(), // Millisecondi al momento della creazione del backup
         val history: List<MatchRecord> = emptyList(),    // Lista di tutte le partite storiche concluse
-        val favoriteNames: List<String> = emptyList(),   // Lista dei nomi dei giocatori salvati tra i preferiti
+        val favoriteNames: List<String>? = emptyList(),   // Lista dei nomi per retrocompatibilità con vecchi backup
         val matchTitleHistory: List<String> = emptyList(),// Lista dei titoli delle sfide usati di frequente
-        val timerPresets: List<String>? = emptyList()     // Lista dei 4 preset personalizzati del timer
+        val timerPresets: List<String>? = emptyList(),    // Lista dei 4 preset personalizzati del timer
+        val favoritePlayers: List<FavoritePlayer>? = emptyList() // Nuova lista ricca con associazione nome-colore opzionale
     )
 
     // ====================================================================

@@ -484,4 +484,7 @@
     <string name="titolo_dialog_ripristino">Ripristinare le impostazioni?</string>
     <string name="desc_dialog_ripristino">Tutte le preferenze di aspetto e di gioco torneranno ai valori predefiniti. Lo storico delle partite e i giocatori salvati non verranno eliminati.</string>
     <string name="btn_ripristina">Ripristina</string>
+    <string name="titolo_modifica_giocatore_rapido">Modifica giocatore rapido</string>
+    <string name="label_colore_preferito">Colore preferito (opzionale):</string>
+    <string name="label_nessun_colore">Nessun colore</string>
 </resources>

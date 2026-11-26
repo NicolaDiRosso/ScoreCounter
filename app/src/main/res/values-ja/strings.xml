@@ -484,4 +484,7 @@
     <string name="titolo_dialog_ripristino">設定をリセットしますか？</string>
     <string name="desc_dialog_ripristino">外観とゲームのすべての設定が初期値に戻ります。試合履歴や保存されたプレイヤーは削除されません。</string>
     <string name="btn_ripristina">リセット</string>
+    <string name="titolo_modifica_giocatore_rapido">クイックプレイヤーを編集</string>
+    <string name="label_colore_preferito">お気に入りの色（任意）:</string>
+    <string name="label_nessun_colore">色なし</string>
 </resources>

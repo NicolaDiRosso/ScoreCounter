@@ -1185,115 +1185,142 @@
         }
     }
 
-/**
- * ====================================================================
- * COMPONENTE ANIMATO RIUTILIZZABILE: AnimatedSelectableChip
- * ====================================================================
- * 🧠 SPIEGAZIONE TEORICA E TECNICA DETTAGLIATA:
- * Questo composable implementa un chip di selezione con animazioni fluide in stile Material You.
- * Quando lo stato `isSelected` passa da false a true (o viceversa):
- * 1. `animateFloatAsState` (Scale Bounce): Varia la scala geometrica della card da 1.0f a 1.04f (4% di ingrandimento)
- *    applicando una fisica a molla elastica (`spring(dampingRatio = Spring.DampingRatioMediumBouncy)`).
- * 2. `animateColorAsState` (Colore Sfondo): Transizione cromatica fluida dal colore neutro di superficie (`surfaceVariant`)
- *    al colore primario in evidenza (`primaryContainer`).
- * 3. `animateColorAsState` (Colore Bordo): Transizione cromatica del contorno perimetrale tra il contorno di default
- *    e il colore primario dell'app.
- * 4. `animateDpAsState` (Spessore Bordo): Modifica lo spessore del tratto del bordo da 1.dp a 2.dp quando selezionato.
- * 5. `AutoResizedText`: Componente tipografico intelligente che scala automaticamente il testo per impedire
- *    qualsiasi troncamento o overflow su schermi di dimensioni differenti.
- */
-@Composable
-fun AnimatedSelectableChip(
-    text: String,                                     // Il testo o etichetta da visualizzare all'interno del chip
-    isSelected: Boolean,                              // Stato booleano che indica se questo specifico chip è attualmente attivo/selezionato
-    onClick: () -> Unit,                              // Callback lambda eseguita quando l'utente tocca il chip
-    modifier: Modifier = Modifier,                    // Modificatore Compose per personalizzare layout, padding o larghezza esterna
-    height: Dp? = 46.dp,                              // Altezza fissa opzionale del chip (null per consentire fillMaxHeight in landscape)
-    shapeRadius: Dp = 16.dp,                          // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
-    textStyle: TextStyle = MaterialTheme.typography.titleMedium, // Stile tipografico predefinito con dimensione definita
-    trailingContent: @Composable (() -> Unit)? = null // Slot opzionale in alto a destra per elementi aggiuntivi (es. tasto matita)
-) {
-    // Otteniamo il riferimento al servizio di vibrazione aptica del sistema
-    val haptic = LocalHapticFeedback.current
-
-    // 🧠 ANIMATE FLOAT AS STATE: Anima il fattore di scala (zoom) con una molla elastica
-    val cardScale by animateFloatAsState(
-        targetValue = if (isSelected) 1.04f else 1.0f, // 1.04f = ingrandimento del 4% se selezionato, 1.0f = dimensione normale
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy, // Rigidità dello smorzamento elastico (effetto rimbalzo gradevole)
-            stiffness = Spring.StiffnessLow                 // Rigidità bassa per un movimento morbido e fluido
-        ),
-        label = "AnimatedChipScale"
-    )
-
-    // 🧠 ANIMATE COLOR AS STATE: Anima il colore dello sfondo in modo fluido (tween di 250ms)
-    val animatedBgColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-        animationSpec = tween(durationMillis = 250),
-        label = "AnimatedChipBgColor"
-    )
-
-    // 🧠 ANIMATE COLOR AS STATE: Anima il colore del bordo perimetrale
-    val animatedBorderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-        animationSpec = tween(durationMillis = 250),
-        label = "AnimatedChipBorderColor"
-    )
-
-    // 🧠 ANIMATE DP AS STATE: Anima lo spessore del bordo (1dp inattivo, 2dp attivo)
-    val animatedBorderWidth by animateDpAsState(
-        targetValue = if (isSelected) 2.dp else 1.dp,
-        animationSpec = tween(durationMillis = 250),
-        label = "AnimatedChipBorderWidth"
-    )
-
-    // Superficie interattiva di Material 3 con forma e colori dinamici
-    Surface(
-        onClick = {
-            // Esegue un feedback aptico di conferma al tocco
-            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-            // Esegue l'azione di click passata dall'esterno
-            onClick()
-        },
-        modifier = modifier
-            .run { if (height != null) height(height) else this } // Imposta l'altezza fissa solo se specificata
-            .graphicsLayer {
-                // Applica l'effetto di scala calcolato da animateFloatAsState
-                scaleX = cardScale
-                scaleY = cardScale
-            },
-        shape = RoundedCornerShape(shapeRadius), // Arrotondamento degli angoli
-        color = animatedBgColor,                // Colore di sfondo animato
-        border = BorderStroke(width = animatedBorderWidth, color = animatedBorderColor) // Bordo animato
+    /**
+     * ====================================================================
+     * COMPONENTE ANIMATO RIUTILIZZABILE: AnimatedSelectableChip
+     * ====================================================================
+     * 🧠 SPIEGAZIONE TEORICA E TECNICA DETTAGLIATA:
+     * Questo composable implementa un chip di selezione con animazioni fluide in stile Material You.
+     * Quando lo stato `isSelected` passa da false a true (o viceversa):
+     * 1. `animateFloatAsState` (Scale Bounce): Varia la scala geometrica della card da 1.0f a 1.04f (4% di ingrandimento)
+     *    applicando una fisica a molla elastica (`spring(dampingRatio = Spring.DampingRatioMediumBouncy)`).
+     * 2. `animateColorAsState` (Colore Sfondo): Transizione cromatica fluida dal colore neutro di superficie (`surfaceVariant`)
+     *    al colore primario in evidenza (`primaryContainer`), oppure al colore preferito del giocatore (`customColor`).
+     * 3. `animateColorAsState` (Colore Bordo): Transizione cromatica del contorno perimetrale tra il contorno di default
+     *    e il colore primario (o preferito) dell'app.
+     * 4. `animateDpAsState` (Spessore Bordo): Modifica lo spessore del tratto del bordo da 1.dp a 2.dp quando selezionato.
+     * 5. `AutoResizedText`: Componente tipografico intelligente che scala automaticamente il testo per impedire
+     *    qualsiasi troncamento o overflow su schermi di dimensioni differenti.
+     */
+    @Composable
+    fun AnimatedSelectableChip(
+        text: String,                                     // Il testo o etichetta da visualizzare all'interno del chip
+        isSelected: Boolean,                              // Stato booleano che indica se questo specifico chip è attualmente attivo/selezionato
+        onClick: () -> Unit,                              // Callback lambda eseguita quando l'utente tocca il chip
+        modifier: Modifier = Modifier,                    // Modificatore Compose per personalizzare layout, padding o larghezza esterna
+        height: Dp? = 46.dp,                              // Altezza fissa opzionale del chip (null per consentire fillMaxHeight in landscape)
+        shapeRadius: Dp = 16.dp,                          // Raggio di arrotondamento degli angoli (default 16.dp per stile Material You)
+        textStyle: TextStyle = MaterialTheme.typography.titleMedium, // Stile tipografico predefinito con dimensione definita
+        customColor: Color? = null,                       // Colore preferito opzionale del giocatore rapido (null = comportamento standard)
+        trailingContent: @Composable (() -> Unit)? = null // Slot opzionale in alto a destra per elementi aggiuntivi (es. tasto matita)
     ) {
-        // Contenitore interno centrato per il testo e l'eventuale contenuto secondario
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 6.dp, vertical = 2.dp)
+        // Otteniamo il riferimento al servizio di vibrazione aptica del sistema
+        val haptic = LocalHapticFeedback.current
+
+        // 🧠 ANIMATE FLOAT AS STATE: Anima il fattore di scala (zoom) con una molla elastica
+        val cardScale by animateFloatAsState(
+            targetValue = if (isSelected) 1.04f else 1.0f, // 1.04f = ingrandimento del 4% se selezionato, 1.0f = dimensione normale
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy, // Rigidità dello smorzamento elastico (effetto rimbalzo gradevole)
+                stiffness = Spring.StiffnessLow                 // Rigidità bassa per un movimento morbido e fluido
+            ),
+            label = "AnimatedChipScale"
+        )
+
+        // 🧠 GESTIONE CROMATICA DINAMICA (Colore Preferito vs Colore Standard del Tema):
+        // - Se il giocatore ha un colore preferito (`customColor != null`):
+        //   • Quando è già al tavolo (`isSelected = true`): sfondo pieno all'85% di opacità per evidenziarlo chiaramente.
+        //   • Quando non è ancora al tavolo (`isSelected = false`): tinta leggera al 28% per anticipare il suo colore.
+        // - Se non ha un colore preferito (`customColor == null`): mantiene i colori standard Material 3.
+        val targetBgColor = if (customColor != null) {
+            if (isSelected) customColor.copy(alpha = 0.85f) else customColor.copy(alpha = 0.28f)
+        } else {
+            if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        }
+
+        // 🧠 ANIMATE COLOR AS STATE: Anima il colore dello sfondo in modo fluido (tween di 250ms)
+        val animatedBgColor by animateColorAsState(
+            targetValue = targetBgColor,
+            animationSpec = tween(durationMillis = 250),
+            label = "AnimatedChipBgColor"
+        )
+
+        // 🧠 ANIMATE COLOR AS STATE: Anima il colore del bordo perimetrale
+        val targetBorderColor = if (customColor != null) {
+            if (isSelected) customColor else customColor.copy(alpha = 0.5f)
+        } else {
+            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        }
+
+        val animatedBorderColor by animateColorAsState(
+            targetValue = targetBorderColor,
+            animationSpec = tween(durationMillis = 250),
+            label = "AnimatedChipBorderColor"
+        )
+
+        // 🧠 ANIMATE DP AS STATE: Anima lo spessore del bordo (1dp inattivo, 2dp attivo)
+        val animatedBorderWidth by animateDpAsState(
+            targetValue = if (isSelected) 2.dp else 1.dp,
+            animationSpec = tween(durationMillis = 250),
+            label = "AnimatedChipBorderWidth"
+        )
+
+        // 🧠 CONTRASTO TIPOGRAFICO GARANTITO:
+        // Se il chip ha uno sfondo colorato pieno (`customColor != null && isSelected`), forziamo il testo a Bianco puro
+        // per garantire la massima leggibilità su qualsiasi tonalità scelta dall'utente (rosso, viola, verde, ecc.).
+        val chipTextColor = when {
+            customColor != null && isSelected -> Color.White
+            isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
+        // Superficie interattiva di Material 3 con forma e colori dinamici
+        Surface(
+            onClick = {
+                // Esegue un feedback aptico di conferma al tocco
+                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                // Esegue l'azione di click passata dall'esterno
+                onClick()
+            },
+            modifier = modifier
+                .run { if (height != null) height(height) else this } // Imposta l'altezza fissa solo se specificata
+                .graphicsLayer {
+                    // Applica l'effetto di scala calcolato da animateFloatAsState
+                    scaleX = cardScale
+                    scaleY = cardScale
+                },
+            shape = RoundedCornerShape(shapeRadius), // Arrotondamento degli angoli
+            color = animatedBgColor,                // Colore di sfondo animato
+            border = BorderStroke(width = animatedBorderWidth, color = animatedBorderColor) // Bordo animato
         ) {
-            // 🧠 PREVENZIONE SOVRAPPOSIZIONE TESTO-ICONA:
-            // Se è presente un elemento trailing (es. la matita di modifica in alto a destra),
-            // isoliamo il testo applicando un padding bilanciato a destra e a sinistra (22.dp).
-            // In questo modo AutoResizedText misura solo lo spazio libero a disposizione e riduce il font
-            // senza mai sovrapporsi o compenetrarsi con l'icona!
-            val sidePadding = if (trailingContent != null) 22.dp else 4.dp
+            // Contenitore interno centrato per il testo e l'eventuale contenuto secondario
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                // 🧠 PREVENZIONE SOVRAPPOSIZIONE TESTO-ICONA:
+                // Se è presente un elemento trailing (es. la matita di modifica in alto a destra),
+                // isoliamo il testo applicando un padding bilanciato a destra e a sinistra (22.dp).
+                // In questo modo AutoResizedText misura solo lo spazio libero a disposizione e riduce il font
+                // senza mai sovrapporsi o compenetrarsi con l'icona!
+                val sidePadding = if (trailingContent != null) 22.dp else 4.dp
 
-            AutoResizedText(
-                text = text,
-                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium, // Grassetto marcato se selezionato
-                style = textStyle,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = sidePadding, end = sidePadding)
-            )
+                AutoResizedText(
+                    text = text,
+                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium, // Grassetto marcato se selezionato
+                    style = textStyle,
+                    color = chipTextColor,
+                    modifier = Modifier.padding(start = sidePadding, end = sidePadding)
+                )
 
-            // Rendering opzionale dell'elemento in alto a destra se fornito dallo slot
-            if (trailingContent != null) {
-                Box(modifier = Modifier.align(Alignment.TopEnd)) {
-                    trailingContent()
+                // Rendering opzionale dell'elemento in alto a destra se fornito dallo slot
+                if (trailingContent != null) {
+                    Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                        trailingContent()
+                    }
                 }
             }
         }
     }
-}

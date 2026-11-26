@@ -19,6 +19,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.n380.scorecounter.dataStore
+import com.n380.scorecounter.model.FavoritePlayer
 import com.n380.scorecounter.model.MatchBackup
 import com.n380.scorecounter.model.MatchRecord
 import com.n380.scorecounter.model.Player
@@ -69,7 +70,8 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
 
     val players = mutableStateListOf<Player>()
     val history = mutableStateListOf<MatchRecord>()
-    val favoriteNames = mutableStateListOf<String>()
+    val favoritePlayers = mutableStateListOf<FavoritePlayer>()
+    val favoriteNames: List<String> get() = favoritePlayers.map { it.name }
 
     // CRONOLOGIA TITOLI: Lista reattiva che memorizza gli ultimi titoli inseriti manualmente
     val matchTitleHistory = mutableStateListOf<String>()
@@ -258,13 +260,28 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                 history.addAll(savedList)
             }
 
-            // 2. CARICAMENTO DEI GIOCATORI PREFERITI
+            // 2. CARICAMENTO DEI GIOCATORI PREFERITI (Con retrocompatibilità per vecchi salvataggi List<String>)
             val jsonFavsString = preferences[favoritesKey]
             if (jsonFavsString != null) {
-                val type = object : TypeToken<List<String>>() {}.type
-                val savedFavs: List<String> = gson.fromJson(jsonFavsString, type)
-                favoriteNames.clear()
-                favoriteNames.addAll(savedFavs)
+                try {
+                    val richType = object : TypeToken<List<FavoritePlayer>>() {}.type
+                    val savedFavs: List<FavoritePlayer> = gson.fromJson(jsonFavsString, richType)
+                    favoritePlayers.clear()
+                    if (savedFavs.isNotEmpty() && savedFavs.first().name != null) {
+                        favoritePlayers.addAll(savedFavs)
+                    } else {
+                        val legacyType = object : TypeToken<List<String>>() {}.type
+                        val legacyFavs: List<String> = gson.fromJson(jsonFavsString, legacyType)
+                        favoritePlayers.addAll(legacyFavs.map { FavoritePlayer(it, null) })
+                    }
+                } catch (_: Exception) {
+                    try {
+                        val legacyType = object : TypeToken<List<String>>() {}.type
+                        val legacyFavs: List<String> = gson.fromJson(jsonFavsString, legacyType)
+                        favoritePlayers.clear()
+                        favoritePlayers.addAll(legacyFavs.map { FavoritePlayer(it, null) })
+                    } catch (_: Exception) { }
+                }
             }
 
             // CARICAMENTO CRONOLOGIA TITOLI
@@ -890,6 +907,26 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         saveBackup() // Ri-aggiorniamo il salva-vita
     }
 
+    // Sposta fisicamente un giocatore su o giù nella lista per il riordino grafico
+    fun movePlayer(fromIndex: Int, toIndex: Int) {
+        if (fromIndex in players.indices && toIndex in players.indices) {
+            val player = players.removeAt(fromIndex)
+            players.add(toIndex, player)
+            saveBackup()
+        }
+    }
+
+    // Elimina una partita intera dallo storico visualizzato e la cancella dal file fisico.
+    fun deleteMatch(record: MatchRecord) {
+        history.remove(record)
+        viewModelScope.launch {
+            val jsonString = gson.toJson(history)
+            getApplication<Application>().dataStore.edit { prefs ->
+                prefs[historyKey] = jsonString
+            }
+        }
+    }
+
     // Funzione per la Snackbar che resuscita una partita appena eliminata dallo storico
     fun restoreMatch(index: Int, record: MatchRecord) {
         if (index in 0..history.size) {
@@ -906,145 +943,68 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // ---> FUNZIONI GESTIONE GIOCATORI RAPIDI (PREFERITI) <---
-    fun addFavorite(name: String) {
+    // ---> FUNZIONI GESTIONE GIOCATORI RAPIDI (PREFERITI) CON COLORE OPZIONALE <---
+    fun addFavorite(name: String, color: Int? = null) {
         val cleanName = name.trim()
 
         // Controllo intelligente: verifichiamo se il nome esiste già ignorando le maiuscole
-        val alreadyExists = favoriteNames.any { it.equals(cleanName, ignoreCase = true) }
+        val alreadyExists = favoritePlayers.any { it.name.equals(cleanName, ignoreCase = true) }
 
         if (cleanName.isNotEmpty() && !alreadyExists) {
-            favoriteNames.add(cleanName) // Salviamo il nome "pulito"
+            favoritePlayers.add(FavoritePlayer(cleanName, color)) // Salviamo l'oggetto ricco
             saveFavorites() // Dopo ogni modifica alla lista, salva fisicamente sul disco
         }
     }
 
-    fun removeFavorite(name: String) {
-        favoriteNames.remove(name)
+    fun removeFavorite(player: FavoritePlayer) {
+        favoritePlayers.remove(player)
         saveFavorites()
     }
 
-    fun editFavorite(oldName: String, newName: String) {
-        // Anche in modifica evitiamo di sovrascrivere un nome con uno che esiste già
-        if (!favoriteNames.contains(newName)) {
-            val index = favoriteNames.indexOf(oldName)
-            if (index != -1) {
-                favoriteNames[index] =
-                    newName // Sostituzione diretta tramite indice della stringa
+    fun removeFavorite(name: String) {
+        favoritePlayers.removeAll { it.name.equals(name, ignoreCase = true) }
+        saveFavorites()
+    }
+
+    fun editFavorite(oldName: String, newName: String, newColor: Int? = null) {
+        val cleanNewName = newName.trim()
+        val index = favoritePlayers.indexOfFirst { it.name.equals(oldName, ignoreCase = true) }
+        if (index != -1 && cleanNewName.isNotEmpty()) {
+            val conflict = favoritePlayers.indexOfFirst { it.name.equals(cleanNewName, ignoreCase = true) }
+            if (conflict == -1 || conflict == index) {
+                favoritePlayers[index] = FavoritePlayer(cleanNewName, newColor)
                 saveFavorites()
             }
         }
     }
 
-    // ---> FUNZIONI GESTIONE GIOCATORI RAPIDI (PREFERITI) <---
-    /**
-     * ====================================================================
-     * LOGICA DI RIPRISTINO (UNDO) PER I GIOCATORI RAPIDI (PREFERITI)
-     * ====================================================================
-     * Questa funzione permette di reinserire un nome precedentemente rimosso
-     * in una posizione specifica della lista, garantendo che l'ordine originale
-     * venga preservato quando l'utente preme "Annulla" sulla Snackbar.
-     */
-    fun restoreFavorite(index: Int, name: String) {
-        // Controllo di sicurezza strutturale: verifichiamo che l'indice rientri nei
-        // limiti geometrici attuali della lista. Il range '0..favoriteNames.size'
-        // garantisce che possiamo inserire in testa (0), in mezzo, o in coda (size).
-        if (index in 0..favoriteNames.size) {
-            // L'overload del metodo .add(indice, elemento) sposta tutti gli elementi
-            // successivi in avanti di un posto per fare spazio al dato ripristinato.
-            favoriteNames.add(index, name)
+    fun restoreFavorite(index: Int, player: FavoritePlayer) {
+        if (index in 0..favoritePlayers.size) {
+            favoritePlayers.add(index, player)
         } else {
-            // Logica di Fallback: se l'indice risulta invalido (es. la lista ha subito
-            // altre mutazioni nel frattempo), accodiamo l'elemento alla fine usando
-            // il metodo .add(elemento) base. Questo previene crash irreversibili.
-            favoriteNames.add(name)
+            favoritePlayers.add(player)
         }
-
-        // PERSISTENZA DEL DATO: La lista osservata dalla UI è stata modificata in RAM.
-        // Dobbiamo immediatamente invocare la scrittura fisica su disco per allineare
-        // il DataStore, altrimenti chiudendo l'app il ripristino verrebbe perduto.
         saveFavorites()
     }
 
-    /**
-     * ====================================================================
-     * PERSISTENZA DEI DATI / SALVATTAGGIO IN MEMORIA: LA PIPELINE I/O (Input/Output)
-     * ====================================================================
-     * Questa funzione illustra i tre pilastri del salvataggio moderno in Android:
-     * Asincronicità, Serializzazione e Transazioni Atomiche.
-     */
+    fun restoreFavorite(index: Int, name: String) {
+        restoreFavorite(index, FavoritePlayer(name, null))
+    }
+
+    fun moveFavorite(fromIndex: Int, toIndex: Int) {
+        if (fromIndex in favoritePlayers.indices && toIndex in favoritePlayers.indices) {
+            val fav = favoritePlayers.removeAt(fromIndex)
+            favoritePlayers.add(toIndex, fav)
+            saveFavorites()
+        }
+    }
+
     private fun saveFavorites() {
-        // 1. ASINCRONICITÀ (viewModelScope.launch)
-        // Scrivere dati sul disco fisico (Memoria Flash del telefono) è un'operazione "lenta"
-        // (parliamo di millisecondi, ma in ambito grafico 16ms di ritardo fanno "scattare" l'app).
-        // viewModelScope apre un Thread di Background: delega il salvataggio a un "operaio"
-        // in modo che il Main Thread (quello che disegna i bottoni) possa continuare a scorrere fluido a 60fps.
         viewModelScope.launch {
-
-            // 2. SERIALIZZAZIONE (gson.toJson)
-            // Trasformiamo la MutableStateList (oggetto complesso) in una Stringa JSON.
-            // Questo processo è necessario perché il DataStore Preferences è un
-            // database "Key-Value" che accetta solo tipi primitivi (String, Int, Boolean).
-            // 'favoriteNames' è un oggetto vivo nella RAM (una List<String>). Il disco fisso non capisce
-            // cosa sia un oggetto Kotlin, sa solo scrivere puro testo.
-            // Gson prende l'oggetto complesso e lo "appiattisce" in una stringa JSON universale.
-            // Esempio: ["Marco", "Lucia", "Giovanni"]
-            val jsonString = gson.toJson(favoriteNames)
-
-            // 3. TRANSAZIONE ATOMICA (dataStore.edit)
-            // 'edit' è una funzione "suspend" che garantisce la Thread-Safety. Se tentiamo di salvare
-            // 10 volte nello stesso decimo di secondo, DataStore le mette in coda (queue) evitando file corrotti.
-            // Usiamo il paradigma Chiave-Valore (Dictionary):
-            // - La Chiave: 'favoritesKey' (Il nome dell'etichetta sul cassetto)
-            // - Il Valore: 'jsonString' (Il contenuto del cassetto)
-            // - DataStore.edit assicura che il dato venga scritto "tutto o niente", senza errori a metà.
+            val jsonString = gson.toJson(favoritePlayers)
             getApplication<Application>().dataStore.edit { prefs ->
-
-                // Assocciamo la stringa JSON alla chiave univoca definita nel ViewModel.
                 prefs[favoritesKey] = jsonString
             }
-        }
-    }
-
-    // Elimina una partita intera dallo storico visualizzato e la cancella dal file fisico.
-    fun deleteMatch(record: MatchRecord) {
-        history.remove(record)
-        viewModelScope.launch {
-            val jsonString = gson.toJson(history)
-            getApplication<Application>().dataStore.edit { prefs ->
-                prefs[historyKey] = jsonString
-            }
-        }
-    }
-
-    // Sposta fisicamente un giocatore su o giù nella lista per il riordino grafico (Drag & Drop fittizio)
-    fun movePlayer(fromIndex: Int, toIndex: Int) {
-        // Controllo di sicurezza vitale: verifichiamo che l'indice di partenza (from) e di arrivo (to) esistano davvero.
-        // Altrimenti, se cerco di spostare il giocatore all'indice 5, ma la lista ha solo 3 giocatori, l'app va in Crash letale (IndexOutOfBoundsException)!
-        if (fromIndex in players.indices && toIndex in players.indices) {
-            // Rimuoviamo il giocatore dalla vecchia posizione temporaneamente
-            val player = players.removeAt(fromIndex)
-            // Lo reinseriamo subito nella posizione desiderata
-            players.add(toIndex, player)
-            saveBackup() // Salviamo il nuovo ordine nel salva-vita
-        }
-    }
-
-    // Sposta un nome nella lista dei preferiti su o giù
-    fun moveFavorite(fromIndex: Int, toIndex: Int) {
-        // Controllo di sicurezza: verifichiamo che entrambi gli indici siano validi
-        // (Compresi tra 0 e la fine della lista dei preferiti)
-        if (fromIndex in favoriteNames.indices && toIndex in favoriteNames.indices) {
-
-            // 1. Estraiamo il nome dalla posizione attuale
-            val fav = favoriteNames.removeAt(fromIndex)
-
-            // 2. Lo inseriamo nella nuova posizione desiderata
-            favoriteNames.add(toIndex, fav)
-
-            // 3. Salviamo il cambiamento (se hai una funzione specifica per i preferiti,
-            // altrimenti qui è dove l'app memorizza l'ordine per il futuro)
-            saveFavorites()
         }
     }
 
@@ -1930,10 +1890,19 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                         }
 
                         // Uniamo i giocatori preferiti evitando duplicati (ignorando maiuscole/minuscole)
-                        backupData.favoriteNames.forEach { favName ->
-                            val cleanName = favName.trim()
-                            if (cleanName.isNotEmpty() && favoriteNames.none { it.equals(cleanName, ignoreCase = true) }) {
-                                favoriteNames.add(cleanName)
+                        if (!backupData.favoritePlayers.isNullOrEmpty()) {
+                            backupData.favoritePlayers.forEach { favPlayer ->
+                                val cleanName = favPlayer.name.trim()
+                                if (cleanName.isNotEmpty() && favoritePlayers.none { it.name.equals(cleanName, ignoreCase = true) }) {
+                                    favoritePlayers.add(FavoritePlayer(cleanName, favPlayer.color))
+                                }
+                            }
+                        } else if (!backupData.favoriteNames.isNullOrEmpty()) {
+                            backupData.favoriteNames.forEach { favName ->
+                                val cleanName = favName.trim()
+                                if (cleanName.isNotEmpty() && favoritePlayers.none { it.name.equals(cleanName, ignoreCase = true) }) {
+                                    favoritePlayers.add(FavoritePlayer(cleanName, null))
+                                }
                             }
                         }
 
@@ -1960,8 +1929,12 @@ class MatchViewModel(application: Application) : AndroidViewModel(application) {
                         history.clear()
                         history.addAll(backupData.history)
 
-                        favoriteNames.clear()
-                        favoriteNames.addAll(backupData.favoriteNames)
+                        favoritePlayers.clear()
+                        if (!backupData.favoritePlayers.isNullOrEmpty()) {
+                            favoritePlayers.addAll(backupData.favoritePlayers)
+                        } else if (!backupData.favoriteNames.isNullOrEmpty()) {
+                            favoritePlayers.addAll(backupData.favoriteNames.map { FavoritePlayer(it, null) })
+                        }
 
                         matchTitleHistory.clear()
                         matchTitleHistory.addAll(backupData.matchTitleHistory)

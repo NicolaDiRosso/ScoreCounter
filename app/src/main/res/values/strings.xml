@@ -484,4 +484,7 @@
     <string name="titolo_dialog_ripristino">Reset settings?</string>
     <string name="desc_dialog_ripristino">All appearance and game preferences will return to their default values. Match history and saved players will not be deleted.</string>
     <string name="btn_ripristina">Reset</string>
+    <string name="titolo_modifica_giocatore_rapido">Edit quick player</string>
+    <string name="label_colore_preferito">Preferred color (optional):</string>
+    <string name="label_nessun_colore">No color</string>
 </resources>

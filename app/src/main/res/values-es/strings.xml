@@ -484,4 +484,7 @@
     <string name="titolo_dialog_ripristino">¿Restablecer ajustes?</string>
     <string name="desc_dialog_ripristino">Todas las preferencias de aspecto y juego volverán a sus valores predeterminados. El historial de partidas y los jugadores guardados no se eliminarán.</string>
     <string name="btn_ripristina">Restablecer</string>
+    <string name="titolo_modifica_giocatore_rapido">Editar jugador rápido</string>
+    <string name="label_colore_preferito">Color preferido (opcional):</string>
+    <string name="label_nessun_colore">Sin color</string>
 </resources>

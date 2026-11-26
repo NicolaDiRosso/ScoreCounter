@@ -484,4 +484,7 @@
     <string name="titolo_dialog_ripristino">Rétablir les paramètres ?</string>
     <string name="desc_dialog_ripristino">Toutes les préférences d\'apparence e de jeu reviendront à leurs valeurs par défaut. L\'historique des parties et les joueurs enregistrés ne seront pas supprimés.</string>
     <string name="btn_ripristina">Rétablir</string>
+    <string name="titolo_modifica_giocatore_rapido">Modifier le joueur rapide</string>
+    <string name="label_colore_preferito">Couleur préférée (facultatif) :</string>
+    <string name="label_nessun_colore">Aucune couleur</string>
 </resources>
