@@ -57,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.n380.scorecounter.model.calculateHeadToHeadStats
 import com.n380.scorecounter.model.extractAvailableVsPlayers
+import com.n380.scorecounter.model.findMostFrequentPair
 import com.n380.scorecounter.ui.screens.landscape.GlobalStatsScreenLandscape
 
 /**
@@ -258,11 +259,17 @@ fun GlobalStatsScreen(
         extractAvailableVsPlayers(viewModel.history)
     }
 
-    var selectedPlayer1 by remember(availableVsPlayers) {
-        mutableStateOf(availableVsPlayers.getOrNull(0)?.name)
+    // Calcola la coppia che ha disputato il maggior numero di sfide insieme
+    // per garantire una schermata iniziale subito significativa e senza stati vuoti
+    val defaultVsPair = remember(viewModel.history.size, availableVsPlayers) {
+        findMostFrequentPair(viewModel.history, availableVsPlayers)
     }
-    var selectedPlayer2 by remember(availableVsPlayers) {
-        mutableStateOf(availableVsPlayers.getOrNull(1)?.name)
+
+    var selectedPlayer1 by remember(defaultVsPair) {
+        mutableStateOf(defaultVsPair?.first)
+    }
+    var selectedPlayer2 by remember(defaultVsPair) {
+        mutableStateOf(defaultVsPair?.second)
     }
 
     // Ricalcola le statistiche incrociate solo quando cambia uno dei due sfidanti o lo storico

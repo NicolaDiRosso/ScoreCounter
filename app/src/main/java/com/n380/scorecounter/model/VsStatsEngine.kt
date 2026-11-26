@@ -23,7 +23,7 @@ import kotlin.math.abs
  */
 
 /**
- * Rappresenta un giocatore selezionabile nei menu a tendina del confronto VS,
+ * Rappresenta un giocatore selezionabile nella finestra di scelta del confronto VS,
  * corredato del suo colore ARGB più recente e del totale partite disputate.
  */
 data class VsPlayerOption(
@@ -116,6 +116,85 @@ fun extractAvailableVsPlayers(history: List<MatchRecord>): List<VsPlayerOption> 
             compareByDescending<VsPlayerOption> { it.totalMatchesPlayed }
                 .thenBy { it.name.lowercase() }
         )
+}
+
+/**
+ * Individua la coppia di giocatori che ha disputato il maggior numero di partite insieme,
+ * da usare come selezione iniziale intelligente all'apertura della scheda "Confronto VS".
+ *
+ * 🧠 TEORIA DEGLI ALGORITMI (Conteggio Coppie non Ordinate & Normalizzazione):
+ * 1. In una partita con $N$ giocatori, il numero di coppie distinte è $\binom{N}{2} = \frac{N(N-1)}{2}$.
+ *    Usiamo due cicli annidati (`i` da `0` a `N-2` e `j` da `i+1` a `N-1`) per generare ogni
+ *    coppia una sola volta.
+ * 2. Normalizziamo la chiave della coppia ordinando alfabeticamente i due nomi in minuscolo
+ *    (`if (a <= b) a to b else b to a`), così ("Nicola", "Marco") e ("Marco", "Nicola")
+ *    incrementano lo stesso identico contatore nella mappa `pairCounts`.
+ * 3. Una volta trovata la coppia con più sfide condivise, posizioniamo come Giocatore 1
+ *    quello con più partite totali nello storico (di norma il proprietario del dispositivo).
+ */
+fun findMostFrequentPair(
+    history: List<MatchRecord>,
+    availablePlayers: List<VsPlayerOption>
+): Pair<String, String>? {
+    if (availablePlayers.size < 2) return null
+
+    // Mappa: coppia normalizzata (nome1_lower, nome2_lower) -> numero di partite condivise
+    val pairCounts = mutableMapOf<Pair<String, String>, Int>()
+
+    for (match in history) {
+        // Estraiamo i nomi unici in minuscolo presenti in questa singola partita
+        val distinctNames = match.allPlayers
+            .map { it.name.trim().lowercase() }
+            .filter { it.isNotBlank() }
+            .distinct()
+
+        if (distinctNames.size < 2) continue
+
+        for (i in 0 until distinctNames.size - 1) {
+            for (j in i + 1 until distinctNames.size) {
+                val a = distinctNames[i]
+                val b = distinctNames[j]
+                val normalizedPair = if (a <= b) a to b else b to a
+                pairCounts[normalizedPair] = (pairCounts[normalizedPair] ?: 0) + 1
+            }
+        }
+    }
+
+    // Mappa rapida per risalire al VsPlayerOption (nome con maiuscole originali e partite totali)
+    val optionByLowerName = availablePlayers.associateBy { it.name.lowercase() }
+
+    // Cerchiamo la coppia con il maggior numero di scontri condivisi;
+    // in caso di parità privilegiamo la coppia con più partite totali complessive.
+    // 🧠 TEORIA KOTLIN (`compareBy` con selettori multipli):
+    // Passando due lambda a `compareBy`, Kotlin confronta prima il primo criterio
+    // (numero di sfide insieme `it.value`) e, solo in caso di parità, usa il secondo
+    // criterio (somma delle partite totali dei due giocatori) inferendo i tipi da solo.
+    val bestPair = pairCounts.entries.maxWithOrNull(
+        compareBy(
+            { it.value },
+            { entry ->
+                val p1Total = optionByLowerName[entry.key.first]?.totalMatchesPlayed ?: 0
+                val p2Total = optionByLowerName[entry.key.second]?.totalMatchesPlayed ?: 0
+                p1Total + p2Total
+            }
+        )
+    )?.key
+
+    if (bestPair != null) {
+        val opt1 = optionByLowerName[bestPair.first]
+        val opt2 = optionByLowerName[bestPair.second]
+        if (opt1 != null && opt2 != null) {
+            // Mettiamo come Giocatore 1 chi ha più partite totali (e in caso di parità ordine alfabetico)
+            return if (opt1.totalMatchesPlayed >= opt2.totalMatchesPlayed) {
+                opt1.name to opt2.name
+            } else {
+                opt2.name to opt1.name
+            }
+        }
+    }
+
+    // Paracadute: se nessuna partita aveva almeno 2 giocatori insieme, prendiamo i primi 2 disponibili
+    return availablePlayers[0].name to availablePlayers[1].name
 }
 
 /**
@@ -292,4 +371,3 @@ fun calculateHeadToHeadStats(
         awardsComparison = awardsList
     )
 }
-

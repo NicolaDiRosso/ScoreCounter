@@ -491,6 +491,14 @@
     <!-- ==================================================================== -->
     <!-- CONFRONTO VS: VsComparisonContent                                    -->
     <!-- ==================================================================== -->
+    <string name="titolo_scegli_giocatori_vs">Scegli due giocatori a confronto</string>
+    <string name="titolo_dialog_scegli_g1">Scegli Giocatore 1</string>
+    <string name="titolo_dialog_scegli_g2">Scegli Giocatore 2</string>
+    <string name="hint_cerca_giocatore">Cerca giocatore...</string>
+    <string name="msg_nessun_giocatore_trovato">Nessun giocatore trovato</string>
+    <string name="label_partite_giocatore_vs">%d partite</string>
+    <string name="label_una_partita_giocatore_vs">1 partita</string>
+    <string name="btn_annulla_dialog_vs">Annulla</string>
     <string name="tab_statistiche_generali">Generali</string>
     <string name="tab_confronto_vs">Confronto VS</string>
     <string name="label_giocatore_1">Giocatore 1</string>

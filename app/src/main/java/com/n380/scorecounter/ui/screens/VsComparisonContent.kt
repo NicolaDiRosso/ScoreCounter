@@ -6,12 +6,16 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
@@ -49,10 +53,15 @@ import java.util.Locale
  *    (`VsComparisonContentLandscape.kt`) vengono ridistribuite su 2 pannelli
  *    senza duplicare nemmeno una riga di codice grafico!
  *
- * 2. PREVENZIONE CONFRONTO CON SE STESSI (Smart Swap):
- *    Se nel menu a tendina del Giocatore 1 scegli il giocatore già selezionato
- *    come Giocatore 2 (o viceversa), i due sfidanti si scambiano automaticamente
- *    di posto, evitando l'errore logico "Nicola vs Nicola".
+ * 2. PERCHÉ UN DIALOGO CON RICERCA INVECE DI UN DROPDOWN MENU:
+ *    In Jetpack Compose, inserire un `OutlinedTextField` dentro un `DropdownMenu`
+ *    causa problemi di gestione del focus quando compare la tastiera virtuale.
+ *    Aprire invece un `AlertDialog` dedicato con campo di ricerca in cima e
+ *    `LazyColumn` scorrevole offre un'esperienza fluida sia con 3 amici sia con 50.
+ *
+ * 3. PREVENZIONE CONFRONTO CON SE STESSI (Smart Swap):
+ *    Se per Giocatore 1 scegli il giocatore già assegnato a Giocatore 2
+ *    (o viceversa), i due sfidanti si scambiano automaticamente di posto.
  * ====================================================================
  */
 @Composable
@@ -82,7 +91,7 @@ fun VsComparisonContent(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // 1. SELETTORE DEI DUE SFIDANTI (P1 <-> P2)
+        // 1. SELETTORE DEI DUE SFIDANTI (P1 <-> P2) CON FINESTRA DI RICERCA
         item {
             VsPlayerSelectorCard(
                 availablePlayers = availablePlayers,
@@ -172,7 +181,10 @@ fun VsComparisonContent(
 }
 
 /**
- * Card con i due selettori a tendina colorati e il pulsante centrale di scambio rapido.
+ * Card di selezione dei due sfidanti:
+ * - Intestazione esplicativa "Scegli due giocatori a confronto"
+ * - Due riquadri cliccabili colorati che aprono la finestra di selezione con ricerca
+ * - Pulsante centrale per invertire istantaneamente Giocatore 1 e Giocatore 2
  */
 @Composable
 fun VsPlayerSelectorCard(
@@ -187,184 +199,400 @@ fun VsPlayerSelectorCard(
     val p1Option = availablePlayers.firstOrNull { it.name.equals(selectedPlayer1, ignoreCase = true) }
     val p2Option = availablePlayers.firstOrNull { it.name.equals(selectedPlayer2, ignoreCase = true) }
 
+    // 🧠 STATO MODALE (0 = chiuso, 1 = scelta Giocatore 1, 2 = scelta Giocatore 2):
+    // Usiamo un singolo intero al posto di due booleani separati per garantire che
+    // non possano mai aprirsi due finestre contemporaneamente.
+    var pickingForSlot by remember { mutableIntStateOf(0) }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Selettore Giocatore 1
-            VsSinglePlayerDropdown(
-                label = stringResource(R.string.label_giocatore_1),
-                selectedName = p1Option?.name ?: selectedPlayer1,
-                selectedColor = p1Option?.color ?: 0xFF2196F3.toInt(),
-                availablePlayers = availablePlayers,
-                onSelect = { chosenName ->
-                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+            // Intestazione chiara per comunicare subito l'interattività dei selettori
+            Text(
+                text = stringResource(R.string.titolo_scegli_giocatori_vs),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 2.dp)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Riquadro cliccabile Giocatore 1
+                VsPlayerSlotBox(
+                    label = stringResource(R.string.label_giocatore_1),
+                    selectedName = p1Option?.name ?: selectedPlayer1,
+                    selectedColor = p1Option?.color ?: 0xFF2196F3.toInt(),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        pickingForSlot = 1
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Pulsante centrale di scambio rapido P1 <-> P2
+                FilledTonalIconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        val temp = selectedPlayer1
+                        onPlayer1Selected(selectedPlayer2)
+                        onPlayer2Selected(temp)
+                    },
+                    modifier = Modifier.size(38.dp),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.SwapHoriz,
+                        contentDescription = stringResource(R.string.desc_scambia_giocatori),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Riquadro cliccabile Giocatore 2
+                VsPlayerSlotBox(
+                    label = stringResource(R.string.label_giocatore_2),
+                    selectedName = p2Option?.name ?: selectedPlayer2,
+                    selectedColor = p2Option?.color ?: 0xFFF44336.toInt(),
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        pickingForSlot = 2
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+
+    // Finestra modale con casella di ricerca ed elenco giocatori
+    if (pickingForSlot == 1 || pickingForSlot == 2) {
+        val isSlot1 = pickingForSlot == 1
+        val currentSlotName = if (isSlot1) selectedPlayer1 else selectedPlayer2
+        val otherSlotName = if (isSlot1) selectedPlayer2 else selectedPlayer1
+
+        VsPlayerPickerDialog(
+            dialogTitle = if (isSlot1) {
+                stringResource(R.string.titolo_dialog_scegli_g1)
+            } else {
+                stringResource(R.string.titolo_dialog_scegli_g2)
+            },
+            availablePlayers = availablePlayers,
+            currentSelectedName = currentSlotName,
+            otherSlotName = otherSlotName,
+            onDismiss = { pickingForSlot = 0 },
+            onPlayerChosen = { chosenName ->
+                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                if (isSlot1) {
                     if (chosenName.equals(selectedPlayer2, ignoreCase = true)) {
-                        // Scambio automatico se si seleziona l'avversario attuale
                         onPlayer2Selected(selectedPlayer1)
                     }
                     onPlayer1Selected(chosenName)
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            // Pulsante centrale di scambio rapido P1 <-> P2
-            FilledTonalIconButton(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    val temp = selectedPlayer1
-                    onPlayer1Selected(selectedPlayer2)
-                    onPlayer2Selected(temp)
-                },
-                modifier = Modifier.size(38.dp),
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.SwapHoriz,
-                    contentDescription = stringResource(R.string.desc_scambia_giocatori),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            // Selettore Giocatore 2
-            VsSinglePlayerDropdown(
-                label = stringResource(R.string.label_giocatore_2),
-                selectedName = p2Option?.name ?: selectedPlayer2,
-                selectedColor = p2Option?.color ?: 0xFFF44336.toInt(),
-                availablePlayers = availablePlayers,
-                onSelect = { chosenName ->
-                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                } else {
                     if (chosenName.equals(selectedPlayer1, ignoreCase = true)) {
-                        // Scambio automatico se si seleziona l'avversario attuale
                         onPlayer1Selected(selectedPlayer2)
                     }
                     onPlayer2Selected(chosenName)
-                },
-                modifier = Modifier.weight(1f)
+                }
+                pickingForSlot = 0
+            }
+        )
+    }
+}
+
+/**
+ * Riquadro singolo cliccabile che mostra l'etichetta ("Giocatore 1/2"), il pallino colorato
+ * del giocatore attivo e la freccia a tendina.
+ */
+@Composable
+private fun VsPlayerSlotBox(
+    label: String,
+    selectedName: String,
+    selectedColor: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, Color(selectedColor).copy(alpha = 0.6f))
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = Modifier.height(2.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(Color(selectedColor))
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = selectedName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
 
 /**
- * Singolo selettore a tendina (Ancora + DropdownMenu) con pallino identificativo del colore giocatore.
+ * Finestra di dialogo Material 3 per selezionare un giocatore con barra di ricerca istantanea.
  *
- * 🧠 TEORIA COMPOSE (Box + DropdownMenu):
- * In Material 3, un `DropdownMenu` deve essere inserito all'interno di un `Box` insieme
- * al componente cliccabile che funge da "ancora", così Compose sa esattamente dove
- * ancorare la tendina sullo schermo.
+ * 🧠 TEORIA COMPOSE (`remember(availablePlayers, searchQuery)` & `heightIn`):
+ * - `remember(availablePlayers, searchQuery)`: ricalcola il filtro testuale solo quando
+ *   l'utente digita una lettera o cambia lo storico, evitando filtraggi inutili ad ogni frame.
+ * - `Modifier.heightIn(max = 280.dp)`: limita l'altezza massima della `LazyColumn` interna al
+ *   dialogo in modo che i pulsanti in basso restino sempre visibili anche su schermi piccoli o
+ *   in orientamento orizzontale.
  */
 @Composable
-private fun VsSinglePlayerDropdown(
-    label: String,
-    selectedName: String,
-    selectedColor: Int,
+private fun VsPlayerPickerDialog(
+    dialogTitle: String,
     availablePlayers: List<VsPlayerOption>,
-    onSelect: (String) -> Unit,
-    modifier: Modifier = Modifier
+    currentSelectedName: String,
+    otherSlotName: String,
+    onDismiss: () -> Unit,
+    onPlayerChosen: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    var searchQuery by remember { mutableStateOf("") }
 
-    Box(modifier = modifier) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .clickable { expanded = true },
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
-            shape = RoundedCornerShape(14.dp),
-            border = BorderStroke(1.dp, Color(selectedColor).copy(alpha = 0.6f))
-        ) {
+    val filteredPlayers = remember(availablePlayers, searchQuery) {
+        val query = searchQuery.trim()
+        if (query.isEmpty()) {
+            availablePlayers
+        } else {
+            availablePlayers.filter { it.name.contains(query, ignoreCase = true) }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(24.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 6.dp,
+        title = {
+            AutoResizedText(
+                text = dialogTitle,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
             Column(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(Color(selectedColor))
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+                // Casella di ricerca istantanea per filtrare l'elenco quando ci sono molti giocatori
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    placeholder = {
                         Text(
-                            text = selectedName,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
+                            text = stringResource(R.string.hint_cerca_giocatore),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                    }
-                    Icon(
-                        imageVector = Icons.Filled.ArrowDropDown,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            availablePlayers.forEach { option ->
-                val isCurrent = option.name.equals(selectedName, ignoreCase = true)
-                DropdownMenuItem(
-                    text = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(option.color))
-                            )
-                            Text(
-                                text = option.name,
-                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                            )
-                        }
                     },
-                    onClick = {
-                        expanded = false
-                        onSelect(option.name)
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = null
+                                )
+                            }
+                        }
                     }
                 )
+
+                if (filteredPlayers.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.msg_nessun_giocatore_trovato),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 260.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = filteredPlayers,
+                            key = { it.name.lowercase() }
+                        ) { option ->
+                            val isCurrentSlot = option.name.equals(currentSelectedName, ignoreCase = true)
+                            val isOtherSlot = option.name.equals(otherSlotName, ignoreCase = true)
+
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .clickable {
+                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        onPlayerChosen(option.name)
+                                    },
+                                shape = RoundedCornerShape(16.dp),
+                                color = if (isCurrentSlot) {
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                                } else {
+                                    MaterialTheme.colorScheme.surface
+                                },
+                                border = if (isCurrentSlot) {
+                                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                                } else {
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .clip(CircleShape)
+                                                .background(Color(option.color))
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column {
+                                            Text(
+                                                text = option.name,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = if (isCurrentSlot) FontWeight.Bold else FontWeight.SemiBold,
+                                                color = if (isCurrentSlot) {
+                                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurface
+                                                },
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Text(
+                                                text = if (option.totalMatchesPlayed == 1) {
+                                                    stringResource(R.string.label_una_partita_giocatore_vs)
+                                                } else {
+                                                    stringResource(
+                                                        R.string.label_partite_giocatore_vs,
+                                                        option.totalMatchesPlayed
+                                                    )
+                                                },
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+
+                                    if (isCurrentSlot) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    } else if (isOtherSlot) {
+                                        Icon(
+                                            imageVector = Icons.Filled.SwapHoriz,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        }
-    }
+        },
+        confirmButton = {
+            OutlinedButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                    onDismiss()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.btn_annulla_dialog_vs),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
+        dismissButton = null
+    )
 }
 
 /**
