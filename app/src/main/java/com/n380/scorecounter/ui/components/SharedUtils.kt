@@ -804,6 +804,38 @@
     }
 
 
+    /**
+     * Pulsante compatto quadrato-stondato (8.dp) progettato per stare dentro i campi di testo
+     * con shape RoundedCornerShape(12.dp), mantenendo la bordatura distintiva di ScoreCounter
+     * senza creare conflitti geometrici con gli angoli del campo.
+     */
+    @Composable
+    fun ClearInputButton(
+        onClick: () -> Unit,
+        contentDescription: String,
+        modifier: Modifier = Modifier
+    ) {
+        Surface(
+            onClick = onClick,
+            modifier = modifier.size(32.dp),
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+            )
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Filled.Clear,
+                    contentDescription = contentDescription,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(17.dp)
+                )
+            }
+        }
+    }
+
 
     // ====================================================================
     // COMPONENTE: SELETTORE COLORI (ColorPicker)

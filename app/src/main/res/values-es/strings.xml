@@ -159,7 +159,7 @@
     <string name="titolo_info_fire">🔥 Estado On Fire</string>
     <string name="msg_info_fire">Si un jugador anota 3 veces seguidas sin interrupción de los demás, su puntuación se vuelve naranja.</string>
     <string name="titolo_info_manuale">⌨️ Edición manual</string>
-    <string name="msg_info_manuale">Haz clic directamente en el número de la puntuación para abrir el teclado e introducir el valor exacto que desees.</string>
+    <string name="msg_info_manuale">Haz clic directamente en el número de la puntuación para abrir el teclado y realizar operaciones aritméticas encadenadas (ej. 45+15-5) usando los botones rápidos \'+\' e \'-\' o escribiendo operadores directamente.</string>
     <string name="titolo_info_dado">🎲 Dado de la suerte</string>
     <string name="msg_info_dado">Usa el botón \'Dado\' para generar un número aleatorio y decidir quién empieza o resolver disputas entre amigos.\nPara cambiar las caras del dado, toca el botón arriba a la derecha en il diálogo de tirada (ej. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Temporizador personalizado</string>

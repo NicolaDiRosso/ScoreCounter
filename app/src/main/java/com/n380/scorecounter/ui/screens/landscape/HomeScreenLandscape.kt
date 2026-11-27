@@ -46,6 +46,7 @@ import com.n380.scorecounter.model.getWinnerNames
 import com.n380.scorecounter.model.getWinnerFormattedNames
 import com.n380.scorecounter.model.getRankedPlayers
 import com.n380.scorecounter.ui.components.AutoResizedText
+import com.n380.scorecounter.ui.components.ClearInputButton
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.SlideUpAnimatedVisibility
 import com.n380.scorecounter.ui.components.buildMatchShareText
@@ -483,20 +484,14 @@ private fun HomeHistoryGridTableContent(
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(
+                        ClearInputButton(
                             onClick = {
                                 searchQuery = ""
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Clear,
-                                contentDescription = stringResource(R.string.btn_cancella),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
+                            contentDescription = stringResource(R.string.btn_cancella),
+                            modifier = Modifier.padding(end = 6.dp)
+                        )
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

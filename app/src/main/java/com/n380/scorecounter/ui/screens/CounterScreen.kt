@@ -40,6 +40,7 @@
     import androidx.compose.ui.text.style.TextAlign
     import com.n380.scorecounter.R // 🌍 I18N: Import per l'accesso ai file di risorsa XML
     import com.n380.scorecounter.model.Player
+    import com.n380.scorecounter.ui.components.ClearInputButton
     import com.n380.scorecounter.ui.components.PlayerScoreCard
     import com.n380.scorecounter.ui.components.FeatureInfoDialog
     import com.n380.scorecounter.ui.components.ScoreHistoryDialog
@@ -992,18 +993,18 @@
 
 
         // =========================================================================================
-        // MODALE INSERIMENTO MANUALE: GESTIONE AVANZATA DEL FOCUS E DEL TESTO (di MODFICA PUNTEGGIO)
+        // MODALE INSERIMENTO MANUALE: GESTIONE AVANZATA DEL FOCUS, TESTO ED ESPRESSIONI A CATENA
         // =========================================================================================
         if (playerForManualEdit != null) {
 
             // 1. STATE MANAGEMENT (Gestione dello Stato e del Cursore)
             // Usiamo TextFieldValue invece di String. Una String contiene solo i caratteri.
             // TextFieldValue è una data class complessa che memorizza:
-            // - text: La stringa attuale.
+            // - text: La stringa attuale (es. "45" oppure "45+15-5").
             // - selection: L'oggetto TextRange che definisce dove si trova il cursore o la selezione evidenziata.
             // - composition: Usato per le tastiere predittive.
             var scoreInput by remember {
-                //dichiaro la variabile immutabile initialText e dico che è uguale alla variabile di stato che contiene il giocatore con un valore non nullo e lo converto in una stringa con ".toString()"
+                // dichiariamo la variabile immutabile initialText con il punteggio attuale convertito in stringa
                 val initialText = playerForManualEdit!!.score.toString()
                 mutableStateOf(
                     TextFieldValue(
@@ -1014,6 +1015,17 @@
                     )
                 )
             }
+
+            // 🧠 CALCOLO IN TEMPO REALE DELL'ESPRESSIONE A CATENA:
+            // Valutiamo live la stringa digitata (es. "45+15+20-5" -> 75).
+            // Se il campo è vuoto o contiene solo un segno isolato ("+" o "-"), restituisce null.
+            val evaluatedScore = remember(scoreInput.text) {
+                evaluateChainedExpression(scoreInput.text)
+            }
+
+            // Calcoliamo anche la differenza rispetto al punteggio iniziale del giocatore per mostrarla nell'anteprima
+            val currentPlayerScore = playerForManualEdit!!.score
+            val previewDelta = evaluatedScore?.minus(currentPlayerScore)
 
             // 2. FOCUS TREE (Albero del Focus)
             // FocusRequester è un proxy che ci permette di inviare comandi all'albero del focus di Compose.
@@ -1030,6 +1042,35 @@
                 // (Window Manager), la richiesta viene scartata (Ignored). Il delay garantisce che il nodo sia pronto.
                 delay(100)
                 focusRequester.requestFocus() // Spinge programmaticamente l'evento di focus sul nodo collegato.
+            }
+
+            // 🧠 FUNZIONE DI SUPPORTO PER I TASTI RAPIDI (+ e -):
+            // Inserisce l'operatore nella posizione corrente del cursore, evitando doppi operatori consecutivi
+            // (es. se prima del cursore c'è già un '+' e premi '-', lo sostituisce con '-').
+            val insertOperator: (Char) -> Unit = { op ->
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                val currentText = scoreInput.text
+                val start = scoreInput.selection.min.coerceIn(0, currentText.length)
+                val end = scoreInput.selection.max.coerceIn(0, currentText.length)
+
+                val beforeCursor = currentText.substring(0, start)
+                val afterCursor = currentText.substring(end)
+
+                // Se subito prima del cursore c'è già un operatore (+ o -), lo rimpiazziamo invece di affiancarlo
+                val cleanedBefore = if (beforeCursor.lastOrNull() == '+' || beforeCursor.lastOrNull() == '-') {
+                    beforeCursor.dropLast(1)
+                } else {
+                    beforeCursor
+                }
+
+                val updatedText = normalizeExpressionInput(cleanedBefore + op + afterCursor)
+                val newCursorPos = (cleanedBefore.length + 1).coerceAtMost(updatedText.length)
+
+                scoreInput = TextFieldValue(
+                    text = updatedText,
+                    selection = TextRange(newCursorPos)
+                )
+                focusRequester.requestFocus()
             }
 
             // 4. COMPONENTE UI: ALERT DIALOG (Material 3)
@@ -1063,34 +1104,47 @@
                         Text(
                             text = stringResource(R.string.msg_inserisci_nuovo_punteggio, playerForManualEdit!!.name),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 12.dp)
                         )
 
-                        // 5. COMPONENTE UI: CAMPO TESTUALE E TASTIERA
+                        // 5. COMPONENTE UI: CAMPO TESTUALE PER ESPRESSIONI A CATENA
                         OutlinedTextField(
                             value = scoreInput, // Associa lo stato (TextFieldValue) alla UI
                             onValueChange = { newValue ->
-                                // newValue è il nuovo stato emesso dalla tastiera.
-                                // Estraiamo la proprietà 'text' per eseguire la nostra Regex/Validazione.
-                                val newText = newValue.text
-                                // Condizione logica: Accetta vuoto, segno meno isolato, o un intero valido.
-                                if (newText.isEmpty() || newText == "-" || newText.toIntOrNull() != null) {
-                                    // Se la validazione passa, sovrascriviamo lo stato con il NUOVO oggetto TextFieldValue
-                                    // Questo mantiene sincronizzata sia la stringa che la posizione aggiornata del cursore.
-                                    scoreInput = newValue
-                                }
+                                // Sanitizziamo e normalizziamo l'espressione (accetta cifre, '+' e '-')
+                                val sanitizedText = normalizeExpressionInput(newValue.text)
+                                val adjustedCursor = newValue.selection.end.coerceIn(0, sanitizedText.length)
+                                scoreInput = TextFieldValue(
+                                    text = sanitizedText,
+                                    selection = TextRange(adjustedCursor)
+                                )
                             },
                             // Binding del FocusRequester al modificatore di questo specifico componente.
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .focusRequester(focusRequester),
 
-                            // 🧠 DESIGN CHANGE: Stondatura ridotta a 12.dp per coerenza con i nuovi campi di testo (Module style)
+                            // Stondatura coerente con i campi di testo (Module style)
                             shape = RoundedCornerShape(12.dp),
 
                             // singleLine disabilita il comportamento "multiline" (non crea a capo "\n")
                             // ed è propedeutico affinché imeAction venga rispettata dalla tastiera (IME).
                             singleLine = true,
+
+                            // Pulsante rapido di pulizia coerente con la barra di ricerca della Home
+                            trailingIcon = {
+                                if (scoreInput.text.isNotEmpty()) {
+                                    ClearInputButton(
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            scoreInput = TextFieldValue(text = "", selection = TextRange(0))
+                                            focusRequester.requestFocus()
+                                        },
+                                        contentDescription = stringResource(R.string.btn_cancella),
+                                        modifier = Modifier.padding(end = 8.dp)
+                                    )
+                                }
+                            },
 
                             // Configurazione dell'Input Method Editor (IME) del sistema Android.
                             keyboardOptions = KeyboardOptions(
@@ -1101,21 +1155,109 @@
                             // Intercettazione dell'evento emesso dalla tastiera (quando l'utente preme la Spunta).
                             keyboardActions = KeyboardActions(
                                 onDone = {
-                                    // Rimuove il focus dal nodo attivo. Di conseguenza, il Window Manager di Android
-                                    // nasconderà la tastiera automaticamente (Trigger implicito).
-                                    //focusManager.clearFocus()
+                                    if (evaluatedScore != null) {
+                                        // Calcolo del delta per non distruggere le statistiche/combo basate sull'aggiunta.
+                                        val diff = evaluatedScore - playerForManualEdit!!.score
+                                        viewModel.updatePlayerScore(playerForManualEdit!!, diff)
 
-                                    // Casting sicuro: converte la stringa in Int, se fallisce (es. vuoto o "-") usa 0 (Elvis Operator).
-                                    val newScore = scoreInput.text.toIntOrNull() ?: 0
-                                    // Calcolo del delta per non distruggere le statistiche/combo basate sull'aggiunta.
-                                    val diff = newScore - playerForManualEdit!!.score
-                                    viewModel.updatePlayerScore(playerForManualEdit!!, diff)
-
-                                    // Azzera lo stato, innescando la recomposition che distruggerà l'AlertDialog.
-                                    playerForManualEdit = null
+                                        // Azzera lo stato, innescando la recomposition che distruggerà l'AlertDialog.
+                                        playerForManualEdit = null
+                                    }
                                 }
                             )
                         )
+
+                        // 6. BARRA OPERATORI RAPIDI (+ / -) E ANTEPRIMA RISULTATO IN TEMPO REALE
+                        // 🧠 UX DESIGN: Poiché molte tastiere numeriche su Android nascondono il tasto '+',
+                        // affianchiamo due pulsanti tattili '+' e '-' alla pillola con il risultato live.
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Pulsante rapido '-' a sinistra (asse numerico coerente con le card giocatori)
+                            FilledTonalButton(
+                                onClick = { insertOperator('-') },
+                                modifier = Modifier
+                                    .width(52.dp)
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Remove,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            // Pulsante rapido '+' a destra, accanto all'anteprima del risultato
+                            FilledTonalButton(
+                                onClick = { insertOperator('+') },
+                                modifier = Modifier
+                                    .width(52.dp)
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Add,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            // Pillola con anteprima live del punteggio totale e dello scarto (delta)
+                            Surface(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.surface,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 10.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    val previewText = if (evaluatedScore != null) {
+                                        val deltaSuffix = when {
+                                            previewDelta == null || previewDelta == 0 -> ""
+                                            previewDelta > 0 -> " (+$previewDelta)"
+                                            else -> " ($previewDelta)"
+                                        }
+                                        "= $evaluatedScore$deltaSuffix"
+                                    } else {
+                                        "= —"
+                                    }
+
+                                    AutoResizedText(
+                                        text = previewText,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontFeatureSettings = "tnum"
+                                        ),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = if (evaluatedScore != null) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 confirmButton = {
@@ -1134,7 +1276,6 @@
                             shape = RoundedCornerShape(20.dp),
                             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                         ) {
-                            // 🧠 FIX UI: Rimossa virgola finale ridondante che sporcava il codice.
                             AutoResizedText(
                                 text = stringResource(R.string.btn_annulla),
                                 style = MaterialTheme.typography.labelLarge,
@@ -1145,11 +1286,12 @@
 
                         // Filled Button è usato per l'azione primaria e affermativa (Confirm/Salva).
                         Button(
+                            enabled = evaluatedScore != null,
                             onClick = {
+                                val finalScore = evaluatedScore ?: return@Button
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 // Replicazione esatta della business logic presente nella KeyboardActions(onDone)
-                                val newScore = scoreInput.text.toIntOrNull() ?: 0
-                                val diff = newScore - playerForManualEdit!!.score
+                                val diff = finalScore - playerForManualEdit!!.score
                                 viewModel.updatePlayerScore(playerForManualEdit!!, diff)
                                 playerForManualEdit = null
                             },
@@ -1530,6 +1672,71 @@
                 }
             )
         }
+    }
+
+    /**
+     * ====================================================================
+     * HELPER PARSER ESPRESSIONI A CATENA (Addizioni e Sottrazioni)
+     * ====================================================================
+     * Filtra e normalizza l'input dell'utente ammettendo solo cifre e segni (+ / -),
+     * evitando due operatori consecutivi (es. "45+-" viene normalizzato in "45-").
+     */
+    private fun normalizeExpressionInput(raw: String): String {
+        val result = StringBuilder()
+        for (ch in raw) {
+            if (ch.isDigit()) {
+                result.append(ch)
+            } else if (ch == '+' || ch == '-') {
+                if (result.isNotEmpty() && (result.last() == '+' || result.last() == '-')) {
+                    // Sostituisce l'operatore precedente anziché accodarlo
+                    result.setCharAt(result.length - 1, ch)
+                } else {
+                    result.append(ch)
+                }
+            }
+        }
+        return result.toString()
+    }
+
+    /**
+     * Valuta da sinistra a destra un'espressione composta da somme e sottrazioni (es. "45+15+20-5" -> 75).
+     * Se l'utente ha appena digitato un operatore finale in sospeso (es. "45+"), calcola comunque
+     * il risultato parziale valido ("45") per mantenere fluida l'anteprima live.
+     * Restituisce null se non è presente alcuna cifra valida.
+     */
+    private fun evaluateChainedExpression(input: String): Int? {
+        val cleaned = input.trim().trimEnd('+', '-')
+        if (cleaned.isEmpty()) return null
+
+        var total = 0L
+        var currentSign = 1
+        var currentNumber = StringBuilder()
+        var hasAnyDigit = false
+
+        for (i in cleaned.indices) {
+            val ch = cleaned[i]
+            when {
+                ch.isDigit() -> {
+                    currentNumber.append(ch)
+                    hasAnyDigit = true
+                }
+                ch == '+' || ch == '-' -> {
+                    if (currentNumber.isNotEmpty()) {
+                        val value = currentNumber.toString().toLongOrNull() ?: return null
+                        total += currentSign * value
+                        currentNumber = StringBuilder()
+                    }
+                    currentSign = if (ch == '-') -1 else 1
+                }
+            }
+        }
+
+        if (currentNumber.isNotEmpty()) {
+            val value = currentNumber.toString().toLongOrNull() ?: return null
+            total += currentSign * value
+        }
+
+        return if (hasAnyDigit) total.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong()).toInt() else null
     }
 
 

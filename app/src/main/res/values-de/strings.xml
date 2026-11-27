@@ -159,7 +159,7 @@
     <string name="titolo_info_fire">🔥 On Fire Status</string>
     <string name="msg_info_fire">Wenn ein Spieler dreimal hintereinander ohne Unterbrechung durch die anderen punktet, wird sein Punktestand orange.</string>
     <string name="titolo_info_manuale">⌨️ Manuelle Bearbeitung</string>
-    <string name="msg_info_manuale">Klicke direkt auf die Zahl des Punktestands, um die Tastatur zu öffnen und einen genauen Wert nach Wunsch einzugeben.</string>
+    <string name="msg_info_manuale">Klicke direkt auf die Zahl des Punktestands, um die Tastatur zu öffnen und verkettete Rechenoperationen (z.B. 45+15-5) über die Schnellschaltflächen \'+\' und \'-\' oder durch direkte Eingabe von Operatoren durchzuführen.</string>
     <string name="titolo_info_dado">🎲 Glückswürfel</string>
     <string name="msg_info_dado">Nutze die \'Würfel\'-Taste, um eine Zufallszahl zu generieren und zu entscheiden, wer beginnt oder Streitigkeiten zu schlichten.\nUm die Anzahl der Würfelseiten zu ändern, tippe auf den Button oben rechts im Wurfdialog (z.B. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Benutzerdefinierter Timer</string>

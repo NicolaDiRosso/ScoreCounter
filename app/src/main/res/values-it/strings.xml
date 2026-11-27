@@ -159,7 +159,7 @@
     <string name="titolo_info_fire">🔥 Stato On Fire</string>
     <string name="msg_info_fire">Se un giocatore segna 3 volte di fila senza interruzioni da parte degli altri, il suo punteggio diventa arancione.</string>
     <string name="titolo_info_manuale">⌨️ Modifica manuale</string>
-    <string name="msg_info_manuale">Clicca direttamente sul numero del punteggio per aprire la tastiera e inserire un valore preciso a piacere.</string>
+    <string name="msg_info_manuale">Clicca direttamente sul numero del punteggio per aprire la tastiera ed eseguire operazioni aritmetiche a catena (es. 45+15-5) utilizzando i pulsanti rapidi \'+\' e \'-\' o digitando direttamente gli operatori.</string>
     <string name="titolo_info_dado">🎲 Dado fortunato</string>
     <string name="msg_info_dado">Usa il tasto \'Dado\' per generare un numero casuale e decidere chi inizia o risolvere dispute tra amici.\nPer modificare le facce del dado, premi il pulsante in alto a destra nel dialogo di lancio (es. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Timer personalizzato</string>

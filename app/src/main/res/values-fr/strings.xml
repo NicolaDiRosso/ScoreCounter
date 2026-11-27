@@ -159,7 +159,7 @@
     <string name="titolo_info_fire">🔥 Statut On Fire</string>
     <string name="msg_info_fire">Si un joueur marque 3 fois de suite sans interruption des autres, son score devient orange.</string>
     <string name="titolo_info_manuale">⌨️ Modification manuelle</string>
-    <string name="msg_info_manuale">Cliquez directement sur le nombre du score pour ouvrir le clavier et entrer la valeur exacte de votre choix.</string>
+    <string name="msg_info_manuale">Cliquez directement sur le nombre du score pour ouvrir le clavier et effectuer des opérations arithmétiques en chaîne (ex. 45+15-5) à l\'aide des boutons rapides \'+\' et \'-\' ou en tapant directement les opérateurs.</string>
     <string name="titolo_info_dado">🎲 Dé de la chance</string>
     <string name="msg_info_dado">Utilisez le bouton \'Dé\' pour générer un nombre aléatoire et décider qui commence ou régler des différends.\nPour modifier les faces du dé, touchez le bouton en haut à droite dans la boîte de dialogue (ex. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Minuteur personnalisé</string>

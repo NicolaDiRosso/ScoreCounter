@@ -159,7 +159,7 @@
     <string name="titolo_info_fire">🔥 On Fire 状態</string>
     <string name="msg_info_fire">他のプレイヤーに邪魔されずに3回連続で得点すると、そのプレイヤーのスコア表示がオレンジ色に変わります。</string>
     <string name="titolo_info_manuale">⌨️ 手動編集</string>
-    <string name="msg_info_manuale">スコアの数値を直接タップすると、キーボードが開き、好きな正確な値を入力できます。</string>
+    <string name="msg_info_manuale">スコアの数値を直接タップすると、キーボードが開き、「+」および「-」のクイックボタンを使用するか直接演算子を入力して、連鎖的な算術演算（例: 45+15-5）を実行できます。</string>
     <string name="titolo_info_dado">🎲 ラッキーサイコロ</string>
     <string name="msg_info_dado">「サイコロ」ボタンを使ってランダムな数字を生成し、順番を決めたり友達との判定に使ったりできます。\nサイコロの面数を変更するには、ロールダイアログの右上にあるボタン（例: \"D6\"）をタップしてください。</string>
     <string name="titolo_info_timer">⏱️ カスタムタイマー</string>

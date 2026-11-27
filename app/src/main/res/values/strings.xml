@@ -159,7 +159,7 @@
     <string name="titolo_info_fire">🔥 On Fire status</string>
     <string name="msg_info_fire">If a player scores 3 times in a row without interruptions, their score turns orange.</string>
     <string name="titolo_info_manuale">⌨️ Manual edit</string>
-    <string name="msg_info_manuale">Tap directly on the score number to open the keyboard and enter an exact value.</string>
+    <string name="msg_info_manuale">Tap directly on the score number to open the keyboard and perform chained arithmetic operations (e.g. 45+15-5) using the quick \'+\' and \'-\' buttons or typing operators directly.</string>
     <string name="titolo_info_dado">🎲 Lucky dice</string>
     <string name="msg_info_dado">Use the \'Dice\' button to generate a random number to decide who starts or settle disputes.\nTo change the number of dice faces, tap the button in the top right of the roll dialog (e.g. \"D6\").</string>
     <string name="titolo_info_timer">⏱️ Custom timer</string>

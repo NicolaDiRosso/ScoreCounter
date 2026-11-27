@@ -65,6 +65,7 @@ import com.n380.scorecounter.ui.components.AboutAppDialog
 import com.n380.scorecounter.ui.components.AutoResizedText
 import com.n380.scorecounter.ui.components.DonationDialog
 import com.n380.scorecounter.ui.components.BackupRestoreDialog
+import com.n380.scorecounter.ui.components.ClearInputButton
 import com.n380.scorecounter.ui.components.FilledActionPill
 import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.ui.components.SlideUpAnimatedVisibility
@@ -796,21 +797,14 @@ fun HomeScreen(
                                 trailingIcon = {
                                     // Tasto "X" dinamico: esiste solo se c'è testo da cancellare
                                     if (searchQuery.isNotEmpty()) {
-                                        TonalActionPill(
+                                        ClearInputButton(
                                             onClick = {
                                                 searchQuery = ""
                                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                             },
-                                            modifier = Modifier.padding(end = 8.dp) // Leggero margine dal bordo destro
-                                        ) {
-                                            // Nella HomeScreen mettiamo SOLO l'icona!
-                                            Icon(
-                                                imageVector = Icons.Filled.Clear,
-                                                contentDescription = stringResource(R.string.btn_cancella),
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(18.dp) // Dimensione proporzionata
-                                            )
-                                        }
+                                            contentDescription = stringResource(R.string.btn_cancella),
+                                            modifier = Modifier.padding(end = 8.dp)
+                                        )
                                     }
                                 },
 
