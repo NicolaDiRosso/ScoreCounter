@@ -177,22 +177,28 @@ fun CounterScreenLandscape(
                                 )
                             }
 
-                            // Pulsante compatto gemello circolare per l'apertura della cronologia punteggi e annulla mossa
+                            // Pulsante compatto gemello circolare per l'apertura della cronologia punteggi e annulla mossa (abilitato solo se c'è almeno un punto)
+                            val isHistoryEnabled = viewModel.scoreActions.isNotEmpty()
                             FilledIconButton(
                                 onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onShowScoreHistoryDialogChange(true)
+                                    if (isHistoryEnabled) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onShowScoreHistoryDialogChange(true)
+                                    }
                                 },
+                                enabled = isHistoryEnabled,
                                 modifier = Modifier.size(44.dp),
                                 colors = IconButtonDefaults.filledIconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    containerColor = if (isHistoryEnabled) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.38f),
+                                    contentColor = if (isHistoryEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.38f),
+                                    disabledContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.38f),
+                                    disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.38f)
                                 )
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.History,
                                     contentDescription = stringResource(R.string.desc_cronologia_icon),
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    tint = if (isHistoryEnabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.38f),
                                     modifier = Modifier.size(20.dp)
                                 )
                             }

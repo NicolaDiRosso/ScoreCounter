@@ -525,4 +525,6 @@
     <string name="desc_media_punti_vs">Puntuación media en partidas compartidas</string>
     <string name="desc_scarto_massimo_vs">Máxima diferencia de puntos en una partida</string>
     <string name="desc_combo_fuoco_vs">Rachas consecutivas totales en partidas compartidas</string>
+    <string name="tab_log">Historial</string>
+    <string name="tab_grafico">Gráfico</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
@@ -56,8 +57,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.n380.scorecounter.R
+import com.n380.scorecounter.model.PlayerRecord
 import com.n380.scorecounter.model.ScoreAction
+import com.n380.scorecounter.ui.components.ScoreChart
 import com.n380.scorecounter.viewmodel.MatchViewModel
 import kotlinx.coroutines.launch
 
@@ -77,14 +96,23 @@ fun ScoreHistoryDialog(
     val dialogSnackbarHostState = remember { SnackbarHostState() }
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+    // 🧠 STATO SELETTORE (0 = Log elenco mosse, 1 = Grafico live andamento punteggi):
+    // Viene memorizzato con 'rememberSaveable' per preservare la scheda selezionata anche alla rotazione.
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    // 🧠 PROPORZIONI FISSE E STABILI: Manteniamo entrambe le viste (Log e Grafico)
+    // della stessa generosa dimensione per evitare qualsiasi scatto o ridimensionamento del dialog.
+    val targetWidthFraction = if (isLandscape) 0.92f else 0.95f
+    val targetHeightFraction = if (isLandscape) 0.92f else 0.88f
+
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(if (isLandscape) 0.70f else 0.92f)
-                .fillMaxHeight(0.88f),
+                .fillMaxWidth(targetWidthFraction)
+                .fillMaxHeight(targetHeightFraction),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.background,
             shadowElevation = 12.dp,
@@ -95,74 +123,176 @@ fun ScoreHistoryDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(18.dp),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Intestazione con icona e titolo ridimensionabile automaticamente
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    // 🧠 INTESTAZIONE DUAL-MODE: Titolo + Selettore a segmenti M3 per alternare Log e Grafico
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.History,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        AutoResizedText(
-                            text = stringResource(R.string.titolo_cronologia_punteggi),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = if (selectedTabIndex == 1) Icons.AutoMirrored.Filled.ShowChart else Icons.Filled.History,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(26.dp)
+                            )
+                            AutoResizedText(
+                                text = stringResource(R.string.titolo_cronologia_punteggi),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        // Selettore a pillola Log / Grafico
+                        SingleChoiceSegmentedButtonRow(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            SegmentedButton(
+                                selected = selectedTabIndex == 0,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    selectedTabIndex = 0
+                                },
+                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                            ) {
+                                AutoResizedText(
+                                    text = stringResource(R.string.tab_log),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                            SegmentedButton(
+                                selected = selectedTabIndex == 1,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                                    selectedTabIndex = 1
+                                },
+                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                            ) {
+                                AutoResizedText(
+                                    text = stringResource(R.string.tab_grafico),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                        }
                     }
 
-                    // Corpo centrale: contenitore scorrevole per la cronologia delle mosse
-                    Surface(
+                    // 🧠 CORPO CENTRALE CON TRANSIZIONE ANIMATA TRA LOG E GRAFICO
+                    AnimatedContent(
+                        targetState = selectedTabIndex,
+                        transitionSpec = {
+                            if (targetState > initialState) {
+                                slideInHorizontally(
+                                    initialOffsetX = { fullWidth -> fullWidth },
+                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                ) + fadeIn(animationSpec = tween(300)) togetherWith
+                                slideOutHorizontally(
+                                    targetOffsetX = { fullWidth -> -fullWidth },
+                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                ) + fadeOut(animationSpec = tween(300))
+                            } else {
+                                slideInHorizontally(
+                                    initialOffsetX = { fullWidth -> -fullWidth },
+                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                ) + fadeIn(animationSpec = tween(300)) togetherWith
+                                slideOutHorizontally(
+                                    targetOffsetX = { fullWidth -> fullWidth },
+                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                ) + fadeOut(animationSpec = tween(300))
+                            }
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                    ) {
-                        if (viewModel.scoreActions.isEmpty()) {
-                            // Stato vuoto quando nessuna variazione e ancora avvenuta
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                        label = "HistoryLogChartTransition"
+                    ) { tab ->
+                        if (tab == 1) {
+                            // 📊 VISTA GRAFICO LIVE: Mappa i dati correnti dei giocatori e della cronologia
+                            val currentPlayersAsRecords = remember(viewModel.players.map { it.score }, viewModel.scoreActions.size) {
+                                viewModel.players.map { player ->
+                                    PlayerRecord(
+                                        name = player.name,
+                                        score = player.score,
+                                        scoreHistory = player.scoreHistory.toList(),
+                                        fireComboCount = player.fireComboCount,
+                                        color = player.color
+                                    )
+                                }
+                            }
+
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                                    modifier = Modifier.size(56.dp)
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = stringResource(R.string.msg_nessuna_mossa_cronologia),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                    textAlign = TextAlign.Center
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(10.dp)
+                                ) {
+                                    ScoreChart(
+                                        players = currentPlayersAsRecords,
+                                        durationSeconds = viewModel.matchDurationSeconds,
+                                        isDetailed = true,
+                                        showTimeZoom = true,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             }
                         } else {
-                            // Lista ordinata dall'azione piu recente a quella piu remota
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(10.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(bottom = 8.dp)
+                            // 📋 VISTA LOG VERTICALE: Lista ordinata delle azioni registrate
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                shape = RoundedCornerShape(16.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                             ) {
-                                items(viewModel.scoreActions.reversed()) { action ->
-                                    ScoreActionItemRow(action = action)
+                                if (viewModel.scoreActions.isEmpty()) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(24.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.History,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                                            modifier = Modifier.size(56.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Text(
+                                            text = stringResource(R.string.msg_nessuna_mossa_cronologia),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                } else {
+                                    LazyColumn(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(bottom = 8.dp)
+                                    ) {
+                                        items(viewModel.scoreActions.reversed()) { action ->
+                                            ScoreActionItemRow(action = action)
+                                        }
+                                    }
                                 }
                             }
                         }

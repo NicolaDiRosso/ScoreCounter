@@ -517,4 +517,6 @@
     <string name="desc_media_punti_vs">Durchschnittspunktzahl in gemeinsamen Spielen</string>
     <string name="desc_scarto_massimo_vs">Maximale Punktedifferenz in einem Spiel</string>
     <string name="desc_combo_fuoco_vs">Gesamte Siegessserien in gemeinsamen Spielen</string>
+    <string name="tab_log">Verlauf</string>
+    <string name="tab_grafico">Diagramm</string>
 </resources>

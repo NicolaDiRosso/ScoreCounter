@@ -525,5 +525,7 @@
     <string name="desc_media_punti_vs">Average score in shared matches</string>
     <string name="desc_scarto_massimo_vs">Maximum point difference in a match</string>
     <string name="desc_combo_fuoco_vs">Total consecutive streaks in shared matches</string>
+    <string name="tab_log">History</string>
+    <string name="tab_grafico">Chart</string>
 
 </resources>

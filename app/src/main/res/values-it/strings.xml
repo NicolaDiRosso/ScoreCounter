@@ -525,6 +525,8 @@
     <string name="desc_media_punti_vs">Punteggio medio nelle sfide insieme</string>
     <string name="desc_scarto_massimo_vs">Massima differenza punti in una partita</string>
     <string name="desc_combo_fuoco_vs">Serie consecutive totali nelle sfide insieme</string>
+    <string name="tab_log">Storico</string>
+    <string name="tab_grafico">Grafico</string>
 
 </resources>
 

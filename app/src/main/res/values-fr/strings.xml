@@ -517,4 +517,6 @@
     <string name="desc_media_punti_vs">Score moyen dans les parties partagées</string>
     <string name="desc_scarto_massimo_vs">Différence de points maximale dans une partie</string>
     <string name="desc_combo_fuoco_vs">Séries consécutives totales dans les parties partagées</string>
+    <string name="tab_log">Historique</string>
+    <string name="tab_grafico">Graphique</string>
 </resources>

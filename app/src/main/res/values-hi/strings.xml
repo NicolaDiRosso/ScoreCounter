@@ -517,4 +517,6 @@
     <string name="desc_media_punti_vs">साझा मैचों में औसत स्कोर</string>
     <string name="desc_scarto_massimo_vs">एक मैच में अधिकतम अंकों का अंतर</string>
     <string name="desc_combo_fuoco_vs">साझा मैचों में कुल लगातार स्ट्रीक</string>
+    <string name="tab_log">इतिहास</string>
+    <string name="tab_grafico">ग्राफ</string>
 </resources>

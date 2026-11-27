@@ -478,16 +478,22 @@
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Pulsante circolare Cronologia
+                        // Pulsante circolare Cronologia (abilitato solo se è stato assegnato almeno un punto)
+                        val isHistoryEnabled = viewModel.scoreActions.isNotEmpty()
                         FilledIconButton(
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                showScoreHistoryDialog = true
+                                if (isHistoryEnabled) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showScoreHistoryDialog = true
+                                }
                             },
+                            enabled = isHistoryEnabled,
                             modifier = Modifier.size(36.dp),
                             colors = IconButtonDefaults.filledIconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                containerColor = if (isHistoryEnabled) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+                                contentColor = if (isHistoryEnabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+                                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                             )
                         ) {
                             Icon(

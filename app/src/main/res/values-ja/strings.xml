@@ -517,4 +517,6 @@
     <string name="desc_media_punti_vs">共通の試合での平均スコア</string>
     <string name="desc_scarto_massimo_vs">1試合での最大ポイント差</string>
     <string name="desc_combo_fuoco_vs">共通の試合での合計連続ストリーク</string>
+    <string name="tab_log">履歴</string>
+    <string name="tab_grafico">グラフ</string>
 </resources>

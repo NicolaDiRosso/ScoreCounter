@@ -87,7 +87,7 @@ fun FeatureInfoDialogLandscape(
     val haptic = LocalHapticFeedback.current
 
     Dialog(
-        onDismissRequest = { }, // Blocca la chiusura accidentale toccando fuori
+        onDismissRequest = onDismissRequest, // 🧠 PERMETTE LA CHIUSURA CLICCANDO ALL'ESTERNO O TRAMITE BACK
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
@@ -207,7 +207,7 @@ fun FeatureInfoDialogPortrait(
     val haptic = LocalHapticFeedback.current
 
     Dialog(
-        onDismissRequest = { },
+        onDismissRequest = onDismissRequest, // 🧠 PERMETTE LA CHIUSURA CLICCANDO ALL'ESTERNO O TRAMITE BACK
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
