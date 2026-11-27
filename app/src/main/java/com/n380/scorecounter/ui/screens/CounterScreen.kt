@@ -556,7 +556,12 @@
                             verticalArrangement = Arrangement.Center,
                             modifier = Modifier.padding(end = 12.dp)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Allineamento verticale perfetto: aggiungiamo padding(start = 4.dp)
+                            // per allineare l'icona dell'orologio esattamente con la 'T' di "Traguardo" sottostante.
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(start = 4.dp)
+                            ) {
                                 Icon(
                                     imageVector = Icons.Filled.Schedule,
                                     contentDescription = null,
