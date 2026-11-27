@@ -500,7 +500,7 @@
     <string name="label_una_partita_giocatore_vs">1 match</string>
     <string name="btn_annulla_dialog_vs">Cancel</string>
     <string name="tab_statistiche_generali">General</string>
-    <string name="tab_confronto_vs">VS Head-to-Head</string>
+    <string name="tab_confronto_vs">Duels</string>
     <string name="label_giocatore_1">Player 1</string>
     <string name="label_giocatore_2">Player 2</string>
     <string name="desc_scambia_giocatori">Swap players</string>
@@ -522,5 +522,8 @@
     <string name="desc_vs_pochi_giocatori">Complete a match with at least two participants to unlock head-to-head comparisons.</string>
     <string name="titolo_vs_nessuna_sfida">No shared matches</string>
     <string name="desc_vs_nessuna_sfida">%1$s and %2$s haven\'t played in the same match yet.</string>
+    <string name="desc_media_punti_vs">Average score in shared matches</string>
+    <string name="desc_scarto_massimo_vs">Maximum point difference in a match</string>
+    <string name="desc_combo_fuoco_vs">Total consecutive streaks in shared matches</string>
 
 </resources>

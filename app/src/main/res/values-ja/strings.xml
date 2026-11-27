@@ -492,7 +492,7 @@
     <!-- CONFRONTO VS: VsComparisonContent                                    -->
     <!-- ==================================================================== -->
     <string name="tab_statistiche_generali">一般</string>
-    <string name="tab_confronto_vs">VS対戦</string>
+    <string name="tab_confronto_vs">デュエル</string>
     <string name="label_giocatore_1">プレイヤー 1</string>
     <string name="label_giocatore_2">プレイヤー 2</string>
     <string name="desc_scambia_giocatori">プレイヤーを入れ替え</string>
@@ -514,4 +514,7 @@
     <string name="desc_vs_pochi_giocatori">直接対決をロック解除するには、2人以上の参加者で試合を完了してください。</string>
     <string name="titolo_vs_nessuna_sfida">共通の試合はありません</string>
     <string name="desc_vs_nessuna_sfida">%1$s と %2$s はまだ同じ試合でプレイしていません。</string>
+    <string name="desc_media_punti_vs">共通の試合での平均スコア</string>
+    <string name="desc_scarto_massimo_vs">1試合での最大ポイント差</string>
+    <string name="desc_combo_fuoco_vs">共通の試合での合計連続ストリーク</string>
 </resources>

@@ -492,7 +492,7 @@
     <!-- CONFRONTO VS: VsComparisonContent                                    -->
     <!-- ==================================================================== -->
     <string name="tab_statistiche_generali">Général</string>
-    <string name="tab_confronto_vs">Comparaison VS</string>
+    <string name="tab_confronto_vs">Duels</string>
     <string name="label_giocatore_1">Joueur 1</string>
     <string name="label_giocatore_2">Joueur 2</string>
     <string name="desc_scambia_giocatori">Échanger les joueurs</string>
@@ -514,4 +514,7 @@
     <string name="desc_vs_pochi_giocatori">Terminez une partie avec au moins deux participants pour débloquer le face-à-face.</string>
     <string name="titolo_vs_nessuna_sfida">Aucune partie ensemble</string>
     <string name="desc_vs_nessuna_sfida">%1$s et %2$s n\'ont pas encore joué dans la même partie.</string>
+    <string name="desc_media_punti_vs">Score moyen dans les parties partagées</string>
+    <string name="desc_scarto_massimo_vs">Différence de points maximale dans une partie</string>
+    <string name="desc_combo_fuoco_vs">Séries consécutives totales dans les parties partagées</string>
 </resources>

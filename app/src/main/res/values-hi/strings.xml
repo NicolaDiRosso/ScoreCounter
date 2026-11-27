@@ -492,7 +492,7 @@
     <!-- CONFRONTO VS: VsComparisonContent                                    -->
     <!-- ==================================================================== -->
     <string name="tab_statistiche_generali">सामान्य</string>
-    <string name="tab_confronto_vs">आमने-सामने (VS)</string>
+    <string name="tab_confronto_vs">डुएल्स</string>
     <string name="label_giocatore_1">खिलाड़ी 1</string>
     <string name="label_giocatore_2">खिलाड़ी 2</string>
     <string name="desc_scambia_giocatori">खिलाड़ी बदलें</string>
@@ -514,4 +514,7 @@
     <string name="desc_vs_pochi_giocatori">आमने-सामने की तुलना अनलॉक करने के लिए कम से कम दो प्रतिभागियों के साथ एक मैच पूरा करें।</string>
     <string name="titolo_vs_nessuna_sfida">कोई साझा मैच नहीं</string>
     <string name="desc_vs_nessuna_sfida">%1$s और %2$s ने अभी तक एक ही मैच में नहीं खेला है।</string>
+    <string name="desc_media_punti_vs">साझा मैचों में औसत स्कोर</string>
+    <string name="desc_scarto_massimo_vs">एक मैच में अधिकतम अंकों का अंतर</string>
+    <string name="desc_combo_fuoco_vs">साझा मैचों में कुल लगातार स्ट्रीक</string>
 </resources>

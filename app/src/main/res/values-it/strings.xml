@@ -500,7 +500,7 @@
     <string name="label_una_partita_giocatore_vs">1 partita</string>
     <string name="btn_annulla_dialog_vs">Annulla</string>
     <string name="tab_statistiche_generali">Generali</string>
-    <string name="tab_confronto_vs">Confronto VS</string>
+    <string name="tab_confronto_vs">Duelli</string>
     <string name="label_giocatore_1">Giocatore 1</string>
     <string name="label_giocatore_2">Giocatore 2</string>
     <string name="desc_scambia_giocatori">Scambia giocatori</string>
@@ -522,6 +522,9 @@
     <string name="desc_vs_pochi_giocatori">Completa qualche partita con almeno due partecipanti per sbloccare il confronto testa a testa.</string>
     <string name="titolo_vs_nessuna_sfida">Nessuna sfida insieme</string>
     <string name="desc_vs_nessuna_sfida">%1$s e %2$s non hanno ancora giocato nella stessa partita.</string>
+    <string name="desc_media_punti_vs">Punteggio medio nelle sfide insieme</string>
+    <string name="desc_scarto_massimo_vs">Massima differenza punti in una partita</string>
+    <string name="desc_combo_fuoco_vs">Serie consecutive totali nelle sfide insieme</string>
 
 </resources>
 

@@ -1,5 +1,7 @@
 package com.n380.scorecounter.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +17,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Timer
@@ -23,14 +27,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import com.n380.scorecounter.R
 import com.n380.scorecounter.model.HeadToHeadStats
 import com.n380.scorecounter.model.VsAwardType
@@ -41,7 +49,7 @@ import java.util.Locale
 
 /**
  * ====================================================================
- * VISTA CONFRONTO DIRETTO "VS" (PORTRAIT + COMPONENTI MODULARI CONDIVISI)
+ * VISTA CONFRONTO DIRETTO "DUELLI" (PORTRAIT + COMPONENTI MODULARI CONDIVISI)
  * ====================================================================
  * 🧠 CONCETTI TEORICI CHIAVE DI JETPACK COMPOSE:
  *
@@ -125,6 +133,7 @@ fun VsComparisonContent(
             item {
                 VsDualMetricCard(
                     title = stringResource(R.string.titolo_media_punti_vs),
+                    subtitle = stringResource(R.string.desc_media_punti_vs),
                     p1Name = stats.player1Name,
                     p1Color = stats.player1Color,
                     p1Value = String.format(Locale.getDefault(), "%.1f", stats.p1AverageScore),
@@ -161,6 +170,7 @@ fun VsComparisonContent(
             item {
                 VsDualMetricCard(
                     title = stringResource(R.string.titolo_combo_fuoco_vs),
+                    subtitle = stringResource(R.string.desc_combo_fuoco_vs),
                     p1Name = stats.player1Name,
                     p1Color = stats.player1Color,
                     p1Value = "${stats.p1OnFireTotal}",
@@ -181,10 +191,77 @@ fun VsComparisonContent(
 }
 
 /**
+ * Testo adattivo resiliente per schede e riquadri compatti:
+ * - Misura lo spazio reale disponibile tramite `onTextLayout` prima di disegnare il testo
+ *   (`drawWithContent`) e riduce progressivamente `fontSize` e `lineHeight` se rileva un
+ *   overflow orizzontale (`didOverflowWidth`) o verticale (`didOverflowHeight`).
+ * - Supporta sia righe singole (`maxLines = 1`) sia blocchi multi-riga (`maxLines > 1`),
+ *   comunicando al contenitore tramite `onOverflowStateChange` se il testo risulta ancora
+ *   troncato anche alla scala minima (`minScaleFactor`), così da attivare la tendina espandibile.
+ */
+@Composable
+private fun VsAdaptiveText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    textAlign: TextAlign? = null,
+    maxLines: Int = 1,
+    minScaleFactor: Float = 0.62f,
+    onOverflowStateChange: ((Boolean) -> Unit)? = null
+) {
+    // Ricalcola la scala da capo ogni volta che cambiano testo, stile o numero massimo di righe
+    var scaleFactor by remember(text, style, maxLines) { mutableFloatStateOf(1f) }
+    var readyToDraw by remember(text, style, maxLines) { mutableStateOf(false) }
+
+    val scaledFontSize = if (style.fontSize.isSpecified) {
+        style.fontSize * scaleFactor
+    } else {
+        TextUnit.Unspecified
+    }
+    val scaledLineHeight = if (style.lineHeight.isSpecified) {
+        style.lineHeight * scaleFactor
+    } else {
+        TextUnit.Unspecified
+    }
+
+    Text(
+        text = text,
+        modifier = modifier.drawWithContent {
+            // Disegna solo quando la misura è stabilizzata per evitare sfarfallii visivi
+            if (readyToDraw) drawContent()
+        },
+        style = style.copy(
+            fontSize = scaledFontSize,
+            lineHeight = scaledLineHeight
+        ),
+        color = color,
+        fontWeight = fontWeight,
+        textAlign = textAlign,
+        softWrap = maxLines > 1,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { layoutResult ->
+            val hasOverflow = layoutResult.didOverflowWidth || layoutResult.didOverflowHeight
+            if (hasOverflow && scaleFactor > minScaleFactor) {
+                scaleFactor = (scaleFactor * 0.9f).coerceAtLeast(minScaleFactor)
+            } else {
+                readyToDraw = true
+                onOverflowStateChange?.invoke(hasOverflow)
+            }
+        }
+    )
+}
+
+/**
  * Card di selezione dei due sfidanti:
  * - Intestazione esplicativa "Scegli due giocatori a confronto"
  * - Due riquadri cliccabili colorati che aprono la finestra di selezione con ricerca
  * - Pulsante centrale per invertire istantaneamente Giocatore 1 e Giocatore 2
+ *
+ * @param compact Riduce i margini verticali e forza il titolo su una riga in modalità Landscape,
+ *                permettendo al tabellone sottostante di restare visibile senza scorrimento.
  */
 @Composable
 fun VsPlayerSelectorCard(
@@ -193,6 +270,7 @@ fun VsPlayerSelectorCard(
     onPlayer1Selected: (String) -> Unit,
     selectedPlayer2: String,
     onPlayer2Selected: (String) -> Unit,
+    compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -213,15 +291,16 @@ fun VsPlayerSelectorCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(if (compact) 10.dp else 12.dp),
+            verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)
         ) {
             // Intestazione chiara per comunicare subito l'interattività dei selettori
-            Text(
+            VsAdaptiveText(
                 text = stringResource(R.string.titolo_scegli_giocatori_vs),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
                 modifier = Modifier.padding(horizontal = 2.dp)
             )
 
@@ -250,7 +329,7 @@ fun VsPlayerSelectorCard(
                         onPlayer1Selected(selectedPlayer2)
                         onPlayer2Selected(temp)
                     },
-                    modifier = Modifier.size(38.dp),
+                    modifier = Modifier.size(if (compact) 34.dp else 38.dp),
                     colors = IconButtonDefaults.filledTonalIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -259,7 +338,7 @@ fun VsPlayerSelectorCard(
                     Icon(
                         imageVector = Icons.Filled.SwapHoriz,
                         contentDescription = stringResource(R.string.desc_scambia_giocatori),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(if (compact) 18.dp else 20.dp)
                     )
                 }
 
@@ -314,8 +393,9 @@ fun VsPlayerSelectorCard(
 }
 
 /**
- * Riquadro singolo cliccabile che mostra l'etichetta ("Giocatore 1/2"), il pallino colorato
- * del giocatore attivo e la freccia a tendina.
+ * Riquadro singolo cliccabile che mostra l'etichetta ("Giocatore 1/2"),
+ * una barra verticale colorata sul bordo sinistro, il nome del giocatore attivo
+ * e la freccia a tendina.
  */
 @Composable
 private fun VsPlayerSlotBox(
@@ -333,48 +413,47 @@ private fun VsPlayerSlotBox(
         shape = RoundedCornerShape(14.dp),
         border = BorderStroke(1.dp, Color(selectedColor).copy(alpha = 0.6f))
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 7.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            // Indicatore cromatico verticale sul bordo sinistro al posto del puntino accanto al nome
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(Color(selectedColor))
             )
-            Spacer(modifier = Modifier.height(2.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .clip(CircleShape)
-                            .background(Color(selectedColor))
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = selectedName,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                VsAdaptiveText(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    minScaleFactor = 0.58f
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                VsAdaptiveText(
+                    text = selectedName,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    minScaleFactor = 0.6f
                 )
             }
+
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
@@ -598,10 +677,13 @@ private fun VsPlayerPickerDialog(
 /**
  * Tabellone principale degli scontri diretti: punteggio grande P1 vs P2,
  * barra proporzionale colorata e riepilogo partite/tempo condiviso.
+ *
+ * @param compact Adatta dimensioni dei numeri e spaziature per il pannello sinistro in Landscape.
  */
 @Composable
 fun VsScoreboardCard(
     stats: HeadToHeadStats,
+    compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val p1Color = Color(stats.player1Color)
@@ -621,17 +703,18 @@ fun VsScoreboardCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(if (compact) 12.dp else 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+            VsAdaptiveText(
                 text = stringResource(R.string.titolo_scontri_diretti),
-                style = MaterialTheme.typography.titleMedium,
+                style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(if (compact) 6.dp else 10.dp))
 
             // Riga Punteggio Principale: [Nome + Vittorie P1]  VS  [Vittorie P2 + Nome]
             Row(
@@ -639,28 +722,30 @@ fun VsScoreboardCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Lato Giocatore 1
+                // Lato Giocatore 1 (simmetrico: Nome -> Capsula colore -> Punteggio -> Percentuale)
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(p1Color)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        AutoResizedText(
-                            text = stats.player1Name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    VsAdaptiveText(
+                        text = stats.player1Name,
+                        style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(26.dp)
+                            .height(3.5.dp)
+                            .clip(CircleShape)
+                            .background(p1Color)
+                    )
+                    Spacer(modifier = Modifier.height(if (compact) 2.dp else 4.dp))
                     Text(
                         text = "${stats.p1DirectWins}",
-                        style = MaterialTheme.typography.displayMedium,
+                        style = (if (compact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displayMedium)
+                            .copy(fontFeatureSettings = "tnum"),
                         fontWeight = FontWeight.Black,
                         color = if (stats.p1DirectWins >= stats.p2DirectWins) {
                             MaterialTheme.colorScheme.primary
@@ -670,7 +755,7 @@ fun VsScoreboardCard(
                     )
                     Text(
                         text = "$p1Pct%",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -687,10 +772,13 @@ fun VsScoreboardCard(
                     ) {
                         Text(
                             text = "VS",
-                            style = MaterialTheme.typography.labelLarge,
+                            style = if (compact) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Black,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            modifier = Modifier.padding(
+                                horizontal = if (compact) 10.dp else 12.dp,
+                                vertical = if (compact) 4.dp else 6.dp
+                            )
                         )
                     }
                     if (stats.draws > 0) {
@@ -707,28 +795,30 @@ fun VsScoreboardCard(
                     }
                 }
 
-                // Lato Giocatore 2
+                // Lato Giocatore 2 (speculare al Giocatore 1)
                 Column(
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(p2Color)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        AutoResizedText(
-                            text = stats.player2Name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    VsAdaptiveText(
+                        text = stats.player2Name,
+                        style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(26.dp)
+                            .height(3.5.dp)
+                            .clip(CircleShape)
+                            .background(p2Color)
+                    )
+                    Spacer(modifier = Modifier.height(if (compact) 2.dp else 4.dp))
                     Text(
                         text = "${stats.p2DirectWins}",
-                        style = MaterialTheme.typography.displayMedium,
+                        style = (if (compact) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.displayMedium)
+                            .copy(fontFeatureSettings = "tnum"),
                         fontWeight = FontWeight.Black,
                         color = if (stats.p2DirectWins >= stats.p1DirectWins) {
                             MaterialTheme.colorScheme.primary
@@ -738,14 +828,14 @@ fun VsScoreboardCard(
                     )
                     Text(
                         text = "$p2Pct%",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(if (compact) 8.dp else 12.dp))
 
             // 🧠 BARRA PROPORZIONALE CON WEIGHT DINAMICI (P1 | Pareggi | P2):
             // In Compose `Modifier.weight()` accetta solo valori > 0f; per questo renderizziamo
@@ -753,7 +843,7 @@ fun VsScoreboardCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(12.dp)
+                    .height(if (compact) 10.dp else 12.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f), RoundedCornerShape(6.dp))
             ) {
@@ -783,7 +873,7 @@ fun VsScoreboardCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(if (compact) 6.dp else 10.dp))
 
             // Footer: Partite giocate insieme + Tempo totale condiviso
             Row(
@@ -799,7 +889,7 @@ fun VsScoreboardCard(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(
+                    VsAdaptiveText(
                         text = if (stats.sharedMatchesCount == 1) {
                             stringResource(R.string.label_una_sfida_insieme)
                         } else {
@@ -807,7 +897,8 @@ fun VsScoreboardCard(
                         },
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
                     )
                 }
 
@@ -820,11 +911,12 @@ fun VsScoreboardCard(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(
+                        VsAdaptiveText(
                             text = formatTime(stats.totalSharedSeconds),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
                         )
                     }
                 }
@@ -835,6 +927,22 @@ fun VsScoreboardCard(
 
 /**
  * Card comparativa a due colonne per una metrica numerica (es. Media punti, Vittorie al tavolo, Combo).
+ * 🧠 ECCELLENZA UX/UI DESIGN & ACCESSIBILITÀ MATERIAL 3:
+ * 1. DISPOSIZIONE SIMMETRICA CENTRATA (Column con Alignment.CenterHorizontally):
+ *    Ogni pillola centra orizzontalmente e verticalmente nome, capsula colore e valore numerico,
+ *    eliminando spazi vuoti sul lato destro e rendendo le due metà perfettamente speculari.
+ * 2. CIFRE TABELLARI (`fontFeatureSettings = "tnum"`):
+ *    Garantisce che numeri con cifre diverse (es. `5,5` vs `12,0`) occupino una larghezza
+ *    visiva bilanciata senza sbilanciare l'allineamento centrale.
+ * 3. GERARCHIA VISIVA NON-INTERATTIVA (Anti-Button Confusion):
+ *    Per evitare che le pillole statistiche vengano scambiate per pulsanti cliccabili
+ *    (come "Chiudi statistiche"), evitiamo riempimenti pieni `primaryContainer` e usiamo
+ *    una sfumatura traslucida (`alpha = 0.15f`) del colore personale del giocatore vincitore
+ *    abbinata a un bordo del suo stesso colore (`alpha = 0.75f`).
+ * 4. TESTI RESILIENTI E TENDINA ESPANDIBILE SU OVERFLOW:
+ *    Titolo e sottotitolo si ridimensionano automaticamente; se con caratteri di sistema
+ *    molto grandi il sottotitolo dovesse eccedere le 2 righe, compare un pulsante a freccia
+ *    che espande il testo completo senza alterare l'altezza base delle card affiancate.
  */
 @Composable
 fun VsDualMetricCard(
@@ -850,90 +958,110 @@ fun VsDualMetricCard(
     subtitle: String? = null,
     modifier: Modifier = Modifier
 ) {
+    var hasSubtitleOverflow by remember(subtitle) { mutableStateOf(false) }
+    var isExpanded by remember(subtitle) { mutableStateOf(false) }
+
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .then(
+                if (hasSubtitleOverflow) {
+                    Modifier.clickable { isExpanded = !isExpanded }
+                } else {
+                    Modifier
+                }
+            ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            if (subtitle != null) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    VsAdaptiveText(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (hasSubtitleOverflow) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+                if (subtitle != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    VsAdaptiveText(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        onOverflowStateChange = { hasSubtitleOverflow = it }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // IntrinsicSize.Max assicura che entrambe le pillole abbiano la stessa altezza
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Pillola Giocatore 1
+                VsPlayerMetricPill(
+                    playerName = p1Name,
+                    playerColor = p1Color,
+                    value = p1Value,
+                    isHighlighted = p1Highlights,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                )
+
+                // Pillola Giocatore 2
+                VsPlayerMetricPill(
+                    playerName = p2Name,
+                    playerColor = p2Color,
+                    value = p2Value,
+                    isHighlighted = p2Highlights,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Valore P1 (allineato a sinistra)
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(Color(p1Color))
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+            // Tendina espandibile visibile solo se il sottotitolo ha richiesto troncamento
+            if (subtitle != null) {
+                AnimatedVisibility(visible = isExpanded) {
+                    Column(modifier = Modifier.padding(top = 10.dp)) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = p1Name,
+                            text = subtitle,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Text(
-                        text = p1Value,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Black,
-                        color = if (p1Highlights) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                // Valore P2 (allineato a destra)
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = p2Name,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(Color(p2Color))
-                        )
-                    }
-                    Text(
-                        text = p2Value,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Black,
-                        color = if (p2Highlights) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
                 }
             }
         }
@@ -941,65 +1069,269 @@ fun VsDualMetricCard(
 }
 
 /**
+ * Singola pillola comparativa centrata: mostra nome, indicatore cromatico sottile e valore grande.
+ * Quando `isHighlighted` è attivo, applica una velatura del colore del giocatore (`alpha = 0.15f`)
+ * e un bordo definito nello stesso colore, mantenendo il testo ad alto contrasto su `onSurface`.
+ */
+@Composable
+private fun VsPlayerMetricPill(
+    playerName: String,
+    playerColor: Int,
+    value: String,
+    isHighlighted: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val accentColor = Color(playerColor)
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = if (isHighlighted) {
+            accentColor.copy(alpha = 0.15f)
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+        },
+        border = if (isHighlighted) {
+            BorderStroke(1.5.dp, accentColor.copy(alpha = 0.75f))
+        } else {
+            BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.18f))
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            VsAdaptiveText(
+                text = playerName,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Medium,
+                color = if (isHighlighted) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                maxLines = 1
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Capsula colore centrata sotto il nome: più marcata sul vincitore, più discreta sull'altro
+            Box(
+                modifier = Modifier
+                    .width(if (isHighlighted) 28.dp else 20.dp)
+                    .height(3.dp)
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = if (isHighlighted) 1f else 0.6f))
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            VsAdaptiveText(
+                text = value,
+                style = MaterialTheme.typography.headlineMedium.copy(fontFeatureSettings = "tnum"),
+                fontWeight = FontWeight.Black,
+                color = if (isHighlighted) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                },
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
  * Card dedicata allo scarto record registrato nello stesso match tra i due giocatori.
+ *
+ * Allinea la propria struttura visiva alle card comparative (`VsDualMetricCard`):
+ * - Intestazione in alto: titolo (`⚡ Scarto record`) e sottotitolo adattivo su 2 righe
+ *   (`Massima differenza punti in una partita`).
+ * - Riquadro `Surface` centrato in basso: mostra il distacco numerico (`+X pt`), la barretta
+ *   del colore del giocatore detentore del record e il riferimento all'incontro (`Da X in 'Y'`),
+ *   mantenendo altezza e proporzioni uniformi con la card affiancata in Landscape.
+ * - Se il titolo della partita o il sottotitolo superano lo spazio disponibile (es. font di
+ *   sistema ingrandito), compare automaticamente una freccia per espandere il dettaglio completo.
  */
 @Composable
 fun VsBiggestMarginCard(
     stats: HeadToHeadStats,
     modifier: Modifier = Modifier
 ) {
+    val recordHolderColor = when {
+        stats.biggestMarginWinnerName.equals(stats.player1Name, ignoreCase = true) -> Color(stats.player1Color)
+        stats.biggestMarginWinnerName.equals(stats.player2Name, ignoreCase = true) -> Color(stats.player2Color)
+        else -> MaterialTheme.colorScheme.primary
+    }
+    val hasRecord = stats.biggestMargin > 0
+
+    val subtitleText = stringResource(R.string.desc_scarto_massimo_vs)
+    val detailText = if (hasRecord && stats.biggestMarginWinnerName != null && stats.biggestMarginMatchTitle != null) {
+        stringResource(
+            R.string.label_ottenuto_da_in,
+            stats.biggestMarginWinnerName,
+            stats.biggestMarginMatchTitle
+        )
+    } else {
+        stringResource(R.string.msg_nessuno_scarto_vs)
+    }
+
+    var hasSubtitleOverflow by remember(subtitleText) { mutableStateOf(false) }
+    var hasDetailOverflow by remember(detailText) { mutableStateOf(false) }
+    val canExpand = hasSubtitleOverflow || hasDetailOverflow
+    var isExpanded by remember(subtitleText, detailText) { mutableStateOf(false) }
+
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .then(
+                if (canExpand) {
+                    Modifier.clickable { isExpanded = !isExpanded }
+                } else {
+                    Modifier
+                }
+            ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.titolo_scarto_massimo_vs),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                if (stats.biggestMargin > 0 && stats.biggestMarginWinnerName != null && stats.biggestMarginMatchTitle != null) {
-                    Text(
-                        text = stringResource(
-                            R.string.label_ottenuto_da_in,
-                            stats.biggestMarginWinnerName,
-                            stats.biggestMarginMatchTitle
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+            // Intestazione identica a VsDualMetricCard: titolo + sottotitolo descrittivo
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    VsAdaptiveText(
+                        text = stringResource(R.string.titolo_scarto_massimo_vs),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
                     )
+                    if (canExpand) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                VsAdaptiveText(
+                    text = subtitleText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    onOverflowStateChange = { hasSubtitleOverflow = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Surface inferiore coordinato con le pillole delle altre metriche
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = if (hasRecord) {
+                    recordHolderColor.copy(alpha = 0.15f)
                 } else {
-                    Text(
-                        text = stringResource(R.string.msg_nessuno_scarto_vs),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+                },
+                border = BorderStroke(
+                    width = if (hasRecord) 1.5.dp else 1.dp,
+                    color = if (hasRecord) {
+                        recordHolderColor.copy(alpha = 0.75f)
+                    } else {
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
+                    }
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    VsAdaptiveText(
+                        text = if (hasRecord) "+${stats.biggestMargin} pt" else "0 pt",
+                        style = MaterialTheme.typography.headlineMedium.copy(fontFeatureSettings = "tnum"),
+                        fontWeight = FontWeight.Black,
+                        color = if (hasRecord) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
+                        },
+                        maxLines = 1
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Capsula colore del giocatore detentore dello scarto record
+                    Box(
+                        modifier = Modifier
+                            .width(if (hasRecord) 28.dp else 20.dp)
+                            .height(3.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (hasRecord) recordHolderColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                            )
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    VsAdaptiveText(
+                        text = detailText,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (hasRecord) FontWeight.SemiBold else FontWeight.Medium,
+                        color = if (hasRecord) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        onOverflowStateChange = { hasDetailOverflow = it }
                     )
                 }
             }
 
-            Text(
-                text = "+${stats.biggestMargin} pt",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.primary
-            )
+            // Tendina espandibile con il testo integrale in caso di overflow
+            AnimatedVisibility(visible = isExpanded) {
+                Column(modifier = Modifier.padding(top = 10.dp)) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    if (hasSubtitleOverflow) {
+                        Text(
+                            text = subtitleText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    Text(
+                        text = detailText,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
         }
     }
 }
@@ -1015,18 +1347,19 @@ fun VsAwardsComparisonCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
+        Column(modifier = Modifier.padding(16.dp)) {
+            VsAdaptiveText(
                 text = stringResource(R.string.titolo_premi_condivisi_vs),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             if (stats.awardsComparison.isEmpty()) {
                 Text(
@@ -1035,34 +1368,56 @@ fun VsAwardsComparisonCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                // Intestazione con i nomi dei due sfidanti sopra le rispettive colonne numeriche
+                // Intestazione con i nomi dei due sfidanti e capsula colore sopra le rispettive colonne
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 6.dp),
+                        .padding(bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stats.player1Name,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(stats.player1Color),
-                        modifier = Modifier.width(56.dp),
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column(
+                        modifier = Modifier.width(64.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        VsAdaptiveText(
+                            text = stats.player1Name,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(22.dp)
+                                .height(3.dp)
+                                .clip(CircleShape)
+                                .background(Color(stats.player1Color))
+                        )
+                    }
+
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = stats.player2Name,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(stats.player2Color),
-                        modifier = Modifier.width(56.dp),
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+
+                    Column(
+                        modifier = Modifier.width(64.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        VsAdaptiveText(
+                            text = stats.player2Name,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(3.dp))
+                        Box(
+                            modifier = Modifier
+                                .width(22.dp)
+                                .height(3.dp)
+                                .clip(CircleShape)
+                                .background(Color(stats.player2Color))
+                        )
+                    }
                 }
 
                 stats.awardsComparison.forEachIndexed { index, row ->
@@ -1078,27 +1433,28 @@ fun VsAwardsComparisonCard(
                     ) {
                         Text(
                             text = "${row.p1Count}",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
                             fontWeight = FontWeight.Black,
                             color = if (row.p1Count > row.p2Count) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.width(56.dp),
+                            modifier = Modifier.width(64.dp),
                             textAlign = TextAlign.Center
                         )
 
-                        Text(
+                        VsAdaptiveText(
                             text = getAwardLabel(row.type),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center,
+                            maxLines = 1,
                             modifier = Modifier.weight(1f)
                         )
 
                         Text(
                             text = "${row.p2Count}",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
                             fontWeight = FontWeight.Black,
                             color = if (row.p2Count > row.p1Count) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.width(56.dp),
+                            modifier = Modifier.width(64.dp),
                             textAlign = TextAlign.Center
                         )
                     }

@@ -492,7 +492,7 @@
     <!-- CONFRONTO VS: VsComparisonContent                                    -->
     <!-- ==================================================================== -->
     <string name="tab_statistiche_generali">Allgemein</string>
-    <string name="tab_confronto_vs">VS-Vergleich</string>
+    <string name="tab_confronto_vs">Duelle</string>
     <string name="label_giocatore_1">Spieler 1</string>
     <string name="label_giocatore_2">Spieler 2</string>
     <string name="desc_scambia_giocatori">Spieler tauschen</string>
@@ -514,4 +514,7 @@
     <string name="desc_vs_pochi_giocatori">Schließe ein Spiel mit mindestens zwei Teilnehmern ab, um den direkten Vergleich freizuschalten.</string>
     <string name="titolo_vs_nessuna_sfida">Keine gemeinsamen Spiele</string>
     <string name="desc_vs_nessuna_sfida">%1$s und %2$s haben noch nicht im selben Spiel gespielt.</string>
+    <string name="desc_media_punti_vs">Durchschnittspunktzahl in gemeinsamen Spielen</string>
+    <string name="desc_scarto_massimo_vs">Maximale Punktedifferenz in einem Spiel</string>
+    <string name="desc_combo_fuoco_vs">Gesamte Siegessserien in gemeinsamen Spielen</string>
 </resources>
