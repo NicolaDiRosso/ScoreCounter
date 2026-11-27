@@ -92,19 +92,19 @@ fun ScoreHistoryDialog(
 
     // 🧠 STATO CONDIVISO SOLLEVATO (State Hoisting):
     // Solleviamo `selectedTabIndex` nel componente genitore `ScoreHistoryDialog` e lo memorizziamo
-    // con `rememberSaveable`. In questo modo, se l'utente si trova sul "Grafico" in Portrait e ruota
-    // il dispositivo in Landscape (o viceversa), la scheda attiva viene preservata perfettamente.
+    // con `rememberSaveable`. In questo modo, se l'utente si trova sul "Grafico" in Portrait,
+    // ruota in Landscape (dove entrambi i pannelli sono visibili insieme) e poi torna in Portrait,
+    // la scheda attiva in verticale viene preservata perfettamente.
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     // 🧠 GESTIONE ORIENTAMENTO ADATTIVA:
     // In landscape utilizziamo un layout Master-Detail a 2 colonne (ScoreHistoryDialogLandscape)
-    // per garantire che il grafico e il log non vengano mai compressi o tagliati.
-    // In portrait utilizziamo il layout verticale standard (ScoreHistoryDialogPortrait).
+    // senza selettore a schede: il log scorrevole occupa direttamente la colonna sinistra (38%)
+    // e il grafico l'intera colonna destra (62%).
+    // In portrait utilizziamo il layout verticale standard con switch Storico/Grafico (ScoreHistoryDialogPortrait).
     if (isLandscape) {
         ScoreHistoryDialogLandscape(
             viewModel = viewModel,
-            selectedTabIndex = selectedTabIndex,
-            onTabSelected = { selectedTabIndex = it },
             onDismissRequest = onDismissRequest
         )
     } else {
@@ -118,13 +118,15 @@ fun ScoreHistoryDialog(
 }
 
 /**
- * LAYOUT ORIZZONTALE (Landscape Master-Detail Split Dialog per Cronologia & Grafico)
+ * LAYOUT ORIZZONTALE (Landscape Split View simultanea: Storico a sinistra 38% + Grafico a destra 62%)
+ *
+ * Eliminando il selettore a schede in orizzontale, l'utente può consultare contemporaneamente
+ * l'elenco delle mosse e l'andamento delle curve, vedendo aggiornarsi entrambi in tempo reale
+ * quando preme il pulsante "Annulla".
  */
 @Composable
 fun ScoreHistoryDialogLandscape(
     viewModel: MatchViewModel,
-    selectedTabIndex: Int,
-    onTabSelected: (Int) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
@@ -152,70 +154,42 @@ fun ScoreHistoryDialogLandscape(
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // PANNELLO SINISTRO (~38%): Intestazione, Selettore tab e Pulsanti azione in basso
+                    // PANNELLO SINISTRO (~38%): Intestazione in alto, Storico azioni al centro e Pulsanti in basso
                     Column(
                         modifier = Modifier
                             .weight(0.38f)
                             .fillMaxHeight(),
-                        verticalArrangement = Arrangement.SpaceBetween
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        // Intestazione compatta della cronologia
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(
-                                    imageVector = if (selectedTabIndex == 1) Icons.AutoMirrored.Filled.ShowChart else Icons.Filled.History,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                                AutoResizedText(
-                                    text = stringResource(R.string.titolo_cronologia_punteggi),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            SingleChoiceSegmentedButtonRow(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                SegmentedButton(
-                                    selected = selectedTabIndex == 0,
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        onTabSelected(0)
-                                    },
-                                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                                ) {
-                                    AutoResizedText(
-                                        text = stringResource(R.string.tab_log),
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                                SegmentedButton(
-                                    selected = selectedTabIndex == 1,
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        onTabSelected(1)
-                                    },
-                                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                                ) {
-                                    AutoResizedText(
-                                        text = stringResource(R.string.tab_grafico),
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                }
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.History,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(26.dp)
+                            )
+                            AutoResizedText(
+                                text = stringResource(R.string.titolo_cronologia_punteggi),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.weight(1f)
+                            )
                         }
+
+                        // Elenco scorrevole dello storico direttamente visibile nello spazio centrale
+                        ScoreHistoryLogBox(
+                            scoreActions = viewModel.scoreActions,
+                            compact = true,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        )
 
                         // Pulsanti Annulla e Chiudi ancorati in basso a sinistra
                         Row(
@@ -244,7 +218,7 @@ fun ScoreHistoryDialogLandscape(
                                 enabled = viewModel.scoreActions.isNotEmpty(),
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(48.dp),
+                                    .height(46.dp),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.filledTonalButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
@@ -272,7 +246,7 @@ fun ScoreHistoryDialogLandscape(
                                 },
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(48.dp),
+                                    .height(46.dp),
                                 shape = RoundedCornerShape(16.dp),
                                 contentPadding = PaddingValues(horizontal = 8.dp)
                             ) {
@@ -291,124 +265,23 @@ fun ScoreHistoryDialogLandscape(
                         }
                     }
 
-                    // PANNELLO DESTRO (~62%): Contenitore animato per Log o Grafico a piena altezza
-                    Box(
+                    // PANNELLO DESTRO (~62%): Grafico dell'andamento punti sempre visibile a piena altezza
+                    ScoreHistoryChartBox(
+                        viewModel = viewModel,
+                        contentPadding = 12.dp,
+                        cornerRadius = 18.dp,
                         modifier = Modifier
                             .weight(0.62f)
                             .fillMaxHeight()
-                    ) {
-                        AnimatedContent(
-                            targetState = selectedTabIndex,
-                            transitionSpec = {
-                                if (targetState > initialState) {
-                                    slideInHorizontally(
-                                        initialOffsetX = { fullWidth -> fullWidth },
-                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                    ) + fadeIn(animationSpec = tween(300)) togetherWith
-                                    slideOutHorizontally(
-                                        targetOffsetX = { fullWidth -> -fullWidth },
-                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                    ) + fadeOut(animationSpec = tween(300))
-                                } else {
-                                    slideInHorizontally(
-                                        initialOffsetX = { fullWidth -> -fullWidth },
-                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                    ) + fadeIn(animationSpec = tween(300)) togetherWith
-                                    slideOutHorizontally(
-                                        targetOffsetX = { fullWidth -> fullWidth },
-                                        animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                    ) + fadeOut(animationSpec = tween(300))
-                                }
-                            },
-                            modifier = Modifier.fillMaxSize(),
-                            label = "HistoryLogChartLandscapeTransition"
-                        ) { tab ->
-                            if (tab == 1) {
-                                val currentPlayersAsRecords = remember(viewModel.players.map { it.score }, viewModel.scoreActions.size) {
-                                    viewModel.players.map { player ->
-                                        PlayerRecord(
-                                            name = player.name,
-                                            score = player.score,
-                                            scoreHistory = player.scoreHistory.toList(),
-                                            fireComboCount = player.fireComboCount,
-                                            color = player.color
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    modifier = Modifier.fillMaxSize(),
-                                    shape = RoundedCornerShape(18.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(12.dp)
-                                    ) {
-                                        ScoreChart(
-                                            players = currentPlayersAsRecords,
-                                            durationSeconds = viewModel.matchDurationSeconds,
-                                            isDetailed = true,
-                                            showTimeZoom = true,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
-                                }
-                            } else {
-                                Surface(
-                                    modifier = Modifier.fillMaxSize(),
-                                    shape = RoundedCornerShape(18.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                                ) {
-                                    if (viewModel.scoreActions.isEmpty()) {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(24.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Filled.History,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                                                modifier = Modifier.size(56.dp)
-                                            )
-                                            Spacer(modifier = Modifier.height(12.dp))
-                                            Text(
-                                                text = stringResource(R.string.msg_nessuna_mossa_cronologia),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                                textAlign = TextAlign.Center
-                                            )
-                                        }
-                                    } else {
-                                        LazyColumn(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(10.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                            contentPadding = PaddingValues(bottom = 8.dp)
-                                        ) {
-                                            items(viewModel.scoreActions.reversed()) { action ->
-                                                ScoreActionItemRow(action = action)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    )
                 }
 
+                // Posizionato in basso a destra sopra il grafico per non coprire i tasti Annulla/Chiudi a sinistra
                 SnackbarHost(
                     hostState = dialogSnackbarHostState,
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 12.dp)
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 24.dp, bottom = 24.dp)
                 )
             }
         }
@@ -518,19 +391,19 @@ fun ScoreHistoryDialogPortrait(
                                     initialOffsetX = { fullWidth -> fullWidth },
                                     animationSpec = tween(300, easing = FastOutSlowInEasing)
                                 ) + fadeIn(animationSpec = tween(300)) togetherWith
-                                slideOutHorizontally(
-                                    targetOffsetX = { fullWidth -> -fullWidth },
-                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                ) + fadeOut(animationSpec = tween(300))
+                                        slideOutHorizontally(
+                                            targetOffsetX = { fullWidth -> -fullWidth },
+                                            animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                        ) + fadeOut(animationSpec = tween(300))
                             } else {
                                 slideInHorizontally(
                                     initialOffsetX = { fullWidth -> -fullWidth },
                                     animationSpec = tween(300, easing = FastOutSlowInEasing)
                                 ) + fadeIn(animationSpec = tween(300)) togetherWith
-                                slideOutHorizontally(
-                                    targetOffsetX = { fullWidth -> fullWidth },
-                                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                                ) + fadeOut(animationSpec = tween(300))
+                                        slideOutHorizontally(
+                                            targetOffsetX = { fullWidth -> fullWidth },
+                                            animationSpec = tween(300, easing = FastOutSlowInEasing)
+                                        ) + fadeOut(animationSpec = tween(300))
                             }
                         },
                         modifier = Modifier
@@ -539,81 +412,18 @@ fun ScoreHistoryDialogPortrait(
                         label = "HistoryLogChartPortraitTransition"
                     ) { tab ->
                         if (tab == 1) {
-                            val currentPlayersAsRecords = remember(viewModel.players.map { it.score }, viewModel.scoreActions.size) {
-                                viewModel.players.map { player ->
-                                    PlayerRecord(
-                                        name = player.name,
-                                        score = player.score,
-                                        scoreHistory = player.scoreHistory.toList(),
-                                        fireComboCount = player.fireComboCount,
-                                        color = player.color
-                                    )
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(10.dp)
-                                ) {
-                                    ScoreChart(
-                                        players = currentPlayersAsRecords,
-                                        durationSeconds = viewModel.matchDurationSeconds,
-                                        isDetailed = true,
-                                        showTimeZoom = true,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                            }
+                            ScoreHistoryChartBox(
+                                viewModel = viewModel,
+                                contentPadding = 10.dp,
+                                cornerRadius = 16.dp,
+                                modifier = Modifier.fillMaxSize()
+                            )
                         } else {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                shape = RoundedCornerShape(16.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                            ) {
-                                if (viewModel.scoreActions.isEmpty()) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(24.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.History,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                                            modifier = Modifier.size(56.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(12.dp))
-                                        Text(
-                                            text = stringResource(R.string.msg_nessuna_mossa_cronologia),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                            textAlign = TextAlign.Center
-                                        )
-                                    }
-                                } else {
-                                    LazyColumn(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(10.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        contentPadding = PaddingValues(bottom = 8.dp)
-                                    ) {
-                                        items(viewModel.scoreActions.reversed()) { action ->
-                                            ScoreActionItemRow(action = action)
-                                        }
-                                    }
-                                }
-                            }
+                            ScoreHistoryLogBox(
+                                scoreActions = viewModel.scoreActions,
+                                compact = false,
+                                modifier = Modifier.fillMaxSize()
+                            )
                         }
                     }
 
@@ -703,14 +513,118 @@ fun ScoreHistoryDialogPortrait(
     }
 }
 
+/**
+ * Riquadro condiviso (principio DRY) che contiene l'elenco cronologico delle variazioni punteggio
+ * oppure lo stato vuoto se non è ancora stata registrata alcuna azione nella partita.
+ */
+@Composable
+private fun ScoreHistoryLogBox(
+    scoreActions: List<ScoreAction>,
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+    ) {
+        if (scoreActions.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(if (compact) 16.dp else 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.History,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                    modifier = Modifier.size(if (compact) 40.dp else 56.dp)
+                )
+                Spacer(modifier = Modifier.height(if (compact) 8.dp else 12.dp))
+                Text(
+                    text = stringResource(R.string.msg_nessuna_mossa_cronologia),
+                    style = if (compact) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(if (compact) 8.dp else 10.dp),
+                verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 8.dp),
+                contentPadding = PaddingValues(bottom = 6.dp)
+            ) {
+                items(scoreActions.reversed()) { action ->
+                    ScoreActionItemRow(
+                        action = action,
+                        compact = compact
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Riquadro condiviso (principio DRY) che adatta lo stato live dei giocatori della partita in corso
+ * in `List<PlayerRecord>` e renderizza il componente vettoriale `ScoreChart`.
+ */
+@Composable
+private fun ScoreHistoryChartBox(
+    viewModel: MatchViewModel,
+    contentPadding: androidx.compose.ui.unit.Dp,
+    cornerRadius: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier
+) {
+    // Ricalcola la lista dei record solo quando cambiano i punteggi o il numero di mosse registrate
+    val currentPlayersAsRecords = remember(viewModel.players.map { it.score }, viewModel.scoreActions.size) {
+        viewModel.players.map { player ->
+            PlayerRecord(
+                name = player.name,
+                score = player.score,
+                scoreHistory = player.scoreHistory.toList(),
+                fireComboCount = player.fireComboCount,
+                color = player.color
+            )
+        }
+    }
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(cornerRadius),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+        ) {
+            ScoreChart(
+                players = currentPlayersAsRecords,
+                durationSeconds = viewModel.matchDurationSeconds,
+                isDetailed = true,
+                showTimeZoom = true,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
 // Visualizzazione della singola mossa in formato mini-card giocatore, coerente con lo stile grafico del tavolo da gioco
 @Composable
 private fun ScoreActionItemRow(
     action: ScoreAction,
+    compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val playerColor = Color(action.playerColor)
-    val cornerRadius = 14.dp
+    val cornerRadius = if (compact) 12.dp else 14.dp
 
     // Contenitore principale a card con sfondo tonalmente integrato e bordo colorato del giocatore
     Card(
@@ -730,7 +644,7 @@ private fun ScoreActionItemRow(
             // Indicatore verticale di accento sul lato sinistro della card con il colore puro del giocatore
             Box(
                 modifier = Modifier
-                    .width(6.dp)
+                    .width(if (compact) 5.dp else 6.dp)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = cornerRadius, bottomStart = cornerRadius))
                     .background(playerColor)
@@ -739,7 +653,10 @@ private fun ScoreActionItemRow(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                    .padding(
+                        horizontal = if (compact) 10.dp else 12.dp,
+                        vertical = if (compact) 6.dp else 8.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -747,12 +664,12 @@ private fun ScoreActionItemRow(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 8.dp),
+                        .padding(end = 6.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
                         text = action.playerName,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = if (compact) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
@@ -767,11 +684,11 @@ private fun ScoreActionItemRow(
                             imageVector = Icons.Filled.Schedule,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                            modifier = Modifier.size(13.dp)
+                            modifier = Modifier.size(if (compact) 12.dp else 13.dp)
                         )
                         Text(
                             text = formatTime(action.matchDurationSeconds),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
                         )
                     }
@@ -780,7 +697,7 @@ private fun ScoreActionItemRow(
                 // Sezione destra: badge della variazione di punteggio e totale progressivo
                 Column(
                     horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                    verticalArrangement = Arrangement.spacedBy(if (compact) 2.dp else 3.dp)
                 ) {
                     val isPositive = action.delta > 0
                     val deltaText = if (isPositive) "+${action.delta}" else action.delta.toString()
@@ -794,10 +711,10 @@ private fun ScoreActionItemRow(
                     ) {
                         Text(
                             text = deltaText,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = if (compact) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.ExtraBold,
                             color = deltaColor,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = if (compact) 7.dp else 8.dp, vertical = 2.dp)
                         )
                     }
 
